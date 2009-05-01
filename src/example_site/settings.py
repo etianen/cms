@@ -61,13 +61,6 @@ EMAIL_SUBJECT_PREFIX = "[%s] " % SITE_NAME
 PREPEND_WWW = True
 
 
-# Debug settings.  These should be set to False in a production environment.
-
-DEBUG = False
-
-TEMPLATE_DEBUG = False
-
-
 # Error reporting settings.  Use these to set up automatic error notifications.
 
 ADMINS = (("Etianen.com Error Reporting", "errors@etianen.com"),)
@@ -129,7 +122,7 @@ CACHE_MIDDLEWARE_KEY_PREFIX = SITE_DOMAIN
 # generated from your site domain, database password and email password.  If,
 # for some reason, these are not considered secure, you can override it below.
 
-SECURE_SETTINGS = (SITE_DOMAIN, DATABASE_PASSWORD, EMAIL_PASSWORD)
+SECURE_SETTINGS = (SITE_DOMAIN, DATABASE_PASSWORD, EMAIL_HOST_PASSWORD)
 
 SECRET_KEY = hashlib.sha1("".join(SECURE_SETTINGS)).hexdigest()
 
