@@ -7,9 +7,16 @@ For an explanation of these settings, please see the Django documentation at:
 """
 
 
-import os
+import hashlib, os
 
 from cms.settings import *
+
+
+# The name of this site.  Used for branding in the online admin area.
+
+SITE_NAME = "Example Site"
+
+SITE_DOMAIN = "example.com"
 
 
 # Database settings.
@@ -23,11 +30,30 @@ DATABASE_USER = DATABASE_NAME
 DATABASE_PASSWORD = ""
 
 
-# Absolute paths to the directory where all media files are stored.
+# Absolute path to the directory where all media files are stored.
 
 MEDIA_ROOT = ""
 
 MEDIA_URL = "/media/"
+
+
+# Email settings.
+
+EMAIL_HOST = ""
+
+EMAIL_HOST_USER = ""
+
+EMAIL_HOST_PASSWORD = ""
+
+EMAIL_PORT = 25
+
+EMAIL_USE_TLS = False
+
+SERVER_EMAIL = "notifications@" + SITE_DOMAIN
+
+DEFAULT_FROM_EMAIL = "notifications@" + SITE_DOMAIN
+
+EMAIL_SUBJECT_PREFIX = "[%s] " % SITE_NAME
 
 
 # Whether to automatically add www to the start of the domain name.  
@@ -70,7 +96,7 @@ INSTALLED_APPS += ()
 PROJECT_ROOT = os.path.dirname(__file__)
 
 
-# Absolute paths to the directory where site-specific media files are stored.
+# Absolute path to the directory where site-specific media files are stored.
 
 SITE_MEDIA_ROOT = os.path.join(PROJECT_ROOT, "media")
 
@@ -92,4 +118,18 @@ CMS_MEDIA_URL = MEDIA_URL = "cms/"
 TEMPLATE_ROOT = os.path.join(PROJECT_ROOT, "templates")
 
 TEMPLATE_DIRS += (TEMPLATE_ROOT,)
+
+
+# Namespace for cache keys, if using a process-shared cache.
+
+CACHE_MIDDLEWARE_KEY_PREFIX = SITE_DOMAIN
+
+
+# A secret key used for cryptographic algorithms.  For convenience, this is
+# generated from your site domain, database password and email password.  If,
+# for some reason, these are not considered secure, you can override it below.
+
+SECURE_SETTINGS = (SITE_DOMAIN, DATABASE_PASSWORD, EMAIL_PASSWORD)
+
+SECRET_KEY = hashlib.sha1("".join(SECURE_SETTINGS)).hexdigest()
 
