@@ -16,6 +16,13 @@ from settings_debug import *
 MEDIA_ROOT = os.path.expanduser("~/Uploads/%s" % SITE_DOMAIN)
 
 
+# Static media serving
+
+STATIC_MEDIA += ((SITE_MEDIA_URL, SITE_MEDIA_ROOT),
+                 (CMS_MEDIA_URL, CMS_MEDIA_ROOT),
+                 (MEDIA_URL, MEDIA_ROOT))
+
+
 # Enable serving of static media files (slow, not for production).
 
 SERVE_STATIC_MEDIA = True

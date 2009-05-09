@@ -113,13 +113,6 @@ TEMPLATE_ROOT = os.path.join(PROJECT_ROOT, "templates")
 TEMPLATE_DIRS += (TEMPLATE_ROOT,)
 
 
-# Static media serving
-
-STATIC_MEDIA += ((SITE_MEDIA_URL, SITE_MEDIA_ROOT),
-                 (CMS_MEDIA_URL, CMS_MEDIA_ROOT),
-                 (MEDIA_URL, MEDIA_ROOT))
-
-
 # Namespace for cache keys, if using a process-shared cache.
 
 CACHE_MIDDLEWARE_KEY_PREFIX = SITE_DOMAIN

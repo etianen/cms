@@ -45,7 +45,9 @@ TEMPLATE_DIRS = (os.path.join(CMS_ROOT, "templates",),)
 
 TEMPLATE_CONTEXT_PROCESSORS = ("django.core.context_processors.auth",
                                "django.core.context_processors.request",
-                               "django.core.context_processors.media",)
+                               "django.core.context_processors.media",
+                               "cms.core.context_processors.site",
+                               "cms.core.context_processors.media",)
 
 
 # Dispatch settings.
