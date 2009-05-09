@@ -88,3 +88,8 @@ SEO_CHANGE_FREQUENCIES = (("always", "Always"),
 
 SEO_DEFAULT_CHANGE_FREQUENCY = None
 
+
+# Internationalization settings.
+
+USE_I18N = False
+

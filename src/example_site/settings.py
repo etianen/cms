@@ -76,8 +76,6 @@ TIME_ZONE = "Europe/London"
 
 LANGUAGE_CODE = "en-gb"
 
-USE_I18N = False
-
 
 # A list of additional installed applications.
 
