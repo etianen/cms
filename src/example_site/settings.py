@@ -32,7 +32,7 @@ DATABASE_PASSWORD = ""
 
 # Absolute path to the directory where all uploaded media files are stored.
 
-MEDIA_ROOT = ""
+MEDIA_ROOT = "/var/www/%s/media" % SITE_DOMAIN
 
 MEDIA_URL = "/media/"
 
