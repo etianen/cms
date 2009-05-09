@@ -24,6 +24,18 @@ import os
 CMS_ROOT = os.path.dirname(__file__)
 
 
+# Absolute path to the directory containing the CMS media files.
+
+CMS_MEDIA_ROOT = os.path.join(CMS_ROOT, "media")
+
+
+# Static media serving.
+
+STATIC_MEDIA = ()
+
+SERVE_STATIC_MEDIA = False
+
+
 # Template settings.
 
 TEMPLATE_LOADERS = ("django.template.loaders.filesystem.load_template_source",

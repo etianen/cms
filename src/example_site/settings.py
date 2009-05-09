@@ -30,7 +30,7 @@ DATABASE_USER = DATABASE_NAME
 DATABASE_PASSWORD = ""
 
 
-# Absolute path to the directory where all media files are stored.
+# Absolute path to the directory where all uploaded media files are stored.
 
 MEDIA_ROOT = ""
 
@@ -103,7 +103,7 @@ ADMIN_MEDIA_PREFIX = MEDIA_URL + "admin/"
 
 # Absolute URL of the location where CMS media files are served.
 
-CMS_MEDIA_URL = MEDIA_URL = "cms/"
+CMS_MEDIA_URL = MEDIA_URL + "cms/"
 
 
 # Absolute path to the directory where templates are stored.
@@ -111,6 +111,13 @@ CMS_MEDIA_URL = MEDIA_URL = "cms/"
 TEMPLATE_ROOT = os.path.join(PROJECT_ROOT, "templates")
 
 TEMPLATE_DIRS += (TEMPLATE_ROOT,)
+
+
+# Static media serving
+
+STATIC_MEDIA += ((SITE_MEDIA_URL, SITE_MEDIA_ROOT),
+                 (CMS_MEDIA_URL, CMS_MEDIA_ROOT),
+                 (MEDIA_URL, MEDIA_ROOT))
 
 
 # Namespace for cache keys, if using a process-shared cache.
