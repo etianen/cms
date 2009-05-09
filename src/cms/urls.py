@@ -6,12 +6,14 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.views.static import serve
 
+from cms.core.admin import site as admin_site
+
 
 admin.autodiscover()
 
 
 urlpatterns = patterns("",
-                       (r'^admin/', include(admin.site.urls)),)
+                       (r'^admin/', include(admin_site.urls)),)
 
 
 # Set up static media serving.
