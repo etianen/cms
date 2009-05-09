@@ -10,7 +10,8 @@ from django.views.static import serve
 admin.autodiscover()
 
 
-urlpatterns = patterns("",)
+urlpatterns = patterns("",
+                       (r'^admin/', include(admin.site.urls)),)
 
 
 # Set up static media serving.

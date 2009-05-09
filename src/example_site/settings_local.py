@@ -6,8 +6,17 @@ using the manage.py utility.
 """
 
 
+import os
+
 from settings_debug import *
 
+
+# Save media files to the uploads directory in the user's home folder.
+
+MEDIA_ROOT = os.path.expanduser("~/Uploads/%s" % SITE_DOMAIN)
+
+
+# Enable serving of static media files (slow, not for production).
 
 SERVE_STATIC_MEDIA = True
 
