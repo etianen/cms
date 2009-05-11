@@ -7,9 +7,13 @@ standard implementation.
 """
 
 
+from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.contrib.contenttypes.models import ContentType
+from django.http import Http404
+from django.shortcuts import redirect
 
 
 class AdminSite(admin.AdminSite):
@@ -45,6 +49,28 @@ class AdminSite(admin.AdminSite):
         permissions = permissions.order_by("content_type__app_label", "content_type__model", "name")
         return permissions
     
+    def get_urls(self):
+        """Adds some custom functionality to this admin site."""
+        urlpatterns = patterns("", url(r"^r/(\d+)/(.+)/$", self.view_on_site))
+        urlpatterns += super(AdminSite, self).get_urls()
+        return urlpatterns
+    
+    def view_on_site(self, request, content_type_id, object_id):
+        """Redirects to the absolute URL of the object in the public site."""
+        try:
+            content_type = ContentType.objects.get_for_id(content_type_id)
+        except ContentType.DoesNotExist, ex:
+            raise Http404, ex
+        try:
+            obj = content_type.get_object_for_this_type(pk=object_id)
+        except content_type.model_class().DoesNotExist, ex:
+            raise Http404, ex
+        try:
+            redirect_url = obj.get_absolute_url()
+        except AttributeError:
+            raise Http404, "%s objects do not publish an absolute URL." % content_type.name.title()
+        return redirect(redirect_url)
+    
     
 # The default instance of the CMS admin site.
     
@@ -53,7 +79,7 @@ site = AdminSite()
 
 # Re-register some standard Django models.
 
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(DjangoUserAdmin):
     
     """Admin settings for User models."""
     
