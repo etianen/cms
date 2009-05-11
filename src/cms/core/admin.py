@@ -40,12 +40,6 @@ class AdminSite(admin.AdminSite):
         user = request.user
         content_types = self.get_content_types()
         permissions = Permission.objects.filter(content_type__in=content_types)
-        if not user.is_superuser:
-            available_permissions = set(user.user_permissions.all())
-            for group in user.groups.all():
-                available_permissions.update(group.permissions.all())
-            available_permission_ids = [permission.id for permission in available_permissions]
-            permissions = permissions.filter(id__in=available_permission_ids)
         permissions = permissions.order_by("content_type__app_label", "content_type__model", "name")
         return permissions
     
