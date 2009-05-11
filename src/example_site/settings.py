@@ -4,6 +4,9 @@ Site-specific settings file.
 For an explanation of these settings, please see the Django documentation at:
 
 <http://docs.djangoproject.com/en/dev/>
+
+While many of these settings assume sensible defaults, you must provide values
+for the site, database, media and email sections below.
 """
 
 
@@ -32,7 +35,7 @@ DATABASE_PASSWORD = ""
 
 # Absolute path to the directory where all uploaded media files are stored.
 
-MEDIA_ROOT = "/var/www/%s/media" % SITE_DOMAIN
+MEDIA_ROOT = "/var/uploads/%s" % SITE_DOMAIN
 
 MEDIA_URL = "/media/"
 
