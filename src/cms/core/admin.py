@@ -58,11 +58,11 @@ class AdminSite(admin.AdminSite):
         try:
             content_type = ContentType.objects.get_for_id(content_type_id)
         except ContentType.DoesNotExist, ex:
-            raise Http404, ex
+            raise Http404, str(ex)
         try:
             obj = content_type.get_object_for_this_type(pk=object_id)
         except content_type.model_class().DoesNotExist, ex:
-            raise Http404, ex
+            raise Http404, str(ex)
         try:
             redirect_url = obj.get_absolute_url()
         except AttributeError:
