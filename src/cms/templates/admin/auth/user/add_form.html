@@ -1,0 +1,62 @@
+{% extends "admin/change_form.html" %}
+
+
+{% block after_field_sets %}
+
+    <fieldset class="module aligned">
+    
+        <div class="form-row">
+            {{form.username.errors}}
+            <label for="id_username" class="required">Username:</label> {{form.username}}
+            <p class="help">{{form.username.help_text}}</p>
+        </div>
+        
+        <div class="form-row">
+            {{form.password1.errors}}
+            <label for="id_password1" class="required">Password:</label> {{form.password1}}
+        </div>
+        
+        <div class="form-row">
+            {{form.password2.errors}}
+            <label for="id_password2" class="required">Password (again):</label> {{form.password2}}
+            <p class="help">Enter the same password as above, for verification.</p>
+        </div>
+    
+    </fieldset>
+    
+    <fieldset class="module aligned">
+    
+        <h2>Personal information</h2>
+    
+        <div class="form-row">
+            {{form.first_name.errors}}
+            <label for="id_first_name">First name:</label> {{form.first_name}}
+        </div>
+
+        <div class="form-row">
+            {{form.last_name.errors}}
+            <label for="id_last_name">Last name:</label> {{form.last_name}}
+        </div>
+        
+        <div class="form-row">
+            {{form.email.errors}}
+            <label for="id_email">E-mail address:</label> {{form.email}}
+        </div>
+    
+    </fieldset>
+    
+    <fieldset class="module aligned">
+    
+        <h2>Groups</h2>
+        
+        <div class="form-row">
+            {{form.groups.errors}}
+            <label for="id_groups">Groups:</label> {{form.groups}}
+        </div>
+    
+    </fieldset>
+    
+    <script type="text/javascript">document.getElementById("id_username").focus();</script>
+
+{% endblock %}
+
