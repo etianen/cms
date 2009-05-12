@@ -49,6 +49,10 @@ class AdminSite(admin.AdminSite):
         urlpatterns += super(AdminSite, self).get_urls()
         return urlpatterns
     
+    # HACK: The current admin redirect implementation requires the sites
+    # framework.  This can be removed if the sites dependency is removed.  This
+    # might break in Django 1.2, which will start using named URL patterns in
+    # the admin views.
     def view_on_site(self, request, content_type_id, object_id):
         """Redirects to the absolute URL of the object in the public site."""
         try:
