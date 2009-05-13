@@ -86,6 +86,9 @@ class Permission(BasePermission):
     
     """A permission granted to a `User` or `Group`."""
     
+    # FIXME: Because the authentication framework does not recognise proxy
+    # models as having their own permissions, the staff application permissions
+    # are incorrectly displayed as 'auth'.
     def __unicode__(self):
         """Returns a hypen-separated description of the Permission."""
         content_type = ContentType.objects.get_for_id(self.content_type_id)
