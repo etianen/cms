@@ -3,8 +3,11 @@
 
 {% block object-tools %}
     {# HACK: User model has a broken get_absolute_url method. #}
-    {% with 0 as has_absolute_url %}
-        {{block.super}}
-    {% endwith %}
+    {% if not is_popup %}
+        <ul class="object-tools">
+            <li><a href="history/" class="historylink">History</a></li>
+            <li><a href="password/" class="passwordlink">Change Password</a></li>
+        </ul>
+    {% endif %}
 {% endblock %}
 

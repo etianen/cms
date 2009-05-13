@@ -11,17 +11,21 @@ from cms.staff.forms import UserCreationForm
 from cms.staff.models import User, Group
 
 
+GROUPS_DESCRIPTION = '<p class="help"><strong>Administrators</strong> can create users and edit site content. <strong>Editors</strong> may only edit site content.</p>'
+
+
 class UserAdmin(BaseUserAdmin):
     
     """Admin settings for User models."""
     
-    actions = ["activate_selected", "deactivate_selected"]
+    actions = ("activate_selected", "deactivate_selected",)
     
     add_form = UserCreationForm
     
     fieldsets = ((None, {"fields": ("username", "is_active",)}),
                  ("Personal information", {"fields": ("first_name", "last_name", "email",)}),
-                 ("Groups", {"fields": ("groups",)}),)
+                 ("Groups", {"fields": ("groups",),
+                             "description": GROUPS_DESCRIPTION}),)
     
     filter_horizontal = ("user_permissions", "groups",)
     
@@ -89,7 +93,8 @@ class UserAdmin(BaseUserAdmin):
                    "media": media,
                    "save_as": False,
                    "root_path": self.admin_site.root_path,
-                   "app_label": self.model._meta.app_label,}
+                   "app_label": self.model._meta.app_label,
+                   "groups_description": GROUPS_DESCRIPTION}
         return render_to_response("admin/staff/user/add_form.html", context, template.RequestContext(request))
     
     

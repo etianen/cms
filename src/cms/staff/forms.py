@@ -4,17 +4,21 @@
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm
+from django.utils.safestring import mark_safe
 
 from cms.staff.models import User, Group, EDITORS_GROUP_ID
+
+
+groups_field = forms.ModelMultipleChoiceField(queryset=Group.objects.all(),
+                                             initial=[EDITORS_GROUP_ID],
+                                             widget=FilteredSelectMultiple("groups", False))
 
 
 class UserCreationForm(BaseUserCreationForm):
     
     """Extended user creation form."""
     
-    groups = forms.ModelMultipleChoiceField(queryset=Group.objects.all(),
-                                            initial=[EDITORS_GROUP_ID],
-                                            widget=FilteredSelectMultiple("groups", False))
+    groups = groups_field
     
     def save(self, commit=True):
         """Saves the user."""
