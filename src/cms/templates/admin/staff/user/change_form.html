@@ -1,0 +1,10 @@
+{% extends "admin/change_form.html" %}
+
+
+{% block object-tools %}
+    {# HACK: User model has a broken get_absolute_url method. #}
+    {% with 0 as has_absolute_url %}
+        {{block.super}}
+    {% endwith %}
+{% endblock %}
+

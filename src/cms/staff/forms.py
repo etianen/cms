@@ -5,7 +5,7 @@ from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm
 
-from cms.staff.models import User, Group
+from cms.staff.models import User, Group, EDITORS_GROUP_ID
 
 
 class UserCreationForm(BaseUserCreationForm):
@@ -13,6 +13,7 @@ class UserCreationForm(BaseUserCreationForm):
     """Extended user creation form."""
     
     groups = forms.ModelMultipleChoiceField(queryset=Group.objects.all(),
+                                            initial=[EDITORS_GROUP_ID],
                                             widget=FilteredSelectMultiple("groups", False))
     
     def save(self, commit=True):

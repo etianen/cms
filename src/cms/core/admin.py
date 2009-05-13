@@ -7,7 +7,6 @@ standard implementation.
 """
 
 
-from django import template
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
@@ -27,12 +26,15 @@ class AdminSite(admin.AdminSite):
         context.update(extra_context or {})
         return super(AdminSite, self).index(request, context)
     
+    # FIXME: Proxy models return the content type of their parent model when
+    # get_for_model is used.
     def get_content_types(self):
         """Returns the content types of all models registered with this site."""
         content_types = [ContentType.objects.get_for_model(model)
                          for model in self._registry.keys()]
         return content_types
     
+    # FIXME: No permissions are created for proxy models.
     def get_permissions(self, request):
         """
         Returns an list of permissions for all models registered with

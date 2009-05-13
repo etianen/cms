@@ -1,6 +1,7 @@
 """Admin settings for the staff management application."""
 
 
+from django import template
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.shortcuts import redirect, render_to_response
@@ -20,9 +21,7 @@ class UserAdmin(BaseUserAdmin):
     
     fieldsets = ((None, {"fields": ("username", "is_active",)}),
                  ("Personal information", {"fields": ("first_name", "last_name", "email",)}),
-                 ("Groups", {"fields": ("groups",)}),
-                 ("Advanced permissions", {"fields": ("is_superuser", "user_permissions",),
-                                  "classes": ("collapse",)}),)
+                 ("Groups", {"fields": ("groups",)}),)
     
     filter_horizontal = ("user_permissions", "groups",)
     
@@ -61,17 +60,17 @@ class UserAdmin(BaseUserAdmin):
                 message = 'The user "%s" was added successfully.' % new_user
                 self.log_addition(request, new_user)
                 if "_addanother" in request.POST:
-                    self.message_user(message)
-                    return redirect("admin_auth_user_add")
+                    self.message_user(request, message)
+                    return redirect("admin_staff_user_add")
                 elif "_popup" in request.REQUEST:
                     return self.response_add(request, new_user)
                 elif "_continue" in request.POST:
                     message = message + " You may edit it again below."
-                    self.message_user(message)
-                    return redirect("admin_auth_user_change", new_user.id)
+                    self.message_user(request, message)
+                    return redirect("admin_staff_user_change", new_user.id)
                 else:
-                    self.message_user(message)
-                    return redirect("admin_auth_user_changelist")
+                    self.message_user(request, message)
+                    return redirect("admin_staff_user_changelist")
         else:
             form = self.add_form()
         media = self.media + form.media
@@ -91,7 +90,7 @@ class UserAdmin(BaseUserAdmin):
                    "save_as": False,
                    "root_path": self.admin_site.root_path,
                    "app_label": self.model._meta.app_label,}
-        return render_to_response("admin/auth/user/add_form.html", context, template.RequestContext(request))
+        return render_to_response("admin/staff/user/add_form.html", context, template.RequestContext(request))
     
     
 site.register(User, UserAdmin)
