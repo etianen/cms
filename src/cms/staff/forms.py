@@ -13,7 +13,6 @@ class UserCreationForm(BaseUserCreationForm):
     """Extended user creation form."""
     
     groups = forms.ModelMultipleChoiceField(queryset=Group.objects.all(),
-                                            required=False,
                                             widget=FilteredSelectMultiple("groups", False))
     
     def save(self, commit=True):

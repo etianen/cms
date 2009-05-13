@@ -14,6 +14,8 @@ class UserAdmin(BaseUserAdmin):
     
     """Admin settings for User models."""
     
+    actions = ["activate_selected", "deactivate_selected"]
+    
     add_form = UserCreationForm
     
     fieldsets = ((None, {"fields": ("username", "is_active",)}),
@@ -28,6 +30,28 @@ class UserAdmin(BaseUserAdmin):
     
     list_filter = ("is_active",)
     
+    # Custom admin actions.
+    
+    def activate_selected(self, request, queryset):
+        """Activates the selected user accounts."""
+        queryset.update(is_active=True)
+    activate_selected.short_description = "Activate selected users"
+    
+    def deactivate_selected(self, request, queryset):
+        """Deactivates the selected user accounts."""
+        queryset.update(is_active=False)
+    deactivate_selected.short_description = "Deactivate selected users"
+    
+    # Custom form generation.
+    
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        """Sets up custom foreign key choices."""
+        if db_field.name == "user_permissions":
+            kwargs["queryset"] = self.admin_site.get_permissions(request)
+        return super(UserAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+    
+    # Custom admin views.
+    
     def add_view(self, request):
         """Allows new users to be added to the admin interface."""
         if request.method == 'POST':
@@ -37,16 +61,16 @@ class UserAdmin(BaseUserAdmin):
                 message = 'The user "%s" was added successfully.' % new_user
                 self.log_addition(request, new_user)
                 if "_addanother" in request.POST:
-                    request.user.message_set.create(message=message)
+                    self.message_user(message)
                     return redirect("admin_auth_user_add")
                 elif "_popup" in request.REQUEST:
                     return self.response_add(request, new_user)
                 elif "_continue" in request.POST:
                     message = message + " You may edit it again below."
-                    request.user.message_set.create(message=message)
+                    self.message_user(message)
                     return redirect("admin_auth_user_change", new_user.id)
                 else:
-                    request.user.message_set.create(message=message)
+                    self.message_user(message)
                     return redirect("admin_auth_user_changelist")
         else:
             form = self.add_form()
@@ -68,18 +92,6 @@ class UserAdmin(BaseUserAdmin):
                    "root_path": self.admin_site.root_path,
                    "app_label": self.model._meta.app_label,}
         return render_to_response("admin/auth/user/add_form.html", context, template.RequestContext(request))
-    
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        """Sets up custom foreign key choices."""
-        if db_field.name == "user_permissions":
-            kwargs["queryset"] = self.admin_site.get_permissions(request)
-        return super(UserAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
-    
-    def queryset(self, request):
-        """Only displays staff users."""
-        queryset = super(UserAdmin, self).queryset(request)
-        queryset = queryset.filter(is_staff=True)
-        return queryset
     
     
 site.register(User, UserAdmin)
