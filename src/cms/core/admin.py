@@ -8,6 +8,7 @@ standard implementation.
 
 
 from django import template
+from django.core.urlresolvers import reverse
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -22,6 +23,13 @@ from cms.staff.models import Permission
 class AdminSite(admin.AdminSite):
     
     """The CMS admin site."""
+    
+    # HACK: The base admin site manually sets the root path to a wrong value,
+    # thus this hack has to remain until the base admin site fixes this.
+    def __init__(self, *args, **kwargs):
+        """Initializes the admin site."""
+        super(AdminSite, self).__init__(*args, **kwargs)
+        self.root_path = "/admin/"
     
     def index(self, request, extra_context=None):
         """Displays the admin site dashboard."""
@@ -66,6 +74,8 @@ class AdminSite(admin.AdminSite):
             form = EditDetailsForm(request.POST, instance=user)
             if form.is_valid():
                 form.save()
+                message = "Your details have been updated."
+                request.user.message_set.create(message=message)
                 if "_continue" in request.POST:
                     return redirect("admin_edit_details")
                 else:
@@ -93,7 +103,7 @@ class AdminSite(admin.AdminSite):
     
     # HACK: The current admin redirect implementation requires the sites
     # framework.  This can be removed if the sites dependency is removed.  This
-    # might break in Django 1.2, which will start using named URL patterns in
+    # might break in Django 1.3, which will start using named URL patterns in
     # the admin views.
     def view_on_site(self, request, content_type_id, object_id):
         """Redirects to the absolute URL of the object in the public site."""
