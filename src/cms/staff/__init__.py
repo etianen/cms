@@ -1,0 +1,2 @@
+"""Staff management application."""
+

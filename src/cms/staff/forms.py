@@ -3,8 +3,9 @@
 
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm
+
+from cms.staff.models import User, Group
 
 
 class UserCreationForm(BaseUserCreationForm):
