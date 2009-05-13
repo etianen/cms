@@ -120,6 +120,5 @@ class GroupAdmin(admin.ModelAdmin):
         return super(GroupAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
     
-    
 site.register(Group, GroupAdmin)
 
