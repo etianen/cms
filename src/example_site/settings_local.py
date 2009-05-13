@@ -32,3 +32,25 @@ SERVE_STATIC_MEDIA = True
 
 PREPEND_WWW = False
 
+
+# Optional separate database settings
+
+#DATABASE_NAME = ""
+
+#DATABASE_USER = ""
+
+#DATABASE_PASSWORD = ""
+
+
+# Optional separate email settings.
+
+#EMAIL_HOST = "smtp.gmail.com"
+
+#EMAIL_HOST_USER = ""
+
+#EMAIL_HOST_PASSWORD = ""
+
+#EMAIL_PORT = 587
+
+#EMAIL_USE_TLS = True
+
