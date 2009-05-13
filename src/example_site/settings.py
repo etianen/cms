@@ -24,8 +24,6 @@ SITE_DOMAIN = "example.com"
 
 # Database settings.
 
-DATABASE_ENGINE = "mysql"
-
 DATABASE_NAME = ""
 
 DATABASE_USER = DATABASE_NAME

@@ -16,8 +16,3 @@ DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
 
-
-# Many staging sites don't have the www prefix, so URL rewriting is disabled.
-
-PREPEND_WWW = False
-

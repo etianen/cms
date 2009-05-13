@@ -27,3 +27,8 @@ STATIC_MEDIA += ((SITE_MEDIA_URL, SITE_MEDIA_ROOT),
 
 SERVE_STATIC_MEDIA = True
 
+
+# Disable prepending www, as local servers run from localhost.
+
+PREPEND_WWW = False
+

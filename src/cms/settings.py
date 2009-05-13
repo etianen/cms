@@ -36,6 +36,11 @@ STATIC_MEDIA = ()
 SERVE_STATIC_MEDIA = False
 
 
+# Database settings.
+
+DATABASE_ENGINE = "mysql"
+
+
 # Template settings.
 
 TEMPLATE_LOADERS = ("django.template.loaders.filesystem.load_template_source",
