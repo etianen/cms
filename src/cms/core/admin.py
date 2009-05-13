@@ -7,12 +7,15 @@ standard implementation.
 """
 
 
+from django import template
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
+from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render_to_response
 
+from cms.core.forms import EditDetailsForm
 from cms.staff.models import Permission
 
 
@@ -46,11 +49,47 @@ class AdminSite(admin.AdminSite):
         permissions = permissions.order_by("content_type__app_label", "content_type__model", "name")
         return permissions
     
+    # Custom admin views.
+    
     def get_urls(self):
         """Adds some custom functionality to this admin site."""
-        urlpatterns = patterns("", url(r"^r/(\d+)/(.+)/$", self.view_on_site))
+        urlpatterns = patterns("",
+                               url(r"^r/(\d+)/(.+)/$", self.view_on_site),
+                               url(r"^edit-details/$", self.admin_view(self.edit_details), name="admin_edit_details"),)
         urlpatterns += super(AdminSite, self).get_urls()
         return urlpatterns
+    
+    def edit_details(self, request):
+        """Allows a user to edit their own details."""
+        user = request.user
+        if request.method == "POST":
+            form = EditDetailsForm(request.POST, instance=user)
+            if form.is_valid():
+                form.save()
+                if "_continue" in request.POST:
+                    return redirect("admin_edit_details")
+                else:
+                    return redirect("admin_index")
+        else:
+            form = EditDetailsForm(instance=user)
+        media = form.media
+        context = {"title": "Edit details",
+                   "form": form,
+                   "is_popup": False,
+                   "add": False,
+                   "change": True,
+                   "has_add_permission": False,
+                   "has_delete_permission": False,
+                   "has_change_permission": True,
+                   "has_file_field": False,
+                   "has_absolute_url": False,
+                   "auto_populated_fields": (),
+                   "opts": User._meta,
+                   "media": media,
+                   "save_as": False,
+                   "root_path": self.root_path,
+                   "app_label": User._meta.app_label,}
+        return render_to_response("admin/edit_details.html", context, template.RequestContext(request))
     
     # HACK: The current admin redirect implementation requires the sites
     # framework.  This can be removed if the sites dependency is removed.  This

@@ -57,7 +57,7 @@ class UserAdmin(BaseUserAdmin):
     
     def add_view(self, request):
         """Allows new users to be added to the admin interface."""
-        if request.method == 'POST':
+        if request.method == "POST":
             form = self.add_form(request.POST)
             if form.is_valid():
                 new_user = form.save()

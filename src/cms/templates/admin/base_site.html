@@ -8,3 +8,9 @@
     <h1 id="site-name">{{SITE_NAME}} administration</h1>
 {% endblock %}
 
+
+{% block userlinks %}
+    <a href="{% url admin_edit_details %}">Edit details</a> /
+    {{block.super}}
+{% endblock %}
+

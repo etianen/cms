@@ -1,4 +1,4 @@
-"""Forms used by the CMS."""
+"""Forms used by the staff management application."""
 
 
 from django import forms
