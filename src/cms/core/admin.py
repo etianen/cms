@@ -99,7 +99,7 @@ class AdminSite(admin.AdminSite):
                    "save_as": False,
                    "root_path": self.root_path,
                    "app_label": User._meta.app_label,}
-        return render_to_response("admin/edit_details.html", context, template.RequestContext(request))
+        return render_to_response("admin/edit_details_form.html", context, template.RequestContext(request))
     
     # HACK: The current admin redirect implementation requires the sites
     # framework.  This can be removed if the sites dependency is removed.  This
