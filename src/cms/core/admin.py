@@ -17,7 +17,6 @@ from django.http import Http404
 from django.shortcuts import redirect, render_to_response
 
 from cms.core.forms import EditDetailsForm
-from cms.staff.models import Permission
 
 
 class AdminSite(admin.AdminSite):
@@ -36,26 +35,6 @@ class AdminSite(admin.AdminSite):
         context = {"title": "Dashboard"}
         context.update(extra_context or {})
         return super(AdminSite, self).index(request, context)
-    
-    # FIXME: Proxy models return the content type of their parent model when
-    # get_for_model is used.
-    def get_content_types(self):
-        """Returns the content types of all models registered with this site."""
-        content_types = [ContentType.objects.get_for_model(model)
-                         for model in self._registry.keys()]
-        return content_types
-    
-    # FIXME: No permissions are created for proxy models.
-    def get_permissions(self, request):
-        """
-        Returns an list of permissions for all models registered with
-        this site.
-        """
-        user = request.user
-        content_types = self.get_content_types()
-        permissions = Permission.objects.filter(content_type__in=content_types)
-        permissions = permissions.order_by("content_type__app_label", "content_type__model", "name")
-        return permissions
     
     # Custom admin views.
     
@@ -104,7 +83,8 @@ class AdminSite(admin.AdminSite):
     # HACK: The current admin redirect implementation requires the sites
     # framework.  This can be removed if the sites dependency is removed.  This
     # might break in Django 1.3, which will start using named URL patterns in
-    # the admin views.
+    # the admin views.  This might not actually be needed if custom view on site
+    # urls are used for content objects.
     def view_on_site(self, request, content_type_id, object_id):
         """Redirects to the absolute URL of the object in the public site."""
         try:

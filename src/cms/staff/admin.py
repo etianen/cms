@@ -4,11 +4,12 @@
 from django import template
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import redirect, render_to_response
 
 from cms.core.admin import site
 from cms.staff.forms import UserCreationForm
-from cms.staff.models import User, Group
+from cms.staff.models import User, Group, Permission
 
 
 GROUPS_DESCRIPTION = '<p class="help"><strong>Administrators</strong> can create users and edit site content. <strong>Editors</strong> may only edit site content.</p>'
@@ -44,14 +45,6 @@ class UserAdmin(BaseUserAdmin):
         """Deactivates the selected user accounts."""
         queryset.update(is_active=False)
     deactivate_selected.short_description = "Deactivate selected users"
-    
-    # Custom form generation.
-    
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        """Sets up custom foreign key choices."""
-        if db_field.name == "user_permissions":
-            kwargs["queryset"] = self.admin_site.get_permissions(request)
-        return super(UserAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
     
     # Custom admin views.
     
@@ -113,10 +106,17 @@ class GroupAdmin(admin.ModelAdmin):
     
     ordering = ("name",)
     
+    # FIXME: Proxy models return the content type of their parent model when
+    # get_for_model is used.
+    # FIXME: No permissions are created for proxy models.
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         """Sets up custom foreign key choices."""
         if db_field.name == "permissions":
-            kwargs["queryset"] = self.admin_site.get_permissions(request)
+            content_types = [ContentType.objects.get_for_model(model)
+                             for model in self.admin_site._registry.keys()]
+            permissions = Permission.objects.filter(content_type__in=content_types)
+            permissions = permissions.order_by("content_type__app_label", "content_type__model", "name")
+            kwargs["queryset"] = permissions
         return super(GroupAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
     
