@@ -1,6 +1,7 @@
 """Core views used by the CMS."""
 
 
+from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
 from django.shortcuts import redirect
 

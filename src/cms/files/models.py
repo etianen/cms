@@ -33,6 +33,10 @@ class File(models.Model):
     file = models.FileField(max_length=1000,
                             upload_to="files/%Y/%m/%d")
     
+    def get_absolute_url(self):
+        """Returns the absolute URL of the stored file."""
+        return self.file.url
+    
     def __unicode__(self):
         """Returns the title of the file."""
         return self.title

@@ -12,7 +12,6 @@ from django.core.urlresolvers import reverse
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
 from django.shortcuts import redirect, render_to_response
 

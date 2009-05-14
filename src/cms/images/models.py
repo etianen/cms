@@ -39,6 +39,10 @@ class Image(models.Model):
     
     height = models.PositiveSmallIntegerField(editable=False)
     
+    def get_absolute_url(self):
+        """Returns the absolute URL of the stored image."""
+        return self.image.url
+    
     def __unicode__(self):
         """Returns the title of the image."""
         return self.title
