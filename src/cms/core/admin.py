@@ -106,3 +106,18 @@ class AdminSite(admin.AdminSite):
     
 site = AdminSite()
 
+
+class ContentAdmin(admin.ModelAdmin):
+    
+    """Base admin class for Content models."""
+    
+    seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "keywords", "description", "priority", "change_frequency", "allow_indexing", "allow_archiving", "follow_links",),
+                                                     "classes": ("collapse",),},),)
+    
+    fieldsets = ((None, {"fields": ("title", "is_online",),},),) + seo_fieldsets
+    
+    
+# TODO: Testing only!
+from cms.core.models import Content
+site.register(Content, ContentAdmin)
+
