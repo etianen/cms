@@ -116,8 +116,9 @@ class ContentAdmin(admin.ModelAdmin):
     
     fieldsets = ((None, {"fields": ("title", "is_online",),},),) + seo_fieldsets
     
+    list_display = ("title", "is_online",)
     
-# TODO: Testing only!
-from cms.core.models import Content
-site.register(Content, ContentAdmin)
-
+    search_fields = ("title", "browser_title",)
+    
+    list_filter = ("is_online",)
+    

@@ -13,7 +13,8 @@ admin.autodiscover()
 
 
 urlpatterns = patterns("",
-                       (r'^admin/', include(admin_site.urls)),)
+                       (r"^admin/", include(admin_site.urls)),
+                       (r"^", include("cms.pages.urls")),)
 
 
 # Set up static media serving.

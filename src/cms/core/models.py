@@ -5,23 +5,33 @@ from django.conf import settings
 from django.db import models
 
 
+class PublishedManager(models.Manager):
+    
+    """Manager that only returns published content."""
+    
+    def get_query_set(self):
+        """Returns all content that is published."""
+        queryset = super(PublishedManager, self).get_query_set()
+        queryset = queryset.filter(is_online=True)
+        return queryset
+
+
 class Content(models.Model):
     
     """Base model for all website content."""
     
-    title = models.CharField(max_length=100)
+    objects = models.Manager()
+    
+    published_objects = PublishedManager()
+    
+    # Base fields.
+    
+    title = models.CharField(max_length=1000)
     
     # Publication fields.
     
     is_online = models.BooleanField("online",
                                     default=True)
-    
-    def get_is_published(self):
-        """Checks whether the content object is published."""
-        return self.is_online
-    
-    is_published = property(get_is_published,
-                            doc="Whether the content object is published.")
     
     # SEO fields.
     
@@ -70,5 +80,6 @@ class Content(models.Model):
     class Meta:
         # TODO: Make abstract!
         ordering = ("title",)
+        verbose_name_plural = "content"
         
         
