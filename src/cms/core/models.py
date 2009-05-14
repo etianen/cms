@@ -78,7 +78,7 @@ class Content(models.Model):
         return self.title
     
     class Meta:
-        # TODO: Make abstract!
+        abstract = True
         ordering = ("title",)
         verbose_name_plural = "content"
         
