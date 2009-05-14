@@ -39,6 +39,7 @@ class User(BaseUser):
     
     class Meta:
         proxy = True
+        ordering = ("username",)
         
         
 ADMINISTRATORS_GROUP_ID = 1
