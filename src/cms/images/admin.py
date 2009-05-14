@@ -1,7 +1,10 @@
 """Admin settings for the image management application."""
 
 
+from django import template
+from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
+from django.shortcuts import render_to_response
 from django.template.defaultfilters import filesizeformat
 
 from cms.core.admin import site
@@ -57,6 +60,22 @@ class ImageAdmin(admin.ModelAdmin):
     def size(self, obj):
         """Returns the size of the file in a human-readable format."""
         return filesizeformat(obj.image.size)
+    
+    # Custom views.
+    
+    def get_urls(self):
+        """Adds some custom functionality to the file admin."""
+        admin_view_wrapper = self.admin_site.admin_view
+        urlpatterns = patterns("",
+                               url(r"^tiny-mce-image-list.js$", admin_view_wrapper(self.tiny_mce_image_list), name="admin_images_image_tiny_mce_image_list"),)
+        urlpatterns += super(ImageAdmin, self).get_urls()
+        return urlpatterns
+    
+    def tiny_mce_image_list(self, request):
+        """Renders the TinyMCE image list."""
+        images = self.queryset(request)
+        context = {"images": images}
+        return render_to_response("admin/images/image/tiny_mce_image_list.js", context, template.RequestContext(request), mimetype="text/javascript")
     
 
 site.register(Image, ImageAdmin)
