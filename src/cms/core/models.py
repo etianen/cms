@@ -82,4 +82,14 @@ class Content(models.Model):
         ordering = ("title",)
         verbose_name_plural = "content"
         
-        
+    
+class HtmlField(models.TextField):
+    
+    """A text field that contains HTML content."""
+    
+    def formfield(self, **kwargs):
+        defaults = {"widget": forms.Textarea}
+        defaults.update(kwargs)
+        return super(HtmlField, self).formfield(**defaults)
+    
+    

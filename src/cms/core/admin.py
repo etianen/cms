@@ -17,6 +17,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render_to_response
 
 from cms.core.forms import EditDetailsForm
+from cms.core.views import permalink_redirect
 
 
 class AdminSite(admin.AdminSite):
@@ -39,10 +40,12 @@ class AdminSite(admin.AdminSite):
     # Custom admin views.
     
     def get_urls(self):
-        """Adds some custom functionality to this admin site."""
+        """Adds some custom functionality to the admin site."""
         urlpatterns = patterns("",
-                               url(r"^r/(\d+)/(.+)/$", self.view_on_site),
-                               url(r"^edit-details/$", self.admin_view(self.edit_details), name="admin_edit_details"),)
+                               url(r"^edit-details/$", self.admin_view(self.edit_details), name="admin_edit_details"),
+                               url(r"^tiny-mce-init.js$", self.admin_view(self.tiny_mce_init), name="admin_tiny_mce_init"),
+                               # HACK: This might not actually be needed if custom view on site urls are used for content objects.
+                               url(r"^r/(\d+)/(.+)/$", self.admin_view(permalink_redirect), name="admin_view_on_site"),)
         urlpatterns += super(AdminSite, self).get_urls()
         return urlpatterns
     
@@ -80,26 +83,10 @@ class AdminSite(admin.AdminSite):
                    "app_label": User._meta.app_label,}
         return render_to_response("admin/edit_details_form.html", context, template.RequestContext(request))
     
-    # HACK: The current admin redirect implementation requires the sites
-    # framework.  This can be removed if the sites dependency is removed.  This
-    # might break in Django 1.3, which will start using named URL patterns in
-    # the admin views.  This might not actually be needed if custom view on site
-    # urls are used for content objects.
-    def view_on_site(self, request, content_type_id, object_id):
-        """Redirects to the absolute URL of the object in the public site."""
-        try:
-            content_type = ContentType.objects.get_for_id(content_type_id)
-        except ContentType.DoesNotExist, ex:
-            raise Http404, str(ex)
-        try:
-            obj = content_type.get_object_for_this_type(pk=object_id)
-        except content_type.model_class().DoesNotExist, ex:
-            raise Http404, str(ex)
-        try:
-            redirect_url = obj.get_absolute_url()
-        except AttributeError:
-            raise Http404, "%s objects do not publish an absolute URL." % content_type.name.title()
-        return redirect(redirect_url)
+    def tiny_mce_init(self, request):
+        """Renders the TinyMCE initialization script."""
+        context = {}
+        return render_to_response("admin/tiny_mce_init.js", context, template.RequestContext(request), mimetype="text/javascript")
     
     
 # The default instance of the CMS admin site.

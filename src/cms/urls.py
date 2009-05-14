@@ -13,8 +13,9 @@ admin.autodiscover()
 
 
 urlpatterns = patterns("",
-                       (r"^admin/", include(admin_site.urls)),
-                       (r"^", include("cms.pages.urls")),)
+                       url(r"^admin/", include(admin_site.urls)),
+                       url(r"^links/(\d+)/(.+)/$", "cms.core.views.permalink_redirect", name="permalink_redirect"),
+                       url(r"^", include("cms.pages.urls")),)
 
 
 # Set up static media serving.

@@ -1,7 +1,10 @@
 """Admin settings for the file management application."""
 
 
+from django import template
+from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
+from django.shortcuts import render_to_response
 from django.template.defaultfilters import filesizeformat
 
 from cms.core.admin import site
@@ -57,6 +60,22 @@ class FileAdmin(admin.ModelAdmin):
     def size(self, obj):
         """Returns the size of the file in a human-readable format."""
         return filesizeformat(obj.file.size)
+    
+    # Custom views.
+    
+    def get_urls(self):
+        """Adds some custom functionality to the file admin."""
+        admin_view_wrapper = self.admin_site.admin_view
+        urlpatterns = patterns("",
+                               url(r"^tiny-mce-link-list.js$", admin_view_wrapper(self.tiny_mce_link_list), name="admin_files_file_tiny_mce_link_list"),)
+        urlpatterns += super(FileAdmin, self).get_urls()
+        return urlpatterns
+    
+    def tiny_mce_link_list(self, request):
+        """Renders the TinyMCE link list."""
+        files = self.queryset(request)
+        context = {"files": files}
+        return render_to_response("admin/files/file/tiny_mce_link_list.js", context, template.RequestContext(request), mimetype="text/javascript")
     
 
 site.register(File, FileAdmin)
