@@ -72,10 +72,9 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "django.contrib.sessions",
                   "django.contrib.admin",
                   "cms.core",
-                  "cms.staff",
-                  "cms.files",
-                  "cms.images",
-                  "cms.pages",)
+                  "cms.pages",
+                  "cms.lib.staff",
+                  "cms.lib.media",)
 
 
 # SEO settings.

@@ -6,7 +6,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm
 from django.utils.safestring import mark_safe
 
-from cms.staff.models import User, Group, EDITORS_GROUP_ID
+from cms.lib.staff.models import User, Group, EDITORS_GROUP_ID
 
 
 groups_field = forms.ModelMultipleChoiceField(queryset=Group.objects.all(),

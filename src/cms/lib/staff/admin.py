@@ -8,8 +8,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import redirect, render_to_response
 
 from cms.core.admin import site
-from cms.staff.forms import UserCreationForm
-from cms.staff.models import User, Group, Permission
+from cms.lib.staff.forms import UserCreationForm
+from cms.lib.staff.models import User, Group, Permission
 
 
 GROUPS_DESCRIPTION = '<p class="help"><strong>Administrators</strong> can create users and edit site content. <strong>Editors</strong> may only edit site content.</p>'

@@ -1,2 +1,0 @@
-"""Image management application."""
-

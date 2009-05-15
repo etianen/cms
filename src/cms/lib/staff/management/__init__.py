@@ -5,7 +5,7 @@ from django.contrib.auth import models as auth_application
 from django.contrib.auth.models import Group as BaseGroup
 from django.db.models.signals import post_syncdb
 
-from cms.staff.models import Group
+from cms.lib.staff.models import Group
 
 
 def create_default_groups(app, created_models, verbosity, **kwargs):
