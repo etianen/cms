@@ -13,7 +13,7 @@ from settings_debug import *
 
 # Save media files to the uploads directory in the user's home folder.
 
-MEDIA_ROOT = os.path.expanduser("~/Sites/media/%s" % SITE_DOMAIN)
+MEDIA_ROOT = os.path.expanduser("~/Sites/%s/media" % SITE_DOMAIN)
 
 
 # Static media serving
