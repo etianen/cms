@@ -77,6 +77,18 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "cms.lib.media",)
 
 
+# Media settings.
+
+FILE_TYPES = (("doc", "Document"),
+              ("png", "Image"),
+              ("gif", "Image"),
+              ("jpeg", "Image"),
+              ("odt", "Document"),
+              ("pdf", "Document"),
+              ("txt", "Plain text"),
+              ("xls", "Spreadsheet"),)
+
+
 # SEO settings.
 
 SEO_PRIORITIES = ((1.0, "Very high"),
