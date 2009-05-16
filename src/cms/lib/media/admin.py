@@ -81,3 +81,13 @@ class FileAdmin(MediaAdmin):
     
 site.register(File, FileAdmin)
 
+
+class ImageAdmin(MediaAdmin):
+    
+    """Admin settings for Image models."""
+    
+    list_display = ("title", "get_folder", "width", "height", "get_size", "last_modified", "notes",)
+    
+    
+site.register(Image, ImageAdmin)
+
