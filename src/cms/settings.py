@@ -79,12 +79,19 @@ INSTALLED_APPS = ("django.contrib.auth",
 
 # Media settings.
 
-FILE_TYPES = (("doc", "Document"),
-              ("png", "Image"),
-              ("gif", "Image"),
-              ("jpeg", "Image"),
+FILE_TYPES = (("mp3", "Audio"),
+              ("wav", "Audio"),
+              ("doc", "Document"),
               ("odt", "Document"),
               ("pdf", "Document"),
+              ("png", "Image"),
+              ("gif", "Image"),
+              ("jpg", "Image"),
+              ("jpeg", "Image"),
+              ("flv", "Movie"),
+              ("m4a", "Movie"),
+              ("mov", "Movie"),
+              ("wmv", "Movie"),
               ("txt", "Plain text"),
               ("xls", "Spreadsheet"),)
 
