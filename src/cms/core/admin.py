@@ -104,7 +104,7 @@ class ContentAdmin(admin.ModelAdmin):
     
     fieldsets = ((None, {"fields": ("title", "is_online",),},),) + seo_fieldsets
     
-    list_display = ("title", "is_online",)
+    list_display = ("title", "is_online", "last_modified",)
     
     search_fields = ("title", "browser_title",)
     
