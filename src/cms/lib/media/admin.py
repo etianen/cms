@@ -34,6 +34,8 @@ class MediaAdmin(admin.ModelAdmin):
     
     list_filter = ("folder",)
     
+    list_select_related = True
+    
     search_fields = ("name", "keywords",)
     
     # Custom actions.
