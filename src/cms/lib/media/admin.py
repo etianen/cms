@@ -27,6 +27,8 @@ class MediaAdmin(admin.ModelAdmin):
     
     """Base admin settings for Media models."""
     
+    date_hierarchy = "last_modified"
+    
     fieldsets = ((None, {"fields": ("title", "file",),},),
                  ("Media management", {"fields": ("folder", "keywords", "notes",),},),)
     
