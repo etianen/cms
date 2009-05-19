@@ -97,6 +97,8 @@ class ContentAdmin(admin.ModelAdmin):
     
     """Base admin class for Content models."""
     
+    date_hierarchy = "last_modified"
+    
     seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "keywords", "description", "priority", "change_frequency", "allow_indexing", "allow_archiving", "follow_links",),
                                                      "classes": ("collapse",),},),)
     

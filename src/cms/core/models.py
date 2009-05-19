@@ -28,6 +28,9 @@ class Content(models.Model):
     
     title = models.CharField(max_length=1000)
     
+    last_modified = models.DateTimeField(auto_now=True,
+                                         help_text="The date and time of when this content was last modified.")
+    
     # Publication fields.
     
     is_online = models.BooleanField("online",
