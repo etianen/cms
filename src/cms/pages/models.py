@@ -5,6 +5,7 @@ from django.db import models
 
 from cms.core.models import Content
 from cms.core.models import PublishedManager as BasePublishedManager
+from cms.core.optimizations import instance_cache
 
 
 class PublishedManager(BasePublishedManager):
@@ -43,6 +44,7 @@ class Page(Content):
                                              blank=True,
                                              null=True)
     
+    @instance_cache
     def get_children(self):
         """
         Returns all the children of this page, regardless of their publication
@@ -63,6 +65,7 @@ class Page(Content):
                                        null=True,
                                        help_text="The date that this page will be removed from the website.  Leave this blank to never expire this page.")
 
+    @instance_cache
     def get_published_children(self):
         """Returns all the published children of this page."""
         return Page.published_objects.filter(parent=self).order_by("order", "id")
@@ -81,6 +84,7 @@ class Page(Content):
                                         default=True,
                                         help_text="Uncheck this box to remove this content from the site navigation.")
     
+    @instance_cache
     def get_navigation(self):
         """
         Returns all published children of this page in the site navigation.
