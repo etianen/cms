@@ -10,6 +10,7 @@ from django.contrib import admin
 from django.shortcuts import render_to_response
 from django.template.defaultfilters import filesizeformat
 
+from cms.core import thumbnails
 from cms.core.admin import site
 from cms.lib.media.models import Folder, File, Image
 
@@ -131,7 +132,17 @@ class ImageAdmin(MediaAdmin):
     
     """Admin settings for Image models."""
     
-    list_display = ("title", "get_folder", "width", "height", "get_size", "last_modified", "notes",)
+    list_display = ("get_thumbnail", "title", "get_folder", "width", "height", "get_size", "last_modified", "notes",)
+    
+    # Custom display routines.
+    
+    def get_thumbnail(self, obj):
+        """Generates a thumbnail of the image."""
+        thumbnail = thumbnails.thumbnail(obj.file, 150, 100)
+        return '<img src="%s" width="%s" height="%s" alt=""/>' % (thumbnail.url, thumbnail.width, thumbnail.height)
+        
+    get_thumbnail.short_description = "thumbnail"
+    get_thumbnail.allow_tags = True
     
     # Custom admin views.
     

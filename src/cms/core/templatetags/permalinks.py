@@ -12,5 +12,5 @@ register = template.Library()
 @register.filter
 def permalink(obj):
     """Generates a permalink for the given object."""
-    return permalinks.create_permalink(obj)
+    return permalinks.create(obj)
 

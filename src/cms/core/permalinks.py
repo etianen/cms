@@ -10,7 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 
 
-def create_permalink(obj):
+def create(obj):
     """Generates a permalink for the given object."""
     content_type = ContentType.objects.get_for_model(obj)
     content_type_id = content_type.id
