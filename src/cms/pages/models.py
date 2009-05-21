@@ -1,9 +1,10 @@
 """Models used by the page management application."""
 
 
+from django.conf import settings
 from django.db import models
 
-from cms.core.models import Content
+from cms.core.models import ContentModel
 from cms.core.models import PublishedManager as BasePublishedManager
 from cms.core.optimizations import instance_cache
 
@@ -21,9 +22,15 @@ class PublishedManager(BasePublishedManager):
         return queryset
 
 
-class Page(Content):
+class Page(ContentModel):
     
     """A page within the site."""
+    
+    # Templates areas.
+    
+    template_areas = settings.PAGE_TEMPLATE_AREAS
+    
+    # Manager classes.
     
     objects = models.Manager()
     
@@ -97,4 +104,20 @@ class Page(Content):
     class Meta:
         unique_together = (("parent", "url_title",),)
         
+    
+class Content(models.Model):
+    
+    """HTML content within a page.""" 
+    
+    page = models.ForeignKey(Page)
+    
+    content = models.TextField(blank=True,
+                               null=True)
+    
+    def __unicode__(self):
+        """Returns a human-readable version of the template area name."""
+        return self.content
+    
+    class Meta:
+        verbose_name_plural = "content"
         

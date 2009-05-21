@@ -1,8 +1,11 @@
 """Core models used by the CMS."""
 
 
+from django import forms
 from django.conf import settings
 from django.db import models
+
+from cms.core.widgets import HtmlWidget
 
 
 class PublishedManager(models.Manager):
@@ -16,7 +19,7 @@ class PublishedManager(models.Manager):
         return queryset
 
 
-class Content(models.Model):
+class ContentModel(models.Model):
     
     """Base model for all website content."""
     
@@ -85,14 +88,3 @@ class Content(models.Model):
         ordering = ("title",)
         verbose_name_plural = "content"
         
-    
-class HtmlField(models.TextField):
-    
-    """A text field that contains HTML content."""
-    
-    def formfield(self, **kwargs):
-        defaults = {"widget": forms.Textarea}
-        defaults.update(kwargs)
-        return super(HtmlField, self).formfield(**defaults)
-    
-    

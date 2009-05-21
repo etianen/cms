@@ -10,10 +10,10 @@ class HtmlWidget(forms.Textarea):
     
     """A textarea that is converted into a TinyMCE editor."""
     
-    def __init__(self, attrs, **kwargs):
+    def __init__(self, **kwargs):
         """Initializes the HtmlWidget."""
-        attrs.setdefault("class", "html")
-        super(HtmlWidget, self).__init__(attrs, **kwargs)
+        kwargs.setdefault("attrs", {}).setdefault("class", "html")
+        super(HtmlWidget, self).__init__(**kwargs)
 
     def get_media(self):
         """Returns the media used by the widget."""
