@@ -1,5 +1,5 @@
 /*
-    Renders the TinyMCE link list.
+    A list of TinyMCE links.
 */
 
 

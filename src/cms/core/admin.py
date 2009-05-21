@@ -42,7 +42,7 @@ class AdminSite(admin.AdminSite):
         """Adds some custom functionality to the admin site."""
         urlpatterns = patterns("",
                                url(r"^edit-details/$", self.admin_view(self.edit_details), name="admin_edit_details"),
-                               url(r"^tiny-mce-init.js$", self.admin_view(self.tiny_mce_init), name="admin_tiny_mce_init"),
+                               url(r"^tinymce-init.js$", self.admin_view(self.tiny_mce_init), name="admin_tinymce_init"),
                                # HACK: This might not actually be needed if custom view on site urls are used for content objects.
                                url(r"^r/(\d+)/(.+)/$", self.admin_view(permalink_redirect), name="admin_view_on_site"),)
         urlpatterns += super(AdminSite, self).get_urls()
@@ -85,7 +85,7 @@ class AdminSite(admin.AdminSite):
     def tiny_mce_init(self, request):
         """Renders the TinyMCE initialization script."""
         context = {}
-        return render_to_response("admin/tiny_mce_init.js", context, template.RequestContext(request), mimetype="text/javascript")
+        return render_to_response("admin/tinymce_init.js", context, template.RequestContext(request), mimetype="text/javascript")
     
     
 # The default instance of the CMS admin site.

@@ -3,8 +3,11 @@
 
 import os
 
+from django import template
 from django.conf import settings
+from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
+from django.shortcuts import render_to_response
 from django.template.defaultfilters import filesizeformat
 
 from cms.core.admin import site
@@ -106,6 +109,20 @@ class FileAdmin(MediaAdmin):
         return "%s file" % extension.upper()
     get_type.short_description = "type"
     
+    # Custom admin views.
+    
+    def get_urls(self):
+        """Creates custom admin URLs for File models."""
+        urlpatterns = super(FileAdmin, self).get_urls()
+        urlpatterns += patterns("", url(r"^link-list.js$", self.admin_site.admin_view(self.link_list), name="admin_media_file_link_list"))
+        return urlpatterns
+    
+    def link_list(self, request):
+        """Returns a list of TinyMCE links."""
+        files = self.queryset(request)
+        context = {"files": files}
+        return render_to_response("admin/media/file/link_list.js", context, template.RequestContext(request), mimetype="text/javascript")
+    
     
 site.register(File, FileAdmin)
 
@@ -115,6 +132,20 @@ class ImageAdmin(MediaAdmin):
     """Admin settings for Image models."""
     
     list_display = ("title", "get_folder", "width", "height", "get_size", "last_modified", "notes",)
+    
+    # Custom admin views.
+    
+    def get_urls(self):
+        """Creates custom admin URLs for File models."""
+        urlpatterns = super(ImageAdmin, self).get_urls()
+        urlpatterns += patterns("", url(r"^image-list.js$", self.admin_site.admin_view(self.image_list), name="admin_media_image_image_list"))
+        return urlpatterns
+    
+    def image_list(self, request):
+        """Returns a list of TinyMCE images."""
+        images = self.queryset(request)
+        context = {"image": images}
+        return render_to_response("admin/media/image/image_list.js", context, template.RequestContext(request), mimetype="text/javascript")
     
     
 site.register(Image, ImageAdmin)
