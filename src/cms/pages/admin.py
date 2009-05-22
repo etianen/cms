@@ -23,19 +23,27 @@ class PageAdmin(ContentAdmin):
 
     prepopulated_fields = {"url_title": ("title",),}
     
+    def get_page_content(self, request, obj=None):
+        """Retrieves the page content object."""
+        page_content_name = request.GET["type"]
+        page_content_cls = get_page_content_type(page_content_name)
+        page_content = page_content_cls(None, {})
+        return page_content
+    
     def get_form(self, request, obj=None, **kwargs):
         """Adds the template area fields to the form."""
-        content_type_name = request.GET["type"]
-        content_type_cls = get_page_content_type(content_type_name)
-        content_type = content_type_cls(None, {})
-        Form = content_type.get_form()
+        page_content = self.get_page_content(request, obj)
+        Form = page_content.get_form()
         defaults = {"form": Form}
         defaults.update(kwargs)
         return super(PageAdmin, self).get_form(request, obj, **defaults)
     
     def get_fieldsets(self, request, obj=None):
         """Generates the custom content fieldsets."""
+        page_content = self.get_page_content(request, obj)
+        content_fieldsets = page_content.get_fieldsets()
         fieldsets = super(PageAdmin, self).get_fieldsets(request, obj)
+        fieldsets = fieldsets[0:1] + content_fieldsets + fieldsets[1:]
         return fieldsets
     
     def save_model(self, request, obj, form, change):

@@ -114,6 +114,11 @@ class Content(object):
                            for field in self.fields])
         Form = type("%sForm" % self.__class__.__name__, (forms.ModelForm,), form_attrs)
         return Form
+    
+    def get_fieldsets(self):
+        """Returns the fieldsets used to lay out the content form."""
+        fields = [field.name for field in self.fields]
+        return (("Page content", {"fields": fields}),)
         
 
 class SimpleContent(Content):
