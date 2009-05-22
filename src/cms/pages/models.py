@@ -26,10 +26,6 @@ class Page(ContentModel):
     
     """A page within the site."""
     
-    # Templates areas.
-    
-    template_areas = settings.PAGE_TEMPLATE_AREAS
-    
     # Manager classes.
     
     objects = models.Manager()
@@ -101,23 +97,15 @@ class Page(ContentModel):
     navigation = property(get_navigation,
                           doc="All the published children of this page in the site navigation.")
     
+    # Content fields.
+    
+    type = models.CharField(max_length=20,
+                            editable=False,
+                            help_text="The type of page content.")
+    
+    content_data = models.TextField(editable=False,
+                                    help_text="The encoded data of this page.")
+    
     class Meta:
         unique_together = (("parent", "url_title",),)
-        
-    
-class Content(models.Model):
-    
-    """HTML content within a page.""" 
-    
-    page = models.ForeignKey(Page)
-    
-    content = models.TextField(blank=True,
-                               null=True)
-    
-    def __unicode__(self):
-        """Returns a human-readable version of the template area name."""
-        return self.content
-    
-    class Meta:
-        verbose_name_plural = "content"
         
