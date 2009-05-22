@@ -3,6 +3,8 @@
 
 from django import forms
 
+from cms.core.widgets import HtmlWidget
+
 
 class ContentField(object):
     
@@ -76,6 +78,13 @@ class TextField(CharField):
     widget = forms.Textarea
             
     
+class HtmlField(TextField):
+    
+    """A HTML rich text field."""
+    
+    widget = HtmlWidget
+    
+    
 class ContentMetaClass(type):
     
     """Metaclass for Content objects."""
@@ -125,6 +134,6 @@ class SimpleContent(Content):
     
     """A single column content page."""
     
-    content = TextField()
+    content = HtmlField()
     
     
