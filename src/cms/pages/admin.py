@@ -5,6 +5,7 @@ from django import forms
 from django.forms.models import ModelFormMetaclass, media_property
 from django.contrib import admin
 from django.db import models
+from django.http import Http404
 
 from cms.core.admin import ContentAdmin, site
 from cms.core.widgets import HtmlWidget
@@ -25,9 +26,19 @@ class PageAdmin(ContentAdmin):
     
     def get_page_content(self, request, obj=None):
         """Retrieves the page content object."""
-        page_content_name = request.GET["type"]
-        page_content_cls = get_page_content_type(page_content_name)
-        page_content = page_content_cls(None, {})
+        # Try to use an instance.
+        if obj:
+            return obj.content
+        # Create an unbound page content.
+        try:
+            page_content_name = request.GET["type"]
+        except KeyError: 
+            raise Http404, "You must specify a page content type."
+        try:
+            page_content_cls = get_page_content_type(page_content_name)
+        except KeyError:
+            raise Http404, "%r is not a valid page content type." % page_content_name
+        page_content = page_content_cls(page_content_name, None, {})
         return page_content
     
     def get_form(self, request, obj=None, **kwargs):
@@ -48,17 +59,15 @@ class PageAdmin(ContentAdmin):
     
     def save_model(self, request, obj, form, change):
         """Saves the model and adds its content fields."""
+        if change:
+            page_content = self.get_page_content(request, obj)
+        else:
+            page_content = self.get_page_content(request, None)
+        for field_name in page_content.get_field_names():
+            field_data = form.cleaned_data[field_name]
+            setattr(page_content, field_name, field_data)
+        obj.content = page_content
         obj.save()
-        content_set = obj.content_set.all()
-        for index, template_area_field in enumerate(self.get_template_area_fields()):
-            template_area_content = form.cleaned_data[template_area_field]
-            try:
-                content = content_set[index]
-            except IndexError:
-                content = Content()
-                content.page = obj
-            content.content = template_area_content
-            content.save()
 
     
 site.register(Page, PageAdmin)

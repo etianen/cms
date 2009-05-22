@@ -112,8 +112,9 @@ class Content(object):
     
     __metaclass__ = ContentMetaClass
     
-    def __init__(self, page, content_data):
+    def __init__(self, type, page, content_data):
         """Initializes the page content."""
+        self.type = type
         self.page = page
         self.content_data = content_data
         
@@ -124,10 +125,15 @@ class Content(object):
         Form = type("%sForm" % self.__class__.__name__, (forms.ModelForm,), form_attrs)
         return Form
     
+    def get_field_names(self):
+        """Returns a list of all the named fields in this Content."""
+        fields = [field.name for field in self.fields]
+        return fields
+    
     def get_fieldsets(self):
         """Returns the fieldsets used to lay out the content form."""
-        fields = [field.name for field in self.fields]
-        return (("Page content", {"fields": fields}),)
+        field_names = self.get_field_names()
+        return (("Page content", {"fields": field_names}),)
         
 
 class SimpleContent(Content):

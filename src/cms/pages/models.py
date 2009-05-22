@@ -126,10 +126,16 @@ class Page(ContentModel):
             content_data = serializer.deserialize(self.content_data)
         else:
             content_data = {}
-        content = content_cls(self, content_data)
+        content = content_cls(self.type, self, content_data)
         return content
+
+    def set_content(self, content):
+        """Sets the content object for this page."""
+        self.type = content.type
+        self.content_data = serializer.serialize(content.content_data)
     
     content = property(get_content,
+                       set_content,
                        doc="The content object associated with this page.")
     
     class Meta:
