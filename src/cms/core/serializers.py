@@ -152,6 +152,40 @@ class ModelCodec(Codec):
         generator.addQuickElement("pk", str(obj.pk))
 
 
+class ListCodec(Codec):
+    
+    """A codec for list objects."""
+    
+    def encode(self, obj, generator):
+        """Encodes the sequence."""
+        for item in obj:
+            self.serializer.encode(item, generator)
+            
+    def decode(self, node):
+        """Decodes the node into a list."""
+        result = [self.serializer.decode(node)
+                  for node in node.getElementsByTagName("obj")]
+        return result
+    
+    
+class TupleCodec(ListCodec):
+    
+    """A codec for tuple objects."""
+    
+    def decode(self, node):
+        """Decodes the node into a tuple."""
+        return tuple(super(TupleCodec, self).decode(node))
+    
+    
+class SetCodec(ListCodec):
+    
+    """A codec for set objects."""
+    
+    def decode(self, node):
+        """Decodes the node into a set."""
+        return set(super(SetCodec, self).decode(node))
+    
+    
 class DictCodec(Codec):
     
     """A codec for dict objects."""
@@ -163,35 +197,16 @@ class DictCodec(Codec):
             self.serializer.encode(key, generator)
             self.serializer.encode(value, generator)
             generator.endElement("item")
-    
-    
-class SequenceCodec(Codec):
-    
-    """A base codec for list, tuple and set objects."""
-    
-    def encode(self, obj, generator):
-        """Encodes the sequence."""
-        for item in obj:
-            self.serializer.encode(item, generator)
             
     def decode(self, node):
-        """Decodes the node into a list."""
-        result = []
-    
-    
-class ListCodec(SequenceCodec):
-    
-    """A codec for list objects."""
-    
-    
-class TupleCodec(SequenceCodec):
-    
-    """A codec for tuple objects."""
-    
-    
-class SetCodec(SequenceCodec):
-    
-    """A codec for set objects."""
+        """Decodes the node into a dict."""
+        result = {}
+        for item in node.getElementsByTagName("item"):
+            objects = item.getElementsByTagName("obj")
+            key = self.serializer.decode(objects[0])
+            value = self.serializer.decode(objects[1])
+            result[key] = value
+        return result
     
     
 class SerializationError(Exception):
@@ -266,11 +281,11 @@ serializer.register_codec(datetime.datetime, DateTimeCodec)
 
 serializer.register_codec(models.Model, ModelCodec)
 
-serializer.register_codec(dict, DictCodec)
-
 serializer.register_codec(list, ListCodec)
 
 serializer.register_codec(tuple, TupleCodec)
 
 serializer.register_codec(set, SetCodec)
+
+serializer.register_codec(dict, DictCodec)
 
