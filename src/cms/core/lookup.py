@@ -1,15 +1,15 @@
-"""Utilities for looking up Python objects by name."""
+"""Utilities for lookup up Python objects by name."""
 
 
 def get_module(name):
-    """Returns a Python module by name."""
+    """Looks up the named Python module."""
     return __import__(name, {}, {}, [""])
 
 
 def get_object(name):
-    """Returns a Python object by name."""
-    module_name, object_name = name.rsplit(".", 1)
+    """Looks up the named Python object."""
+    module_name, obj_name = name.rsplit(".")
     module = get_module(module_name)
-    obj = getattr(module, object_name)
+    obj = getattr(module, obj_name)
     return obj
 

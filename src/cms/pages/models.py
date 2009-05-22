@@ -8,6 +8,7 @@ from cms.core import lookup
 from cms.core.models import ContentModel
 from cms.core.models import PublishedManager as BasePublishedManager
 from cms.core.optimizations import instance_cache
+from cms.core.serializers import serializer
 
 
 class PublishedManager(BasePublishedManager):
@@ -26,6 +27,11 @@ class PublishedManager(BasePublishedManager):
 # Make a fast dict of content types.
 PAGE_CONTENT_TYPES = dict([(slug, lookup.get_object(content_type))
                            for slug, content_type in settings.PAGE_CONTENT_TYPES])
+
+
+def get_page_content_type(type):
+    """Returns the names page content type."""
+    return PAGE_CONTENT_TYPES[type]
 
 
 class Page(ContentModel):
@@ -111,6 +117,20 @@ class Page(ContentModel):
     
     content_data = models.TextField(editable=False,
                                     help_text="The encoded data of this page.")
+    
+    @instance_cache
+    def get_content(self):
+        """Returns the content object associated with this page."""
+        content_cls = get_page_content_type(self.type)
+        if self.content_data:
+            content_data = serializer.deserialize(self.content_data)
+        else:
+            content_data = {}
+        content = content_cls(self, content_data)
+        return content
+    
+    content = property(get_content,
+                       doc="The content object associated with this page.")
     
     class Meta:
         unique_together = (("parent", "url_title",),)
