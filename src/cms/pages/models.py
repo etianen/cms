@@ -4,6 +4,7 @@
 from django.conf import settings
 from django.db import models
 
+from cms.core import lookup
 from cms.core.models import ContentModel
 from cms.core.models import PublishedManager as BasePublishedManager
 from cms.core.optimizations import instance_cache
@@ -20,6 +21,11 @@ class PublishedManager(BasePublishedManager):
         queryset = queryset.filter(models.Q(publication_date=None) | models.Q(publication_date__lte=now))
         queryset = queryset.filter(models.Q(expiry_date=None) | models.Q(expiry_date__gt=now))
         return queryset
+
+
+# Make a fast dict of content types.
+PAGE_CONTENT_TYPES = dict([(slug, lookup.get_object(content_type))
+                           for slug, content_type in settings.PAGE_CONTENT_TYPES])
 
 
 class Page(ContentModel):
