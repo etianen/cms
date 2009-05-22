@@ -150,6 +150,14 @@ class ModelCodec(Codec):
         generator.addQuickElement("app-label", str(obj._meta.app_label))
         generator.addQuickElement("model", obj.__class__.__name__.lower())
         generator.addQuickElement("pk", str(obj.pk))
+        
+    def decode(self, node):
+        """Decodes the Django model instance."""
+        app_label = self.get_child_text(node, "app-label")
+        model = self.get_child_text(node, "model")
+        pk = self.get_child_text(node, "pk")
+        model = models.get_model(app_label, model)
+        return model._default_manager.get(pk=pk)
 
 
 class ListCodec(Codec):
