@@ -8,8 +8,9 @@ into XML for database storage.
 
 
 import cStringIO, datetime
-from xml.dom import pulldom
+from xml.dom import minidom
 
+from django.conf import settings
 from django.db import models
 from django.utils.xmlutils import SimplerXMLGenerator
 
@@ -31,9 +32,37 @@ class Codec(object):
         """Encodes the given object into an XML document."""
         generator.characters(str(obj))
     
-    def decode(self, node, events):
+    def get_unicode(self, node):
+        """Returns the unicode text content of a node."""
+        text = []
+        for child in node.childNodes:
+            if child.nodeType == child.TEXT_NODE or child.nodeType == child.CDATA_SECTION_NODE:
+                text.append(child.data)
+            elif child.nodeType == child.ELEMENT_NODE:
+                text.extend(self.get_text(child))
+            else:
+               pass
+        return u"".join(text)
+    
+    def get_text(self, node):
+        """Returns the text content of a node."""
+        return str(self.get_unicode(node))
+    
+    def get_child(self, node, tagname):
+        """Returns the first child node with the given name."""
+        return node.getElementsByTagName(tagname)[0]
+    
+    def get_child_unicode(self, node, tagname):
+        """Returns the unicode content of the named child node."""
+        return self.get_unicode(self.get_child(node, tagname))
+    
+    def get_child_text(self, node, tagname):
+        """Returns the text content of the named child node."""
+        return self.get_text(self.get_child(node, tagname))
+    
+    def decode(self, node):
         """Converts the given node into an object."""
-        raise NotImplementedError
+        return self.get_text(node)
     
     
 class StringCodec(Codec):
@@ -45,18 +74,31 @@ class UnicodeCodec(Codec):
     
     """A codec for unicode objects."""
     
+    def encode(self, obj, generator):
+        """Encodes the unicode object."""
+        generator.characters(obj.encode(self.serializer.encoding))
+        
+    def decode(self, node):
+        """Decodes the given node into a string."""
+        return self.get_unicode(node)
+    
     
 class IntCodec(Codec):
     
     """A codec for int objects."""
     
-    def decode(self, node, events):
-        """Decodes the nodes into an integer."""
+    def decode(self, node):
+        """Decodes the node into an integer."""
+        return int(self.get_text(node))
     
     
 class FloatCodec(Codec):
     
     """A codec for float objects."""
+    
+    def decode(self, node):
+        """Decodes the node into a float."""
+        return float(self.get_text(node))
     
     
 class DateCodec(Codec):
@@ -68,6 +110,13 @@ class DateCodec(Codec):
         generator.addQuickElement("year", str(obj.year))
         generator.addQuickElement("month", str(obj.month))
         generator.addQuickElement("day", str(obj.day))
+        
+    def decode(self, node):
+        """Decodes the node into a date object."""
+        year = int(self.get_child_text(node, "year"))
+        month = int(self.get_child_text(node, "month"))
+        day = int(self.get_child_text(node, "day"))
+        return datetime.date(year, month, day)
         
         
 class DateTimeCodec(DateCodec):
@@ -81,6 +130,15 @@ class DateTimeCodec(DateCodec):
         generator.addQuickElement("minute", str(obj.minute))
         generator.addQuickElement("second", str(obj.second))
         generator.addQuickElement("microsecond", str(obj.microsecond))
+    
+    def decode(self, node):
+        """Decodes the node into a datetime objects."""
+        date = super(DateTimeCodec, self).decode(node)
+        hour = int(self.get_child_text(node, "hour"))
+        minute = int(self.get_child_text(node, "minute"))
+        second = int(self.get_child_text(node, "second"))
+        microsecond = int(self.get_child_text(node, "microsecond"))
+        return datetime.datetime(date.year, date.month, date.day, hour, minute, second, microsecond)
     
     
 class ModelCodec(Codec):
@@ -115,6 +173,10 @@ class SequenceCodec(Codec):
         """Encodes the sequence."""
         for item in obj:
             self.serializer.encode(item, generator)
+            
+    def decode(self, node):
+        """Decodes the node into a list."""
+        result = []
     
     
 class ListCodec(SequenceCodec):
@@ -141,10 +203,10 @@ class Serializer(object):
     
     """A serializer of Python types."""
     
-    def __init__(self, encoding="utf8"):
+    def __init__(self, encoding=None):
         """Initializes the serializer."""
+        self.encoding = encoding or settings.DEFAULT_CHARSET
         self._codecs = []
-        self.encoding = encoding
         
     def register_codec(self, type, codec, identifier=None):
         """Registers the given codec with this serializer."""
@@ -162,15 +224,13 @@ class Serializer(object):
                 return
         raise SerializationError, "No suitable codec found for type %r." % obj.__class__.__name__
         
-    def decode(self, events):
+    def decode(self, node):
         """Converts the given data from node into an object."""
-        for event, node in events:
-            if event == "START_ELEMENT" and node.nodeName == "obj":
-                node_type = node.attributes["type"]
-                for type, codec, identifier in reversed(self._codecs):
-                    if node_type == identifier:
-                        return codec.decode(node, events)
-            
+        node_type = node.attributes["type"].nodeValue
+        for type, codec, identifier in reversed(self._codecs):
+            if node_type == identifier:
+                return codec.decode(node)
+        raise SerializationError, "No suitable codec found for type %r." % node_type
         
     def serialize(self, obj):
         """Serializes the given object into a string."""
@@ -183,8 +243,8 @@ class Serializer(object):
         
     def deserialize(self, data):
         """Deserializes the given string into an object.""" 
-        events = pulldom.parseString(data)
-        return self.decode(events)
+        document = minidom.parseString(data)
+        return self.decode(document.documentElement)
         
         
 # A shared serialization object.
