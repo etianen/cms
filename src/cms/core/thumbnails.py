@@ -8,6 +8,20 @@ from PIL import Image
 from django.core.files.storage import default_storage
 from django.core.files.images import ImageFile
 
+from cms.core.optimizations import cached_getter
+
+
+class Thumbnail(ImageFile):
+    
+    """A generated thumbnail image."""
+    
+    def __init__(self, path, url):
+        """Initializes the Thumbnail."""
+        super(Thumbnail, self).__init__(None, path)
+        self.path = path
+        self.url = url
+        self.mode = "rb"
+        
 
 # Resize the image, preserving aspect ratio.
 THUMBNAIL = "preserved"
@@ -19,7 +33,7 @@ RESIZE = "resized"
 CROP = "cropped"
 
 
-def generate(image, requested_width, requested_height, generation_method=RESIZE):
+def generate(image, requested_width, requested_height, generation_method=RESIZE, storage=default_storage):
     """
     Generated a thumbnail of the given image, returning an image representing
     the thumbnail.
@@ -42,18 +56,15 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE)
         return image
     # Generate the thumbnail filename.
     thumbnail_name = "thumbnails/%s/%sx%s/%s" % (generation_method, requested_width, requested_height, image.name)
-    thumbnail_path = default_storage.path(thumbnail_name)
-    thumbnail_url = default_storage.url(thumbnail_name)
+    thumbnail_path = storage.path(thumbnail_name)
+    thumbnail_url = storage.url(thumbnail_name)
     # See if the thumbnail has already been created.
-    if default_storage.exists(thumbnail_name):
+    if storage.exists(thumbnail_name):
         image_timestamp = os.stat(image_path).st_mtime
         thumbnail_timestamp = os.stat(thumbnail_path).st_mtime
         # If the thumbnail is newer than the file, no more generation needs to take place.
         if thumbnail_timestamp > image_timestamp:
-            thumbnail = default_storage.open(thumbnail_name, mixin=ImageFile)
-            thumbnail.url = thumbnail_url
-            thumbnail.path = thumbnail_path
-            return thumbnail
+            return Thumbnail(thumbnail_path, thumbnail_url)
     else:
         dirname = os.path.dirname(thumbnail_path)
         if not os.path.exists(dirname):
@@ -77,17 +88,13 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE)
         source_height = min(original_height, int(original_width / required_aspect))
         source_x = (original_width - source_width) / 2
         source_y = (original_height - source_height) / 2
-        print source_width, source_height
         image_data = image_data.transform((requested_width, requested_height), Image.EXTENT, (source_x, source_y, source_x + source_width, source_y + source_height), Image.BICUBIC)
     else:
         raise ValueError, "Unknown thumbnail generation method: %r" % generation_method
     # Save the thumbnail to disk.
     image_data.save(thumbnail_path)
     # Return the new image object.
-    thumbnail = default_storage.open(thumbnail_path, mixin=ImageFile)
-    thumbnail.url = thumbnail_url
-    thumbnail.path = thumbnail_path
-    return thumbnail
+    return Thumbnail(thumbnail_path, thumbnail_url)
     
     
 def thumbnail(image, requested_width, requested_height):

@@ -65,10 +65,16 @@ class Encoder(object):
                 text.extend(self.decode(child))
         return u"".join(text)
        
+    def get_elements(self, name, node):
+        """Returns all the named child elements of the given node."""
+        elements = [child for child in node.childNodes
+                    if child.nodeType == child.ELEMENT_NODE and child.nodeName == name]
+        return elements
+       
     def get_element(self, name, node):
         """Returns the named child element of the given node."""
         try:
-            return node.getElementsByTagName(name)[0]
+            return self.get_elements(name, node)[0]
         except IndexError:
             raise SerializationError, "Required element %r missing from %r element." % (name, node.attributes["type"])
         
@@ -80,7 +86,7 @@ class Encoder(object):
     def decode_objects(self, node):
         """Reads all child objects from the node."""
         objects = [self.serializer.decode(node)
-                   for node in node.getElementsByTagName("obj")]
+                   for node in self.get_elements("obj", node)]
         return objects
         
     def decode(self, node):
@@ -226,7 +232,7 @@ class DictEncoder(Encoder):
         """Decodes the node into a dict."""
         result = {}
         for item in node.getElementsByTagName("item"):
-            key, value = self.decode_objects(item)[:2]
+            key, value = self.decode_objects(item)
             result[key] = value
         return result
     
