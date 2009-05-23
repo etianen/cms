@@ -6,7 +6,7 @@ from django.http import Http404
 from django.shortcuts import redirect
 
 
-def dispatch(request, path_info=""):
+def page(request, path_info=""):
     """Dispatches the request to the site pages."""
     pass
 

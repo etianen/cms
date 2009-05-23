@@ -2,6 +2,7 @@
 
 
 from django import forms
+from django.core.urlresolvers import reverse
 
 from cms.pages.widgets import HtmlWidget
 
@@ -119,6 +120,32 @@ class Content(object):
         """Initializes the page content."""
         self.page = page
         self.data = data
+        
+    # Model delegation methods.
+    
+    def get_absolute_url(self):
+        """Generates the absolute URL of the page."""
+        page = self.page
+        if page.parent:
+            return page.parent.get_absolute_url() + page.url_title + "/"
+        return reverse("homepage")
+        
+    def get_navigation(self):
+        """
+        Generates the sub-navigation of the page.
+        
+        This is returned in the form of a dictionary of 'title' and 'url'.
+        An option third item is 'navigation', which should be an iterable of
+        sub navigation.
+        """
+        navigation_pages = self.page.get_published_children().filter(in_navigation=True)
+        navigation = [{"title": page.short_title or page.title,
+                       "url": page.get_absolute_url(),
+                       "navigation": (entry for entry in page.navigation)}
+                       for page in navigation pages]
+        return navigation
+        
+    # Administration methods.
         
     def get_form(self):
         """Returns a form used to edit this Content."""

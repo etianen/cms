@@ -156,7 +156,7 @@ class Page(PageBase):
         """
         Returns all published children of this page in the site navigation.
         """
-        return self.get_published_children().filter(in_navigation=True)
+        return self.content.get_navigation()
 
     navigation = property(get_navigation,
                           doc="All the published children of this page in the site navigation.")
@@ -191,6 +191,12 @@ class Page(PageBase):
     content = property(get_content,
                        set_content,
                        doc="The content object associated with this page.")
+
+    # Standard model methods.
+    
+    def get_absolute_url(self):
+        """Generates the absolute url of the page."""
+        return self.content.get_absolute_url()
 
     class Meta:
         unique_together = (("parent", "url_title",),)

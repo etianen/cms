@@ -5,6 +5,6 @@ from django.conf.urls.defaults import *
 
 
 urlpatterns = patterns("cms.pages.views",
-                       url(r"^(.*/)$", "dispatch", name="page"),
-                       url(r"^$", "dispatch", name="homepage"),)
+                       url(r"^(.*/)$", "page", name="page"),
+                       url(r"^$", "page", name="homepage"),)
 
