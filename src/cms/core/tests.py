@@ -85,7 +85,7 @@ class TestSerializer(unittest.TestCase):
                 {"foo": "bar", "list": ["one", "two"]},)
 
     
-    def testSerialize(self):
+    def testSerializationIsReversible(self):
         """
         Tests that encoding and decoding are reversible for a variety of test
         cases.
