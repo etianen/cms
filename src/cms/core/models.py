@@ -5,7 +5,9 @@ from django import forms
 from django.conf import settings
 from django.db import models
 
-from cms.core.widgets import HtmlWidget
+from cms.core import lookup
+from cms.core.optimizations import cached_getter, cached_setter
+from cms.core.serializers import serializer
 
 
 class PublishedManager(models.Manager):
@@ -16,12 +18,14 @@ class PublishedManager(models.Manager):
         """Returns all content that is published."""
         queryset = super(PublishedManager, self).get_query_set()
         queryset = queryset.filter(is_online=True)
+        queryset = queryset.filter(models.Q(publication_date=None) | models.Q(publication_date__lte=now))
+        queryset = queryset.filter(models.Q(expiry_date=None) | models.Q(expiry_date__gt=now))
         return queryset
 
 
-class ContentModel(models.Model):
+class PageBase(models.Model):
     
-    """Base model for all website content."""
+    """Base model for models used to generate a HTML page."""
     
     objects = models.Manager()
     
@@ -38,6 +42,15 @@ class ContentModel(models.Model):
     
     is_online = models.BooleanField("online",
                                     default=True)
+    
+    publication_date = models.DateTimeField(blank=True,
+                                            null=True,
+                                            help_text="The date that this page will appear on the website.  Leave this blank to immediately publish this page.")
+
+    expiry_date = models.DateTimeField(blank=True,
+                                       null=True,
+                                       help_text="The date that this page will be removed from the website.  Leave this blank to never expire this page.")
+    
     
     # SEO fields.
     
@@ -88,3 +101,106 @@ class ContentModel(models.Model):
         ordering = ("title",)
         verbose_name_plural = "content"
         
+
+# Make a fast dict of content types.
+PAGE_CONTENT_TYPES = dict([(slug, lookup.get_object(content_type))
+                           for slug, content_type in settings.PAGE_CONTENT_TYPES])
+
+
+def get_page_content_type(type):
+    """Returns the names page content type."""
+    return PAGE_CONTENT_TYPES[type]
+
+
+class Page(PageBase):
+
+    """A page within the site."""
+
+    # Base fields.
+
+    url_title = models.SlugField("URL title")
+
+    # Hierarchy fields.
+
+    parent = models.ForeignKey("self",
+                               blank=True,
+                               null=True)
+
+    order = models.PositiveSmallIntegerField(unique=True,
+                                             editable=False,
+                                             blank=True,
+                                             null=True)
+
+    @cached_getter
+    def get_children(self):
+        """
+        Returns all the children of this page, regardless of their publication
+        state.
+        """
+        return Page.objects.filter(parent=self).order_by("order", "id")
+
+    children = property(get_children,
+                        doc="All the children of this page, regardless of their publication state.")
+
+    @cached_getter
+    def get_published_children(self):
+        """Returns all the published children of this page."""
+        return Page.published_objects.filter(parent=self).order_by("order", "id")
+
+    published_children = property(get_published_children,
+                                  doc="All the published children of this page.")
+
+    # Navigation fields.
+
+    short_title = models.CharField(max_length=100,
+                                   blank=True,
+                                   null=True,
+                                   help_text="A shorter version of the title that will be used in site navigation. Leave blank to use the full-length title.")
+
+    in_navigation = models.BooleanField("add to navigation",
+                                        default=True,
+                                        help_text="Uncheck this box to remove this content from the site navigation.")
+
+    @cached_getter
+    def get_navigation(self):
+        """
+        Returns all published children of this page in the site navigation.
+        """
+        return self.get_published_children().filter(in_navigation=True)
+
+    navigation = property(get_navigation,
+                          doc="All the published children of this page in the site navigation.")
+
+    # Content fields.
+
+    content_type = models.CharField(max_length=20,
+                                    editable=False,
+                                    help_text="The type of page content.")
+
+    content_data = models.TextField(editable=False,
+                                    help_text="The encoded data of this page.")
+
+    @cached_getter
+    def get_content(self):
+        """Returns the content object associated with this page."""
+        content_cls = get_page_content_type(self.content_type)
+        if self.content_data:
+            content_data = serializer.deserialize(self.content_data)
+        else:
+            content_data = {}
+        content = content_cls(self.content_type, self, content_data)
+        return content
+
+    @cached_setter(get_content)
+    def set_content(self, content):
+        """Sets the content object for this page."""
+        self.content_type = content.type
+        self.content_data = serializer.serialize(content.content_data)
+
+    content = property(get_content,
+                       set_content,
+                       doc="The content object associated with this page.")
+
+    class Meta:
+        unique_together = (("parent", "url_title",),)
+

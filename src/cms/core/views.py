@@ -6,9 +6,11 @@ from django.http import Http404
 from django.shortcuts import redirect
 
 
-# HACK: The current admin redirect implementation requires the sites framework.
-# This can be removed if the sites dependency is removed.  This might break in
-# Django 1.3, which will start using named URL patterns in the admin views.
+def dispatch(request, path_info=""):
+    """Dispatches the request to the site pages."""
+    pass
+
+
 def permalink_redirect(request, content_type_id, object_id):
     """Redirects to the object encoded in the permalink."""
     # Attempt to access the encoded content type.
