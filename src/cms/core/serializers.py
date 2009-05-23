@@ -298,9 +298,7 @@ serializer.register_encoder(datetime.datetime, DateTimeEncoder)
 
 serializer.register_encoder(models.Model, ModelEncoder)
 
-serializer.register_encoder(list, ListEncoder)
-
-serializer.register_encoder(tuple, ListEncoder)
+serializer.register_encoder((list, tuple), ListEncoder, "list")
 
 serializer.register_encoder(set, SetEncoder)
 

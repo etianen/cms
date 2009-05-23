@@ -111,9 +111,9 @@ class Page(ContentModel):
     
     # Content fields.
     
-    type = models.CharField(max_length=20,
-                            editable=False,
-                            help_text="The type of page content.")
+    content_type = models.CharField(max_length=20,
+                                    editable=False,
+                                    help_text="The type of page content.")
     
     content_data = models.TextField(editable=False,
                                     help_text="The encoded data of this page.")
@@ -121,18 +121,18 @@ class Page(ContentModel):
     @cached_getter
     def get_content(self):
         """Returns the content object associated with this page."""
-        content_cls = get_page_content_type(self.type)
+        content_cls = get_page_content_type(self.content_type)
         if self.content_data:
             content_data = serializer.deserialize(self.content_data)
         else:
             content_data = {}
-        content = content_cls(self.type, self, content_data)
+        content = content_cls(self.content_type, self, content_data)
         return content
 
     @cached_setter(get_content)
     def set_content(self, content):
         """Sets the content object for this page."""
-        self.type = content.type
+        self.content_type = content.type
         self.content_data = serializer.serialize(content.content_data)
     
     content = property(get_content,
