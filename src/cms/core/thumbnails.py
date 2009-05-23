@@ -52,6 +52,7 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE)
         if thumbnail_timestamp > image_timestamp:
             thumbnail = default_storage.open(thumbnail_name, mixin=ImageFile)
             thumbnail.url = thumbnail_url
+            thumbnail.path = thumbnail_path
             return thumbnail
     else:
         dirname = os.path.dirname(thumbnail_path)
@@ -85,6 +86,7 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE)
     # Return the new image object.
     thumbnail = default_storage.open(thumbnail_path, mixin=ImageFile)
     thumbnail.url = thumbnail_url
+    thumbnail.path = thumbnail_path
     return thumbnail
     
     
