@@ -7,7 +7,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import redirect, render_to_response
 
-from cms.core.admin import site
+from cms.pages.admin import site
 from cms.lib.staff.forms import UserCreationForm
 from cms.lib.staff.models import User, Group, Permission
 

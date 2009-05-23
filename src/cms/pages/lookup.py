@@ -1,4 +1,4 @@
-"""Utilities for lookup up Python objects by name."""
+"""Utilities for looking up Python objects by name."""
 
 
 def get_module(name):

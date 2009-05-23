@@ -6,7 +6,7 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.views.static import serve
 
-from cms.core.admin import site as admin_site
+from cms.pages.admin import site as admin_site
 
 
 admin.autodiscover()
@@ -14,7 +14,7 @@ admin.autodiscover()
 
 urlpatterns = patterns("",
                        url(r"^admin/", include(admin_site.urls)),
-                       url(r"^links/(\d+)/(.+)/$", "cms.core.views.permalink_redirect", name="permalink_redirect"),
+                       url(r"^links/(\d+)/(.+)/$", "cms.pages.views.permalink_redirect", name="permalink_redirect"),
                        url(r"^", include("cms.pages.urls")),)
 
 

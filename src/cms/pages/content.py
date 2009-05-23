@@ -1,9 +1,9 @@
-"""Some base page content types."""
+"""Pluggable page content, serialized to XML."""
 
 
 from django import forms
 
-from cms.core.widgets import HtmlWidget
+from cms.pages.widgets import HtmlWidget
 
 
 class ContentField(object):

@@ -7,9 +7,9 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.images import ImageFile
 
-from cms.core import thumbnails
-from cms.core.optimizations import cached_getter, cached_setter, cached_deleter
-from cms.core.serializers import serializer
+from cms.pages import thumbnails
+from cms.pages.optimizations import cached_getter, cached_setter, cached_deleter
+from cms.pages.serializers import serializer
 
 
 # Test thumbnail generation.

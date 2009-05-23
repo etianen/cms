@@ -16,9 +16,9 @@ from django.db import models
 from django.http import Http404
 from django.shortcuts import redirect, render_to_response
 
-from cms.core.forms import EditDetailsForm
-from cms.core.models import Page, get_page_content_type
-from cms.core.views import permalink_redirect
+from cms.pages.forms import EditDetailsForm
+from cms.pages.models import Page, get_page_content_type
+from cms.pages.views import permalink_redirect
 
 
 class AdminSite(admin.AdminSite):
