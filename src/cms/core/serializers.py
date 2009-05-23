@@ -30,44 +30,11 @@ class Codec(object):
     
     def encode(self, obj, generator):
         """Encodes the given object into an XML document."""
-        generator.characters(str(obj))
-    
-    def get_unicode(self, node):
-        """Returns the unicode text content of a node."""
-        text = []
-        for child in node.childNodes:
-            if child.nodeType == child.TEXT_NODE or child.nodeType == child.CDATA_SECTION_NODE:
-                text.append(child.data)
-            elif child.nodeType == child.ELEMENT_NODE:
-                text.extend(self.get_text(child))
-            else:
-               pass
-        return u"".join(text)
-    
-    def get_text(self, node):
-        """Returns the text content of a node."""
-        return str(self.get_unicode(node))
-    
-    def get_child(self, node, tagname):
-        """Returns the first child node with the given name."""
-        return node.getElementsByTagName(tagname)[0]
-    
-    def get_child_unicode(self, node, tagname):
-        """Returns the unicode content of the named child node."""
-        return self.get_unicode(self.get_child(node, tagname))
-    
-    def get_child_text(self, node, tagname):
-        """Returns the text content of the named child node."""
-        return self.get_text(self.get_child(node, tagname))
-    
+        raise NotImplementedError
+        
     def decode(self, node):
         """Converts the given node into an object."""
-        return self.get_text(node)
-    
-    
-class StringCodec(Codec):
-    
-    """A codec for string objects."""
+        raise NotImplementedError
     
     
 class UnicodeCodec(Codec):
@@ -76,86 +43,142 @@ class UnicodeCodec(Codec):
     
     def encode(self, obj, generator):
         """Encodes the unicode object."""
+        obj = unicode(obj)
         generator.characters(obj.encode(self.serializer.encoding))
         
     def decode(self, node):
         """Decodes the given node into a string."""
-        return self.get_unicode(node)
-    
-    
-class IntCodec(Codec):
+        text = []
+        for child in node.childNodes:
+            if child.nodeType == child.TEXT_NODE or child.nodeType == child.CDATA_SECTION_NODE:
+                text.append(child.data)
+            elif child.nodeType == child.ELEMENT_NODE:
+                text.extend(self.decode(child))
+        return u"".join(text)
+
+
+class IntCodec(UnicodeCodec):
     
     """A codec for int objects."""
     
     def decode(self, node):
         """Decodes the node into an integer."""
-        return int(self.get_text(node))
+        unicode_value = super(IntCodec, self).decode(node) 
+        return int(unicode_value)
     
     
-class FloatCodec(Codec):
+class LongCodec(UnicodeCodec):
+    
+    """A codec for long objects."""
+    
+    def decode(self, node):
+        """Decodes the node into an long."""
+        unicode_value = super(LongCodec, self).decode(node) 
+        return long(unicode_value)
+    
+    
+class FloatCodec(UnicodeCodec):
     
     """A codec for float objects."""
     
     def decode(self, node):
         """Decodes the node into a float."""
-        return float(self.get_text(node))
+        unicode_value = super(FloatCodec, self).decode(node) 
+        return float(unicode_value)
+
+
+class PropertyCodec(Codec):
+    
+    """
+    A codec for objects that can be serialized to a dictionary of strings mapped
+    to objects.
+    """
+    
+    def encode(self, obj, generator):
+        """Serializes a dictionary of string keys mapped to string values."""
+        for key, value in obj.items():
+            generator.startElement(key, {})
+            self.serializer.encode(value, generator)
+            generator.endElement(key)
+            
+    def decode(self, node):
+        """
+        Decodes the node into a dictionary of string keys mapped to values.
+        """
+        decoded = {}
+        for child in node.childNodes:
+            if child.nodeType == child.ELEMENT_NODE:
+                key = child.nodeName
+                value = self.serializer.decode(child.getElementsByTagName("obj")[0])
+                decoded[key] = value
+        return decoded
     
     
-class DateCodec(Codec):
+class DateCodec(PropertyCodec):
     
     """A codec for date objects."""
     
     def encode(self, obj, generator):
         """Encodes the date object."""
-        generator.addQuickElement("year", str(obj.year))
-        generator.addQuickElement("month", str(obj.month))
-        generator.addQuickElement("day", str(obj.day))
+        encoded = {"year": obj.year,
+                   "month": obj.month,
+                   "day": obj.day}
+        super(DateCodec, self).encode(encoded, generator)
         
     def decode(self, node):
         """Decodes the node into a date object."""
-        year = int(self.get_child_text(node, "year"))
-        month = int(self.get_child_text(node, "month"))
-        day = int(self.get_child_text(node, "day"))
+        decoded = super(DateCodec, self).decode(node)
+        year = decoded["year"]
+        month = decoded["month"]
+        day = decoded["day"]
         return datetime.date(year, month, day)
-        
-        
-class DateTimeCodec(DateCodec):
+                
+     
+class DateTimeCodec(PropertyCodec):
     
     """A codec for datetime objects."""
     
     def encode(self, obj, generator):
         """Encodes the datetime object."""
-        super(DateTimeCodec, self).encode(obj, generator)
-        generator.addQuickElement("hour", str(obj.hour))
-        generator.addQuickElement("minute", str(obj.minute))
-        generator.addQuickElement("second", str(obj.second))
-        generator.addQuickElement("microsecond", str(obj.microsecond))
+        encoded = {"year": obj.year,
+                   "month": obj.month,
+                   "day": obj.day,
+                   "hour": obj.hour,
+                   "minute": obj.minute,
+                   "second": obj.second,
+                   "microsecond": obj.microsecond}
+        super(DateTimeCodec, self).encode(encoded, generator)
     
     def decode(self, node):
         """Decodes the node into a datetime objects."""
-        date = super(DateTimeCodec, self).decode(node)
-        hour = int(self.get_child_text(node, "hour"))
-        minute = int(self.get_child_text(node, "minute"))
-        second = int(self.get_child_text(node, "second"))
-        microsecond = int(self.get_child_text(node, "microsecond"))
-        return datetime.datetime(date.year, date.month, date.day, hour, minute, second, microsecond)
+        decoded = super(DateTimeCodec, self).decode(node)
+        year = decoded["year"]
+        month = decoded["month"]
+        day = decoded["day"]
+        hour = decoded["hour"]
+        minute = decoded["minute"]
+        second = decoded["second"]
+        microsecond = decoded["microsecond"]
+        return datetime.datetime(year, month, day, hour, minute, second, microsecond)
     
     
-class ModelCodec(Codec):
+class ModelCodec(PropertyCodec):
     
     """A codec for Django models."""
     
     def encode(self, obj, generator):
         """Encodes the Django model instance."""
-        generator.addQuickElement("app-label", str(obj._meta.app_label))
-        generator.addQuickElement("model", obj.__class__.__name__.lower())
-        generator.addQuickElement("pk", str(obj.pk))
+        encoded = {"app-label": obj._meta.app_label,
+                   "model": obj.__class__.__name__.lower(),
+                   "pk": obj.pk}
+        super(ModelCodec, self).encode(encoded, generator)
         
     def decode(self, node):
         """Decodes the Django model instance."""
-        app_label = self.get_child_text(node, "app-label")
-        model = self.get_child_text(node, "model")
-        pk = self.get_child_text(node, "pk")
+        decoded = super(ModelCodec, self).decode(node)
+        app_label = decoded["app-label"]
+        model = decoded["model"]
+        pk = decoded["pk"]
         model = models.get_model(app_label, model)
         return model._default_manager.get(pk=pk)
 
@@ -194,7 +217,7 @@ class SetCodec(ListCodec):
         return set(super(SetCodec, self).decode(node))
     
     
-class DictCodec(Codec):
+class DictCodec(PropertyCodec):
     
     """A codec for dict objects."""
     
@@ -202,17 +225,18 @@ class DictCodec(Codec):
         """Encodes the dict."""
         for key, value in obj.items():
             generator.startElement("item", {})
-            self.serializer.encode(key, generator)
-            self.serializer.encode(value, generator)
+            encoded = {"key": key,
+                       "value": value}
+            super(DictCodec, self).encode(encoded, generator)
             generator.endElement("item")
             
     def decode(self, node):
         """Decodes the node into a dict."""
         result = {}
         for item in node.getElementsByTagName("item"):
-            objects = item.getElementsByTagName("obj")
-            key = self.serializer.decode(objects[0])
-            value = self.serializer.decode(objects[1])
+            decoded = super(DictCodec, self).decode(item)
+            key = decoded["key"]
+            value = decoded["value"]
             result[key] = value
         return result
     
@@ -275,11 +299,11 @@ serializer = Serializer()
 
 
 # Register some default codecs.
-serializer.register_codec(str, StringCodec)
-
-serializer.register_codec(unicode, UnicodeCodec)
+serializer.register_codec(basestring, UnicodeCodec)
 
 serializer.register_codec(int, IntCodec)
+
+serializer.register_codec(long, LongCodec)
 
 serializer.register_codec(float, FloatCodec)
 

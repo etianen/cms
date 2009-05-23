@@ -14,10 +14,10 @@ class TestSerializer(unittest.TestCase):
     
     def setUp(self):
         """Initializes the test case."""
-        self.examples = ("hello world",
-                         u"hello world",
+        self.examples = (u"hello world",
+                         "hello world",
                          5,
-                         5.0,
+                         5.5,
                          datetime.date(1984, 5, 19),
                          datetime.datetime(1984, 5, 19, 3, 35, 55),
                          ContentType.objects.all()[0],
