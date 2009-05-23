@@ -126,21 +126,25 @@ class PageAdmin(PageBaseAdmin):
 
     prepopulated_fields = {"url_title": ("title",),}
 
+    def get_page_content_type(self, request, obj=None):
+        """Retrieves the page content type slug."""
+        if "type" in request.GET:
+            return request.GET["type"]
+        if obj and obj.content_type:
+            return obj.content_type
+        raise Http404, "You must specify a page content type."
+
     def get_page_content(self, request, obj=None):
         """Retrieves the page content object."""
+        page_content_type = self.get_page_content_type(request, obj)
+        page_content_cls = get_page_content_type(page_content_type)
         # Try to use an instance.
-        if obj:
-            return obj.content
-        # Create an unbound page content.
-        try:
-            page_content_name = request.GET["type"]
-        except KeyError: 
-            raise Http404, "You must specify a page content type."
-        try:
-            page_content_cls = get_page_content_type(page_content_name)
-        except KeyError:
-            raise Http404, "%r is not a valid page content type." % page_content_name
-        page_content = page_content_cls(page_content_name, None, {})
+        if obj and obj.content:
+            page_content_data = obj.content.data
+        else:
+            page_content_data = {}
+        # Create new page content instance.
+        page_content = page_content_cls(obj, page_content_data)
         return page_content
 
     def get_form(self, request, obj=None, **kwargs):
@@ -161,13 +165,12 @@ class PageAdmin(PageBaseAdmin):
 
     def save_model(self, request, obj, form, change):
         """Saves the model and adds its content fields."""
-        if change:
-            page_content = self.get_page_content(request, obj)
-        else:
-            page_content = self.get_page_content(request, None)
+        page_content_type = self.get_page_content_type(request, obj)
+        page_content = self.get_page_content(request, obj)
         for field_name in page_content.get_field_names():
             field_data = form.cleaned_data[field_name]
             setattr(page_content, field_name, field_data)
+        obj.content_type = page_content_type
         obj.content = page_content
         obj.save()
 

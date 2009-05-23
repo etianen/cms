@@ -6,7 +6,7 @@ from django import forms
 from cms.pages.widgets import HtmlWidget
 
 
-class ContentField(object):
+class Field(object):
     
     """A field within a Content object."""
     
@@ -17,7 +17,7 @@ class ContentField(object):
     creation_counter = 0
     
     def __init__(self, label=None, required=False, help_text=""):
-        """"Initializes the ContentField."""
+        """"Initializes the Field."""
         self.label = label
         self.required = required
         self.help_text = help_text
@@ -32,11 +32,11 @@ class ContentField(object):
         """Retrieves the value from the Content object."""
         if obj is None:
             return self
-        return obj.content_data.get(self.name, "")
+        return obj.data.get(self.name, "")
 
     def __set__(self, obj, value):
         """Sets the value in the Content object."""
-        obj.content_data[self.name] = value
+        obj.data[self.name] = value
 
     def get_default_attrs(self, obj):
         """Returns the default attributes for a form field."""
@@ -55,7 +55,7 @@ class ContentField(object):
         return self.form_field(**defaults)
            
 
-class CharField(ContentField):
+class CharField(Field):
     
     """A simple character data field."""
     
@@ -94,10 +94,13 @@ class ContentMetaClass(type):
         self = super(ContentMetaClass, cls).__new__(cls, name, bases, attrs)
         self.fields = []
         for key, value in attrs.items():
+            # Perform metaclass programming.
             if hasattr(value, "contribute_to_class"):
                 value.contribute_to_class(cls, key)
-            if isinstance(value, ContentField):
+            # Register fields.
+            if isinstance(value, Field):
                 self.fields.append(value)
+        # Sort fields by creation order.
         self.fields.sort(lambda a, b: cmp(a.creation_order, b.creation_order))
         return self
                 
@@ -112,11 +115,10 @@ class Content(object):
     
     __metaclass__ = ContentMetaClass
     
-    def __init__(self, type, page, content_data):
+    def __init__(self, page, data):
         """Initializes the page content."""
-        self.type = type
         self.page = page
-        self.content_data = content_data
+        self.data = data
         
     def get_form(self):
         """Returns a form used to edit this Content."""

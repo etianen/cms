@@ -183,19 +183,20 @@ class Page(PageBase):
     @cached_getter
     def get_content(self):
         """Returns the content object associated with this page."""
+        if not self.content_type:
+            return None
         content_cls = get_page_content_type(self.content_type)
         if self.content_data:
             content_data = serializer.deserialize(self.content_data)
         else:
             content_data = {}
-        content = content_cls(self.content_type, self, content_data)
+        content = content_cls(self, content_data)
         return content
 
     @cached_setter(get_content)
     def set_content(self, content):
         """Sets the content object for this page."""
-        self.content_type = content.type
-        self.content_data = serializer.serialize(content.content_data)
+        self.content_data = serializer.serialize(content.data)
 
     content = property(get_content,
                        set_content,
