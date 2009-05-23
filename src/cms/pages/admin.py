@@ -16,8 +16,9 @@ from django.db import models
 from django.http import Http404
 from django.shortcuts import redirect, render_to_response
 
+from cms.pages import content
 from cms.pages.forms import EditDetailsForm
-from cms.pages.models import Page, get_page_content_type
+from cms.pages.models import Page
 from cms.pages.views import permalink_redirect
 
 
@@ -137,7 +138,7 @@ class PageAdmin(PageBaseAdmin):
     def get_page_content(self, request, obj=None):
         """Retrieves the page content object."""
         page_content_type = self.get_page_content_type(request, obj)
-        page_content_cls = get_page_content_type(page_content_type)
+        page_content_cls = content.get_content(page_content_type)
         # Try to use an instance.
         if obj and obj.content:
             page_content_data = obj.content.data

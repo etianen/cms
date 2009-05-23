@@ -1,3 +1,0 @@
-Replace page_content_types setting with a registration setting.
-
-don't store content type slug in content object.

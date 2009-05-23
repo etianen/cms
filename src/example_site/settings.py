@@ -57,11 +57,6 @@ DEFAULT_FROM_EMAIL = SERVER_EMAIL
 EMAIL_SUBJECT_PREFIX = "[%s] " % SITE_NAME
 
 
-# Content settings.
-
-PAGE_CONTENT_TYPES = (("content", "cms.pages.content.SimpleContent"),)
-
-
 # Whether to automatically add www to the start of the domain name.  
 
 PREPEND_WWW = True

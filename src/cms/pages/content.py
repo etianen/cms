@@ -21,7 +21,7 @@ class Field(object):
         self.label = label
         self.required = required
         self.help_text = help_text
-        self.creation_counter += 1
+        Field.creation_counter += 1
         self.creation_order = self.creation_counter
     
     def contribute_to_class(self, cls, name):
@@ -138,10 +138,44 @@ class Content(object):
         return (("Page content", {"fields": field_names}),)
         
 
-class SimpleContent(Content):
+class RegistrationError(Exception):
     
-    """A single column content page."""
+    """Exception raised when content type registration goes wrong."""
+
+
+registry = {}
+
+
+def get_content(slug):
+    """Looks up the given content type by type slug."""
+    try:
+        return registry[slug]
+    except KeyError:
+        raise RegistrationError, "No content type is registered under %r." % slug
+
+
+def register(content_cls, slug=None):
+    """Registers the given content type under the given slug."""
+    slug = slug or content_cls.__name__.lower()
+    registry[slug] = content_cls
     
-    content = HtmlField()
+    
+def unregister(slug):
+    """Unregisters the content type associated with the given slug."""
+    try:
+        del registry[slug]
+    except KeyError:
+        raise RegistrationError, "No content type is registered under %r." % slug
+
+
+class StaticContent(Content):
+    
+    """A standard two column content page."""
+    
+    main = HtmlField()
+    
+    sidebar = HtmlField()
     
     
+register(StaticContent, "content")
+

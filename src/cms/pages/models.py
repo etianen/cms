@@ -5,7 +5,7 @@ from django import forms
 from django.conf import settings
 from django.db import models
 
-from cms.pages import lookup
+from cms.pages import content
 from cms.pages.optimizations import cached_getter, cached_setter
 from cms.pages.serializers import serializer
 
@@ -100,16 +100,6 @@ class PageBase(models.Model):
         abstract = True
         ordering = ("title",)
         verbose_name_plural = "content"
-        
-
-# Make a fast dict of content types.
-PAGE_CONTENT_TYPES = dict([(slug, lookup.get_object(content_type))
-                           for slug, content_type in settings.PAGE_CONTENT_TYPES])
-
-
-def get_page_content_type(type):
-    """Returns the names page content type."""
-    return PAGE_CONTENT_TYPES[type]
 
 
 class Page(PageBase):
@@ -185,13 +175,13 @@ class Page(PageBase):
         """Returns the content object associated with this page."""
         if not self.content_type:
             return None
-        content_cls = get_page_content_type(self.content_type)
+        content_cls = content.get_content(self.content_type)
         if self.content_data:
             content_data = serializer.deserialize(self.content_data)
         else:
             content_data = {}
-        content = content_cls(self, content_data)
-        return content
+        content_instance = content_cls(self, content_data)
+        return content_instance
 
     @cached_setter(get_content)
     def set_content(self, content):
