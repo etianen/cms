@@ -7,7 +7,7 @@ from django.db import models
 from cms.core import lookup
 from cms.core.models import ContentModel
 from cms.core.models import PublishedManager as BasePublishedManager
-from cms.core.optimizations import cached_property
+from cms.core.optimizations import cached_getter, cached_setter
 from cms.core.serializers import serializer
 
 
@@ -59,6 +59,7 @@ class Page(ContentModel):
                                              blank=True,
                                              null=True)
     
+    @cached_getter
     def get_children(self):
         """
         Returns all the children of this page, regardless of their publication
@@ -66,8 +67,8 @@ class Page(ContentModel):
         """
         return Page.objects.filter(parent=self).order_by("order", "id")
     
-    children = cached_property(get_children,
-                               doc="All the children of this page, regardless of their publication state.")
+    children = property(get_children,
+                        doc="All the children of this page, regardless of their publication state.")
     
     # Publication fields.
     
@@ -79,12 +80,13 @@ class Page(ContentModel):
                                        null=True,
                                        help_text="The date that this page will be removed from the website.  Leave this blank to never expire this page.")
 
+    @cached_getter
     def get_published_children(self):
         """Returns all the published children of this page."""
         return Page.published_objects.filter(parent=self).order_by("order", "id")
     
-    published_children = cached_property(get_published_children,
-                                         doc="All the published children of this page.")
+    published_children = property(get_published_children,
+                                  doc="All the published children of this page.")
     
     # Navigation fields.
     
@@ -97,14 +99,15 @@ class Page(ContentModel):
                                         default=True,
                                         help_text="Uncheck this box to remove this content from the site navigation.")
     
+    @cached_getter
     def get_navigation(self):
         """
         Returns all published children of this page in the site navigation.
         """
         return self.get_published_children().filter(in_navigation=True)
     
-    navigation = cached_property(get_navigation,
-                                 doc="All the published children of this page in the site navigation.")
+    navigation = property(get_navigation,
+                          doc="All the published children of this page in the site navigation.")
     
     # Content fields.
     
@@ -115,6 +118,7 @@ class Page(ContentModel):
     content_data = models.TextField(editable=False,
                                     help_text="The encoded data of this page.")
     
+    @cached_getter
     def get_content(self):
         """Returns the content object associated with this page."""
         content_cls = get_page_content_type(self.type)
@@ -125,14 +129,15 @@ class Page(ContentModel):
         content = content_cls(self.type, self, content_data)
         return content
 
+    @cached_setter(get_content)
     def set_content(self, content):
         """Sets the content object for this page."""
         self.type = content.type
         self.content_data = serializer.serialize(content.content_data)
     
-    content = cached_property(get_content,
-                              set_content,
-                              doc="The content object associated with this page.")
+    content = property(get_content,
+                       set_content,
+                       doc="The content object associated with this page.")
     
     class Meta:
         unique_together = (("parent", "url_title",),)

@@ -5,7 +5,7 @@ import datetime, unittest
 
 from django.contrib.contenttypes.models import ContentType
 
-from cms.core.optimizations import cached_property
+from cms.core.optimizations import cached_getter, cached_setter, cached_deleter
 from cms.core.serializers import serializer
 
 
@@ -20,20 +20,19 @@ class CachedPropertyTest(object):
         self.call_count = 0
         self._value = "initial"
         
+    @cached_getter
     def get_value(self):
         self.call_count += 1
         return self._value
     
+    @cached_setter(get_value)
     def set_value(self, value):
         self._value = value
         
+    @cached_deleter(get_value)
     def del_value(self):
         del self._value
         
-    value = cached_property(get_value,
-                            set_value,
-                            del_value)
-    
     
 class TestCachedProperty(unittest.TestCase):
     
@@ -45,23 +44,23 @@ class TestCachedProperty(unittest.TestCase):
     
     def testGetterIsCached(self):
         """Tests that calls to getters are cached."""
-        self.cached_property_test.value
+        self.cached_property_test.get_value()
         self.assertEqual(self.cached_property_test.call_count, 1)
-        self.cached_property_test.value
+        self.cached_property_test.get_value()
         self.assertEqual(self.cached_property_test.call_count, 1)
         
     def testSetterSetsCache(self):
         """Tests that calls to setters sets the cache."""
-        self.cached_property_test.value = "changed"
-        self.assertEqual(self.cached_property_test.value, "changed")
+        self.cached_property_test.set_value("changed")
+        self.assertEqual(self.cached_property_test.get_value(), "changed")
         self.assertEqual(self.cached_property_test.call_count, 0)
         
     def testDeleterClearsCache(self):
         """Tests that calls to deleters clear the cache."""
-        self.cached_property_test.value
-        del self.cached_property_test.value
-        self.assertRaises(AttributeError, lambda: self.cached_property_test.value)
-        self.cached_property_test.value = "changed"
+        self.cached_property_test.get_value()
+        self.cached_property_test.del_value()
+        self.assertRaises(AttributeError, lambda: self.cached_property_test.get_value())
+        self.cached_property_test.set_value("changed")
         self.assertEqual(self.cached_property_test.call_count, 2)
         
 
