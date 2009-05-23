@@ -170,11 +170,9 @@ def unregister(slug):
 
 class StaticContent(Content):
     
-    """A standard two column content page."""
+    """A standard single column content page."""
     
     main = HtmlField()
-    
-    sidebar = HtmlField()
     
     
 register(StaticContent, "content")
