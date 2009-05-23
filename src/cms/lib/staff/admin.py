@@ -4,15 +4,12 @@
 from django import template
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import redirect, render_to_response
 
 from cms.pages.admin import site
 from cms.lib.staff.forms import UserCreationForm
-from cms.lib.staff.models import User, Group, Permission
-
-
-GROUPS_DESCRIPTION = '<p class="help"><strong>Administrators</strong> can create users and edit site content. <strong>Editors</strong> may only edit site content.</p>'
 
 
 class UserAdmin(BaseUserAdmin):
@@ -25,14 +22,21 @@ class UserAdmin(BaseUserAdmin):
     
     fieldsets = ((None, {"fields": ("username", "is_active",)}),
                  ("Personal information", {"fields": ("first_name", "last_name", "email",)}),
-                 ("Groups", {"fields": ("groups",),
-                             "description": GROUPS_DESCRIPTION}),)
+                 ("Groups", {"fields": ("groups",)}),)
     
     filter_horizontal = ("user_permissions", "groups",)
     
     list_display = ("username", "first_name", "last_name", "email", "is_active",)
     
     list_filter = ("is_active",)
+    
+    # Custom admin access.
+    
+    def queryset(self, request):
+        """Only allows staff members to be edited."""
+        queryset = super(UserAdmin, self).queryset(request)
+        queryset = queryset.filter(is_staff=True, is_superuser=False)
+        return queryset
     
     # Custom admin actions.
     
@@ -86,8 +90,7 @@ class UserAdmin(BaseUserAdmin):
                    "media": media,
                    "save_as": False,
                    "root_path": self.admin_site.root_path,
-                   "app_label": self.model._meta.app_label,
-                   "groups_description": GROUPS_DESCRIPTION}
+                   "app_label": self.model._meta.app_label,}
         return render_to_response("admin/staff/user/add_form.html", context, template.RequestContext(request))
     
     

@@ -120,3 +120,8 @@ SEO_DEFAULT_CHANGE_FREQUENCY = None
 
 USE_I18N = False
 
+
+# Staff management settings.
+
+DEFAULT_GROUP_ID = 1
+

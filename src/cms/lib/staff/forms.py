@@ -2,15 +2,15 @@
 
 
 from django import forms
+from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm
+from django.contrib.auth.models import User, Group
 from django.utils.safestring import mark_safe
-
-from cms.lib.staff.models import User, Group, EDITORS_GROUP_ID
 
 
 groups_field = forms.ModelMultipleChoiceField(queryset=Group.objects.all(),
-                                             initial=[EDITORS_GROUP_ID],
+                                             initial=[settings.DEFAULT_GROUP_ID],
                                              widget=FilteredSelectMultiple("groups", False))
 
 
