@@ -1,5 +1,3 @@
 Replace page_content_types setting with a registration setting.
 
-Use a registration method for links and images for wysiwyg.  Generate file in page admin.
-
 don't store content type slug in content object.

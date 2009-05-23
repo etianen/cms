@@ -88,7 +88,7 @@ class AdminSite(admin.AdminSite):
         """Renders the TinyMCE initialization script."""
         context = {}
         return render_to_response("admin/tinymce_init.js", context, template.RequestContext(request), mimetype="text/javascript")
-    
+        
     
 # The default instance of the CMS admin site.
     
