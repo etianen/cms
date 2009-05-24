@@ -1,6 +1,11 @@
 {% extends "admin/base.html" %}
 
 
+{% block extrahead %}
+    <link rel="stylesheet" type="text/css" href="{{CMS_MEDIA_URL}}css/admin.css">
+{% endblock %}
+
+
 {% block title %}{{title}} - {{SITE_NAME}} administration{% endblock %}
 
 

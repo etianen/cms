@@ -216,7 +216,7 @@ class Page(PageBase):
         """Returns the content object associated with this page."""
         if not self.content_type:
             return None
-        content_cls = content.get_content(self.content_type)
+        content_cls = content.get_content_type(self.content_type)
         if self.content_data:
             content_data = serializer.deserialize(self.content_data)
         else:

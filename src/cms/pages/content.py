@@ -2,7 +2,9 @@
 
 
 from django import forms
+from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.db.models.options import get_verbose_name
 
 from cms.pages.forms import PageForm
 from cms.pages.widgets import HtmlWidget
@@ -104,6 +106,10 @@ class ContentMetaClass(type):
                 self.fields.append(value)
         # Sort fields by creation order.
         self.fields.sort(lambda a, b: cmp(a.creation_order, b.creation_order))
+        # Generate a verbose name, if required.
+        if not "verbose_name" in attrs:
+            verbose_name = get_verbose_name(name)
+            attrs["verbose_name"] = verbose_name
         return self
                 
 
@@ -116,6 +122,9 @@ class Content(object):
     """
     
     __metaclass__ = ContentMetaClass
+    
+    # This must be a 64 x 64 pixel image.
+    icon = settings.CMS_MEDIA_URL + "img/content-types/content.png"
     
     def __init__(self, page, data):
         """Initializes the page content."""
@@ -174,14 +183,6 @@ class RegistrationError(Exception):
 registry = {}
 
 
-def get_content(slug):
-    """Looks up the given content type by type slug."""
-    try:
-        return registry[slug]
-    except KeyError:
-        raise RegistrationError, "No content type is registered under %r." % slug
-
-
 def register(content_cls, slug=None):
     """Registers the given content type under the given slug."""
     slug = slug or content_cls.__name__.lower()
@@ -196,9 +197,19 @@ def unregister(slug):
         raise RegistrationError, "No content type is registered under %r." % slug
 
 
+def get_content_type(slug):
+    """Looks up the given content type by type slug."""
+    try:
+        return registry[slug]
+    except KeyError:
+        raise RegistrationError, "No content type is registered under %r." % slug
+    
+
 class StaticContent(Content):
     
     """A standard single column content page."""
+    
+    verbose_name = "content"
     
     main = HtmlField()
     

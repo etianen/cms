@@ -1,3 +1,5 @@
-Publish and unpublish admin actions.
-
 Type selector for page add
+
+Version control of some sort.
+
+Shortcut for adding a single content type.

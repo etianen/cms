@@ -6,6 +6,7 @@ user-friendly appearance and providing additional functionality over the
 standard implementation.
 """
 
+import urllib
 
 from django import forms, template
 from django.core.urlresolvers import reverse
@@ -132,6 +133,9 @@ class PageBaseAdmin(admin.ModelAdmin):
         queryset.update(is_online=False)
     unpublish_selected.short_description = "Take selected %(verbose_name_plural)s offline"
     
+    
+PAGE_TYPE_PARAMETER = "type"
+    
 
 class PageAdmin(PageBaseAdmin):
 
@@ -141,12 +145,39 @@ class PageAdmin(PageBaseAdmin):
                  ("Navigation", {"fields": ("short_title", "in_navigation",),
                                  "classes": ("collapse",),},),) + PageBaseAdmin.publication_fieldsets + PageBaseAdmin.seo_fieldsets
 
+    # Custom admin views.
+    
+    def add_view(self, request, *args, **kwargs):
+        """Ensures that a valid content type is chosen."""
+        if not PAGE_TYPE_PARAMETER in request.GET:
+            # Generate the available content items.
+            content_items = content.registry.items()
+            content_items.sort(lambda a, b: cmp(a[1].verbose_name, b[1].verbose_name))
+            content_types = []
+            for slug, content_type in content_items:
+                get_params = request.GET.items()
+                get_params.append((PAGE_TYPE_PARAMETER, slug))
+                query_string = urllib.urlencode(get_params)
+                url = request.path + "?" + query_string
+                content_type_context = {"name": content_type.verbose_name,
+                                        "icon": content_type.icon,
+                                        "url": url}
+                content_types.append(content_type_context)
+            # Shortcut for when there is a single content type.
+            if len(content_types) == 1:
+                return redirect(content_types[0]["url"])
+            # Render the select page template.
+            context = {"title": "Select page type",
+                       "content_types": content_types}
+            return render_to_response("admin/pages/page/select_page_type.html", context, template.RequestContext(request))
+        return super(PageAdmin, self).add_view(request, *args, **kwargs)
+
     # Plugable content methods.
 
     def get_page_content_type(self, request, obj=None):
         """Retrieves the page content type slug."""
-        if "type" in request.GET:
-            return request.GET["type"]
+        if PAGE_TYPE_PARAMETER in request.GET:
+            return request.GET[PAGE_TYPE_PARAMETER]
         if obj and obj.content_type:
             return obj.content_type
         raise Http404, "You must specify a page content type."
@@ -154,7 +185,7 @@ class PageAdmin(PageBaseAdmin):
     def get_page_content(self, request, obj=None):
         """Retrieves the page content object."""
         page_content_type = self.get_page_content_type(request, obj)
-        page_content_cls = content.get_content(page_content_type)
+        page_content_cls = content.get_content_type(page_content_type)
         # Try to use an instance.
         if obj and obj.content:
             page_content_data = obj.content.data
