@@ -100,6 +100,8 @@ class PageBaseAdmin(admin.ModelAdmin):
     
     """Base admin class for Content models."""
     
+    actions = ("publish_selected", "unpublish_selected",)
+    
     date_hierarchy = "last_modified"
     
     seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "keywords", "description", "priority", "change_frequency", "allow_indexing", "allow_archiving", "follow_links",),
@@ -117,6 +119,18 @@ class PageBaseAdmin(admin.ModelAdmin):
     prepopulated_fields = {"url_title": ("title",),}
     
     search_fields = ("title", "browser_title",)
+    
+    # Custom admin actions.
+    
+    def publish_selected(self, request, queryset):
+        """Makes the selected pages online."""
+        queryset.update(is_online=True)
+    publish_selected.short_description = "Place selected %(verbose_name_plural)s online"
+    
+    def unpublish_selected(self, request, queryset):
+        """Makes the selected pages offline."""
+        queryset.update(is_online=False)
+    unpublish_selected.short_description = "Take selected %(verbose_name_plural)s offline"
     
 
 class PageAdmin(PageBaseAdmin):
