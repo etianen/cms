@@ -35,6 +35,8 @@ class PageBase(models.Model):
     
     title = models.CharField(max_length=1000)
     
+    url_title = models.SlugField("URL title")
+    
     last_modified = models.DateTimeField(auto_now=True,
                                          help_text="The date and time of when this content was last modified.")
     
@@ -102,13 +104,22 @@ class PageBase(models.Model):
         verbose_name_plural = "content"
 
 
+class PageManager(models.Manager):
+    
+    """Manager for Page objects."""
+    
+    def get_homepage(self):
+        """Returns the site homepage."""
+        return self.get(parent=None)
+
+
 class Page(PageBase):
 
     """A page within the site."""
 
-    # Base fields.
-
-    url_title = models.SlugField("URL title")
+    objects = PageManager()
+    
+    published_objects = PublishedManager()
 
     # Hierarchy fields.
 
@@ -121,6 +132,22 @@ class Page(PageBase):
                                              blank=True,
                                              null=True)
 
+    def get_all_parents(self):
+        """Returns a list of all parents of this page."""
+        if self.parent:
+            return [self.parent] + self.parent.all_parents
+        return []
+    
+    all_parents = property(get_all_parents,
+                           doc="A list of all parents of this page.")
+
+    def get_breadcrumbs(self):
+        """Returns the breadcrumb trail for this page."""
+        return reversed([self] + self.all_parents)
+
+    breadcrumbs = property(get_breadcrumbs,
+                           doc="The breadcrumb trail for this page.")
+
     @cached_getter
     def get_children(self):
         """
@@ -131,6 +158,20 @@ class Page(PageBase):
 
     children = property(get_children,
                         doc="All the children of this page, regardless of their publication state.")
+
+    def get_all_children(self):
+        """
+        Returns all the children of this page, cascading down to their children
+        too.
+        """
+        children = []
+        for child in self.children:
+            children.append(child)
+            children.extend(child.all_children)
+        return children
+            
+    all_children = property(get_all_children,
+                            doc="All the children of this page, cascading down to their children too.")
 
     @cached_getter
     def get_published_children(self):
@@ -197,6 +238,13 @@ class Page(PageBase):
     def get_absolute_url(self):
         """Generates the absolute url of the page."""
         return self.content.get_absolute_url()
+
+    def __unicode__(self):
+        """
+        Returns the short title of this page, falling back to the standard
+        title.
+        """
+        return self.short_title or self.title
 
     class Meta:
         unique_together = (("parent", "url_title",),)

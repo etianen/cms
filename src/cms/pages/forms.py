@@ -14,3 +14,10 @@ class EditDetailsForm(forms.ModelForm):
         fields = ("username", "first_name", "last_name", "email",)
         
         
+class PageForm(forms.ModelForm):
+    
+    """Form used to edit Page models."""
+    
+    pass
+    
+    

@@ -109,9 +109,6 @@ class GroupAdmin(admin.ModelAdmin):
     
     ordering = ("name",)
     
-    # FIXME: Proxy models return the content type of their parent model when
-    # get_for_model is used.
-    # FIXME: No permissions are created for proxy models.
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         """Sets up custom foreign key choices."""
         if db_field.name == "permissions":

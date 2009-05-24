@@ -4,6 +4,7 @@
 from django import forms
 from django.core.urlresolvers import reverse
 
+from cms.pages.forms import PageForm
 from cms.pages.widgets import HtmlWidget
 
 
@@ -142,7 +143,7 @@ class Content(object):
         navigation = [{"title": page.short_title or page.title,
                        "url": page.get_absolute_url(),
                        "navigation": (entry for entry in page.navigation)}
-                       for page in navigation pages]
+                       for page in navigation_pages]
         return navigation
         
     # Administration methods.
@@ -151,7 +152,7 @@ class Content(object):
         """Returns a form used to edit this Content."""
         form_attrs = dict([(field.name, field.get_formfield(self))
                            for field in self.fields])
-        Form = type("%sForm" % self.__class__.__name__, (forms.ModelForm,), form_attrs)
+        Form = type("%sForm" % self.__class__.__name__, (PageForm,), form_attrs)
         return Form
     
     def get_field_names(self):

@@ -108,13 +108,15 @@ class PageBaseAdmin(admin.ModelAdmin):
     publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date",),
                                               "classes": ("collapse",)}),)
 
-    fieldsets = ((None, {"fields": ("title", "is_online",),},),) + publication_fieldsets + seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title", "is_online",),},),) + publication_fieldsets + seo_fieldsets
     
     list_display = ("title", "is_online", "last_modified",)
     
-    search_fields = ("title", "browser_title",)
-    
     list_filter = ("is_online",)
+    
+    prepopulated_fields = {"url_title": ("title",),}
+    
+    search_fields = ("title", "browser_title",)
     
 
 class PageAdmin(PageBaseAdmin):
@@ -125,7 +127,7 @@ class PageAdmin(PageBaseAdmin):
                  ("Navigation", {"fields": ("short_title", "in_navigation",),
                                  "classes": ("collapse",),},),) + PageBaseAdmin.publication_fieldsets + PageBaseAdmin.seo_fieldsets
 
-    prepopulated_fields = {"url_title": ("title",),}
+    # Plugable content methods.
 
     def get_page_content_type(self, request, obj=None):
         """Retrieves the page content type slug."""
@@ -154,7 +156,21 @@ class PageAdmin(PageBaseAdmin):
         Form = page_content.get_form()
         defaults = {"form": Form}
         defaults.update(kwargs)
-        return super(PageAdmin, self).get_form(request, obj, **defaults)
+        PageForm = super(PageAdmin, self).get_form(request, obj, **defaults)
+        # HACK: Need to limit parents field based on object. This should be done in
+        # formfield_for_foreignkey, but that method does not know about the object instance.
+        valid_parents = Page.objects.all()
+        if obj:
+            invalid_parents = [child.id for child in obj.all_children] + [obj.id]
+            valid_parents = valid_parents.exclude(id__in=invalid_parents)
+        if valid_parents:
+            parent_choices = [(parent.id, u" \u203a ".join([unicode(breadcrumb) for breadcrumb in parent.breadcrumbs]))
+                              for parent in valid_parents]
+        else:
+            parent_choices = (("", "---------"),)
+        PageForm.base_fields["parent"].choices = parent_choices
+        # Return the completed form.
+        return PageForm
 
     def get_fieldsets(self, request, obj=None):
         """Generates the custom content fieldsets."""
