@@ -26,12 +26,17 @@ class Encoder(object):
     A plugable encoder that knows how to serialize and deserialize a particular
     Python type.
     
-    Subclasses should extend this by overriding the two methods defined below.
+    Subclasses should extend this by overriding the `can_encode`, `encode` and
+    `decode` methods.
     """
     
     def __init__(self, serializer):
         """Initializes the Encoder."""
         self.serializer = serializer
+    
+    def can_encode(obj):
+        """Tests whether this encoder can encode the given object."""
+        raise NotImplementedError
     
     def write(self, obj, generator):
         """Writes the given object to the generator as character data."""
@@ -98,6 +103,10 @@ class UnicodeEncoder(Encoder):
     
     """An encoder for unicode objects."""
     
+    def can_encode(self, obj):
+        """This encoder is good for string types."""
+        return isinstance(obj, basestring)
+    
     def decode(self, node):
         """Decodes the given node into a string."""
         return self.read(node)
@@ -106,6 +115,10 @@ class UnicodeEncoder(Encoder):
 class IntEncoder(Encoder):
     
     """An encoder for int objects."""
+    
+    def can_encode(self, obj):
+        """This encoder is good for integers."""
+        return isinstance(obj, int)
     
     def decode(self, node):
         """Decodes the node into an integer."""
@@ -116,6 +129,10 @@ class LongEncoder(Encoder):
     
     """An encoder for long objects."""
     
+    def can_encode(self, obj):
+        """This encoder is good for longs."""
+        return isinstance(obj, long)
+    
     def decode(self, node):
         """Decodes the node into an long."""
         return long(self.read(node))
@@ -125,6 +142,10 @@ class FloatEncoder(Encoder):
     
     """An encoder for float objects."""
     
+    def can_encode(self, obj):
+        """This encoder is good for floats."""
+        return isinstance(obj, float)
+    
     def decode(self, node):
         """Decodes the node into a float."""
         return float(self.read(node))
@@ -133,6 +154,10 @@ class FloatEncoder(Encoder):
 class DateEncoder(Encoder):
     
     """An encoder for date objects."""
+    
+    def can_encode(self, obj):
+        """This encoder is good for dates."""
+        return isinstance(obj, datetime.date)
     
     def encode(self, obj, generator):
         """Encodes the date object."""
@@ -151,6 +176,10 @@ class DateEncoder(Encoder):
 class DateTimeEncoder(Encoder):
     
     """An encoder for datetime objects."""
+    
+    def can_encode(self, obj):
+        """This encoder is good for datetimes."""
+        return isinstance(obj, datetime.datetime)
     
     def encode(self, obj, generator):
         """Encodes the datetime object."""
@@ -178,6 +207,10 @@ class ModelEncoder(Encoder):
     
     """An encoder for Django models."""
     
+    def can_encode(self, obj):
+        """This encoder is good for Django models."""
+        return isinstance(obj, models.Model)
+    
     def encode(self, obj, generator):
         """Encodes the Django model instance."""
         self.write_element("app-label", obj._meta.app_label, generator)
@@ -197,6 +230,10 @@ class ListEncoder(Encoder):
     
     """An encoder for list objects."""
     
+    def can_encode(self, obj):
+        """This encoder is good for lists and tuples."""
+        return isinstance(obj, (list, tuple))
+    
     def encode(self, obj, generator):
         """Encodes the sequence."""
         for item in obj:
@@ -211,6 +248,10 @@ class SetEncoder(ListEncoder):
     
     """An encoder for set objects."""
     
+    def can_encode(self, obj):
+        """This encoder is good for sets."""
+        return isinstance(obj, (set, frozenset))
+    
     def decode(self, node):
         """Decodes the node into a set."""
         return set(super(SetEncoder, self).decode(node))
@@ -219,6 +260,10 @@ class SetEncoder(ListEncoder):
 class DictEncoder(Encoder):
     
     """An encoder for dict objects."""
+    
+    def can_encode(self, obj):
+        """This encoder is good for dictionaries."""
+        return isinstance(obj, dict)
     
     def encode(self, obj, generator):
         """Encodes the dict."""
@@ -245,17 +290,20 @@ class Serializer(object):
         """Initializes the serializer."""
         self.encoding = encoding or settings.DEFAULT_CHARSET
         self._encoders = []
+        self._decoders = {}
         
-    def register_encoder(self, type, encoder, identifier=None):
+    def register_encoder(self, identifier, encoder):
         """Registers the given encoder with this serializer."""
-        identifier = identifier or type.__name__.lower()
+        if identifier in self._encoders:
+            raise ValueError, "An encoder with that identifier has already been registered."
         encoder_instance = encoder(self)
-        self._encoders.append((type, encoder_instance, identifier))
+        self._encoders.append((identifier, encoder_instance))
+        self._decoders[identifier] = encoder_instance
         
     def encode(self, obj, generator):
         """Encodes the given object into an XML document."""
-        for type, encoder, identifier in reversed(self._encoders):
-            if isinstance(obj, type):
+        for identifier, encoder in reversed(self._encoders):
+            if encoder.can_encode(obj):
                 generator.startElement("obj", {"type": identifier})
                 encoder.encode(obj, generator)
                 generator.endElement("obj")
@@ -265,10 +313,11 @@ class Serializer(object):
     def decode(self, node):
         """Converts the given data from node into an object."""
         node_type = node.attributes["type"].nodeValue
-        for type, encoder, identifier in reversed(self._encoders):
-            if node_type == identifier:
-                return encoder.decode(node)
-        raise SerializationError, "No suitable encoder found for type %r." % node_type
+        try:
+            encoder = self._decoders[node_type]
+        except KeyError:
+            raise SerializationError, "No suitable encoder found for type %r." % node_type
+        return encoder.decode(node)
         
     def serialize(self, obj):
         """Serializes the given object into a string."""
@@ -290,23 +339,23 @@ serializer = Serializer()
 
 
 # Register some default encoders.
-serializer.register_encoder(basestring, UnicodeEncoder, "unicode")
+serializer.register_encoder("unicode", UnicodeEncoder)
 
-serializer.register_encoder(int, IntEncoder)
+serializer.register_encoder("int", IntEncoder)
 
-serializer.register_encoder(long, LongEncoder)
+serializer.register_encoder("long", LongEncoder)
 
-serializer.register_encoder(float, FloatEncoder)
+serializer.register_encoder("float", FloatEncoder)
 
-serializer.register_encoder(datetime.date, DateEncoder)
+serializer.register_encoder("date", DateEncoder)
 
-serializer.register_encoder(datetime.datetime, DateTimeEncoder)
+serializer.register_encoder("datetime", DateTimeEncoder)
 
-serializer.register_encoder(models.Model, ModelEncoder)
+serializer.register_encoder("model", ModelEncoder)
 
-serializer.register_encoder((list, tuple), ListEncoder, "list")
+serializer.register_encoder("list", ListEncoder)
 
-serializer.register_encoder(set, SetEncoder)
+serializer.register_encoder("set", SetEncoder)
 
-serializer.register_encoder(dict, DictEncoder)
+serializer.register_encoder("dict", DictEncoder)
 
