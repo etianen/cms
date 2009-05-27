@@ -1,1 +1,3 @@
 Version control of some sort.
+
+Make publication date not null, and default to now?  That way, we can use them in news articles too!

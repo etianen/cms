@@ -1,9 +1,10 @@
 """Core views used by the CMS."""
 
 
+from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render_to_response
 
 
 def page(request, path_info=""):
@@ -29,5 +30,18 @@ def permalink_redirect(request, content_type_id, object_id):
     except AttributeError:
         raise Http404, "%s objects do not publish an absolute URL." % content_type.name.title()
     return redirect(redirect_url)
+    
+    
+def templates(request, path, base_path=""):
+    """
+    Serves static template files based on the given path.
+    
+    If supplied, `base_path` will be prepended onto the path.
+    """
+    template_name = base_path + path
+    try:
+        return render_to_response(template_name, {}, template.RequestContext(request))
+    except template.TemplateDoesNotExist, ex:
+        raise Http404, str(ex)
     
     
