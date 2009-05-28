@@ -71,6 +71,7 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "django.contrib.contenttypes",
                   "django.contrib.sessions",
                   "django.contrib.admin",
+                  "django.contrib.webdesign",
                   "cms.pages",
                   "cms.lib.staff",
                   "cms.lib.media",)

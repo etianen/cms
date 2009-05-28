@@ -32,16 +32,18 @@ def permalink_redirect(request, content_type_id, object_id):
     return redirect(redirect_url)
     
     
-def templates(request, path, base_path=""):
+def render_template(request, path, base_path=""):
     """
     Serves static template files based on the given path.
     
     If supplied, `base_path` will be prepended onto the path.
     """
     template_name = base_path + path
+    if not template_name or template_name.endswith("/"):
+        template_name += "base.html"
     try:
         return render_to_response(template_name, {}, template.RequestContext(request))
-    except template.TemplateDoesNotExist, ex:
-        raise Http404, str(ex)
+    except template.TemplateDoesNotExist:
+        raise Http404, "The template '%s' does not exist." % template_name
     
     

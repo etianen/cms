@@ -14,8 +14,14 @@ admin.autodiscover()
 
 urlpatterns = patterns("",
                        url(r"^admin/", include(admin_site.urls)),
-                       url(r"^links/(\d+)/(.+)/$", "cms.pages.views.permalink_redirect", name="permalink_redirect"),
-                       url(r"^", include("cms.pages.urls")),)
+                       # Permalink redirection service.
+                       url(r"^links/(\d+)/(.+)/$", "cms.pages.views.permalink_redirect", name="permalink_redirect"),)
+
+
+# Template preview service, only in DEBUG and TEMPLATE_DEBUG.
+
+if settings.DEBUG and settings.TEMPLATE_DEBUG:
+    urlpatterns += patterns("", url(r"^templates/(.*)", "cms.pages.views.render_template", name="render_template"))
 
 
 # Set up static media serving.
@@ -24,4 +30,9 @@ if settings.SERVE_STATIC_MEDIA:
     for media_url, media_root in settings.STATIC_MEDIA:
         media_regex = r"^%s(.*)" % media_url.lstrip("/")
         urlpatterns += patterns("", url(media_regex, serve, {"document_root": media_root}))
+
+
+# Final pattern is the catch-all for page serving.
+
+urlpatterns += patterns("", url(r"^", include("cms.pages.urls")),)
 
