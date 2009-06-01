@@ -67,7 +67,7 @@ class Encoder(object):
             if child.nodeType == child.TEXT_NODE or child.nodeType == child.CDATA_SECTION_NODE:
                 text.append(child.data)
             elif child.nodeType == child.ELEMENT_NODE:
-                text.extend(self.decode(child))
+                text.extend(self.read(child))
         return u"".join(text)
        
     def get_elements(self, name, node):
