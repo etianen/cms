@@ -1,4 +1,4 @@
-"""Some useful template tags."""
+"""Tags used in template composition."""
 
 
 import re
