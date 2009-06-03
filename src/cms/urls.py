@@ -15,7 +15,8 @@ admin.autodiscover()
 urlpatterns = patterns("",
                        url(r"^admin/", include(admin_site.urls)),
                        # Permalink redirection service.
-                       url(r"^links/(\d+)/(.+)/$", "cms.pages.views.permalink_redirect", name="permalink_redirect"),)
+                       url(r"^links/(\d+)/(.+)/$", "cms.pages.views.permalink_redirect", name="permalink_redirect"),
+                       url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}),)
 
 
 # Template preview service, only in DEBUG and TEMPLATE_DEBUG.

@@ -1,0 +1,3 @@
+User-agent: Fasterfox
+Disallow: /
+
