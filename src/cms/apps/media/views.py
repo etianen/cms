@@ -11,13 +11,13 @@ def tinymce_link_list(request):
     """Returns a list of TinyMCE links."""
     files = File.objects.all()
     context = {"files": files}
-    return render_to_response("admin/media/file/link_list.js", context, template.RequestContext(request), mimetype="text/javascript")
+    return render_to_response("media/link_list.js", context, template.RequestContext(request), mimetype="text/javascript")
 
 
 def tinymce_image_list(request):
     """Returns a list of TinyMCE images."""
     images = Image.objects.all()
     context = {"images": images}
-    return render_to_response("admin/media/image/image_list.js", context, template.RequestContext(request), mimetype="text/javascript")
+    return render_to_response("media/image_list.js", context, template.RequestContext(request), mimetype="text/javascript")
     
     
