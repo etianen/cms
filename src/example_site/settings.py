@@ -80,7 +80,7 @@ LANGUAGE_CODE = "en-gb"
 
 # A list of additional installed applications.
 
-INSTALLED_APPS += ()
+INSTALLED_APPS += ("cms.apps.simplecontent",)
 
 
 # Absolute path to the directory containing this project.

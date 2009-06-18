@@ -154,10 +154,11 @@ class PageAdmin(PageBaseAdmin):
                 content_types.append(content_type_context)
             # Shortcut for when there is a single content type.
             if len(content_types) == 1:
-                return HttpResonseRedirect(content_types[0]["url"])
+                return HttpResponseRedirect(content_types[0]["url"])
             # Render the select page template.
             context = {"title": "Select page type",
-                       "content_types": content_types}
+                       "content_types": content_types,
+                       "root_path": self.admin_site.root_path}
             return render_to_response("admin/pages/page/select_page_type.html", context, template.RequestContext(request))
         return super(PageAdmin, self).add_view(request, *args, **kwargs)
 

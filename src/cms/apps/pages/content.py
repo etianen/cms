@@ -1,6 +1,8 @@
 """Pluggable page content, serialized to XML."""
 
 
+import imp
+
 from django import forms
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -204,3 +206,23 @@ def get_content_type(slug):
     except KeyError:
         raise RegistrationError, "No content type is registered under %r." % slug
 
+
+def autodiscover():
+    """
+    Searches all installed applications for content classes.
+    
+    All installed applications are checked for a content.py module.  If present,
+    it is imported.
+    """
+    for app in settings.INSTALLED_APPS:
+        try:
+            app_path = __import__(app, {}, {}, [app.split('.')[-1]]).__path__
+        except AttributeError:
+            continue
+        try:
+            imp.find_module("content", app_path)
+        except ImportError:
+            continue
+        __import__("%s.content" % app)
+    
+    
