@@ -11,7 +11,6 @@ from django.db.models.base import ModelBase
 from django.http import Http404
 from django.shortcuts import render_to_response
 
-from cms.apps.pages import content
 from cms.apps.pages.optimizations import cached_getter, cached_setter
 from cms.apps.pages.serializers import serializer
 
@@ -61,9 +60,49 @@ class PublishedManagerProxy(object):
         return cls.objects.extra(where=[PAGE_PUBLICATION_WHERE_SQL])
 
 
+class ContentRegistrationError(Exception):
+    
+    """Exception raised when content registration goes wrong."""
+
+
+class PageMetaClass(ModelBase):
+    
+    """Metaclass for Page models."""
+    
+    def __init__(self, name, bases, attrs):
+        """Initializes the PageMetaClass."""
+        super(PageMetaClass, self).__init__(name, bases, attrs)
+        self.content_registry = {}
+
+    def register_content(self, content_cls, slug=None):
+        """
+        Registers the given content type with this class under the given slug.
+        """
+        slug = slug or content_cls.__name__.lower()
+        self.content_registry[slug] = content_cls
+      
+    def unregister_content(self, slug):
+        """Unregisters the content type associated with the given slug."""
+        try:
+            del self.content_registry[slug]
+        except KeyError:
+            raise ContentRegistrationError, "No content type is registered under %r." % slug
+    
+    def lookup_content(self, slug):
+        """Looks up the given content type by type slug."""
+        try:
+            return self.content_registry[slug]
+        except KeyError:
+            raise ContentRegistrationError, "No content type is registered under %r." % slug
+        
+
 class PageBase(models.Model):
     
     """Base model for models used to generate a HTML page."""
+    
+    __metaclass__ = PageMetaClass
+    
+    # Model managers.
     
     objects = PageBaseManager()
     
@@ -135,6 +174,37 @@ class PageBase(models.Model):
 
     follow_links = models.BooleanField(default=True,
                                        help_text="Uncheck this box to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise.")
+    
+    # Content fields.
+
+    content_type = models.CharField(max_length=20,
+                                    editable=False,
+                                    help_text="The type of page content.")
+
+    content_data = models.TextField(editable=False,
+                                    help_text="The encoded data of this page.")
+
+    @cached_getter
+    def get_content(self):
+        """Returns the content object associated with this page."""
+        if not self.content_type:
+            return None
+        content_cls = self.__class__.lookup_content(self.content_type)
+        if self.content_data:
+            content_data = serializer.deserialize(self.content_data)
+        else:
+            content_data = {}
+        content_instance = content_cls(self, content_data)
+        return content_instance
+
+    @cached_setter(get_content)
+    def set_content(self, content):
+        """Sets the content object for this page."""
+        self.content_data = serializer.serialize(content.data)
+
+    content = property(get_content,
+                       set_content,
+                       doc="The content object associated with this page.")
     
     # Page rendering methods.
     
@@ -259,37 +329,6 @@ class Page(PageBase):
 
     navigation = property(get_navigation,
                           doc="All the published children of this page in the site navigation.")
-
-    # Content fields.
-
-    content_type = models.CharField(max_length=20,
-                                    editable=False,
-                                    help_text="The type of page content.")
-
-    content_data = models.TextField(editable=False,
-                                    help_text="The encoded data of this page.")
-
-    @cached_getter
-    def get_content(self):
-        """Returns the content object associated with this page."""
-        if not self.content_type:
-            return None
-        content_cls = content.get_content_type(self.content_type)
-        if self.content_data:
-            content_data = serializer.deserialize(self.content_data)
-        else:
-            content_data = {}
-        content_instance = content_cls(self, content_data)
-        return content_instance
-
-    @cached_setter(get_content)
-    def set_content(self, content):
-        """Sets the content object for this page."""
-        self.content_data = serializer.serialize(content.data)
-
-    content = property(get_content,
-                       set_content,
-                       doc="The content object associated with this page.")
 
     # Standard model methods.
     

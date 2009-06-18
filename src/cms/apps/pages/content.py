@@ -9,6 +9,7 @@ from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidg
 from django.db.models.options import get_verbose_name
 
 from cms.apps.pages.forms import PageForm
+from cms.apps.pages.models import Page
 from cms.apps.pages.widgets import HtmlWidget
 
 
@@ -177,36 +178,6 @@ class Content(object):
         return (("Page content", {"fields": field_names}),)
         
 
-class RegistrationError(Exception):
-    
-    """Exception raised when content type registration goes wrong."""
-
-
-registry = {}
-
-
-def register(content_cls, slug=None):
-    """Registers the given content type under the given slug."""
-    slug = slug or content_cls.__name__.lower()
-    registry[slug] = content_cls
-    
-    
-def unregister(slug):
-    """Unregisters the content type associated with the given slug."""
-    try:
-        del registry[slug]
-    except KeyError:
-        raise RegistrationError, "No content type is registered under %r." % slug
-
-
-def get_content_type(slug):
-    """Looks up the given content type by type slug."""
-    try:
-        return registry[slug]
-    except KeyError:
-        raise RegistrationError, "No content type is registered under %r." % slug
-
-
 def autodiscover():
     """
     Searches all installed applications for content classes.
@@ -235,7 +206,7 @@ class SimpleContent(Content):
     main = HtmlField()
     
     
-register(SimpleContent, "content")
+Page.register_content(SimpleContent, "content")
 
 
 class Redirect(Content):
@@ -246,8 +217,6 @@ class Redirect(Content):
     
     redirect_url = CharField(help_text="The URL where the user will be redirected.")
     
-    
-    
-register(Redirect)
-
+       
+Page.register_content(Redirect)
 

@@ -17,7 +17,6 @@ from django.db import models
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
 
-from cms.apps.pages import content
 from cms.apps.pages.forms import EditDetailsForm
 from cms.apps.pages.models import Page
 
@@ -122,7 +121,7 @@ class PageAdmin(PageBaseAdmin):
         """Ensures that a valid content type is chosen."""
         if not PAGE_TYPE_PARAMETER in request.GET:
             # Generate the available content items.
-            content_items = content.registry.items()
+            content_items = self.model.content_registry.items()
             content_items.sort(lambda a, b: cmp(a[1].verbose_name, b[1].verbose_name))
             content_types = []
             for slug, content_type in content_items:
@@ -157,7 +156,7 @@ class PageAdmin(PageBaseAdmin):
     def get_page_content(self, request, obj=None):
         """Retrieves the page content object."""
         page_content_type = self.get_page_content_type(request, obj)
-        page_content_cls = content.get_content_type(page_content_type)
+        page_content_cls = self.model.lookup_content(page_content_type)
         # Try to use an instance.
         if obj and obj.content:
             page_content_data = obj.content.data
