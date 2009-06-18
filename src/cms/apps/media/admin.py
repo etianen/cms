@@ -114,7 +114,12 @@ class ImageAdmin(MediaAdmin):
     
     def get_thumbnail(self, obj):
         """Generates a thumbnail of the image."""
-        thumbnail = thumbnails.thumbnail(obj.file, 150, 100)
+        try:
+            thumbnail = thumbnails.thumbnail(obj.file, 150, 100)
+        except:
+            import traceback
+            traceback.print_exc()
+            raise
         return '<img src="%s" width="%s" height="%s" alt=""/>' % (thumbnail.url, thumbnail.width, thumbnail.height)
         
     get_thumbnail.short_description = "thumbnail"

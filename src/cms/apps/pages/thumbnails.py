@@ -6,25 +6,66 @@ import os
 from PIL import Image
 
 from django.core.files.storage import default_storage
-from django.core.files.images import ImageFile
+from django.core.files.images import get_image_dimensions
 
 from cms.apps.pages.optimizations import cached_getter
 
 
-class Thumbnail(ImageFile):
+class Thumbnail(object):
     
     """A generated thumbnail image."""
     
-    def __init__(self, path, url):
+    def __init__(self, name, storage):
         """Initializes the Thumbnail."""
-        super(Thumbnail, self).__init__(None, path)
-        self.path = path
-        self.url = url
-        self.mode = "rb"
+        self.name = name
+        self.storage = storage
+        
+    def get_url(self):
+        """Returns the URL of the thumbnail."""
+        return self.storage.url(self.name)
+    
+    url = property(get_url,
+                   doc="The URL of the thumbnail")
+    
+    def get_path(self):
+        """Returns the path of the thumbnail on disk."""
+        return self.storage.path(self.name)
+    
+    path = property(get_path,
+                    doc="The path of the thumbnail on disk.")
+    
+    def get_size(self):
+        """Returns the size of the thumbnail on disk, in bytes."""
+        return self.storage.size(self.name)
+        
+    size = property(get_size,
+                    doc="The size of the thumbnail on disk, in bytes.")
+    
+    @cached_getter
+    def get_dimensions(self):
+        """Returns a tuple of the dimensions of the image, in pixels."""
+        return get_image_dimensions(self.path)
+    
+    dimensions = property(get_dimensions,
+                          doc="A tuple of the dimensions of the image, in pixels.")
+    
+    def get_width(self):
+        """Returns the width of the image, in pixels."""
+        return self.dimensions[0]
+    
+    width = property(get_width,
+                     doc="The width of the image, in pixels.")
+    
+    def get_height(self):
+        """Returns the height of the image in pixels."""
+        return self.dimensions[1]
+    
+    height = property(get_height,
+                      doc="The height of the image, in pixels.")
         
 
 # Resize the image, preserving aspect ratio.
-THUMBNAIL = "preserved"
+THUMBNAIL = "proportional"
 
 # Resize the image, ignoring aspect ratio.
 RESIZE = "resized"
@@ -64,7 +105,7 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE,
         thumbnail_timestamp = os.stat(thumbnail_path).st_mtime
         # If the thumbnail is newer than the file, no more generation needs to take place.
         if thumbnail_timestamp > image_timestamp:
-            return Thumbnail(thumbnail_path, thumbnail_url)
+            return Thumbnail(thumbnail_name, storage)
     else:
         dirname = os.path.dirname(thumbnail_path)
         if not os.path.exists(dirname):
@@ -94,7 +135,7 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE,
     # Save the thumbnail to disk.
     image_data.save(thumbnail_path)
     # Return the new image object.
-    return Thumbnail(thumbnail_path, thumbnail_url)
+    return Thumbnail(thumbnail_name, storage)
     
     
 def thumbnail(image, requested_width, requested_height):

@@ -74,8 +74,7 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "django.contrib.webdesign",
                   "cms.apps.pages",
                   "cms.apps.staff",
-                  #"cms.apps.media",
-                  )
+                  "cms.apps.media",)
 
 
 # Media settings.
