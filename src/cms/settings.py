@@ -73,7 +73,7 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "django.contrib.admin",
                   "django.contrib.webdesign",
                   "cms.apps.pages",
-                  #"cms.apps.staff",
+                  "cms.apps.staff",
                   #"cms.apps.media",
                   )
 
@@ -125,5 +125,5 @@ USE_I18N = False
 
 # Staff management settings.
 
-DEFAULT_GROUP_ID = 1
+DEFAULT_GROUP_IDS = (1,)
 

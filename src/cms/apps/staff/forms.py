@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 
 
 groups_field = forms.ModelMultipleChoiceField(queryset=Group.objects.all(),
-                                             initial=[settings.DEFAULT_GROUP_ID],
+                                             initial=settings.DEFAULT_GROUP_IDS,
                                              widget=FilteredSelectMultiple("groups", False))
 
 

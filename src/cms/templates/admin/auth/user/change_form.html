@@ -2,7 +2,6 @@
 
 
 {% block object-tools %}
-    {# HACK: User model has a broken get_absolute_url method. #}
     {% if not is_popup %}
         <ul class="object-tools">
             <li><a href="history/" class="historylink">History</a></li>

@@ -15,8 +15,8 @@ tinyMCE.init({
     height: "250px",
     dialog_type: "modal",
     theme_advanced_blockformats: "h2,h3,p",  
-    external_image_list_url: "{% url admin_media_image_image_list %}",
-    external_link_list_url: "{% url admin_media_file_link_list %}",
+    external_image_list_url: "{{root_path}}media/image/image-list.js",
+    external_link_list_url: "{{root_path}}media/file/link-list.js",
     content_css: "{{SITE_MEDIA_URL}}css/content.css",
     convert_urls: false
 });

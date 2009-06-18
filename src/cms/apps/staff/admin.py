@@ -6,10 +6,11 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.shortcuts import redirect, render_to_response
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
 
 from cms.apps.pages.admin import site
-from cms.lib.staff.forms import UserCreationForm
+from cms.apps.staff.forms import UserCreationForm
 
 
 class UserAdmin(BaseUserAdmin):
@@ -38,18 +39,6 @@ class UserAdmin(BaseUserAdmin):
         queryset = queryset.filter(is_staff=True, is_superuser=False)
         return queryset
     
-    # Custom admin actions.
-    
-    def activate_selected(self, request, queryset):
-        """Activates the selected user accounts."""
-        queryset.update(is_active=True)
-    activate_selected.short_description = "Activate selected users"
-    
-    def deactivate_selected(self, request, queryset):
-        """Deactivates the selected user accounts."""
-        queryset.update(is_active=False)
-    deactivate_selected.short_description = "Deactivate selected users"
-    
     # Custom admin views.
     
     def add_view(self, request):
@@ -62,16 +51,16 @@ class UserAdmin(BaseUserAdmin):
                 self.log_addition(request, new_user)
                 if "_addanother" in request.POST:
                     self.message_user(request, message)
-                    return redirect("admin_staff_user_add")
+                    return HttpResponseRedirect("./")
                 elif "_popup" in request.REQUEST:
                     return self.response_add(request, new_user)
                 elif "_continue" in request.POST:
                     message = message + " You may edit it again below."
                     self.message_user(request, message)
-                    return redirect("admin_staff_user_change", new_user.id)
+                    return HttpResponseRedirect("./%i/" % new_user.id)
                 else:
                     self.message_user(request, message)
-                    return redirect("admin_staff_user_changelist")
+                    return HttpResponseRedirect("../")
         else:
             form = self.add_form()
         media = self.media + form.media
@@ -91,7 +80,7 @@ class UserAdmin(BaseUserAdmin):
                    "save_as": False,
                    "root_path": self.admin_site.root_path,
                    "app_label": self.model._meta.app_label,}
-        return render_to_response("admin/staff/user/add_form.html", context, template.RequestContext(request))
+        return render_to_response("admin/auth/user/add_form.html", context, template.RequestContext(request))
     
     
 site.register(User, UserAdmin)
@@ -109,7 +98,7 @@ class GroupAdmin(admin.ModelAdmin):
     
     ordering = ("name",)
     
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
+    def formfield_for_dbfield(self, db_field, **kwargs):
         """Sets up custom foreign key choices."""
         if db_field.name == "permissions":
             content_types = [ContentType.objects.get_for_model(model)
@@ -117,7 +106,7 @@ class GroupAdmin(admin.ModelAdmin):
             permissions = Permission.objects.filter(content_type__in=content_types)
             permissions = permissions.order_by("content_type__app_label", "content_type__model", "name")
             kwargs["queryset"] = permissions
-        return super(GroupAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+        return super(GroupAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
     
 site.register(Group, GroupAdmin)

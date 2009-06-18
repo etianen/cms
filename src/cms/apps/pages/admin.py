@@ -77,7 +77,7 @@ class AdminSite(admin.AdminSite):
     
     def tiny_mce_init(self, request):
         """Renders the TinyMCE initialization script."""
-        context = {}
+        context = {"root_path": self.root_path}
         return render_to_response("admin/tinymce_init.js", context, template.RequestContext(request), mimetype="text/javascript")
         
     
