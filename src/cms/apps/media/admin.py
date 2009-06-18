@@ -90,7 +90,7 @@ class FileAdmin(MediaAdmin):
     
     def __call__(self, request, url):
         """Dispatches to additional admin views."""
-        if url == "link-list.js":
+        if url == "link-list":
             return self.link_list(request)
         return super(FileAdmin, self).__call__(request, url)
     
@@ -124,7 +124,7 @@ class ImageAdmin(MediaAdmin):
     
     def __call__(self, request, url):
         """Dispatches to additional admin views."""
-        if url == "image-list.js":
+        if url == "image-list":
             return self.image_list(request)
         return super(ImageAdmin, self).__call__(request, url)
     

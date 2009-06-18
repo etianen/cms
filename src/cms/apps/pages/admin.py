@@ -30,7 +30,7 @@ class AdminSite(admin.AdminSite):
         """Adds additional views to the admin site."""
         if url == "edit-details/":
             return self.edit_details(request)
-        if url == "tinymce-init.js":
+        if url == "tinymce-init/":
             return self.tiny_mce_init(request)
         
         return super(AdminSite, self).root(request, url)
