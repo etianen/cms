@@ -1,13 +1,20 @@
-"""Tags used in template composition."""
+"""Template tags used by the CMS."""
 
 
 import re
 
 from django import template
-from django.template.defaulttags import ForNode
+
+from cms.apps.pages import permalinks
 
 
 register = template.Library()
+
+
+@register.filter
+def permalink(obj):
+    """Generates a permalink for the given object."""
+    return permalinks.create(obj)
 
 
 class RepeatNode(template.Node):
@@ -60,5 +67,5 @@ def repeat(parser, token):
         return RepeatNode(count, nodelist)
     else:
         raise template.TemplateSyntaxError, "Invalid syntax for repeat tag."
-        
-        
+    
+    

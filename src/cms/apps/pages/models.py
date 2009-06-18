@@ -53,7 +53,6 @@ class PageBase(models.Model):
                                        null=True,
                                        help_text="The date that this page will be removed from the website.  Leave this blank to never expire this page.")
     
-    
     # SEO fields.
     
     browser_title = models.CharField(max_length=1024,

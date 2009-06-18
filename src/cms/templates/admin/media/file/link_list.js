@@ -3,7 +3,7 @@
 */
 
 
-{% load permalinks %}
+{% load pages %}
 
 
 var tinyMCELinkList = new Array(

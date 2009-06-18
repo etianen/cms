@@ -22,7 +22,7 @@ urlpatterns = patterns("",
 # Template preview service, only in DEBUG and TEMPLATE_DEBUG.
 
 if settings.DEBUG and settings.TEMPLATE_DEBUG:
-    urlpatterns += patterns("", url(r"^templates/(.*)", "cms.apps.pages.views.render_template", name="render_template"))
+    urlpatterns += patterns("", url(r"^templates/(.*)", "cms.apps.pages.views.render_template"))
 
 
 # Set up static media serving.

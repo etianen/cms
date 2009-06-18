@@ -203,16 +203,4 @@ def get_content_type(slug):
         return registry[slug]
     except KeyError:
         raise RegistrationError, "No content type is registered under %r." % slug
-    
-
-class StaticContent(Content):
-    
-    """A standard single column content page."""
-    
-    verbose_name = "content"
-    
-    main = HtmlField()
-    
-    
-register(StaticContent, "content")
 

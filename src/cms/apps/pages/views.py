@@ -7,7 +7,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
 
 
-def page(request, path_info=""):
+def render_page(request, path_info=""):
     """Dispatches the request to the site pages."""
     pass
 
