@@ -18,11 +18,11 @@ urlpatterns = patterns("",
                        url(r"^admin/tinymce-link-list.js$", "cms.apps.media.views.tinymce_link_list", name="tinymce_link_list"),
                        url(r"^admin/tinymce-image-list.js$", "cms.apps.media.views.tinymce_image_list", name="tinymce_image_list"),
                        # HACK: The admin redirect url requires the sites framework.
-                       url(r"^admin/r/(\d+)/(.+)/$", "cms.apps.pages.views.permalink_redirect", name="admin_redirect"),
+                       url(r"^admin/r/(?P<content_type_id>\d+)/(?P<object_id>.+)/$", "cms.apps.pages.views.permalink_redirect", name="admin_redirect"),
                        # Admin views.
                        url(r"^admin/(.*)", admin_site.root),
                        # Permalink redirection service.
-                       url(r"^links/(\d+)/(.+)/$", "cms.apps.pages.views.permalink_redirect", name="permalink_redirect"),
+                       url(r"^links/(?P<content_type_id>\d+)/(?P<object_id>.+)/$", "cms.apps.pages.views.permalink_redirect", name="permalink_redirect"),
                        url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}),)
 
 

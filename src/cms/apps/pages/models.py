@@ -92,6 +92,12 @@ class PageBase(models.Model):
     follow_links = models.BooleanField(default=True,
                                        help_text="Uncheck this box to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise.")
     
+    # Page rendering methods.
+    
+    def render(self, request, context=None):
+        """Renders this page to a string."""
+        
+    
     # Base model methods.
     
     def __unicode__(self):
