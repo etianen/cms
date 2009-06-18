@@ -3,11 +3,13 @@
 
 import datetime
 
-from django import forms
+from django import forms, template
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models.base import ModelBase
+from django.http import Http404
+from django.shortcuts import render_to_response
 
 from cms.apps.pages import content
 from cms.apps.pages.optimizations import cached_getter, cached_setter
@@ -57,7 +59,6 @@ class PublishedManagerProxy(object):
             raise AttributeError, "Manager isn't accessible via %s instances" % type.__name__
         # Filter the queryset.
         return cls.objects.extra(where=[PAGE_PUBLICATION_WHERE_SQL])
-        
 
 
 class PageBase(models.Model):
@@ -89,6 +90,13 @@ class PageBase(models.Model):
     expiry_date = models.DateTimeField(blank=True,
                                        null=True,
                                        help_text="The date that this page will be removed from the website.  Leave this blank to never expire this page.")
+    
+    # Navigation fields.
+    
+    short_title = models.CharField(max_length=100,
+                                   blank=True,
+                                   null=True,
+                                   help_text="A shorter version of the title that will be used in site navigation. Leave blank to use the full-length title.")
     
     # SEO fields.
     
@@ -130,25 +138,35 @@ class PageBase(models.Model):
     
     # Page rendering methods.
     
-    def dispatch(self, request, context=None):
+    def render_to_response(self, request, extra_context=None, template_name=None, **kwargs):
         """
         Dispatches the request to this page.
         
         Returns a HttpResponse of some sort.
         """
-        # Check whether this page is online.
-        
+        # Check for publication state.
+        if not self.is_published:
+            if not (request.user.is_authenticated() and request.user.is_staff and request.user.is_active):
+                raise Http404, "The page '%s' has not been published yet." % self
+        # Render the template.
+        if template_name is None:
+            template_name = "%s/%s.html" % (self._meta.app_label, self.__class__.__name__.lower())
+        context = {}
+        context.update(extra_context or {})
+        return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
     
     # Base model methods.
     
     def __unicode__(self):
-        """Returns the title of the content."""
-        return self.title
+        """
+        Returns the short title of this page, falling back to the standard
+        title.
+        """
+        return self.short_title or self.title
     
     class Meta:
         abstract = True
         ordering = ("title",)
-        verbose_name_plural = "content"
 
 
 class PageManager(PageBaseManager):
@@ -228,11 +246,6 @@ class Page(PageBase):
 
     # Navigation fields.
 
-    short_title = models.CharField(max_length=100,
-                                   blank=True,
-                                   null=True,
-                                   help_text="A shorter version of the title that will be used in site navigation. Leave blank to use the full-length title.")
-
     in_navigation = models.BooleanField("add to navigation",
                                         default=True,
                                         help_text="Uncheck this box to remove this content from the site navigation.")
@@ -285,13 +298,6 @@ class Page(PageBase):
         if self.parent:
             return self.parent.get_absolute_url() + self.url_title + "/"
         return reverse("render_homepage")
-
-    def __unicode__(self):
-        """
-        Returns the short title of this page, falling back to the standard
-        title.
-        """
-        return self.short_title or self.title
 
     class Meta:
         unique_together = (("parent", "url_title",),)

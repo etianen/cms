@@ -91,7 +91,10 @@ class PageBaseAdmin(admin.ModelAdmin):
     publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date",),
                                               "classes": ("collapse",)}),)
 
-    fieldsets = ((None, {"fields": ("title", "url_title", "is_online",),},),) + publication_fieldsets + seo_fieldsets
+    navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
+                                            "classes": ("collapse",),}))
+
+    fieldsets = ((None, {"fields": ("title", "url_title", "is_online",),},),) + navigation_fieldsets + publication_fieldsets + seo_fieldsets
     
     list_display = ("title", "is_online", "last_modified",)
     
