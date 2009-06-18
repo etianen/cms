@@ -109,7 +109,7 @@ CMS_MEDIA_URL = MEDIA_URL + "cms/"
 
 TEMPLATE_ROOT = os.path.join(PROJECT_ROOT, "templates")
 
-TEMPLATE_DIRS += (TEMPLATE_ROOT,)
+TEMPLATE_DIRS = (TEMPLATE_ROOT,) + TEMPLATE_DIRS
 
 
 # Namespace for cache keys, if using a process-shared cache.
