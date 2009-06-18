@@ -88,11 +88,11 @@ class FileAdmin(MediaAdmin):
     
     # Custom admin views.
     
-    def get_urls(self):
-        """Creates custom admin URLs for File models."""
-        urlpatterns = super(FileAdmin, self).get_urls()
-        urlpatterns += patterns("", url(r"^link-list.js$", self.admin_site.admin_view(self.link_list), name="admin_media_file_link_list"))
-        return urlpatterns
+    def __call__(self, request, url):
+        """Dispatches to additional admin views."""
+        if url == "link-list.js":
+            return self.link_list(request)
+        return super(FileAdmin, self).__call__(request, url)
     
     def link_list(self, request):
         """Returns a list of TinyMCE links."""
@@ -114,12 +114,7 @@ class ImageAdmin(MediaAdmin):
     
     def get_thumbnail(self, obj):
         """Generates a thumbnail of the image."""
-        try:
-            thumbnail = thumbnails.thumbnail(obj.file, 150, 100)
-        except:
-            import traceback
-            traceback.print_exc()
-            raise
+        thumbnail = thumbnails.thumbnail(obj.file, 150, 100)
         return '<img src="%s" width="%s" height="%s" alt=""/>' % (thumbnail.url, thumbnail.width, thumbnail.height)
         
     get_thumbnail.short_description = "thumbnail"
@@ -127,16 +122,16 @@ class ImageAdmin(MediaAdmin):
     
     # Custom admin views.
     
-    def get_urls(self):
-        """Creates custom admin URLs for File models."""
-        urlpatterns = super(ImageAdmin, self).get_urls()
-        urlpatterns += patterns("", url(r"^image-list.js$", self.admin_site.admin_view(self.image_list), name="admin_media_image_image_list"))
-        return urlpatterns
+    def __call__(self, request, url):
+        """Dispatches to additional admin views."""
+        if url == "image-list.js":
+            return self.image_list(request)
+        return super(ImageAdmin, self).__call__(request, url)
     
     def image_list(self, request):
         """Returns a list of TinyMCE images."""
         images = self.queryset(request)
-        context = {"image": images}
+        context = {"images": images}
         return render_to_response("admin/media/image/image_list.js", context, template.RequestContext(request), mimetype="text/javascript")
     
     
