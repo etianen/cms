@@ -72,6 +72,8 @@ class SimpleContent(content.Content):
     
     verbose_name = "content"
     
+    verbose_name_plural = "content"
+    
     content = content.HtmlField()
 
 

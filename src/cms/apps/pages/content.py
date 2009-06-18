@@ -119,6 +119,8 @@ class ContentMetaClass(type):
         if not "verbose_name" in attrs:
             verbose_name = get_verbose_name(name)
             setattr(self, "verbose_name", verbose_name)
+        if not "verbose_name_plural" in attrs:
+            self.verbose_name_plural = self.verbose_name + "s"
         return self
                 
 
@@ -176,23 +178,3 @@ class Content(object):
         field_names = self.get_field_names()
         return (("Page content", {"fields": field_names}),)
         
-
-def autodiscover():
-    """
-    Searches all installed applications for content classes.
-    
-    All installed applications are checked for a content.py module.  If present,
-    it is imported.
-    """
-    for app in settings.INSTALLED_APPS:
-        try:
-            app_path = __import__(app, {}, {}, [app.split('.')[-1]]).__path__
-        except AttributeError:
-            continue
-        try:
-            imp.find_module("content", app_path)
-        except ImportError:
-            continue
-        __import__("%s.content" % app)
-    
-    
