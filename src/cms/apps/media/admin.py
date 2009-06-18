@@ -86,20 +86,6 @@ class FileAdmin(MediaAdmin):
         return "%s file" % extension.upper()
     get_type.short_description = "type"
     
-    # Custom admin views.
-    
-    def __call__(self, request, url):
-        """Dispatches to additional admin views."""
-        if url == "link-list":
-            return self.link_list(request)
-        return super(FileAdmin, self).__call__(request, url)
-    
-    def link_list(self, request):
-        """Returns a list of TinyMCE links."""
-        files = self.queryset(request)
-        context = {"files": files}
-        return render_to_response("admin/media/file/link_list.js", context, template.RequestContext(request), mimetype="text/javascript")
-    
     
 site.register(File, FileAdmin)
 
@@ -119,20 +105,6 @@ class ImageAdmin(MediaAdmin):
         
     get_thumbnail.short_description = "thumbnail"
     get_thumbnail.allow_tags = True
-    
-    # Custom admin views.
-    
-    def __call__(self, request, url):
-        """Dispatches to additional admin views."""
-        if url == "image-list":
-            return self.image_list(request)
-        return super(ImageAdmin, self).__call__(request, url)
-    
-    def image_list(self, request):
-        """Returns a list of TinyMCE images."""
-        images = self.queryset(request)
-        context = {"images": images}
-        return render_to_response("admin/media/image/image_list.js", context, template.RequestContext(request), mimetype="text/javascript")
     
     
 site.register(Image, ImageAdmin)

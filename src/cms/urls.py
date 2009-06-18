@@ -13,6 +13,11 @@ admin.autodiscover()
 
 
 urlpatterns = patterns("",
+                       # TinyMCE configuration views.
+                       url(r"^admin/tinymce-init.js$", "cms.apps.pages.views.tinymce_init", name="tinymce_init"),
+                       url(r"^admin/tinymce-link-list.js$", "cms.apps.media.views.tinymce_link_list", name="tinymce_link_list"),
+                       url(r"^admin/tinymce-image-list.js$", "cms.apps.media.views.tinymce_image_list", name="tinymce_image_list"),
+                       # Admin views.
                        url(r"^admin/(.*)", admin_site.root),
                        # Permalink redirection service.
                        url(r"^links/(\d+)/(.+)/$", "cms.apps.pages.views.permalink_redirect", name="permalink_redirect"),

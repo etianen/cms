@@ -2,6 +2,7 @@
 
 
 from django import template
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -47,3 +48,8 @@ def render_template(request, path, base_path=""):
         raise Http404, "The template '%s' does not exist." % template_name
     
     
+def tinymce_init(request):
+    """Renders the TinyMCE initialization script."""
+    context = {"TINYMCE_CONTENT_CSS": settings.TINYMCE_CONTENT_CSS}
+    return render_to_response("admin/tinymce_init.js", context, template.RequestContext(request), mimetype="text/javascript")
+

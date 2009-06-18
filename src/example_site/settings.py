@@ -80,7 +80,7 @@ LANGUAGE_CODE = "en-gb"
 
 # A list of additional installed applications.
 
-INSTALLED_APPS += ("cms.apps.simplecontent",)
+INSTALLED_APPS += ()
 
 
 # Absolute path to the directory containing this project.
@@ -93,6 +93,8 @@ PROJECT_ROOT = os.path.dirname(__file__)
 SITE_MEDIA_ROOT = os.path.join(PROJECT_ROOT, "media")
 
 SITE_MEDIA_URL = MEDIA_URL + "site/"
+
+TINYMCE_CONTENT_CSS = SITE_MEDIA_URL + "css/content.css"
 
 
 # Absolute URL of the location where admin media files are served.

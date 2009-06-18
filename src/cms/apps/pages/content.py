@@ -226,3 +226,14 @@ def autodiscover():
         __import__("%s.content" % app)
     
     
+# Add some base content types.
+
+class SimpleContent(Content):
+    
+    verbose_name = "content"
+    
+    main = HtmlField()
+    
+    
+register(SimpleContent, "content")
+

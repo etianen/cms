@@ -30,8 +30,6 @@ class AdminSite(admin.AdminSite):
         """Adds additional views to the admin site."""
         if url == "edit-details/":
             return self.edit_details(request)
-        if url == "tinymce-init/":
-            return self.tiny_mce_init(request)
         
         return super(AdminSite, self).root(request, url)
         
@@ -74,11 +72,6 @@ class AdminSite(admin.AdminSite):
                    "root_path": self.root_path,
                    "app_label": User._meta.app_label,}
         return render_to_response("admin/edit_details_form.html", context, template.RequestContext(request))
-    
-    def tiny_mce_init(self, request):
-        """Renders the TinyMCE initialization script."""
-        context = {"root_path": self.root_path}
-        return render_to_response("admin/tinymce_init.js", context, template.RequestContext(request), mimetype="text/javascript")
         
     
 # The default instance of the CMS admin site.
@@ -89,8 +82,6 @@ site = AdminSite()
 class PageBaseAdmin(admin.ModelAdmin):
     
     """Base admin class for Content models."""
-    
-    actions = ("publish_selected", "unpublish_selected",)
     
     date_hierarchy = "last_modified"
     
@@ -109,18 +100,6 @@ class PageBaseAdmin(admin.ModelAdmin):
     prepopulated_fields = {"url_title": ("title",),}
     
     search_fields = ("title", "browser_title",)
-    
-    # Custom admin actions.
-    
-    def publish_selected(self, request, queryset):
-        """Makes the selected pages online."""
-        queryset.update(is_online=True)
-    publish_selected.short_description = "Place selected %(verbose_name_plural)s online"
-    
-    def unpublish_selected(self, request, queryset):
-        """Makes the selected pages offline."""
-        queryset.update(is_online=False)
-    unpublish_selected.short_description = "Take selected %(verbose_name_plural)s offline"
     
     
 PAGE_TYPE_PARAMETER = "type"

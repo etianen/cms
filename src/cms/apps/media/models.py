@@ -60,6 +60,10 @@ class Media(models.Model):
         self.size = self.file.size
         super(Media, self).save(*args, **kwargs)
     
+    def get_absolute_url(self):
+        """Generates the absolute URL of the image."""
+        return self.file.url
+    
     def __unicode__(self):
         """Returns the title of the media."""
         return self.title

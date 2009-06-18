@@ -15,7 +15,7 @@ class HtmlWidget(forms.Textarea):
         widget_attrs = {"class": "html"}
         widget_attrs.update(attrs or {})
         super(HtmlWidget, self).__init__(attrs=widget_attrs, **kwargs)
-        self.init_js = init_js or reverse("admin_tinymce_init")
+        self.init_js = init_js or reverse("tinymce_init")
 
     def get_media(self):
         """Returns the media used by the widget."""
