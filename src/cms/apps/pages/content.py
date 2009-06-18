@@ -5,6 +5,7 @@ import imp
 
 from django import forms
 from django.conf import settings
+from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
 from django.db.models.options import get_verbose_name
 
 from cms.apps.pages.forms import PageForm
@@ -17,7 +18,7 @@ class Field(object):
     
     form_field = forms.CharField
     
-    widget = forms.TextInput
+    widget = AdminTextInputWidget
     
     creation_counter = 0
     
@@ -80,7 +81,7 @@ class TextField(CharField):
     
     """A text data field."""
     
-    widget = forms.Textarea
+    widget = AdminTextareaWidget
             
     
 class HtmlField(TextField):
@@ -88,6 +89,13 @@ class HtmlField(TextField):
     """A HTML rich text field."""
     
     widget = HtmlWidget
+    
+    
+class URLField(CharField):
+    
+    """A URL data field."""
+    
+    form_field = forms.URLField
     
     
 class ContentMetaClass(type):
@@ -110,7 +118,7 @@ class ContentMetaClass(type):
         # Generate a verbose name, if required.
         if not "verbose_name" in attrs:
             verbose_name = get_verbose_name(name)
-            attrs["verbose_name"] = verbose_name
+            setattr(self, "verbose_name", verbose_name)
         return self
                 
 
@@ -228,4 +236,18 @@ class SimpleContent(Content):
     
     
 register(SimpleContent, "content")
+
+
+class Redirect(Content):
+    
+    """A redirect to another URL."""
+    
+    icon = settings.CMS_MEDIA_URL + "img/content-types/redirect.png"
+    
+    redirect_url = CharField(help_text="The URL where the user will be redirected.")
+    
+    
+    
+register(Redirect)
+
 
