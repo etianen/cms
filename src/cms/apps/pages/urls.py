@@ -4,7 +4,7 @@
 from django.conf.urls.defaults import *
 
 
-urlpatterns = patterns("cms.pages.views",
+urlpatterns = patterns("cms.apps.pages.views",
                        url(r"^(.*/)$", "page", name="page"),
                        url(r"^$", "page", name="homepage"),)
 

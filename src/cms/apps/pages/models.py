@@ -5,9 +5,9 @@ from django import forms
 from django.conf import settings
 from django.db import models
 
-from cms.pages import content
-from cms.pages.optimizations import cached_getter, cached_setter
-from cms.pages.serializers import serializer
+from cms.apps.pages import content
+from cms.apps.pages.optimizations import cached_getter, cached_setter
+from cms.apps.pages.serializers import serializer
 
 
 class PublishedManager(models.Manager):

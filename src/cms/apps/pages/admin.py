@@ -14,43 +14,32 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import models
-from django.http import Http404
-from django.shortcuts import redirect, render_to_response
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render_to_response
 
-from cms.pages import content
-from cms.pages.forms import EditDetailsForm
-from cms.pages.models import Page
-from cms.pages.views import permalink_redirect
+from cms.apps.pages import content
+from cms.apps.pages.forms import EditDetailsForm
+from cms.apps.pages.models import Page
 
 
 class AdminSite(admin.AdminSite):
     
     """The CMS admin site."""
     
-    # HACK: The base admin site manually sets the root path to a wrong value,
-    # thus this hack has to remain until the base admin site fixes this.
-    def __init__(self, *args, **kwargs):
-        """Initializes the admin site."""
-        super(AdminSite, self).__init__(*args, **kwargs)
-        self.root_path = "/admin/"
-    
+    def root(self, request, url):
+        """Adds additional views to the admin site."""
+        if url == "edit-details/":
+            return self.edit_details(request)
+        if url == "tinymce-init.js":
+            return self.tiny_mce_init(request)
+        
+        return super(AdminSite, self).root(request, url)
+        
     def index(self, request, extra_context=None):
         """Displays the admin site dashboard."""
         context = {"title": "Dashboard"}
         context.update(extra_context or {})
         return super(AdminSite, self).index(request, context)
-    
-    # Custom admin views.
-    
-    def get_urls(self):
-        """Adds some custom functionality to the admin site."""
-        urlpatterns = patterns("",
-                               url(r"^edit-details/$", self.admin_view(self.edit_details), name="admin_edit_details"),
-                               url(r"^tinymce-init.js$", self.admin_view(self.tiny_mce_init), name="admin_tinymce_init"),
-                               # HACK: This might not actually be needed if custom view on site urls are used for content objects.
-                               url(r"^r/(\d+)/(.+)/$", self.admin_view(permalink_redirect), name="admin_view_on_site"),)
-        urlpatterns += super(AdminSite, self).get_urls()
-        return urlpatterns
     
     def edit_details(self, request):
         """Allows a user to edit their own details."""
@@ -62,9 +51,9 @@ class AdminSite(admin.AdminSite):
                 message = "Your details have been updated."
                 request.user.message_set.create(message=message)
                 if "_continue" in request.POST:
-                    return redirect("admin_edit_details")
+                    return HttpResponseRedirect("./")
                 else:
-                    return redirect("admin_index")
+                    return HttpResponseRedirect("../")
         else:
             form = EditDetailsForm(instance=user)
         media = form.media
@@ -165,7 +154,7 @@ class PageAdmin(PageBaseAdmin):
                 content_types.append(content_type_context)
             # Shortcut for when there is a single content type.
             if len(content_types) == 1:
-                return redirect(content_types[0]["url"])
+                return HttpResonseRedirect(content_types[0]["url"])
             # Render the select page template.
             context = {"title": "Select page type",
                        "content_types": content_types}

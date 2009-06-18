@@ -6,23 +6,23 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.views.static import serve
 
-from cms.pages.admin import site as admin_site
+from cms.apps.pages.admin import site as admin_site
 
 
 admin.autodiscover()
 
 
 urlpatterns = patterns("",
-                       url(r"^admin/", include(admin_site.urls)),
+                       url(r"^admin/(.*)", admin_site.root),
                        # Permalink redirection service.
-                       url(r"^links/(\d+)/(.+)/$", "cms.pages.views.permalink_redirect", name="permalink_redirect"),
+                       url(r"^links/(\d+)/(.+)/$", "cms.apps.pages.views.permalink_redirect", name="permalink_redirect"),
                        url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}),)
 
 
 # Template preview service, only in DEBUG and TEMPLATE_DEBUG.
 
 if settings.DEBUG and settings.TEMPLATE_DEBUG:
-    urlpatterns += patterns("", url(r"^templates/(.*)", "cms.pages.views.render_template", name="render_template"))
+    urlpatterns += patterns("", url(r"^templates/(.*)", "cms.apps.pages.views.render_template", name="render_template"))
 
 
 # Set up static media serving.
@@ -35,5 +35,5 @@ if settings.SERVE_STATIC_MEDIA:
 
 # Final pattern is the catch-all for page serving.
 
-urlpatterns += patterns("", url(r"^", include("cms.pages.urls")),)
+urlpatterns += patterns("", url(r"^", include("cms.apps.pages.urls")),)
 

@@ -3,8 +3,8 @@
 
 from django import template
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404
-from django.shortcuts import redirect, render_to_response
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render_to_response
 
 
 def page(request, path_info=""):
@@ -29,7 +29,7 @@ def permalink_redirect(request, content_type_id, object_id):
         redirect_url = obj.get_absolute_url()
     except AttributeError:
         raise Http404, "%s objects do not publish an absolute URL." % content_type.name.title()
-    return redirect(redirect_url)
+    return HttpResponseRedirect(redirect_url)
     
     
 def render_template(request, path, base_path=""):

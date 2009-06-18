@@ -8,7 +8,7 @@ from PIL import Image
 from django.core.files.storage import default_storage
 from django.core.files.images import ImageFile
 
-from cms.pages.optimizations import cached_getter
+from cms.apps.pages.optimizations import cached_getter
 
 
 class Thumbnail(ImageFile):

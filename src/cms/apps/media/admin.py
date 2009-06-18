@@ -10,8 +10,8 @@ from django.contrib import admin
 from django.shortcuts import render_to_response
 from django.template.defaultfilters import filesizeformat
 
-from cms.pages import thumbnails
-from cms.pages.admin import site
+from cms.apps.pages import thumbnails
+from cms.apps.pages.admin import site
 from cms.lib.media.models import Folder, File, Image
 
 

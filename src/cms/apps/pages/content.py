@@ -6,8 +6,8 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db.models.options import get_verbose_name
 
-from cms.pages.forms import PageForm
-from cms.pages.widgets import HtmlWidget
+from cms.apps.pages.forms import PageForm
+from cms.apps.pages.widgets import HtmlWidget
 
 
 class Field(object):

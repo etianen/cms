@@ -8,7 +8,7 @@ from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import redirect, render_to_response
 
-from cms.pages.admin import site
+from cms.apps.pages.admin import site
 from cms.lib.staff.forms import UserCreationForm
 
 
