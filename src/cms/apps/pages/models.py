@@ -1,37 +1,73 @@
 """Core models used by the CMS."""
 
 
+import datetime
+
 from django import forms
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models.base import ModelBase
 
 from cms.apps.pages import content
 from cms.apps.pages.optimizations import cached_getter, cached_setter
 from cms.apps.pages.serializers import serializer
 
 
-class PublishedManager(models.Manager):
+PAGE_PUBLICATION_SELECT_SQL = """
+    is_online = TRUE AND
+    (
+        (
+            publication_date IS NULL OR
+            publication_date <= CURRENT_DATE()
+        ) AND
+        (
+            expiry_date IS NULL OR
+            expiry_date > CURRENT_DATE()
+        )
+    )
+"""
+
+
+PAGE_PUBLICATION_WHERE_SQL = "is_published = TRUE"
+
+
+class PageBaseManager(models.Manager):
+    
+    """
+    Base manager for all pages.
+    
+    This must be subclassed when creating managers for Page subclasses.
+    """
+    
+    def get_query_set(self):
+        """Adds the is_published property to all loaded pages."""
+        queryset = super(PageBaseManager, self).get_query_set()
+        queryset = queryset.extra(select={"is_published": PAGE_PUBLICATION_SELECT_SQL})
+        return queryset
+
+
+class PublishedManagerProxy(object):
     
     """Manager that only returns published content."""
     
-    def get_query_set(self):
-        """Returns all content that is published."""
-        queryset = super(PublishedManager, self).get_query_set()
-        queryset = queryset.filter(is_online=True)
-        queryset = queryset.filter(models.Q(publication_date=None) | models.Q(publication_date__lte=now))
-        queryset = queryset.filter(models.Q(expiry_date=None) | models.Q(expiry_date__gt=now))
-        return queryset
+    def __get__(self, instance, cls):
+        """Returns a filtered queryset which only contains published objects."""
+        if instance != None:
+            raise AttributeError, "Manager isn't accessible via %s instances" % type.__name__
+        # Filter the queryset.
+        return cls.objects.extra(where=[PAGE_PUBLICATION_WHERE_SQL])
+        
 
 
 class PageBase(models.Model):
     
     """Base model for models used to generate a HTML page."""
     
-    objects = models.Manager()
+    objects = PageBaseManager()
     
-    published_objects = PublishedManager()
-    
+    published_objects = PublishedManagerProxy()
+        
     # Base fields.
     
     title = models.CharField(max_length=1000)
@@ -94,8 +130,13 @@ class PageBase(models.Model):
     
     # Page rendering methods.
     
-    def render(self, request, context=None):
-        """Renders this page to a string."""
+    def dispatch(self, request, context=None):
+        """
+        Dispatches the request to this page.
+        
+        Returns a HttpResponse of some sort.
+        """
+        # Check whether this page is online.
         
     
     # Base model methods.
@@ -110,7 +151,7 @@ class PageBase(models.Model):
         verbose_name_plural = "content"
 
 
-class PageManager(models.Manager):
+class PageManager(PageBaseManager):
     
     """Manager for Page objects."""
     
@@ -125,8 +166,6 @@ class Page(PageBase):
 
     objects = PageManager()
     
-    published_objects = PublishedManager()
-
     # Hierarchy fields.
 
     parent = models.ForeignKey("self",
