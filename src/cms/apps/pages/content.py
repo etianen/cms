@@ -5,7 +5,6 @@ import imp
 
 from django import forms
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.db.models.options import get_verbose_name
 
 from cms.apps.pages.forms import PageForm
@@ -135,13 +134,6 @@ class Content(object):
         
     # Model delegation methods.
     
-    def get_absolute_url(self):
-        """Generates the absolute URL of the page."""
-        page = self.page
-        if page.parent:
-            return page.parent.get_absolute_url() + page.url_title + "/"
-        return reverse("homepage")
-        
     def get_navigation(self):
         """
         Generates the sub-navigation of the page.

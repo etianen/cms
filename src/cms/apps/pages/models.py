@@ -3,6 +3,7 @@
 
 from django import forms
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.db import models
 
 from cms.apps.pages import content
@@ -236,7 +237,9 @@ class Page(PageBase):
     
     def get_absolute_url(self):
         """Generates the absolute url of the page."""
-        return self.content.get_absolute_url()
+        if self.parent:
+            return self.parent.get_absolute_url() + self.url_title + "/"
+        return reverse("render_homepage")
 
     def __unicode__(self):
         """

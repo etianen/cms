@@ -17,6 +17,8 @@ urlpatterns = patterns("",
                        url(r"^admin/tinymce-init.js$", "cms.apps.pages.views.tinymce_init", name="tinymce_init"),
                        url(r"^admin/tinymce-link-list.js$", "cms.apps.media.views.tinymce_link_list", name="tinymce_link_list"),
                        url(r"^admin/tinymce-image-list.js$", "cms.apps.media.views.tinymce_image_list", name="tinymce_image_list"),
+                       # HACK: The admin redirect url requires the sites framework.
+                       url(r"^admin/r/(\d+)/(.+)/$", "cms.apps.pages.views.permalink_redirect", name="admin_redirect"),
                        # Admin views.
                        url(r"^admin/(.*)", admin_site.root),
                        # Permalink redirection service.
