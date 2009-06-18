@@ -9,7 +9,6 @@ from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidg
 from django.db.models.options import get_verbose_name
 
 from cms.apps.pages.forms import PageForm
-from cms.apps.pages.models import Page
 from cms.apps.pages.widgets import HtmlWidget
 
 
@@ -197,26 +196,3 @@ def autodiscover():
         __import__("%s.content" % app)
     
     
-# Add some base content types.
-
-class SimpleContent(Content):
-    
-    verbose_name = "content"
-    
-    main = HtmlField()
-    
-    
-Page.register_content(SimpleContent, "content")
-
-
-class Redirect(Content):
-    
-    """A redirect to another URL."""
-    
-    icon = settings.CMS_MEDIA_URL + "img/content-types/redirect.png"
-    
-    redirect_url = CharField(help_text="The URL where the user will be redirected.")
-    
-       
-Page.register_content(Redirect)
-

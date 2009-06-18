@@ -11,6 +11,7 @@ from django.db.models.base import ModelBase
 from django.http import Http404
 from django.shortcuts import render_to_response
 
+from cms.apps.pages import content
 from cms.apps.pages.optimizations import cached_getter, cached_setter
 from cms.apps.pages.serializers import serializer
 
@@ -65,6 +66,15 @@ class ContentRegistrationError(Exception):
     """Exception raised when content registration goes wrong."""
 
 
+class SimpleContent(content.Content):
+    
+    """The default page content associated by default with all pages."""
+    
+    verbose_name = "content"
+    
+    content = content.HtmlField()
+
+
 class PageMetaClass(ModelBase):
     
     """Metaclass for Page models."""
@@ -73,6 +83,7 @@ class PageMetaClass(ModelBase):
         """Initializes the PageMetaClass."""
         super(PageMetaClass, self).__init__(name, bases, attrs)
         self.content_registry = {}
+        self.register_content(SimpleContent, "content")
 
     def register_content(self, content_cls, slug=None):
         """
@@ -94,8 +105,8 @@ class PageMetaClass(ModelBase):
             return self.content_registry[slug]
         except KeyError:
             raise ContentRegistrationError, "No content type is registered under %r." % slug
-        
-
+  
+  
 class PageBase(models.Model):
     
     """Base model for models used to generate a HTML page."""
@@ -341,3 +352,17 @@ class Page(PageBase):
     class Meta:
         unique_together = (("parent", "url_title",),)
 
+
+# Add some base content types.
+
+
+class Redirect(content.Content):
+    
+    """A redirect to another URL."""
+    
+    icon = settings.CMS_MEDIA_URL + "img/content-types/redirect.png"
+    
+    redirect_url = content.CharField(help_text="The URL where the user will be redirected.")
+    
+       
+Page.register_content(Redirect)
