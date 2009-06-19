@@ -124,7 +124,7 @@ class ContentMetaClass(type):
         return self
                 
 
-class Content(object):
+class ContentBase(object):
     
     """
     The base page content type.
@@ -177,4 +177,25 @@ class Content(object):
         """Returns the fieldsets used to lay out the content form."""
         field_names = self.get_field_names()
         return (("Page content", {"fields": field_names}),)
-        
+  
+
+# Simple base content models.
+
+class Content(ContentBase):
+    
+    """The default page content associated by default with all pages."""
+    
+    verbose_name_plural = "content"
+    
+    main = HtmlField("main content")      
+
+
+class Redirect(ContentBase):
+    
+    """A redirect to another URL."""
+    
+    icon = settings.CMS_MEDIA_URL + "img/content-types/redirect.png"
+    
+    redirect_url = CharField(help_text="The URL where the user will be redirected.")
+    
+    

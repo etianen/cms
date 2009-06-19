@@ -66,17 +66,6 @@ class ContentRegistrationError(Exception):
     """Exception raised when content registration goes wrong."""
 
 
-class SimpleContent(content.Content):
-    
-    """The default page content associated by default with all pages."""
-    
-    verbose_name = "content"
-    
-    verbose_name_plural = "content"
-    
-    main = content.HtmlField("main content")
-
-
 class PageMetaClass(ModelBase):
     
     """Metaclass for Page models."""
@@ -85,7 +74,7 @@ class PageMetaClass(ModelBase):
         """Initializes the PageMetaClass."""
         super(PageMetaClass, self).__init__(name, bases, attrs)
         self.content_registry = {}
-        self.register_content(SimpleContent, "content")
+        self.register_content(content.Content)
 
     def register_content(self, content_cls, slug=None):
         """
@@ -364,15 +353,6 @@ class Page(PageBase):
 
 
 # Add some base content types.
-
-
-class Redirect(content.Content):
-    
-    """A redirect to another URL."""
-    
-    icon = settings.CMS_MEDIA_URL + "img/content-types/redirect.png"
-    
-    redirect_url = content.CharField(help_text="The URL where the user will be redirected.")
     
        
-Page.register_content(Redirect)
+Page.register_content(content.Redirect)
