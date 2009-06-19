@@ -168,16 +168,16 @@ class ContentBase(object):
         
     def get_serialized_data(self):
         """Returns the content data, serialized to XML."""
-        field_dict = dict([(field.name, field) for field in self.fields])
         # Start the XML document.
         out = cStringIO.StringIO()
         generator = XMLGenerator(out, "utf-8")
         generator.startDocument()
         generator.startElement("content", {})
         # Generate the XML.
-        for key, value in self.data.items():
+        for field in self.fields:
+            key = field.name
+            value = self.data[key]
             generator.startElement("attribute", {"name": key})
-            field = field_dict[key]
             serialized_value = field.serialize(value)
             generator.characters(serialized_value)
             generator.endElement("attribute")
@@ -198,13 +198,18 @@ class ContentBase(object):
     
     def set_serialized_data(self, serialized_data):
         """Deserializes the given data into a dictionary."""
-        field_dict = dict([(field.name, field) for field in self.fields])
-        data = {}
+        # Generate a dictionary of serialized data.
+        raw_data = {}
         xml_data = minidom.parseString(serialized_data).documentElement
         for element in xml_data.getElementsByTagName("attribute"):
             key = element.attributes["name"].nodeValue
-            serialized_value = self._get_element_value(element)
-            field = field_dict[key]
+            value = self._get_element_value(element)
+            raw_data[key] = value
+        # Deserialize the data using fields.
+        data = {}
+        for field in self.fields:
+            key = field.name
+            serialized_value = raw_data[key]
             value = field.deserialize(serialized_value)
             data[key] = value
         self.data = data
