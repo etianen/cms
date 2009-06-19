@@ -73,7 +73,7 @@ class PageMetaClass(ModelBase):
         """Initializes the PageMetaClass."""
         super(PageMetaClass, self).__init__(name, bases, attrs)
         self.content_registry = {}
-        self.register_content(content.Content)
+        self.register_content(content.Content, content.DEFAULT_CONTENT_SLUG)
 
     def register_content(self, content_cls, slug=None):
         """
