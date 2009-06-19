@@ -78,6 +78,11 @@ class AdminSite(admin.AdminSite):
 site = AdminSite()
 
 
+# Page admin classes.
+
+PAGE_TYPE_PARAMETER = "type"
+
+
 class PageBaseAdmin(admin.ModelAdmin):
     
     """Base admin class for Content models."""
@@ -103,18 +108,6 @@ class PageBaseAdmin(admin.ModelAdmin):
     
     search_fields = ("title", "browser_title",)
     
-    
-PAGE_TYPE_PARAMETER = "type"
-    
-
-class PageAdmin(PageBaseAdmin):
-
-    """Admin settings for Page models."""
-
-    fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),
-                 ("Navigation", {"fields": ("short_title", "in_navigation",),
-                                 "classes": ("collapse",),},),) + PageBaseAdmin.publication_fieldsets + PageBaseAdmin.seo_fieldsets
-
     # Custom admin views.
     
     def add_view(self, request, *args, **kwargs):
@@ -141,7 +134,7 @@ class PageAdmin(PageBaseAdmin):
                        "content_types": content_types,
                        "root_path": self.admin_site.root_path}
             return render_to_response("admin/pages/page/select_page_type.html", context, template.RequestContext(request))
-        return super(PageAdmin, self).add_view(request, *args, **kwargs)
+        return super(PageBaseAdmin, self).add_view(request, *args, **kwargs)
 
     # Plugable content methods.
 
@@ -172,7 +165,7 @@ class PageAdmin(PageBaseAdmin):
         Form = page_content.get_form()
         defaults = {"form": Form}
         defaults.update(kwargs)
-        PageForm = super(PageAdmin, self).get_form(request, obj, **defaults)
+        PageForm = super(PageBaseAdmin, self).get_form(request, obj, **defaults)
         # HACK: Need to limit parents field based on object. This should be done in
         # formfield_for_foreignkey, but that method does not know about the object instance.
         valid_parents = Page.objects.all()
@@ -192,7 +185,7 @@ class PageAdmin(PageBaseAdmin):
         """Generates the custom content fieldsets."""
         page_content = self.get_page_content(request, obj)
         content_fieldsets = page_content.get_fieldsets()
-        fieldsets = super(PageAdmin, self).get_fieldsets(request, obj)
+        fieldsets = super(PageBaseAdmin, self).get_fieldsets(request, obj)
         fieldsets = fieldsets[0:1] + content_fieldsets + fieldsets[1:]
         return fieldsets
 
@@ -206,6 +199,15 @@ class PageAdmin(PageBaseAdmin):
         obj.content_type = page_content_type
         obj.content = page_content
         obj.save()
+    
+
+class PageAdmin(PageBaseAdmin):
+
+    """Admin settings for Page models."""
+
+    fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),
+                 ("Navigation", {"fields": ("short_title", "in_navigation",),
+                                 "classes": ("collapse",),},),) + PageBaseAdmin.publication_fieldsets + PageBaseAdmin.seo_fieldsets
 
 
 site.register(Page, PageAdmin)
