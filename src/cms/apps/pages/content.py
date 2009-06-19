@@ -1,7 +1,9 @@
 """Pluggable page content, serialized to XML."""
 
 
-import imp
+import cStringIO, datetime
+from xml.dom import minidom
+from xml.sax.saxutils import XMLGenerator
 
 from django import forms
 from django.conf import settings
@@ -16,11 +18,9 @@ class Field(object):
     
     """A field within a Content object."""
     
-    form_field = forms.CharField
-    
-    widget = AdminTextInputWidget
-    
     creation_counter = 0
+    
+    form_field = forms.CharField
     
     def __init__(self, label=None, required=False, help_text=""):
         """"Initializes the Field."""
@@ -43,23 +43,30 @@ class Field(object):
     def __set__(self, obj, value):
         """Sets the value in the Content object."""
         obj.data[self.name] = value
-
-    def get_default_attrs(self, obj):
+        
+    def get_formfield_attrs(self, obj):
         """Returns the default attributes for a form field."""
         initial = self.__get__(obj, obj.__class__)
         attrs = {"label": self.label and self.label.capitalize() or None,
                  "required": self.required,
                  "help_text": self.help_text,
-                 "widget": self.widget,
+                 "widget": AdminTextInputWidget,
                  "initial": initial}
         return attrs
         
-    def get_formfield(self, obj, **kwargs):
+    def get_formfield(self, obj):
         """Returns a form field for this content field."""
-        defaults = self.get_default_attrs(obj)
-        defaults.update(kwargs)
-        return self.form_field(**defaults)
-           
+        kwargs = self.get_formfield_attrs(obj)
+        return self.form_field(**kwargs)
+    
+    def serialize(self, value):
+        """Serializes given value as a unicode string."""
+        return unicode(value)
+    
+    def deserialize(self, value):
+        """Converts the value from a unicode string into a Python object."""
+        return value
+    
 
 class CharField(Field):
     
@@ -70,9 +77,9 @@ class CharField(Field):
         super(CharField, self).__init__(label, **kwargs)
         self.max_length = max_length
         
-    def get_default_attrs(self, obj):
+    def get_formfield_attrs(self, obj):
         """Adds the max length to the default attributes."""
-        attrs = super(CharField, self).get_default_attrs(obj)
+        attrs = super(CharField, self).get_formfield_attrs(obj)
         attrs["max_length"] = self.max_length
         return attrs
     
@@ -81,14 +88,22 @@ class TextField(CharField):
     
     """A text data field."""
     
-    widget = AdminTextareaWidget
+    def get_formfield_attrs(self, obj):
+        """Changes the widget of the form field to a text area."""
+        attrs = super(TextField, self).get_formfield_attrs(obj)
+        attrs["widget"] = AdminTextareaWidget
+        return attrs
             
     
 class HtmlField(TextField):
     
     """A HTML rich text field."""
     
-    widget = HtmlWidget
+    def get_formfield_attrs(self, obj):
+        """Changes the widget of the form field to a text area."""
+        attrs = super(HtmlField, self).get_formfield_attrs(obj)
+        attrs["widget"] = HtmlWidget
+        return attrs
     
     
 class URLField(CharField):
@@ -137,10 +152,63 @@ class ContentBase(object):
     # This must be a 64 x 64 pixel image.
     icon = settings.CMS_MEDIA_URL + "img/content-types/content.png"
     
-    def __init__(self, page, data):
-        """Initializes the page content."""
+    def __init__(self, page):
+        """
+        Initializes the page content.
+        
+        If page is None, then an unbound content object is created.  Not all
+        methods will work in an unbound content object, but it is fine for
+        generating form fields used by the admin interface.
+        """
         self.page = page
+        if page and page.content_data:
+            self.serialized_data = page.content_data
+        else:
+            self.data = {}
+        
+    def get_serialized_data(self):
+        """Returns the content data, serialized to XML."""
+        field_dict = dict([(field.name, field) for field in self.fields])
+        # Start the XML document.
+        out = cStringIO.StringIO()
+        generator = XMLGenerator(out, "utf-8")
+        generator.startDocument()
+        generator.startElement("content", {})
+        # Generate the XML.
+        for key, value in self.data.items():
+            generator.startElement("attribute", {"name": key})
+            field = field_dict[key]
+            serialized_value = field.serialize(value)
+            generator.characters(serialized_value)
+            generator.endElement("attribute")
+        # Return the generated XML.
+        generator.endElement("content")
+        generator.endDocument()
+        return out.getvalue()
+    
+    def _get_element_value(self, element):
+        """Reads the content of the node as a unicode object."""
+        text = []
+        for child in element.childNodes:
+            if child.nodeType == child.TEXT_NODE or child.nodeType == child.CDATA_SECTION_NODE:
+                text.append(child.data)
+            elif child.nodeType == child.ELEMENT_NODE:
+                text.extend(self._get_element_value(child))
+        return u"".join(text)
+    
+    def set_serialized_data(self, serialized_data):
+        """Deserializes the given data into a dictionary."""
+        data = {}
+        xml_data = minidom.parseString(serialized_data).documentElement
+        for element in xml_data.getElementsByTagName("attribute"):
+            key = element.attributes["name"].nodeValue
+            value = self._get_element_value(element)
+            data[key] = value
         self.data = data
+        
+    serialized_data = property(get_serialized_data,
+                               set_serialized_data,
+                               doc="The serialized content data, as XML.")
         
     # Model delegation methods.
     

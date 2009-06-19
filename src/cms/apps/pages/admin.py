@@ -150,13 +150,8 @@ class PageBaseAdmin(admin.ModelAdmin):
         """Retrieves the page content object."""
         page_content_type = self.get_page_content_type(request, obj)
         page_content_cls = self.model.lookup_content(page_content_type)
-        # Try to use an instance.
-        if obj and obj.content:
-            page_content_data = obj.content.data
-        else:
-            page_content_data = {}
         # Create new page content instance.
-        page_content = page_content_cls(obj, page_content_data)
+        page_content = page_content_cls(obj)
         return page_content
 
     def get_form(self, request, obj=None, **kwargs):

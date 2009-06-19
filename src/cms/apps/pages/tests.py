@@ -9,7 +9,6 @@ from django.core.files.images import ImageFile
 
 from cms.apps.pages import thumbnails
 from cms.apps.pages.optimizations import cached_getter, cached_setter, cached_deleter
-from cms.apps.pages.serializers import serializer
 
 
 # Test thumbnail generation.
@@ -111,35 +110,3 @@ class TestCachedProperty(unittest.TestCase):
         self.cached_property_test.set_value("changed")
         self.assertEqual(self.cached_property_test.call_count, 2)
         
-
-# Test the serialization.
-
-
-class TestSerializer(unittest.TestCase):
-    
-    """Tests the serialization framework."""
-    
-    examples = (u"hello world",
-                "hello world",
-                5,
-                6L,
-                5.5,
-                datetime.date(1984, 5, 19),
-                datetime.datetime(1984, 5, 19, 3, 35, 55),
-                ContentType.objects.all()[0],
-                ["foo", 5],
-                set(("foo", 5)),
-                {"foo": "bar", "list": ["one", "two"]},)
-
-    
-    def testSerializationIsReversible(self):
-        """
-        Tests that encoding and decoding are reversible for a variety of test
-        cases.
-        """
-        for obj in self.examples:
-            serialized = serializer.serialize(obj)
-            deserialized = serializer.deserialize(serialized)
-            self.assertEqual(obj, deserialized)
-            
-            

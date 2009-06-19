@@ -13,7 +13,6 @@ from django.shortcuts import render_to_response
 
 from cms.apps.pages import content
 from cms.apps.pages.optimizations import cached_getter, cached_setter
-from cms.apps.pages.serializers import serializer
 
 
 PAGE_PUBLICATION_SELECT_SQL = """
@@ -200,17 +199,13 @@ class PageBase(models.Model):
         if not self.content_type:
             return None
         content_cls = self.__class__.lookup_content(self.content_type)
-        if self.content_data:
-            content_data = serializer.deserialize(self.content_data)
-        else:
-            content_data = {}
-        content_instance = content_cls(self, content_data)
+        content_instance = content_cls(self)
         return content_instance
 
     @cached_setter(get_content)
     def set_content(self, content):
         """Sets the content object for this page."""
-        self.content_data = serializer.serialize(content.data)
+        self.content_data = content.serialized_data
 
     content = property(get_content,
                        set_content,
