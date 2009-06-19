@@ -198,11 +198,14 @@ class ContentBase(object):
     
     def set_serialized_data(self, serialized_data):
         """Deserializes the given data into a dictionary."""
+        field_dict = dict([(field.name, field) for field in self.fields])
         data = {}
         xml_data = minidom.parseString(serialized_data).documentElement
         for element in xml_data.getElementsByTagName("attribute"):
             key = element.attributes["name"].nodeValue
-            value = self._get_element_value(element)
+            serialized_value = self._get_element_value(element)
+            field = field_dict[key]
+            value = field.deserialize(serialized_value)
             data[key] = value
         self.data = data
         
