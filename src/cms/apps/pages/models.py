@@ -74,7 +74,7 @@ class SimpleContent(content.Content):
     
     verbose_name_plural = "content"
     
-    content = content.HtmlField()
+    main = content.HtmlField("main content")
 
 
 class PageMetaClass(ModelBase):
@@ -133,7 +133,8 @@ class PageBase(models.Model):
     # Publication fields.
     
     is_online = models.BooleanField("online",
-                                    default=True)
+                                    default=True,
+                                    help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by directly visiting it's URL.")
     
     publication_date = models.DateTimeField(blank=True,
                                             null=True,
@@ -157,36 +158,43 @@ class PageBase(models.Model):
                                      null=True,
                                      help_text="The heading to use in the user's web browser.  Leave blank to use the page title.  Search engines page particular attention to this attribute.")
     
-    keywords = models.CharField(max_length=1024,
-                                blank=True,
-                                null=True,
-                                help_text="A comma-separated list of keywords for this page. Use this to specify common mis-spellings or alternative versions of important words in this page.")
+    meta_keywords = models.CharField("keywords",
+                                     max_length=1024,
+                                     blank=True,
+                                     null=True,
+                                     help_text="A comma-separated list of keywords for this page. Use this to specify common mis-spellings or alternative versions of important words in this page.")
 
-    description = models.TextField(blank=True,
-                                   null=True,
-                                   help_text="A brief description of the contents of this page. Leave blank to use to use the parent page description.")
-    
-    priority = models.FloatField(choices=settings.SEO_PRIORITIES,
-                                 default=settings.SEO_DEFAULT_PRIORITY,
-                                 blank=True,
-                                 null=True,
-                                 help_text="The relative importance of this content in your site.  Search engines use this as a hint when ranking the pages within your site.")
-    
-    change_frequency = models.CharField(max_length=255,
-                                        choices=settings.SEO_CHANGE_FREQUENCIES,
-                                        default=settings.SEO_DEFAULT_CHANGE_FREQUENCY,
+    meta_description = models.TextField("description",
                                         blank=True,
                                         null=True,
-                                        help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates.")
+                                        help_text="A brief description of the contents of this page. Leave blank to use to use the parent page description.")
     
-    allow_indexing = models.BooleanField(default=True,
-                                         help_text="Uncheck this box to prevent search engines from indexing this page. Disable this only if the page contains information which you do not wish to show up in search results.")
+    sitemap_priority = models.FloatField("priority",
+                                         choices=settings.SEO_PRIORITIES,
+                                         default=settings.SEO_DEFAULT_PRIORITY,
+                                         blank=True,
+                                         null=True,
+                                         help_text="The relative importance of this content in your site.  Search engines use this as a hint when ranking the pages within your site.")
+    
+    sitemap_change_frequency = models.CharField("change frequency",
+                                                max_length=255,
+                                                choices=settings.SEO_CHANGE_FREQUENCIES,
+                                                default=settings.SEO_DEFAULT_CHANGE_FREQUENCY,
+                                                blank=True,
+                                                null=True,
+                                                help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates.")
+    
+    robots_allow_indexing = models.BooleanField("allow indexing",
+                                                default=True,
+                                                help_text="Uncheck this box to prevent search engines from indexing this page. Disable this only if the page contains information which you do not wish to show up in search results.")
 
-    allow_archiving = models.BooleanField(default=True,
-                                          help_text="Uncheck this box to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis.")
+    robots_allow_archiving = models.BooleanField("allow archiving",
+                                                 default=True,
+                                                 help_text="Uncheck this box to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis.")
 
-    follow_links = models.BooleanField(default=True,
-                                       help_text="Uncheck this box to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise.")
+    robots_follow_links = models.BooleanField("follow links",
+                                              default=True,
+                                              help_text="Uncheck this box to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise.")
     
     # Content fields.
 

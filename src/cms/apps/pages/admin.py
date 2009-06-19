@@ -84,16 +84,16 @@ class PageBaseAdmin(admin.ModelAdmin):
     
     date_hierarchy = "last_modified"
     
-    seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "keywords", "description", "priority", "change_frequency", "allow_indexing", "allow_archiving", "follow_links",),
+    seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_change_frequency", "robots_allow_indexing", "robots_allow_archiving", "robots_follow_links",),
                                                      "classes": ("collapse",),},),)
     
-    publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date",),
+    publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online",),
                                               "classes": ("collapse",)}),)
 
     navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
                                             "classes": ("collapse",),}))
 
-    fieldsets = ((None, {"fields": ("title", "url_title", "is_online",),},),) + navigation_fieldsets + publication_fieldsets + seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title",),},),) + navigation_fieldsets + publication_fieldsets + seo_fieldsets
     
     list_display = ("title", "is_online", "last_modified",)
     
@@ -111,7 +111,7 @@ class PageAdmin(PageBaseAdmin):
 
     """Admin settings for Page models."""
 
-    fieldsets = ((None, {"fields": ("title", "url_title", "parent", "is_online",),},),
+    fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),
                  ("Navigation", {"fields": ("short_title", "in_navigation",),
                                  "classes": ("collapse",),},),) + PageBaseAdmin.publication_fieldsets + PageBaseAdmin.seo_fieldsets
 

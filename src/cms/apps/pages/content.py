@@ -47,7 +47,7 @@ class Field(object):
     def get_default_attrs(self, obj):
         """Returns the default attributes for a form field."""
         initial = self.__get__(obj, obj.__class__)
-        attrs = {"label": self.label,
+        attrs = {"label": self.label and self.label.capitalize() or None,
                  "required": self.required,
                  "help_text": self.help_text,
                  "widget": self.widget,
