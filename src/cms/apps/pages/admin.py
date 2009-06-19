@@ -9,6 +9,7 @@ standard implementation.
 import urllib
 
 from django import forms, template
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
@@ -17,6 +18,7 @@ from django.db import models
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
 
+from cms.apps.pages import content
 from cms.apps.pages.forms import EditDetailsForm
 from cms.apps.pages.models import Page
 
@@ -110,22 +112,38 @@ class PageBaseAdmin(admin.ModelAdmin):
     
     # Custom admin views.
     
+    def has_add_content_permission(self, request, slug):
+        """Checks whether the given user can edit the given content slug."""
+        model = self.model
+        opts = model._meta
+        # The default page add permission implicitly allows editing of the default content type.
+        if slug == content.DEFAULT_CONTENT_SLUG:
+            return True
+        # Check user has correct permission.
+        add_permission = "%s.%s" % (opts.app_label, content.get_add_permission(slug, model))
+        return request.user.has_perm(add_permission)
+    
     def add_view(self, request, *args, **kwargs):
         """Ensures that a valid content type is chosen."""
+        model = self.model
+        opts = model._meta
+        user = request.user
         if not PAGE_TYPE_PARAMETER in request.GET:
             # Generate the available content items.
             content_items = self.model.content_registry.items()
             content_items.sort(lambda a, b: cmp(a[1].verbose_name, b[1].verbose_name))
             content_types = []
             for slug, content_type in content_items:
-                get_params = request.GET.items()
-                get_params.append((PAGE_TYPE_PARAMETER, slug))
-                query_string = urllib.urlencode(get_params)
-                url = request.path + "?" + query_string
-                content_type_context = {"name": content_type.verbose_name,
-                                        "icon": content_type.icon,
-                                        "url": url}
-                content_types.append(content_type_context)
+                if self.has_add_content_permission(request, slug):
+                    # If we get this far, then we have permisison to add a page of this type.
+                    get_params = request.GET.items()
+                    get_params.append((PAGE_TYPE_PARAMETER, slug))
+                    query_string = urllib.urlencode(get_params)
+                    url = request.path + "?" + query_string
+                    content_type_context = {"name": content_type.verbose_name,
+                                            "icon": content_type.icon,
+                                            "url": url}
+                    content_types.append(content_type_context)
             # Shortcut for when there is a single content type.
             if len(content_types) == 1:
                 return HttpResponseRedirect(content_types[0]["url"])
@@ -134,6 +152,9 @@ class PageBaseAdmin(admin.ModelAdmin):
                        "content_types": content_types,
                        "root_path": self.admin_site.root_path}
             return render_to_response("admin/pages/page/select_page_type.html", context, template.RequestContext(request))
+        else:
+            if not self.has_add_content_permission(request, request.GET[PAGE_TYPE_PARAMETER]):
+                raise PermissionDenied, "You are not allowed to add pages of that content type."
         return super(PageBaseAdmin, self).add_view(request, *args, **kwargs)
 
     # Plugable content methods.

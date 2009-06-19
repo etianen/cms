@@ -251,11 +251,11 @@ DEFAULT_CONTENT_SLUG = "content"
 
 # Permissions control.
 
-def get_add_permission(slug):
+def get_add_permission(slug, model):
     """Generates the add permission codename for the given slug."""
     if slug == DEFAULT_CONTENT_SLUG:
         raise ValueError, "Base content model does not have an add permission."
-    return u"add_%s_content" % slug
+    return u"add_%s_%s" % (slug, model.__name__.lower())
 
 
 # Simple base content models.

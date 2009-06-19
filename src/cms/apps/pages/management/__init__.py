@@ -19,7 +19,7 @@ def create_content_permissions(**kwargs):
                 if slug == content.DEFAULT_CONTENT_SLUG:
                     continue
                 name = u"Can add %s %s" % (content_cls.verbose_name, model._meta.verbose_name)
-                codename = content.get_add_permission(slug)
+                codename = content.get_add_permission(slug, model)
                 permission, created = Permission.objects.get_or_create(content_type=content_type,
                                                                        codename=codename,
                                                                        defaults={"name": name})
