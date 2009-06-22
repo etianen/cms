@@ -10,8 +10,7 @@ from django.conf import settings
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
 from django.db.models.options import get_verbose_name
 
-from cms.apps.pages.forms import PageForm
-from cms.apps.pages.widgets import HtmlWidget
+from cms.apps.pages.forms import PageForm, HtmlWidget
 
 
 class Field(object):
