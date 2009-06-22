@@ -265,7 +265,6 @@ class PageAdmin(PageBaseAdmin):
             if redirect_slug == PAGE_FROM_SITEMAP_VALUE:
                 return HttpResponseRedirect(self.admin_site.root_path)
         return super(PageAdmin, self).changelist_view(request, *args, **kwargs)
-        
             
     def response_add(self, request, *args, **kwargs):
         """Redirects to the sitemap if appropriate."""
