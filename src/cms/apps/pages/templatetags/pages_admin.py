@@ -3,6 +3,8 @@
 
 from django import template
 
+from cms.apps.pages.admin import PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
+
 
 register = template.Library()
 
@@ -24,9 +26,9 @@ def sitemap_entry(context, page):
                "can_add": page_admin.has_add_permission(request),
                "can_change": page_admin.has_change_permission(request, page),
                "can_delete": page_admin.has_delete_permission(request, page),
-               "add_url": page_admin_url + "add/?parent=" + unicode(page.id),
-               "change_url": change_url,
-               "delete_url": change_url + "delete/",
+               "add_url": page_admin_url + "add/?%s=%s&parent=%i" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE, page.id),
+               "change_url": change_url + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+               "delete_url": change_url + "delete/?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
                "page_admin": page_admin,
                "request": request,
                "root_path": root_path}

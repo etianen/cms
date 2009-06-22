@@ -226,6 +226,14 @@ class PageBaseAdmin(admin.ModelAdmin):
         obj.content = page_content
         super(PageBaseAdmin, self).save_model(request, obj, form, change)
     
+    
+# The GET parameter used to indicate where page admin actions originated.
+PAGE_FROM_KEY = "from"
+
+
+# The GET parameter value used to indicate that the page admin action came form the sitemap.
+PAGE_FROM_SITEMAP_VALUE = "sitemap"
+    
 
 class PageAdmin(PageBaseAdmin):
 
@@ -242,6 +250,37 @@ class PageAdmin(PageBaseAdmin):
         if not change:
             obj.order = obj.id
             obj.save()
+          
+    def patch_response_location(self, request, response):
+        """Perpetuates the 'from' key in all redirect responses."""
+        if isinstance(response, HttpResponseRedirect):
+            if PAGE_FROM_KEY in request.GET:
+                response["Location"] += "?%s=%s" % (PAGE_FROM_KEY, request.GET[PAGE_FROM_KEY])
+        return response
+            
+    def changelist_view(self, request, *args, **kwargs):
+        """Redirects to the sitemap, if appropriate."""
+        if PAGE_FROM_KEY in request.GET:
+            redirect_slug = request.GET[PAGE_FROM_KEY]
+            if redirect_slug == PAGE_FROM_SITEMAP_VALUE:
+                return HttpResponseRedirect(self.admin_site.root_path)
+        return super(PageAdmin, self).changelist_view(request, *args, **kwargs)
+        
+            
+    def response_add(self, request, *args, **kwargs):
+        """Redirects to the sitemap if appropriate."""
+        response = super(PageAdmin, self).response_add(request, *args, **kwargs)
+        return self.patch_response_location(request, response)
+    
+    def response_change(self, request, *args, **kwargs):
+        """Redirects to the sitemap if appropriate."""
+        response = super(PageAdmin, self).response_change(request, *args, **kwargs)
+        return self.patch_response_location(request, response)
+    
+    def delete_view(self, request, *args, **kwargs):
+        """Redirects to the sitemap if appropriate."""
+        response = super(PageAdmin, self).delete_view(request, *args, **kwargs)
+        return self.patch_response_location(request, response)
 
 
 site.register(Page, PageAdmin)

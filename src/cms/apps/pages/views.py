@@ -65,13 +65,20 @@ def tinymce_init(request):
 def reorder_pages(request):
     """Swaps the ordering of two pages."""
     # Get the POST variables.
-    page_id, other_id = request.POST["pages"].getlist("pages")
+    page_ids = request.POST.getlist("pages")
     # Get the page objects.
-    page = Page.objects.get(id=page_id)
-    other_page = Page.objects.get(id=other_id)
-    
-    
+    pages = Page.objects.filter(id__in=page_ids)
+    page_0_order = pages[0].order
+    page_1_order = pages[1].order
+    # Blank their order fields.
+    for page in pages:
+        page.order = None
+        page.save()
+    # Swap their order fields.
+    pages[0].order = page_1_order
+    pages[1].order = page_0_order
+    pages[0].save()
+    pages[1].save()
     # Send a positive response.
-    return HttpResponse("Swapped page '' with page ''." % (page. other_page))
-    
-    
+    return HttpResponse("Swapped page '%s' with page '%s'." % (pages[0], pages[1]))
+        
