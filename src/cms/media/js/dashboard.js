@@ -4,6 +4,12 @@
 
 
 $(function() {
+
+    // Global flag for disabling sitemap actions during updates.
+    var sitemap_enabled = true;
+    
+    // Base URL for admin actions.
+    var root_url = String(window.location);
     
     // Collapse the sitemap.
     $("ul#sitemap li li").addClass("closed");
@@ -14,6 +20,67 @@ $(function() {
     // Make the sitemap collapse controls clickable.
     $("div.sitemap-collapse-control").click(function() {
         $(this).parent("li").toggleClass("closed");
+    });
+    
+    // Add the move controls.
+    $("ul#sitemap li li.can-change div.sitemap-entry").append('<div title="Move this page up" class="move-up"/><div title="Move this page down" class="move-down"/>');
+    
+    // Displays an error message in the sitemap.
+    function displayError() {
+        $("ul#sitemap").remove();
+        $("div#sitemap-module").append("<p>The sitemap service is currently unavailable.</p>");
+    }
+    
+    // Generates the page ID from the given list item.
+    function getPageID(li) {
+        var entry = $("div.sitemap-entry", li);
+        return $(entry).attr("id").split("-")[2];
+    }
+    
+    // Moves a page in the given direction.
+    function movePage(control, direction) {
+        if (!sitemap_enabled) {
+            return;
+        }
+        var li = $($(control).parents("li").get(0));
+        var page_id = getPageID(li);
+        if (direction == "up") {
+            var other_li = li.prev();
+        } else if (direction == "down") {
+            var other_li = li.next();
+        }
+        var other_id = getPageID(other_li);
+        // Check that there is something to exchange with.
+        if (other_li.length > 0) {
+            sitemap_enabled = false;
+            li.fadeOut(function() {
+                $.ajax({
+                    url: root_url + "move/",
+                    type: "POST",
+                    data: {
+                        page_id: page_id,
+                        other_id: other_id
+                    },
+                    error: displayError,
+                    success: function(data) {
+                        other_li.before(li);
+                        li.fadeIn();
+                        sitemap_enabled = true
+                    },
+                    cache: false
+                });
+            });
+        }
+    }
+    
+    // Make the move up controls clickable.
+    $("div.move-up").click(function() {
+        movePage(this, "up");
+    });
+    
+    // Make the move down controls clickable.
+    $("div.move-down").click(function() {
+        movePage(this, "down");
     });
     
 });

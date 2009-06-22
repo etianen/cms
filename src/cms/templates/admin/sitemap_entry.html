@@ -1,6 +1,6 @@
 {% load pages_admin %}
-<li>
-    <div class="sitemap-entry{% if not is_online %} offline{% endif %}">
+<li class="{% if can_change %}can-change{% endif %}">
+    <div id="sitemap-entry-{{page.id}}" class="sitemap-entry{% if not is_online %} offline{% endif %}">
         {% if can_change %}
             <a href="{{change_url}}" class="title" title="Edit this {{verbose_name}}">{{page}}</a>
         {% else %}

@@ -54,7 +54,7 @@ body.dashboard div.sitemap-entry {
 body.dashboard div.sitemap-entry a.title,
 body.dashboard div.sitemap-entry span.title {
     font-weight: bold;
-    margin-right: 180px;
+    margin-right: 200px;
     display: block;
 }
 
@@ -108,6 +108,40 @@ body.dashboard li.closed div.sitemap-collapse-control {
 body.dashboard li.closed div.sitemap-collapse-control:hover {
     background-position: 0px -13px;
 }
+
+body.dashboard ul#sitemap li:first-child > div.sitemap-entry > div.move-up,
+body.dashboard ul#sitemap li:last-child > div.sitemap-entry > div.move-down {
+    display: none;
+}
+
+body.dashboard div.sitemap-entry div.move-up,
+body.dashboard div.sitemap-entry div.move-down {
+    width: 11px;
+    height: 5px;
+    background-image: url(../img/arrows.png);
+    position: absolute;
+    right: 172px;
+    cursor: pointer;
+}
+
+body.dashboard div.sitemap-entry div.move-up {
+    background-position: -15px -29px;
+    top: 5px;
+}
+
+body.dashboard div.sitemap-entry div.move-up:hover {
+    background-position: -1px -29px;
+}
+
+body.dashboard div.sitemap-entry div.move-down {
+    background-position: -15px -34px;
+    top: 14px;
+}
+
+body.dashboard div.sitemap-entry div.move-down:hover {
+    background-position: -1px -34px;
+}
+
 
 /*
     Styles for the page content type selection page.
