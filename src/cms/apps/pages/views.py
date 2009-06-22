@@ -4,7 +4,7 @@
 from django import template
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 
 from cms.apps.pages.models import Page
@@ -61,3 +61,17 @@ def tinymce_init(request):
     context = {"TINYMCE_CONTENT_CSS": settings.TINYMCE_CONTENT_CSS}
     return render_to_response("admin/tinymce_init.js", context, template.RequestContext(request), mimetype="text/javascript")
 
+
+def reorder_pages(request):
+    """Swaps the ordering of two pages."""
+    # Get the POST variables.
+    page_id, other_id = request.POST["pages"].getlist("pages")
+    # Get the page objects.
+    page = Page.objects.get(id=page_id)
+    other_page = Page.objects.get(id=other_id)
+    
+    
+    # Send a positive response.
+    return HttpResponse("Swapped page '' with page ''." % (page. other_page))
+    
+    

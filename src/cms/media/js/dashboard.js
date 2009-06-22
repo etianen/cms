@@ -8,9 +8,6 @@ $(function() {
     // Global flag for disabling sitemap actions during updates.
     var sitemap_enabled = true;
     
-    // Base URL for admin actions.
-    var root_url = String(window.location);
-    
     // Collapse the sitemap.
     $("ul#sitemap li li").addClass("closed");
     
@@ -52,19 +49,26 @@ $(function() {
         var other_id = getPageID(other_li);
         // Check that there is something to exchange with.
         if (other_li.length > 0) {
+            // Disable the sitemap.
             sitemap_enabled = false;
+            // Trigger an AJAX call when the list item has faded out.
             li.fadeOut(function() {
                 $.ajax({
-                    url: root_url + "move/",
+                    url: "/admin/reorder-pages/",
                     type: "POST",
                     data: {
-                        page_id: page_id,
-                        other_id: other_id
+                        pages: [page_id, other_id]
                     },
                     error: displayError,
                     success: function(data) {
-                        other_li.before(li);
+                        // Adnimate the page move.
+                        if (direction == "up") {
+                            other_li.before(li);
+                        } else if (direction == "down") {
+                            other_li.after(li);
+                        }
                         li.fadeIn();
+                        // Re-enable the sitemap.
                         sitemap_enabled = true
                     },
                     cache: false
