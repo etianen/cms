@@ -27,17 +27,27 @@ class AdminSite(admin.AdminSite):
     
     """The CMS admin site."""
     
+    index_template = "admin/dashboard.html"
+    
     def root(self, request, url):
         """Adds additional views to the admin site."""
         if url == "edit-details/":
             return self.edit_details(request)
-        
         return super(AdminSite, self).root(request, url)
         
     def index(self, request, extra_context=None):
         """Displays the admin site dashboard."""
-        context = {"title": "Dashboard"}
+        # Retrieve the homepage in order to render the sitemap.
+        try:
+            homepage = Page.objects.get_homepage()
+        except Page.DoesNotExist:
+            homepage = None
+        # Generate the context.
+        context = {"title": "Dashboard",
+                   "homepage": homepage,
+                   "page_admin": self._registry[Page]}
         context.update(extra_context or {})
+        # Render the index page.
         return super(AdminSite, self).index(request, context)
     
     def edit_details(self, request):
@@ -214,7 +224,7 @@ class PageBaseAdmin(admin.ModelAdmin):
             setattr(page_content, field_name, field_data)
         obj.content_type = page_content_type
         obj.content = page_content
-        obj.save()
+        super(PageBaseAdmin, self).save_model(request, obj, form, change)
     
 
 class PageAdmin(PageBaseAdmin):
@@ -224,6 +234,14 @@ class PageAdmin(PageBaseAdmin):
     fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),
                  ("Navigation", {"fields": ("short_title", "in_navigation",),
                                  "classes": ("collapse",),},),) + PageBaseAdmin.publication_fieldsets + PageBaseAdmin.seo_fieldsets
+
+    def save_model(self, request, obj, form, change):
+        """Sets the default order field for this model."""
+        super(PageAdmin, self).save_model(request, obj, form, change)
+        # Set the default ordering of the page to its id.
+        if not change:
+            obj.order = obj.id
+            obj.save()
 
 
 site.register(Page, PageAdmin)

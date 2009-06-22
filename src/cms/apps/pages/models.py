@@ -304,7 +304,7 @@ class Page(PageBase):
         Returns all the children of this page, regardless of their publication
         state.
         """
-        return Page.objects.filter(parent=self).order_by("order", "id")
+        return Page.objects.filter(parent=self).order_by("order")
 
     children = property(get_children,
                         doc="All the children of this page, regardless of their publication state.")
@@ -326,7 +326,7 @@ class Page(PageBase):
     @cached_getter
     def get_published_children(self):
         """Returns all the published children of this page."""
-        return Page.published_objects.filter(parent=self).order_by("order", "id")
+        return Page.published_objects.filter(parent=self).order_by("order")
 
     published_children = property(get_published_children,
                                   doc="All the published children of this page.")

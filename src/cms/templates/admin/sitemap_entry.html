@@ -1,0 +1,26 @@
+{% load pages_admin %}
+<li>
+    <div class="sitemap-entry{% if not is_online %} offline{% endif %}">
+        {% if can_change %}
+            <a href="{{change_url}}" class="title" title="Edit this {{verbose_name}}">{{page}}</a>
+        {% else %}
+            <span class="title">{{page}}</span>
+        {% endif %}
+        {% if can_add %}
+            <a href="{{add_url}}" class="addlink" title="Add a new page underneath this page">Add</a>
+        {% endif %}
+        {% if can_change %}
+            <a href="{{change_url}}" class="changelink" title="Edit this page">Change</a>
+        {% endif %}
+        {% if can_delete %}
+            <a href="{{delete_url}}" class="deletelink" title="Delete this page">Delete</a>
+        {% endif %}
+    </div>
+    {% if children %}
+        <ul>
+            {% for child in children %}
+                {% sitemap_entry child %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>

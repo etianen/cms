@@ -1,0 +1,31 @@
+{% extends "admin/index.html" %}
+
+
+{% load pages_admin %}
+
+
+{% block extrahead %}
+    {{block.super}}
+    <script type="text/javascript" src="{{CMS_MEDIA_URL}}js/dashboard.js"></script>
+{% endblock %}
+
+
+
+{% block sidebar %}
+    <div id="content-related">
+        {% if perms.pages.change_page %}
+            <div id="sitemap-panel">
+                <div id="sitemap-module" class="module">
+                    <h2>Sitemap</h2>
+                    {% if homepage %}
+                        <ul id="sitemap">
+                            {% sitemap_entry homepage %}
+                        </ul>
+                    {% else %}
+                        <p>This site does not have a homepage.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

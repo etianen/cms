@@ -3,6 +3,117 @@
 */
 
 
+/*
+    Styles for the dashboard index page.
+*/
+
+
+html body.dashboard #content {
+    width: 960px;
+}
+
+html body.dashboard #content-main {
+    width: 400px;
+}
+
+html body.dashboard div#content-related {
+    width: 550px;
+    margin-right: 0px;
+}
+
+body.dashboard div#content-related h2 {
+    margin-bottom: 10px;
+}
+
+body.dashboard ul#sitemap {
+    margin: 0px 10px 10px 10px;
+    padding: 0px 0px 0px 0px;
+}
+
+body.dashboard ul#sitemap li {
+    position: relative;
+    list-style: none;
+    padding: 0px 0px 0px 0px;
+}
+
+body.dashboard ul#sitemap li.closed ul {
+    display: none;
+}
+
+body.dashboard ul#sitemap li li {
+    margin: 0px 0px 0px 27px;
+}
+
+body.dashboard div.sitemap-entry {
+    border: 1px #eeeeee solid;
+    position: relative;
+    padding: 5px 7px 6px 7px;
+    margin: 0px 0px 5px 0px;
+}
+
+body.dashboard div.sitemap-entry a.title,
+body.dashboard div.sitemap-entry span.title {
+    font-weight: bold;
+    margin-right: 180px;
+    display: block;
+}
+
+body.dashboard div.sitemap-entry a.addlink {
+    position: absolute;
+    top: 5px;
+    right: 130px;
+}
+
+body.dashboard div.sitemap-entry a.changelink {
+    position: absolute;
+    top: 5px;
+    right: 65px;
+}
+
+body.dashboard div.sitemap-entry a.deletelink {
+    position: absolute;
+    top: 5px;
+    right: 7px;
+}
+
+body.dashboard ul#sitemap ul {
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+}
+
+body.dashboard div.offline a.title,
+body.dashboard div.offline span.title {
+    text-decoration: line-through;
+}
+
+body.dashboard div.sitemap-collapse-control {
+    position: absolute;
+    top: 5px;
+    left: -20px;
+    width: 13px;
+    height: 13px;
+    cursor: pointer;
+    background-image: url(../img/arrows.png);
+    background-position: -13px 0px;
+}
+
+body.dashboard div.sitemap-collapse-control:hover {
+    background-position: 0px 0px;
+}
+
+body.dashboard li.closed div.sitemap-collapse-control {
+    background-position: -13px -13px;
+}
+
+body.dashboard li.closed div.sitemap-collapse-control:hover {
+    background-position: 0px -13px;
+}
+
+/*
+    Styles for the page content type selection page.
+*/
+
+
 ul#content-types {
     padding: 5px 0px 0px 0px;
 }
