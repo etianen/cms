@@ -1,17 +1,21 @@
 """Pluggable page content, serialized to XML."""
 
 
-import cStringIO, datetime
+import cStringIO, datetime, types
 from xml.dom import minidom
 from xml.sax.saxutils import XMLGenerator
 
-from django import forms
+from django import forms, template
 from django.conf import settings
+from django.conf.urls.defaults import url, patterns
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
+from django.core.urlresolvers import RegexURLResolver, Resolver404, Http404
 from django.db.models.options import get_verbose_name
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseServerError
+from django.shortcuts import render_to_response
 
 from cms.apps.pages.forms import PageForm, HtmlWidget
+from cms.apps.pages.optimizations import cached_getter
 
 
 class Field(object):
@@ -113,31 +117,93 @@ class URLField(CharField):
     form_field = forms.URLField
     
     
+view_id_counter = 0
+    
+    
+def view(url):
+    """Decorator used to mark up Content methods as view functions."""
+    def decorator(func):
+        global view_id_counter
+        func.url = url
+        view_id_counter += 1
+        func.view_id = view_id_counter
+        return func
+    return decorator
+    
+    
 class ContentMetaClass(type):
     
     """Metaclass for Content objects."""
     
-    def __new__(cls, name, bases, attrs):
+    def __init__(self, name, bases, attrs):
         """Initializes the ContentMetaClass."""
-        self = super(ContentMetaClass, cls).__new__(cls, name, bases, attrs)
+        super(ContentMetaClass, self).__init__(name, bases, attrs)
         self.fields = []
-        for key, value in attrs.items():
+        views = []
+        for attr_name in dir(self):
+            value = getattr(self, attr_name)
             # Perform metaclass programming.
             if hasattr(value, "contribute_to_class"):
-                value.contribute_to_class(cls, key)
+                value.contribute_to_class(self, attr_name)
             # Register fields.
             if isinstance(value, Field):
                 self.fields.append(value)
+            # Register view functions.
+            if callable(value) and hasattr(value, "view_id"):
+                views.append((value.view_id, url(value.url, value)))
         # Sort fields by creation order.
         self.fields.sort(lambda a, b: cmp(a.creation_order, b.creation_order))
+        # Generate the urlconf.
+        views.sort(lambda a, b: cmp(b[0], a[0]))
+        view_funcs = [""] + [view_func for view_id, view_func in views]
+        self.urlconf_module = types.ModuleType("cms.apps.pages.content.urls.%s" % name.lower())
+        self.urlconf_module.urlpatterns = patterns(*view_funcs)
+        self.urlconf_module.handler404 = self.handler404
+        self.urlconf_module.handler500 = self.handler500
         # Generate a verbose name, if required.
         if not "verbose_name" in attrs:
             verbose_name = get_verbose_name(name)
             setattr(self, "verbose_name", verbose_name)
         if not "verbose_name_plural" in attrs:
             self.verbose_name_plural = self.verbose_name + "s"
-        return self
-                
+        
+        
+class LazyNavigation(object):
+    
+    """
+    A wrapper around a callable that is only evaluated at the last minute to
+    generate page navigation.
+    """
+    
+    def __init__(self, callable):
+        """Initializes the LazyNavigation."""
+        self._callable = callable
+        
+    @cached_getter
+    def get_list(self):
+        """Generates the list of navigation items."""
+        return self._callable()
+    
+    def __len__(self):
+        """Delegates to the wrapped list."""
+        return self.get_list().__len__()
+    
+    def __getitem__(self, key):
+        """Delegates to the wrapped list."""
+        return self.get_list().__getitem__(key)
+    
+    def __setitem__(self, key, value):
+        """Delegates to the wrapped list."""
+        return self.get_list().__setitem__(key, value)
+    
+    def __delitem__(self, key):
+        """Delegates to the wrapped list."""
+        return self.get_list().__delitem__(key)
+    
+    def __iter__(self):
+        """Delegates to the wrapped list."""
+        return self.get_list().__iter__()
+        
 
 class ContentBase(object):
     
@@ -218,28 +284,102 @@ class ContentBase(object):
                                set_serialized_data,
                                doc="The serialized content data, as XML.")
         
-    # Model delegation methods.
+    # Template context generators.
     
     def get_navigation(self):
         """
         Generates the sub-navigation of the page.
         
         This is returned in the form of a dictionary of 'title' and 'url'.
-        An option third item is 'navigation', which should be an iterable of
-        sub navigation.
+        An optional item is 'navigation', which should be a list of sub
+        navigation.  Another optional item is 'page', which should be an
+        instance of PageBase that this navigation item represents.
         """
-        navigation_pages = self.page.get_published_children().filter(in_navigation=True)
-        navigation = [{"title": page.short_title or page.title,
-                       "url": page.get_absolute_url(),
-                       "navigation": (entry for entry in page.navigation)}
-                       for page in navigation_pages]
+        navigation = []
+        for child in self.page.published_children:
+            if child.in_navigation:
+                navigation_context = {"title": child.short_title or page.title,
+                                      "url": child.get_absolute_url(),
+                                      "navigation": LazyNavigation(lambda: child.navigation),
+                                      "page": child}
+                navigation.append(navigation_context)
         return navigation
     
-    def render_to_response(self, request, extra_context=None):
+    # Content view method.
+    
+    @cached_getter
+    def get_url_resolver(self):
+        """Returns the URL resolver for this content."""
+        resolver = RegexURLResolver(r"^", self.urlconf_module.__name__)
+        resolver._urlconf_module = self.urlconf_module
+        return resolver
+    
+    url_resolver = property(get_url_resolver,
+                            doc="The URL resolver for this content.")
+    
+    def dispatch(self, request, path_info, default_kwargs=None):
         """Generates a HttpResponse for this context."""
-        context = {}
-        context.update(extra_context or {})
-        return HttpResponse("Hello World")
+        page = self.page
+        resolver = self.url_resolver
+        try:
+            callback, callback_args, callback_kwargs = resolver.resolve(path_info)
+        except Resolver404:
+            if settings.APPEND_SLASH:
+                new_path_info = path_info + "/"
+                try:
+                    resolver.resolve(new_path_info)
+                except Resolver404:
+                    pass
+                else:
+                    return HttpResponseRedirect(page.get_absolute_url() + new_path_info)
+            raise Http404, "No match for the current path '%s' found in the url conf of %s." % (path_info, self.__class__.__name__)
+        default_kwargs = default_kwargs or {}
+        default_kwargs.update(callback_kwargs)
+        response = callback(self, request, *callback_args, **default_kwargs)
+        # Validate the response.
+        if not isinstance(response, HttpResponse):
+            raise ValueError, "The view %s.%s didn't return an HttpResponse object." % (self.__class__.__name__, callback.__name__)
+        return response
+    
+    def render_to_response(self, request, template_name, context, **kwargs):
+        """Renders the given template using the given context."""
+        page = self.page
+        context.update({"page": page,
+                        "title": page.browser_title or page.title,
+                        "page_header": page.title,
+                        "content": self})
+        return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
+    
+    @view("^([a-zA-Z0-9_\-]+)/(.*)$")
+    def dispatch_to_child(self, request, child_slug, path_info):
+        """Dispatches the request to a child page."""
+        page = self.page
+        for child in page.children:
+            if child.url_title == child_slug:
+                return child.dispatch(request, path_info)
+        raise Http404, "The %s '%s' does not have a child with a url title of '%s'" % (page.__class__.__name__.lower(), page, child_slug)
+    
+    @view("^$")
+    def index(self, request):
+        """Renders the content as a HTML page."""
+        model = self.page.__class__
+        model_name = model.__name__.lower()
+        content_name = self.__class__.__name__.lower()
+        opts = model._meta
+        template_name = ("%s/%s/%s.html" % (opts.app_label, model_name, content_name),
+                         "%s/%s.html" % (opts.app_label, content_name),
+                         "%s.html" % (content_name),)
+        return self.render_to_response(request, template_name, {})
+        
+    def handler404(self, request):
+        """Renders the error 404 document."""
+        content = template.loader.render_to_string("404.html", {}, template.RequestContext(request))
+        return HttpResponseNotFound(content)
+    
+    def handler500(self, request):
+        """Renders the server error document."""
+        content = template.loader.render_to_string("500.html", {}, template.RequestContext(request))
+        return HttpResponseServerError(content)
         
     # Administration methods.
         

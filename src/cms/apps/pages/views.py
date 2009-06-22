@@ -10,15 +10,18 @@ from django.shortcuts import render_to_response
 from cms.apps.pages.models import Page
 
 
-def render_page(request):
+def render_page(request, path_info=""):
     """Dispatches the request to the site pages."""
+    # Attempt to retrieve the homepage.
     try:
         homepage = Page.objects.get_homepage()
     except Page.DoesNotExist:
         raise Http404, "The site does not have a homepage."
+    # Check publication state.
     if not homepage.is_published:
         raise Http404, "The site homepage has not been published."
-    return homepage.render_to_response(request)
+    # Dispatch the request!
+    return homepage.dispatch(request, path_info)
 
 
 def permalink_redirect(request, content_type_id, object_id):
