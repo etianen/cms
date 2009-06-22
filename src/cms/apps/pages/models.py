@@ -46,7 +46,7 @@ class PageBaseManager(models.Manager):
         queryset = super(PageBaseManager, self).get_query_set()
         queryset = queryset.extra(select={"is_published": PAGE_PUBLICATION_SELECT_SQL})
         return queryset
-
+    
 
 class PublishedManagerProxy(object):
     
@@ -213,7 +213,7 @@ class PageBase(models.Model):
     
     # Page rendering methods.
     
-    def render_to_response(self, request, extra_context=None, template_name=None, **kwargs):
+    def render_to_response(self, request, extra_context=None):
         """
         Dispatches the request to this page.
         
@@ -223,14 +223,13 @@ class PageBase(models.Model):
         if not self.is_published:
             if not (request.user.is_authenticated() and request.user.is_staff and request.user.is_active):
                 raise Http404, "The page '%s' has not been published yet." % self
-        # Render the template.
-        if template_name is None:
-            template_name = "%s/%s.html" % (self._meta.app_label, self.__class__.__name__.lower())
-        context = {}
-        context.update(extra_context or {})
-        return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
+        return self.content.render_to_response(request, extra_context)
     
     # Base model methods.
+    
+    def get_absolute_url(self):
+        """All pages must publish an absolute URL."""
+        raise NotImplemented
     
     def __unicode__(self):
         """
@@ -242,6 +241,19 @@ class PageBase(models.Model):
     class Meta:
         abstract = True
         ordering = ("title",)
+
+
+class PageField(models.ForeignKey):
+    
+    """A foreign key to a Page model."""
+    
+    def __init__(self, to, content_type=None, limit_choices_to=None, **kwargs):
+        """Initializes the Page Field."""
+        # Generate the page filter.
+        if content_type is not None:
+            limit_choices_to.setdefault("content_type", content_type)
+        # Initialize the PageField.
+        super(PageField, self).__init__(to=to, limit_choices_to=limit_choices_to, **kwargs)
 
 
 class PageManager(PageBaseManager):
@@ -261,9 +273,9 @@ class Page(PageBase):
     
     # Hierarchy fields.
 
-    parent = models.ForeignKey("self",
-                               blank=True,
-                               null=True)
+    parent = PageField("self",
+                       blank=True,
+                       null=True)
 
     order = models.PositiveSmallIntegerField(unique=True,
                                              editable=False,
@@ -351,3 +363,4 @@ class Page(PageBase):
     
        
 Page.register_content(content.Redirect)
+

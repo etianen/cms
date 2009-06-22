@@ -7,10 +7,18 @@ from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
 
+from cms.apps.pages.models import Page
 
-def render_page(request, path_info=""):
+
+def render_page(request):
     """Dispatches the request to the site pages."""
-    pass
+    try:
+        homepage = Page.objects.get_homepage()
+    except Page.DoesNotExist:
+        raise Http404, "The site does not have a homepage."
+    if not homepage.is_published:
+        raise Http404, "The site homepage has not been published."
+    return homepage.render_to_response(request)
 
 
 def permalink_redirect(request, content_type_id, object_id):

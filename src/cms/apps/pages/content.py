@@ -9,6 +9,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
 from django.db.models.options import get_verbose_name
+from django.http import HttpResponse
 
 from cms.apps.pages.forms import PageForm, HtmlWidget
 
@@ -233,6 +234,12 @@ class ContentBase(object):
                        "navigation": (entry for entry in page.navigation)}
                        for page in navigation_pages]
         return navigation
+    
+    def render_to_response(self, request, extra_context=None):
+        """Generates a HttpResponse for this context."""
+        context = {}
+        context.update(extra_context or {})
+        return HttpResponse("Hello World")
         
     # Administration methods.
         
