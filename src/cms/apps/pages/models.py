@@ -83,18 +83,21 @@ class PageBaseManager(models.Manager):
         queryset = super(PageBaseManager, self).get_query_set()
         queryset = queryset.extra(select={"is_published": PAGE_PUBLICATION_SELECT_SQL})
         return queryset
-    
 
-class PublishedManagerProxy(object):
+
+class PublishedPageManager(PageBaseManager):
     
-    """Manager that only returns published content."""
+    """Manager that selects only published pages."""
     
-    def __get__(self, instance, cls):
-        """Returns a filtered queryset which only contains published objects."""
-        if instance != None:
-            raise AttributeError, "Manager isn't accessible via %s instances" % type.__name__
-        # Filter the queryset.
-        return cls.select_published(cls.objects.all())
+    def select_published(self, queryset):
+        """Filters out unpublished objects from the queryset."""
+        return queryset.extra(where=[PAGE_PUBLICATION_WHERE_SQL])
+    
+    def get_query_set(self):
+        """Returns the filtered query set."""
+        queryset = super(PublishedPageManager, self).get_query_set()
+        queryset = self.select_published(queryset)
+        return queryset
   
   
 class PageBase(models.Model):
@@ -103,17 +106,12 @@ class PageBase(models.Model):
     
     __metaclass__ = PageMetaClass
     
-    # Model managers.
+    # Model management.
     
     objects = PageBaseManager()
-        
-    @classmethod
-    def select_published(cls, queryset):
-        """Selects only published pages from the given queryset."""
-        return queryset.extra(where=[PAGE_PUBLICATION_WHERE_SQL])
-        
-    published_objects = PublishedManagerProxy()
     
+    published_objects = PublishedPageManager()
+        
     # Base fields.
     
     title = models.CharField(max_length=1000)
@@ -125,8 +123,26 @@ class PageBase(models.Model):
     
     # Hierarchy fields.
     
+    parent = None
+    
+    def get_all_parents(self):
+        """Returns a list of all parents of this page."""
+        if self.parent:
+            return [self.parent] + self.parent.all_parents
+        return []
+    
+    all_parents = property(get_all_parents,
+                           doc="A list of all parents of this page.")
+
+    def get_breadcrumbs(self):
+        """Returns the breadcrumb trail for this page."""
+        return reversed([self] + self.all_parents)
+
+    breadcrumbs = property(get_breadcrumbs,
+                           doc="The breadcrumb trail for this page.")
+    
     def get_children(self):
-        """Returns all children of this page."""
+        """Returns a queryset of all children of this page."""
         return self.objects.none()
     
     children = property(get_children,
@@ -149,7 +165,7 @@ class PageBase(models.Model):
     @cached_getter
     def get_published_children(self):
         """Returns all the published children of this page."""
-        return Page.published_objects.filter(parent=self).order_by("order")
+        return self.published_objects.select_published(self.children)
 
     published_children = property(get_published_children,
                                   doc="All the published children of this page.")
@@ -175,7 +191,7 @@ class PageBase(models.Model):
                                    null=True,
                                    help_text="A shorter version of the title that will be used in site navigation. Leave blank to use the full-length title.")
     
-    in_navigation = False
+    in_navigation = True
     
     @cached_getter
     def get_navigation(self):
@@ -330,29 +346,13 @@ class Page(PageBase):
                                              blank=True,
                                              null=True)
 
-    def get_all_parents(self):
-        """Returns a list of all parents of this page."""
-        if self.parent:
-            return [self.parent] + self.parent.all_parents
-        return []
-    
-    all_parents = property(get_all_parents,
-                           doc="A list of all parents of this page.")
-
-    def get_breadcrumbs(self):
-        """Returns the breadcrumb trail for this page."""
-        return reversed([self] + self.all_parents)
-
-    breadcrumbs = property(get_breadcrumbs,
-                           doc="The breadcrumb trail for this page.")
-
     @cached_getter
     def get_children(self):
         """
         Returns all the children of this page, regardless of their publication
         state.
         """
-        return Page.objects.filter(parent=self).order_by("order")
+        return self.page_set.all().order_by("order")
 
     children = property(get_children,
                         doc="All the children of this page, regardless of their publication state.")
