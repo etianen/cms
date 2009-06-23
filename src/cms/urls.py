@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.views.static import serve
 
 from cms.apps.pages.admin import site as admin_site
+from cms.apps.pages.views import handler500
 
 
 admin.autodiscover()

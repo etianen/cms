@@ -120,13 +120,26 @@ class URLField(CharField):
 view_id_counter = 0
     
     
-def view(url):
-    """Decorator used to mark up Content methods as view functions."""
+def view(url, priority=0):
+    """
+    Decorator used to mark up Content methods as view functions.
+    
+    Priority is an integer used to provide coarse ordering of the view
+    functions.  By default, views are checked in the order that they are
+    declared.  By setting the priority to positive, you can make a view be
+    checked earlier in the URL resolution process.  By setting the priority to
+    negative, you can ensure that a view is evaluated last.
+    
+    By convention, the priority of -100 is reserved for the dispatch_to_child
+    view of content objects.  This ensures that all declared views are evaluated
+    before it.
+    """
     def decorator(func):
         global view_id_counter
         func.url = url
         view_id_counter += 1
         func.view_id = view_id_counter
+        func.view_priority = priority
         return func
     return decorator
     
@@ -150,16 +163,13 @@ class ContentMetaClass(type):
                 self.fields.append(value)
             # Register view functions.
             if callable(value) and hasattr(value, "view_id"):
-                views.append((value.view_id, url(value.url, value)))
+                views.append((value.view_priority, value.view_id, url(value.url, value)))
         # Sort fields by creation order.
         self.fields.sort(lambda a, b: cmp(a.creation_order, b.creation_order))
         # Generate the urlconf.
-        views.sort(lambda a, b: cmp(b[0], a[0]))
-        view_funcs = [""] + [view_func for view_id, view_func in views]
-        self.urlconf_module = types.ModuleType("cms.apps.pages.content.urls.%s" % name.lower())
-        self.urlconf_module.urlpatterns = patterns(*view_funcs)
-        self.urlconf_module.handler404 = self.handler404
-        self.urlconf_module.handler500 = self.handler500
+        views.sort(lambda a, b: cmp(-a[0], -b[0]) or cmp(a[1], b[1]))
+        view_funcs = [""] + [view_func for view_priority, view_id, view_func in views]
+        self.urlpatterns = patterns(*view_funcs)
         # Generate a verbose name, if required.
         if not "verbose_name" in attrs:
             verbose_name = get_verbose_name(name)
@@ -310,8 +320,8 @@ class ContentBase(object):
     @cached_getter
     def get_url_resolver(self):
         """Returns the URL resolver for this content."""
-        resolver = RegexURLResolver(r"^", self.urlconf_module.__name__)
-        resolver._urlconf_module = self.urlconf_module
+        resolver = RegexURLResolver(r"^", "cms.apps.pages.content.%s.urlpatterns" % self.__class__.__name__)
+        resolver._urlconf_module = self
         return resolver
     
     url_resolver = property(get_url_resolver,
@@ -350,15 +360,6 @@ class ContentBase(object):
                         "content": self})
         return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
     
-    @view("^([a-zA-Z0-9_\-]+)/(.*)$")
-    def dispatch_to_child(self, request, child_slug, path_info):
-        """Dispatches the request to a child page."""
-        page = self.page
-        for child in page.children:
-            if child.url_title == child_slug:
-                return child.dispatch(request, path_info)
-        raise Http404, "The %s '%s' does not have a child with a url title of '%s'" % (page.__class__.__name__.lower(), page, child_slug)
-    
     @view("^$")
     def index(self, request):
         """Renders the content as a HTML page."""
@@ -371,15 +372,14 @@ class ContentBase(object):
                          "%s.html" % (content_name),)
         return self.render_to_response(request, template_name, {})
         
-    def handler404(self, request):
-        """Renders the error 404 document."""
-        content = template.loader.render_to_string("404.html", {}, template.RequestContext(request))
-        return HttpResponseNotFound(content)
-    
-    def handler500(self, request):
-        """Renders the server error document."""
-        content = template.loader.render_to_string("500.html", {}, template.RequestContext(request))
-        return HttpResponseServerError(content)
+    @view("^([a-zA-Z0-9_\-]+)/(.*)$", priority=-100)
+    def dispatch_to_child(self, request, child_slug, path_info):
+        """Dispatches the request to a child page."""
+        page = self.page
+        for child in page.children:
+            if child.url_title == child_slug:
+                return child.dispatch(request, path_info)
+        raise Http404, "The %s '%s' does not have a child with a url title of '%s'" % (page.__class__.__name__.lower(), page, child_slug)
         
     # Administration methods.
         

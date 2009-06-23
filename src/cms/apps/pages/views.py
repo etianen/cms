@@ -4,7 +4,7 @@
 from django import template
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import render_to_response
 
 from cms.apps.pages.models import Page
@@ -85,3 +85,9 @@ def reorder_pages(request):
     # Send a positive response.
     return HttpResponse("Swapped page '%s' with page '%s'." % (pages[0], pages[1]))
         
+
+def handler500(self, request):
+    """Renders the server error document."""
+    content = template.loader.render_to_string("500.html", {}, template.RequestContext(request))
+    return HttpResponseServerError(content)
+
