@@ -1,8 +1,10 @@
 {% extends "layout.html" %}
 
 
-{% block title %}{{title}}{% endblock %}
+{% block title %}{% include "title.html" %}{% endblock %}
 
 
-{% block page_header %}{{page_header}}{% endblock %}
+{% block page_header %}{% spaceless %}{% include "page_header.html" %}{% endspaceless %}{% endblock %}
 
+
+{% block nav_primary %}{% spaceless %}{% include "nav_primary.html" %}{% endspaceless %}{% endblock %}

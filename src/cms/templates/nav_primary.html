@@ -1,0 +1,11 @@
+{% load pages %}
+{% if homepage.in_navigation %}
+    <li class="{% first_last yes no %}">
+        {% hyperlink_exact "Home" homepage.url %}
+    </li>
+{% endif %}
+{% for entry in nav_primary %}
+    <li class="{% first_last no maybe %}">
+        {% hyperlink entry.title entry.url %}
+    </li>
+{% endfor %}

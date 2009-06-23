@@ -21,6 +21,7 @@ def render_page(request, path_info=""):
     if not homepage.is_published:
         raise Http404, "The site homepage has not been published."
     # Dispatch the request!
+    request.breadcrumbs = []
     return homepage.dispatch(request, path_info)
 
 

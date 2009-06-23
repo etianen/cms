@@ -344,7 +344,7 @@ class ContentBase(object):
         navigation = []
         for child in self.page.published_children:
             if child.in_navigation:
-                navigation_context = {"title": child.short_title or page.title,
+                navigation_context = {"title": child.short_title or child.title,
                                       "url": child.get_absolute_url(),
                                       "navigation": LazyNavigation(lambda: child.navigation),
                                       "page": child}
@@ -366,6 +366,9 @@ class ContentBase(object):
     def dispatch(self, request, path_info, default_kwargs=None):
         """Generates a HttpResponse for this context."""
         page = self.page
+        # Update the request.
+        request.breadcrumbs.append(self.page)
+        # Dispatch to the appropriate view.
         resolver = self.url_resolver
         try:
             callback, callback_args, callback_kwargs = resolver.resolve(path_info)
@@ -389,11 +392,37 @@ class ContentBase(object):
     
     def render_to_response(self, request, template_name, context, **kwargs):
         """Renders the given template using the given context."""
+        # Parse context variables.
         page = self.page
+        breadcrumbs = request.breadcrumbs
+        homepage = breadcrumbs[0]
+        # Parse the main section.
+        if len(breadcrumbs) > 1:
+            section = breadcrumbs[1]
+            nav_secondary = section.navigation
+        else:
+            section = None
+            nav_secondary = None
+        # Parse the subsection.
+        if len(breadcrumbs) > 2:
+            subsection = breadcrumbs[2]
+            nav_tertiary = subsection.navigation
+        else:
+            subsection = None
+            nav_tertiary = None
+        # Generate the context.
         context.update({"page": page,
                         "title": page.browser_title or page.title,
                         "page_header": page.title,
-                        "content": self})
+                        "content": self,
+                        "breadcrumbs": breadcrumbs,
+                        "homepage": homepage,
+                        "is_homepage": (page == homepage),
+                        "nav_primary": homepage.navigation,
+                        "section": section,
+                        "nav_secondary": nav_secondary,
+                        "subsection": subsection,
+                        "nav_tertiary": nav_tertiary})
         return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
     
     @view("^$")

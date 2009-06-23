@@ -52,7 +52,7 @@ class PageMetaClass(ModelBase):
             raise ContentRegistrationError, "No content type is registered under %r." % slug
   
   
-PAGE_PUBLICATION_SELECT_SQL = """
+PAGE_PUBLICATION_SQL = """
     is_online = TRUE AND
     (
         (
@@ -66,9 +66,6 @@ PAGE_PUBLICATION_SELECT_SQL = """
 """
 
 
-PAGE_PUBLICATION_WHERE_SQL = "is_published = TRUE"
-
-
 class PageBaseManager(models.Manager):
     
     """
@@ -77,10 +74,12 @@ class PageBaseManager(models.Manager):
     This must be subclassed when creating managers for Page subclasses.
     """
     
+    use_for_related_fields = True
+    
     def get_query_set(self):
         """Adds the is_published property to all loaded pages."""
         queryset = super(PageBaseManager, self).get_query_set()
-        queryset = queryset.extra(select={"is_published": PAGE_PUBLICATION_SELECT_SQL})
+        queryset = queryset.extra(select={"is_published": PAGE_PUBLICATION_SQL})
         return queryset
 
 
@@ -88,9 +87,11 @@ class PublishedPageManager(PageBaseManager):
     
     """Manager that selects only published pages."""
     
+    use_for_related_fields = False
+    
     def select_published(self, queryset):
         """Filters out unpublished objects from the queryset."""
-        return queryset.extra(where=[PAGE_PUBLICATION_WHERE_SQL])
+        return queryset.extra(where=[PAGE_PUBLICATION_SQL])
     
     def get_query_set(self):
         """Returns the filtered query set."""
@@ -141,7 +142,7 @@ class PageBase(models.Model):
         """Returns a queryset of all children of this page."""
         return self.objects.none()
     
-    children = property(get_children,
+    children = property(lambda self: self.get_children(),
                         doc="All children of this page.")
     
     def get_all_children(self):
@@ -161,7 +162,7 @@ class PageBase(models.Model):
     @cached_getter
     def get_published_children(self):
         """Returns all the published children of this page."""
-        return self.published_objects.select_published(self.children)
+        return self.__class__.published_objects.select_published(self.children)
 
     published_children = property(get_published_children,
                                   doc="All the published children of this page.")
@@ -290,6 +291,9 @@ class PageBase(models.Model):
         """All pages must publish an absolute URL."""
         raise NotImplemented
     
+    url = property(lambda self: self.get_absolute_url(),
+                   doc="The absolute URL of the page.")
+    
     def __unicode__(self):
         """
         Returns the short title of this page, falling back to the standard
@@ -354,9 +358,6 @@ class Page(PageBase):
         state.
         """
         return self.page_set.all().order_by("order")
-
-    children = property(get_children,
-                        doc="All the children of this page, regardless of their publication state.")
 
     # Navigation fields.
 

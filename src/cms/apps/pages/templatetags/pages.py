@@ -11,6 +11,63 @@ from cms.apps.pages import permalinks, thumbnails
 register = template.Library()
 
 
+# Define some convenient keywords.
+
+
+YES = True
+
+NO = False
+
+MAYBE = "maybe"
+
+
+# HTML tags.
+
+
+@register.inclusion_tag("first_last.html", takes_context=True)
+def first_last(context, first=MAYBE, last=MAYBE):
+    """Generates class names to mark items as either first or last in a loop."""
+    # Calculate first and last variables.
+    if first is MAYBE:
+        first = context["forloop"]["first"]
+    if last is MAYBE:
+        last = context["forloop"]["last"]
+    # Generate the context.
+    context = {"first": first,
+               "last": last}
+    return context
+
+
+@register.inclusion_tag("hyperlink.html", takes_context=True)
+def hyperlink(context, title, url):
+    """
+    Generates a hyperlink referencing the given URL.
+    
+    The hyperlink will be marked as 'here' if the request path starts with the
+    URL.
+    """
+    request = context["request"]
+    context = {"title": title,
+               "url": url,
+               "is_here": request.path.startswith(url)}
+    return context
+
+
+@register.inclusion_tag("hyperlink.html", takes_context=True)
+def hyperlink_exact(context, title, url):
+    """
+    Generates a hyperlink referencing the given URL.
+    
+    The hyperlink will be marked as 'here' if the request path exactly equals
+    the URL.
+    """
+    request = context["request"]
+    context = {"title": title,
+               "url": url,
+               "is_here": (request.path == url)}
+    return context
+
+
 # Thumbnail tags.
 
 
