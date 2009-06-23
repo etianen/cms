@@ -38,8 +38,8 @@ class Media(models.Model):
     size = models.PositiveIntegerField(editable=False,
                                        help_text="The size of this media, in bytes.")
     
-    last_modified = models.DateTimeField(auto_now=True,
-                                         help_text="The date and time of when this media was last modified.")
+    publication_date = models.DateTimeField(auto_now_add=True,
+                                            help_text="The date and time of when this media was last modified.")
     
     folder = models.ForeignKey(Folder,
                                blank=True,

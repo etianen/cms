@@ -99,7 +99,7 @@ class PageBaseAdmin(admin.ModelAdmin):
     
     """Base admin class for Content models."""
     
-    date_hierarchy = "last_modified"
+    date_hierarchy = "publication_date"
     
     seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_change_frequency", "robots_allow_indexing", "robots_allow_archiving", "robots_follow_links",),
                                                      "classes": ("collapse",),},),)
@@ -112,7 +112,7 @@ class PageBaseAdmin(admin.ModelAdmin):
 
     fieldsets = ((None, {"fields": ("title", "url_title",),},),) + navigation_fieldsets + publication_fieldsets + seo_fieldsets
     
-    list_display = ("title", "is_online", "last_modified",)
+    list_display = ("title", "publication_date", "is_online",)
     
     list_filter = ("is_online",)
     

@@ -118,9 +118,6 @@ class PageBase(models.Model):
     
     url_title = models.SlugField("URL title")
     
-    last_modified = models.DateTimeField(auto_now=True,
-                                         help_text="The date and time of when this content was last modified.")
-    
     # Hierarchy fields.
     
     parent = None
@@ -176,8 +173,7 @@ class PageBase(models.Model):
                                     default=True,
                                     help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by directly visiting it's URL.")
     
-    publication_date = models.DateTimeField(blank=True,
-                                            null=True,
+    publication_date = models.DateTimeField(default=datetime.datetime.now,
                                             help_text="The date that this page will appear on the website.  Leave this blank to immediately publish this page.")
 
     expiry_date = models.DateTimeField(blank=True,
