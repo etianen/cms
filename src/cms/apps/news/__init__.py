@@ -1,0 +1,2 @@
+"""News publication application."""
+

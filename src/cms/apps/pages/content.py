@@ -13,9 +13,11 @@ from django.core.urlresolvers import RegexURLResolver, Resolver404, Http404
 from django.db.models.options import get_verbose_name
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import render_to_response
+from django.utils.html import strip_tags
 
 from cms.apps.pages.forms import PageForm, HtmlWidget
 from cms.apps.pages.optimizations import cached_getter
+from cms.apps.pages.html import first_paragraph
 
 
 class Field(object):
@@ -26,10 +28,11 @@ class Field(object):
     
     form_field = forms.CharField
     
-    def __init__(self, label=None, required=False, help_text=""):
+    def __init__(self, label=None, required=False, default=None, help_text=""):
         """"Initializes the Field."""
         self.label = label
         self.required = required
+        self.default = default
         self.help_text = help_text
         Field.creation_counter += 1
         self.creation_order = self.creation_counter
@@ -37,12 +40,16 @@ class Field(object):
     def contribute_to_class(self, cls, name):
         """Called automatically by the ContentMetaClass on class creation."""
         self.name = name
+
+    def get_value_from_object(self, obj):
+        """Retrieves the field value from the given content object."""
+        return obj.data.get(self.name, self.default)
     
     def __get__(self, obj, cls=None):
         """Retrieves the value from the Content object."""
         if obj is None:
             return self
-        return obj.data.get(self.name, "")
+        return self.get_value_from_object(obj)
 
     def __set__(self, obj, value):
         """Sets the value in the Content object."""
@@ -50,7 +57,7 @@ class Field(object):
         
     def get_formfield_attrs(self, obj):
         """Returns the default attributes for a form field."""
-        initial = self.__get__(obj, obj.__class__)
+        initial = self.get_value_from_object(obj)
         attrs = {"label": self.label and self.label.capitalize() or None,
                  "required": self.required,
                  "help_text": self.help_text,
@@ -115,6 +122,35 @@ class URLField(CharField):
     """A URL data field."""
     
     form_field = forms.URLField
+    
+    
+class IntegerField(Field):
+    
+    """A field that holds an integer number."""
+    
+    form_field = forms.IntegerField
+    
+    def __init__(self, label=None, min_value=None, max_value=None, **kwargs):
+        """Initializes the IntegerField."""
+        super(IntegerField, self).__init__(label, **kwargs)
+        self.min_value = min_value
+        self.max_value = max_value
+        
+    def get_formfield_attrs(self, obj):
+        """Sets the min and max value attributes of the field."""
+        attrs = super(IntegerField, self).get_formfield_attrs(obj)
+        attrs["min_value"] = self.min_value
+        attrs["max_value"] = self.max_value
+        return attrs
+    
+    
+class PositiveIntegerField(IntegerField):
+    
+    """A field that only holds positive integer numbers."""
+    
+    def __init__(self, label=None, max_value=None, **kwargs):
+        """Initializes the PositiveIntegerField."""
+        super(PositiveIntegerField, self).__init__(label, 0, max_value, **kwargs)
     
     
 view_id_counter = 0

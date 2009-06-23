@@ -56,12 +56,11 @@ PAGE_PUBLICATION_SELECT_SQL = """
     is_online = TRUE AND
     (
         (
-            publication_date IS NULL OR
-            publication_date <= CURRENT_DATE()
+            publication_date <= NOW()
         ) AND
         (
             expiry_date IS NULL OR
-            expiry_date > CURRENT_DATE()
+            expiry_date > NOW()
         )
     )
 """
@@ -301,6 +300,7 @@ class PageBase(models.Model):
     class Meta:
         abstract = True
         ordering = ("title",)
+        unique_together = (("parent", "url_title",),)
 
 
 class PageField(models.ForeignKey):
@@ -311,9 +311,14 @@ class PageField(models.ForeignKey):
         """Initializes the Page Field."""
         # Generate the page filter.
         if content_type is not None:
+            limit_choices_to = limit_choices_to or {}
             limit_choices_to.setdefault("content_type", content_type)
         # Initialize the PageField.
-        super(PageField, self).__init__(to=to, limit_choices_to=limit_choices_to, **kwargs)
+        super(PageField, self).__init__(to=to, limit_choices_to=limit_choices_to, default=self.get_default, **kwargs)
+        
+    def get_default(self):
+        """Returns the default page."""
+        return self.rel.to._default_manager.filter(**self.rel.limit_choices_to)[0].pk
 
 
 class PageManager(PageBaseManager):
@@ -366,9 +371,6 @@ class Page(PageBase):
         if self.parent:
             return self.parent.get_absolute_url() + self.url_title + "/"
         return reverse("render_homepage")
-
-    class Meta:
-        unique_together = (("parent", "url_title",),)
 
 
 # Add some base content types.

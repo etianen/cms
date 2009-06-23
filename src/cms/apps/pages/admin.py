@@ -108,7 +108,7 @@ class PageBaseAdmin(admin.ModelAdmin):
                                               "classes": ("collapse",)}),)
 
     navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
-                                            "classes": ("collapse",),}))
+                                            "classes": ("collapse",),}),)
 
     fieldsets = ((None, {"fields": ("title", "url_title",),},),) + navigation_fieldsets + publication_fieldsets + seo_fieldsets
     
@@ -184,7 +184,7 @@ class PageBaseAdmin(admin.ModelAdmin):
         # Create new page content instance.
         page_content = page_content_cls(obj)
         return page_content
-
+    
     def get_form(self, request, obj=None, **kwargs):
         """Adds the template area fields to the form."""
         page_content = self.get_page_content(request, obj)
@@ -192,19 +192,6 @@ class PageBaseAdmin(admin.ModelAdmin):
         defaults = {"form": Form}
         defaults.update(kwargs)
         PageForm = super(PageBaseAdmin, self).get_form(request, obj, **defaults)
-        # HACK: Need to limit parents field based on object. This should be done in
-        # formfield_for_foreignkey, but that method does not know about the object instance.
-        valid_parents = Page.objects.all()
-        if obj:
-            invalid_parents = [child.id for child in obj.all_children] + [obj.id]
-            valid_parents = valid_parents.exclude(id__in=invalid_parents)
-        if valid_parents:
-            parent_choices = [(parent.id, u" \u203a ".join([unicode(breadcrumb) for breadcrumb in parent.breadcrumbs]))
-                              for parent in valid_parents]
-        else:
-            parent_choices = (("", "---------"),)
-        PageForm.base_fields["parent"].choices = parent_choices
-        # Return the completed form.
         return PageForm
 
     def get_fieldsets(self, request, obj=None):
@@ -242,6 +229,24 @@ class PageAdmin(PageBaseAdmin):
     fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),
                  ("Navigation", {"fields": ("short_title", "in_navigation",),
                                  "classes": ("collapse",),},),) + PageBaseAdmin.publication_fieldsets + PageBaseAdmin.seo_fieldsets
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Adds the template area fields to the form."""
+        PageForm = super(PageAdmin, self).get_form(request, obj, **kwargs)
+        # HACK: Need to limit parents field based on object. This should be done in
+        # formfield_for_foreignkey, but that method does not know about the object instance.
+        valid_parents = Page.objects.all()
+        if obj:
+            invalid_parents = [child.id for child in obj.all_children] + [obj.id]
+            valid_parents = valid_parents.exclude(id__in=invalid_parents)
+        if valid_parents:
+            parent_choices = [(parent.id, u" \u203a ".join([unicode(breadcrumb) for breadcrumb in parent.breadcrumbs]))
+                              for parent in valid_parents]
+        else:
+            parent_choices = (("", "---------"),)
+        PageForm.base_fields["parent"].choices = parent_choices
+        # Return the completed form.
+        return PageForm
 
     def save_model(self, request, obj, form, change):
         """Sets the default order field for this model."""
