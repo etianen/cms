@@ -11,60 +11,77 @@ from cms.apps.pages import permalinks, thumbnails
 register = template.Library()
 
 
-# Define some convenient keywords.
-
-
-YES = True
-
-NO = False
-
-MAYBE = "maybe"
-
-
 # HTML tags.
 
 
-@register.inclusion_tag("first_last.html", takes_context=True)
-def first_last(context, first=MAYBE, last=MAYBE):
-    """Generates class names to mark items as either first or last in a loop."""
-    # Calculate first and last variables.
-    if first is MAYBE:
+@register.inclusion_tag("mark_here.html", takes_context=True)
+def mark_here(context, url=None):
+    """
+    Generates a class name to mark a URL as being at the current request path.
+    
+    If supplied with a URL, then the class name will be generated if the request
+    path starts with the URL.  If not supplied with a URL, then the class name
+    will always be generated.
+    """
+    request = context["request"]
+    if url is None:
+        is_here = True
+    else:
+        is_here = request.path.startswith(url)
+    context = {"is_here": is_here}
+    return context
+
+
+@register.inclusion_tag("mark_here.html", takes_context=True)
+def mark_here_exact(context, url=None):
+    """
+    Generates a class name to mark a URL as being *exactly* at the current
+    request path.
+    
+    If supplied with a URL, then the class name will be generated if the request
+    path exactly equals the URL.  If not supplied with a URL, then the class
+    name will always be generated.
+    """
+    request = context["request"]
+    if url is None:
+        is_here = True
+    else:
+        is_here = request.path == url
+    context = {"is_here": is_here}
+    return context
+
+
+@register.inclusion_tag("mark_first.html", takes_context=True)
+def mark_first(context):
+    """
+    Generates a class name to mark items as first in a loop.
+    
+    If used in a for loop, then the class name will only be generated on the
+    first iteration.  If used outside of a loop, then the class name will
+    always be generated.
+    """
+    try:
         first = context["forloop"]["first"]
-    if last is MAYBE:
+    except KeyError:
+        first = True
+    context = {"first": first}
+    return context
+
+
+@register.inclusion_tag("mark_last.html", takes_context=True)
+def mark_last(context):
+    """
+    Generates a class name to mark items as last in a loop.
+    
+    If used in a for loop, then the class name will only be generated on the
+    last iteration.  If used outside of a loop, then the class name will
+    always be generated.
+    """
+    try:
         last = context["forloop"]["last"]
-    # Generate the context.
-    context = {"first": first,
-               "last": last}
-    return context
-
-
-@register.inclusion_tag("hyperlink.html", takes_context=True)
-def hyperlink(context, title, url):
-    """
-    Generates a hyperlink referencing the given URL.
-    
-    The hyperlink will be marked as 'here' if the request path starts with the
-    URL.
-    """
-    request = context["request"]
-    context = {"title": title,
-               "url": url,
-               "is_here": request.path.startswith(url)}
-    return context
-
-
-@register.inclusion_tag("hyperlink.html", takes_context=True)
-def hyperlink_exact(context, title, url):
-    """
-    Generates a hyperlink referencing the given URL.
-    
-    The hyperlink will be marked as 'here' if the request path exactly equals
-    the URL.
-    """
-    request = context["request"]
-    context = {"title": title,
-               "url": url,
-               "is_here": (request.path == url)}
+    except KeyError:
+        last = True
+    context = {"last": last}
     return context
 
 

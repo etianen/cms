@@ -46,6 +46,6 @@ if settings.SERVE_STATIC_MEDIA:
 # Final pattern is the catch-all for page serving.
 
 urlpatterns += patterns("cms.apps.pages.views",
-                        url(r"^(.*/)$", "render_page", name="render_page"),
+                        url(r"^(.*)$", "render_page", name="render_page"),
                         url(r"^$", "render_page", name="render_homepage"),)
 

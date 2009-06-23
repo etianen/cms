@@ -11,7 +11,7 @@ from django.conf.urls.defaults import url, patterns
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
 from django.core.urlresolvers import RegexURLResolver, Resolver404, Http404
 from django.db.models.options import get_verbose_name
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import render_to_response
 from django.utils.html import strip_tags
 
@@ -376,7 +376,7 @@ class ContentBase(object):
             if settings.APPEND_SLASH:
                 new_path_info = path_info + "/"
                 try:
-                    resolver.resolve(new_path_info)
+                    result = resolver.resolve(new_path_info)
                 except Resolver404:
                     pass
                 else:
