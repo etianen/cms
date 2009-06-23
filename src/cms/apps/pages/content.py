@@ -354,6 +354,32 @@ class ContentBase(object):
     navigation = property(lambda self: self.get_navigation(),
                           doc="The sub-navigation of the page.")
     
+    def get_breadcrumbs(self):
+        """
+        Returns the breadcrumbs to this page.
+        
+        This is returned in the form of a dictionary of 'title' and 'url'.
+        An optional item is 'page', which should be an instance of PageBase that
+        this navigation item represents.
+        
+        This list should not include the current page.
+        """
+        page = self.page
+        # Add parent breadcrumbs.
+        if page.parent:
+            parent = page.parent
+            breadcrumbs = parent.content.breadcrumbs
+            breadcrumb_context = {"title": parent.short_title or parent.title,
+                                  "url": parent.get_absolute_url(),
+                                  "page": parent}
+            breadcrumbs.append(breadcrumb_context)
+        else:
+            breadcrumbs = []
+        return breadcrumbs 
+        
+    breadcrumbs = property(lambda self: self.get_breadcrumbs(),
+                           doc="The breadcrumbs to this page.")
+        
     # Content view method.
     
     @cached_getter
@@ -420,7 +446,7 @@ class ContentBase(object):
                         "meta_keywords": page.meta_keywords,
                         "page_header": page.title,
                         "content": self,
-                        "breadcrumbs": breadcrumbs,
+                        "breadcrumbs": self.breadcrumbs,
                         "homepage": homepage,
                         "is_homepage": (page == homepage),
                         "nav_primary": homepage.content.navigation,

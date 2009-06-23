@@ -1,9 +1,10 @@
 {% load pages %}
 {% if not is_homepage %}
     <div id="breadcrumbs">
-        {% for breadcrumbs in breadcrumbs %}
-        
+        {% for breadcrumb in breadcrumbs %}
+            <span><a href="{{breadcrumb.url}}">{{breadcrumb.title}}</a> &rsaquo; </span>
         {% endfor %}
+        <span>{{page}}</span>
     </div>
 {% endif %}
 

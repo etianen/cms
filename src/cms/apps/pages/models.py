@@ -187,7 +187,7 @@ class PageBase(models.Model):
     browser_title = models.CharField(max_length=1024,
                                      blank=True,
                                      null=True,
-                                     help_text="The heading to use in the user's web browser.  Leave blank to use the page title.  Search engines page particular attention to this attribute.")
+                                     help_text="The heading to use in the user's web browser.  Leave blank to use the page title.  Search engines pay particular attention to this attribute.")
     
     meta_keywords = models.CharField("keywords",
                                      max_length=1024,
