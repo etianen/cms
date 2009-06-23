@@ -235,15 +235,19 @@ class PageAdmin(PageBaseAdmin):
         PageForm = super(PageAdmin, self).get_form(request, obj, **kwargs)
         # HACK: Need to limit parents field based on object. This should be done in
         # formfield_for_foreignkey, but that method does not know about the object instance.
-        valid_parents = Page.objects.all()
         if obj:
-            invalid_parents = [child.id for child in obj.all_children] + [obj.id]
-            valid_parents = valid_parents.exclude(id__in=invalid_parents)
-        if valid_parents:
-            parent_choices = [(parent.id, u" \u203a ".join([unicode(breadcrumb) for breadcrumb in parent.breadcrumbs]))
-                              for parent in valid_parents]
+            invalid_parents = frozenset(obj.all_children + [obj])
         else:
+            invalid_parents = frozenset()
+        try:
+            homepage = Page.objects.get_homepage()
+        except Page.DoesNotExist:
             parent_choices = (("", "---------"),)
+        else:
+            parent_choices = []
+            for page in [homepage] + homepage.all_children:
+                if not page in invalid_parents:
+                    parent_choices.append((page.id, u" \u203a ".join([unicode(breadcrumb) for breadcrumb in list(reversed(page.all_parents)) + [page]])))
         PageForm.base_fields["parent"].choices = parent_choices
         # Return the completed form.
         return PageForm

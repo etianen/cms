@@ -131,13 +131,6 @@ class PageBase(models.Model):
     all_parents = property(get_all_parents,
                            doc="A list of all parents of this page.")
 
-    def get_breadcrumbs(self):
-        """Returns the breadcrumb trail for this page."""
-        return reversed([self] + self.all_parents)
-
-    breadcrumbs = property(get_breadcrumbs,
-                           doc="The breadcrumb trail for this page.")
-    
     def get_children(self):
         """Returns a queryset of all children of this page."""
         return self.objects.none()
@@ -188,16 +181,6 @@ class PageBase(models.Model):
                                    help_text="A shorter version of the title that will be used in site navigation. Leave blank to use the full-length title.")
     
     in_navigation = True
-    
-    @cached_getter
-    def get_navigation(self):
-        """
-        Returns all published children of this page in the site navigation.
-        """
-        return self.content.get_navigation()
-
-    navigation = property(get_navigation,
-                          doc="All the published children of this page in the site navigation.")
     
     # SEO fields.
     

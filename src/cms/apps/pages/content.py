@@ -334,7 +334,7 @@ class ContentBase(object):
     
     def get_navigation(self):
         """
-        Generates the sub-navigation of the page.
+        Returns the sub-navigation of the page.
         
         This is returned in the form of a dictionary of 'title' and 'url'.
         An optional item is 'navigation', which should be a list of sub
@@ -350,6 +350,9 @@ class ContentBase(object):
                                       "page": child}
                 navigation.append(navigation_context)
         return navigation
+    
+    navigation = property(lambda self: self.get_navigation(),
+                          doc="The sub-navigation of the page.")
     
     # Content view method.
     
@@ -399,31 +402,34 @@ class ContentBase(object):
         # Parse the main section.
         if len(breadcrumbs) > 1:
             section = breadcrumbs[1]
-            nav_secondary = section.navigation
+            nav_secondary = section.content.navigation
         else:
             section = None
             nav_secondary = None
         # Parse the subsection.
         if len(breadcrumbs) > 2:
             subsection = breadcrumbs[2]
-            nav_tertiary = subsection.navigation
+            nav_tertiary = subsection.content.navigation
         else:
             subsection = None
             nav_tertiary = None
         # Generate the context.
-        context.update({"page": page,
+        base_context = {"page": page,
                         "title": page.browser_title or page.title,
+                        "meta_description": page.meta_description,
+                        "meta_keywords": page.meta_keywords,
                         "page_header": page.title,
                         "content": self,
                         "breadcrumbs": breadcrumbs,
                         "homepage": homepage,
                         "is_homepage": (page == homepage),
-                        "nav_primary": homepage.navigation,
+                        "nav_primary": homepage.content.navigation,
                         "section": section,
                         "nav_secondary": nav_secondary,
                         "subsection": subsection,
-                        "nav_tertiary": nav_tertiary})
-        return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
+                        "nav_tertiary": nav_tertiary}
+        base_context.update(context)
+        return render_to_response(template_name, base_context, template.RequestContext(request), **kwargs)
     
     @view("^$")
     def index(self, request):

@@ -1,0 +1,11 @@
+{% load pages %}
+{% if nav_secondary %}
+    <ul id="nav-secondary">
+        {% for entry in nav_secondary %}
+            <li class="{% mark_first %}{% mark_last %}">
+                <a class="{% mark_here entry.url %}" href="{{entry.url}}">{{entry.title}}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+

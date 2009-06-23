@@ -4,6 +4,9 @@
     <head>
     
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+        <meta name="description" content="{% block meta_description %}{% endblock %}"/>
+        <meta name="keywords" content="{% block meta_keywords %}{% endblock %}"/>
         
         <title>{% block title %}{% endblock %}</title>
         
@@ -15,11 +18,15 @@
     
     <body>
         
-        <ul id="nav-primary">{% block nav_primary %}{% endblock %}</ul>
+        {% block nav_primary %}{% endblock %}
+        
+        {% block breadcrumbs %}{% endblock %}
         
         <h1>{% block page_header %}{% endblock %}</h1>
-        
+
         {% block content_primary %}{% endblock %}
+        
+        {% block nav_secondary %}{% endblock %}
         
     </body>
     
