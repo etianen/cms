@@ -441,13 +441,14 @@ class ContentBase(object):
             nav_tertiary = None
         # Generate the context.
         base_context = {"page": page,
-                        "title": page.browser_title or page.title,
+                        "title": page.title,
+                        "short_title": page.short_title,
+                        "browser_title": page.browser_title,
                         "meta_description": page.meta_description,
                         "meta_keywords": page.meta_keywords,
                         "robots_index": page.robots_index,
                         "robots_archive": page.robots_archive,
                         "robots_follow": page.robots_follow,
-                        "page_header": page.title,
                         "content": self,
                         "breadcrumbs": self.breadcrumbs,
                         "homepage": homepage,
@@ -502,6 +503,7 @@ class ContentBase(object):
   
 
 DEFAULT_CONTENT_SLUG = "content"
+
 
 # Permissions control.
 

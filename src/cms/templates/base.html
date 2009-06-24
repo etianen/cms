@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
+[% load page %}
 
 
-{% block title %}{% include "title.html" %}{% endblock %}
+{% block browser_title %}{% include "browser_title.html" %}{% endblock %}
 
 
 {% block meta_description %}{% include "meta_description.html" %}{% endblock %}
@@ -13,7 +14,7 @@
 {% block meta_robots %}{% include "meta_robots.html" %}{% endblock %}
 
 
-{% block page_header %}{% spaceless %}{% include "page_header.html" %}{% endspaceless %}{% endblock %}
+{% block title %}{% spaceless %}{% include "title.html" %}{% endspaceless %}{% endblock %}
 
 
 {% block breadcrumbs %}{% spaceless %}{% include "breadcrumbs.html" %}{% endspaceless %}{% endblock %}

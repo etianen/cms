@@ -9,7 +9,7 @@
         <meta name="keywords" content="{% block meta_keywords %}{% endblock %}"/>
         <meta name="robots" content="{% block meta_robots %}{% endblock %}"/>
         
-        <title>{% block title %}{% endblock %}</title>
+        <title>{% block browser_title %}{% endblock %}</title>
         
         <style type="text/css">
             body {font-family: sans-serif;}
@@ -24,7 +24,7 @@
         
         {% block breadcrumbs %}{% endblock %}
         
-        <h1>{% block page_header %}{% endblock %}</h1>
+        <h1>{% block title %}{% endblock %}</h1>
 
         {% block content_primary %}{% endblock %}
         
