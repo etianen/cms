@@ -11,6 +11,10 @@ import os
 from settings_debug import *
 
 
+# Use local server.
+
+SITE_DOMAIN = "localhost:8000"
+
 # Save media files to the uploads directory in the user's home folder.
 
 MEDIA_ROOT = os.path.expanduser("~/Sites/%s/media" % SITE_DOMAIN)
