@@ -4,9 +4,9 @@
 
 {% block content_primary %}
     
-    {{block.super}}
-    
     {% if articles.object_list %}
+    
+        {{block.super}}
     
         {% pagination articles %}
     
