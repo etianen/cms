@@ -215,13 +215,13 @@ class PageBase(models.Model):
                                          null=True,
                                          help_text="The relative importance of this content in your site.  Search engines use this as a hint when ranking the pages within your site.")
     
-    sitemap_change_frequency = models.CharField("change frequency",
-                                                max_length=255,
-                                                choices=settings.SEO_CHANGE_FREQUENCIES,
-                                                default=settings.SEO_DEFAULT_CHANGE_FREQUENCY,
-                                                blank=True,
-                                                null=True,
-                                                help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates.")
+    sitemap_changefreq = models.CharField("change frequency",
+                                          max_length=255,
+                                          choices=settings.SEO_CHANGE_FREQUENCIES,
+                                          default=settings.SEO_DEFAULT_CHANGE_FREQUENCY,
+                                          blank=True,
+                                          null=True,
+                                          help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates.")
     
     robots_index = models.BooleanField("allow indexing",
                                         default=True,

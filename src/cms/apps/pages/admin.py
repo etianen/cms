@@ -110,7 +110,7 @@ class PageBaseAdmin(admin.ModelAdmin):
     
     date_hierarchy = "publication_date"
     
-    seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_change_frequency", "robots_index", "robots_archive", "robots_follow",),
+    seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_changefreq", "robots_index", "robots_archive", "robots_follow",),
                                                      "classes": ("collapse",),},),)
     
     publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online",),

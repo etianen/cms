@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.views.static import serve
 
 from cms.apps.pages.admin import site as admin_site
+from cms.apps.pages.sitemaps import registered_sitemaps
 from cms.apps.pages.views import handler500
 
 
@@ -24,6 +25,10 @@ urlpatterns = patterns("",
                        url(r"^admin/(.*)", admin_site.root),
                        # Permalink redirection service.
                        url(r"^links/(?P<content_type_id>\d+)/(?P<object_id>.+)/$", "cms.apps.pages.views.permalink_redirect", name="permalink_redirect"),
+                       # Google sitemap service.
+                       url(r"^sitemap.xml$", "django.contrib.sitemaps.views.index", {"sitemaps": registered_sitemaps}),
+                       url(r"^sitemap-(?P<section>.+)\.xml$", "django.contrib.sitemaps.views.sitemap", {"sitemaps": registered_sitemaps}),
+                       # Basic robots.txt.
                        url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}),)
 
 
