@@ -71,10 +71,14 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "django.contrib.contenttypes",
                   "django.contrib.sessions",
                   "django.contrib.admin",
+                  "django.contrib.sites",
+                  "django.contrib.sitemaps",
                   "django.contrib.webdesign",
                   "cms.apps.pages",
                   "cms.apps.staff",
                   "cms.apps.media",)
+
+SITE_ID = 1
 
 
 # Media settings.
