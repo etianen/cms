@@ -203,7 +203,7 @@ class ContentMetaClass(type):
                 self.fields.append(value)
             # Register view functions.
             if callable(value) and hasattr(value, "view_id"):
-                views.append((value.view_priority, value.view_id, url(value.url, value)))
+                views.append((value.view_priority, value.view_id, url(value.url, value, name=value.__name__)))
         # Sort fields by creation order.
         self.fields.sort(lambda a, b: cmp(a.creation_order, b.creation_order))
         # Generate the urlconf.
@@ -372,13 +372,13 @@ class ContentBase(object):
         # Add parent breadcrumbs.
         if page.parent:
             parent = page.parent
-            breadcrumbs = parent.content.breadcrumbs
-            breadcrumb_context = {"title": parent.short_title or parent.title,
-                                  "url": parent.get_absolute_url(),
-                                  "page": parent}
-            breadcrumbs.append(breadcrumb_context)
+            breadcrumbs = page.parent.content.breadcrumbs
         else:
             breadcrumbs = []
+        breadcrumb_context = {"title": page.short_title or page.title,
+                              "url": page.get_absolute_url(),
+                              "page": page}
+        breadcrumbs.append(breadcrumb_context)
         return breadcrumbs 
         
     breadcrumbs = property(lambda self: self.get_breadcrumbs(),
@@ -396,7 +396,11 @@ class ContentBase(object):
     url_resolver = property(get_url_resolver,
                             doc="The URL resolver for this content.")
     
-    def dispatch(self, request, path_info, default_kwargs=None):
+    def reverse(self, view_func, *args, **kwargs):
+        """Performs a reverse URL lookup."""
+        return self.page.url + self.url_resolver.reverse(view_func, *args, **kwargs)
+    
+    def dispatch(self, request, path_info="", default_kwargs=None):
         """Generates a HttpResponse for this context."""
         page = self.page
         # Update the request.

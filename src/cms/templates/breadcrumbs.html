@@ -3,9 +3,12 @@
     {% if not is_homepage %}
         <div id="breadcrumbs">
             {% for breadcrumb in breadcrumbs %}
-                <span><a href="{{breadcrumb.url}}">{{breadcrumb.title}}</a> &rsaquo; </span>
+                {% if forloop.last %}
+                    <span>{{breadcrumb.title}}</span>
+                {% else %}
+                    <span><a href="{{breadcrumb.url}}">{{breadcrumb.title}}</a> &rsaquo; </span>
+                {% endif %}
             {% endfor %}
-            <span>{% firstof short_title title %}</span>
         </div>
     {% endif %}
 {% endspaceless %}

@@ -141,7 +141,7 @@ class PageBase(models.Model):
 
     def get_children(self):
         """Returns a queryset of all children of this page."""
-        return self.objects.none()
+        return self.__class__.objects.none()
     
     children = property(lambda self: self.get_children(),
                         doc="All children of this page.")
