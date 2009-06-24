@@ -358,6 +358,13 @@ class ContentBase(object):
     navigation = property(lambda self: self.get_navigation(),
                           doc="The sub-navigation of the page.")
     
+    def get_breadcrumb(self, page):
+        """Returns a breadcrumb for the given page."""
+        breadcrumb_context = {"title": page.short_title or page.title,
+                              "url": page.get_absolute_url(),
+                              "page": page}
+        return breadcrumb_context
+    
     def get_breadcrumbs(self):
         """
         Returns the breadcrumbs to this page.
@@ -372,13 +379,11 @@ class ContentBase(object):
         # Add parent breadcrumbs.
         if page.parent:
             parent = page.parent
-            breadcrumbs = page.parent.content.breadcrumbs
+            breadcrumbs = parent.content.breadcrumbs
+            breadcrumbs.append(self.get_breadcrumb(parent))
         else:
             breadcrumbs = []
-        breadcrumb_context = {"title": page.short_title or page.title,
-                              "url": page.get_absolute_url(),
-                              "page": page}
-        breadcrumbs.append(breadcrumb_context)
+        print breadcrumbs
         return breadcrumbs 
         
     breadcrumbs = property(lambda self: self.get_breadcrumbs(),
@@ -400,7 +405,7 @@ class ContentBase(object):
         """Performs a reverse URL lookup."""
         return self.page.url + self.url_resolver.reverse(view_func, *args, **kwargs)
     
-    def dispatch(self, request, path_info="", default_kwargs=None):
+    def dispatch(self, request, path_info, default_kwargs=None):
         """Generates a HttpResponse for this context."""
         page = self.page
         # Update the request.
