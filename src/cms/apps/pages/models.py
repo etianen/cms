@@ -215,15 +215,15 @@ class PageBase(models.Model):
                                                 null=True,
                                                 help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates.")
     
-    robots_allow_indexing = models.BooleanField("allow indexing",
-                                                default=True,
-                                                help_text="Uncheck this box to prevent search engines from indexing this page. Disable this only if the page contains information which you do not wish to show up in search results.")
+    robots_index = models.BooleanField("allow indexing",
+                                        default=True,
+                                        help_text="Uncheck this box to prevent search engines from indexing this page. Disable this only if the page contains information which you do not wish to show up in search results.")
 
-    robots_allow_archiving = models.BooleanField("allow archiving",
-                                                 default=True,
-                                                 help_text="Uncheck this box to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis.")
+    robots_archive = models.BooleanField("allow archiving",
+                                         default=True,
+                                         help_text="Uncheck this box to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis.")
 
-    robots_follow_links = models.BooleanField("follow links",
+    robots_follow = models.BooleanField("follow links",
                                               default=True,
                                               help_text="Uncheck this box to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise.")
 
@@ -305,7 +305,10 @@ class PageField(models.ForeignKey):
         
     def get_default(self):
         """Returns the default page."""
-        return self.rel.to._default_manager.filter(**self.rel.limit_choices_to)[0].pk
+        try:
+            return self.rel.to._default_manager.filter(**self.rel.limit_choices_to)[0].pk
+        except IndexError:
+            return None
 
 
 class PageManager(PageBaseManager):

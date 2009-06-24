@@ -22,10 +22,14 @@
                             {% sitemap_entry homepage %}
                         </ul>
                     {% else %}
-                        <p>This site does not have a homepage.</p>
+                        <p>This site doesn't have a homepage.</p>
+                        {% if perms.pages.add_page %}
+                            <p>It's probably time to go ahead and <a href="{{create_homepage_url}}">create one</a>!</p>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
         {% endif %}
     </div>
 {% endblock %}
+

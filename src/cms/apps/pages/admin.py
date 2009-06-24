@@ -23,6 +23,14 @@ from cms.apps.pages.forms import EditDetailsForm
 from cms.apps.pages.models import Page
 
 
+# The GET parameter used to indicate where page admin actions originated.
+PAGE_FROM_KEY = "from"
+
+
+# The GET parameter value used to indicate that the page admin action came form the sitemap.
+PAGE_FROM_SITEMAP_VALUE = "sitemap"
+
+
 class AdminSite(admin.AdminSite):
     
     """The CMS admin site."""
@@ -45,7 +53,8 @@ class AdminSite(admin.AdminSite):
         # Generate the context.
         context = {"title": "Dashboard",
                    "homepage": homepage,
-                   "page_admin": self._registry[Page]}
+                   "page_admin": self._registry[Page],
+                   "create_homepage_url": self.root_path + "pages/page/add/?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE)}
         context.update(extra_context or {})
         # Render the index page.
         return super(AdminSite, self).index(request, context)
@@ -101,7 +110,7 @@ class PageBaseAdmin(admin.ModelAdmin):
     
     date_hierarchy = "publication_date"
     
-    seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_change_frequency", "robots_allow_indexing", "robots_allow_archiving", "robots_follow_links",),
+    seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_change_frequency", "robots_index", "robots_archive", "robots_follow",),
                                                      "classes": ("collapse",),},),)
     
     publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online",),
@@ -214,14 +223,6 @@ class PageBaseAdmin(admin.ModelAdmin):
         super(PageBaseAdmin, self).save_model(request, obj, form, change)
     
     
-# The GET parameter used to indicate where page admin actions originated.
-PAGE_FROM_KEY = "from"
-
-
-# The GET parameter value used to indicate that the page admin action came form the sitemap.
-PAGE_FROM_SITEMAP_VALUE = "sitemap"
-    
-
 class PageAdmin(PageBaseAdmin):
 
     """Admin settings for Page models."""

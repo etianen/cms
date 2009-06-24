@@ -1,16 +1,14 @@
 {% load pages %}
-{% if nav_primary %}
-    <ul id="nav-primary">
-        {% if homepage.in_navigation %}
-            <li class="{% mark_first %}">
-                <a class="{% mark_here_exact homepage.url %}" href="{{homepage.url}}">Home</a>
-            </li>
-        {% endif %}
-        {% for entry in nav_primary %}
-            <li class="{% mark_last %}">
-                <a class="{% mark_here entry.url %}" href="{{entry.url}}">{{entry.title}}</a>
-            </li>
-        {% endfor %}
-    </ul>
-{% endif %}
+<ul id="nav-primary">
+    {% if homepage.in_navigation %}
+        <li class="{% mark_first %}">
+            <a class="{% mark_here_exact homepage.url %}" href="{{homepage.url}}">Home</a>
+        </li>
+    {% endif %}
+    {% for entry in nav_primary %}
+        <li class="{% mark_last %}">
+            <a class="{% mark_here entry.url %}" href="{{entry.url}}">{{entry.title}}</a>
+        </li>
+    {% endfor %}
+</ul>
 
