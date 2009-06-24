@@ -383,7 +383,6 @@ class ContentBase(object):
             breadcrumbs.append(self.get_breadcrumb(parent))
         else:
             breadcrumbs = []
-        print breadcrumbs
         return breadcrumbs 
         
     breadcrumbs = property(lambda self: self.get_breadcrumbs(),
