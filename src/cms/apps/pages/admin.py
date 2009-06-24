@@ -119,7 +119,7 @@ class PageBaseAdmin(admin.ModelAdmin):
     navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
                                             "classes": ("collapse",),}),)
 
-    fieldsets = ((None, {"fields": ("title", "url_title",),},),) + navigation_fieldsets + publication_fieldsets + seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title",),},),) + publication_fieldsets + navigation_fieldsets + seo_fieldsets
     
     list_display = ("title", "publication_date", "is_online",)
     
@@ -227,9 +227,10 @@ class PageAdmin(PageBaseAdmin):
 
     """Admin settings for Page models."""
 
-    fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),
-                 ("Navigation", {"fields": ("short_title", "in_navigation",),
-                                 "classes": ("collapse",),},),) + PageBaseAdmin.publication_fieldsets + PageBaseAdmin.seo_fieldsets
+    navigation_fieldsets = (("Navigation", {"fields": ("short_title", "in_navigation",),
+                                            "classes": ("collapse",),},),)
+
+    fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),) + PageBaseAdmin.publication_fieldsets + navigation_fieldsets + PageBaseAdmin.seo_fieldsets
 
     def get_form(self, request, obj=None, **kwargs):
         """Adds the template area fields to the form."""

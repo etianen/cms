@@ -13,7 +13,11 @@ class Article(PageBase):
     
     parent = PageField(Page,
                        "newsfeed",
-                       verbose_name="news page")
+                       verbose_name="news feed")
+    
+    is_featured = models.BooleanField("featured",
+                                      default=False,
+                                      help_text="Featured articles will remain at the top of any news feeds.")
     
     class Meta:
         verbose_name = "news article"

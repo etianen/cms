@@ -143,6 +143,10 @@ class IntegerField(Field):
         attrs["max_value"] = self.max_value
         return attrs
     
+    def deserialize(self, value):
+        """Converts the value from a unicode string into a Python object."""
+        return int(value)
+    
     
 class PositiveIntegerField(IntegerField):
     

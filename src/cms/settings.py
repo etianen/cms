@@ -78,7 +78,15 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "cms.apps.staff",
                   "cms.apps.media",)
 
+
+# Multi-site settings.
+
 SITE_ID = 1
+
+
+# Pagination settings.
+
+PAGINATION_KEY = "page"
 
 
 # Media settings.

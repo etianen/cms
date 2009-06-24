@@ -1,0 +1,45 @@
+{% extends "content.html" %}
+{% load pages %}
+
+
+{% block content_primary %}
+    
+    {{block.super}}
+    
+    {% if articles.object_list %}
+    
+        {% pagination articles %}
+    
+        <ul id="article-list">
+            {% for article in articles.object_list %}
+                <li>
+                    <h2>
+                        <span class="date">{{article.publication_date|date}}</span>
+                        <a href="{{article.url}}">{{article.title}}</a>
+                    </h2>
+                    
+                    {% if article.content.summary %}
+                        <p>{{article.content.summary}}</p>
+                    {% else %}
+                        {% if article.content.main %}
+                            <p>{{article.content.main|first_paragraph|striptags}}</p>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if article.content.main %}
+                        <p class="read-more"><a href="{{article.url}}">Read more</a></p>
+                    {% endif %}
+                    
+                </li>
+            {% endfor %}
+        </ul>
+        
+        {% pagination articles %}
+    
+    {% else %}
+    
+        <p>There are no articles to display.</p>
+    
+    {% endif %}
+    
+{% endblock %}

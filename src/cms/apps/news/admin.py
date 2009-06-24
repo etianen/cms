@@ -11,7 +11,14 @@ class ArticleAdmin(PageBaseAdmin):
     
     """Admin settings used by news articles."""
     
-    fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),) + PageBaseAdmin.navigation_fieldsets + PageBaseAdmin.publication_fieldsets + PageBaseAdmin.seo_fieldsets
+    list_display = ("title", "publication_date", "is_online", "is_featured",)
+    
+    list_filter = ("is_online", "is_featured",)
+    
+    publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online", "is_featured"),
+                                              "classes": ("collapse",)}),)
+    
+    fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),) + publication_fieldsets + PageBaseAdmin.navigation_fieldsets + PageBaseAdmin.seo_fieldsets
     
     radio_fields = {"parent": admin.VERTICAL}
     
