@@ -364,6 +364,16 @@ class Page(PageBase):
                                         default=True,
                                         help_text="Uncheck this box to remove this content from the site navigation.")
 
+    @cached_getter
+    def get_navigation(self):
+        """
+        Returns all published children that should be added to the navigation.
+        """
+        return self.published_children.filter(in_navigation=True)
+        
+    navigation = property(get_navigation,
+                          doc="All published children that should be added to the navigation.")
+
     # Content fields.
     
     content_type = models.CharField(max_length=20,
@@ -396,7 +406,7 @@ class Page(PageBase):
     def get_absolute_url(self):
         """Generates the absolute url of the page."""
         if self.parent:
-            return self.parent.content.reverse("dispatch_to_child", self.url_title, "")
+            return self.parent.url + self.url_title + "/"
         return reverse("render_homepage")
     
     class Meta:

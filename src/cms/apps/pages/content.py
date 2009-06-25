@@ -1,7 +1,7 @@
 """Pluggable page content, serialized to XML."""
 
 
-import cStringIO, datetime, types
+import cStringIO, datetime, types, re
 from xml.dom import minidom
 from xml.sax.saxutils import XMLGenerator
 
@@ -9,6 +9,7 @@ from django import forms, template
 from django.conf import settings
 from django.conf.urls.defaults import url, patterns
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import RegexURLResolver, Resolver404, Http404
 from django.db.models.options import get_verbose_name
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseServerError
@@ -159,7 +160,7 @@ class PositiveIntegerField(IntegerField):
 view_id_counter = 0
     
     
-def view(url, priority=0):
+def view(url):
     """
     Decorator used to mark up Content methods as view functions.
     
@@ -178,7 +179,6 @@ def view(url, priority=0):
         func.url = url
         view_id_counter += 1
         func.view_id = view_id_counter
-        func.view_priority = priority
         return func
     return decorator
     
@@ -202,12 +202,12 @@ class ContentMetaClass(type):
                 self.fields.append(value)
             # Register view functions.
             if callable(value) and hasattr(value, "view_id"):
-                views.append((value.view_priority, value.view_id, url(value.url, value, name=value.__name__)))
+                views.append((value.view_id, url(value.url, value, name=value.__name__)))
         # Sort fields by creation order.
         self.fields.sort(lambda a, b: cmp(a.creation_order, b.creation_order))
         # Generate the urlconf.
-        views.sort(lambda a, b: cmp(-a[0], -b[0]) or cmp(a[1], b[1]))
-        view_funcs = [""] + [view_func for view_priority, view_id, view_func in views]
+        views.sort(lambda a, b: cmp(a[0], b[0]))
+        view_funcs = [""] + [view_func for view_id, view_func in views]
         self.urlpatterns = patterns(*view_funcs)
         # Generate a verbose name, if required.
         if not "verbose_name" in attrs:
@@ -253,7 +253,7 @@ class LazyNavigation(object):
         """Delegates to the wrapped list."""
         return self.get_list().__iter__()
         
-
+        
 class ContentBase(object):
     
     """
@@ -280,6 +280,8 @@ class ContentBase(object):
             self.serialized_data = page.content_data
         else:
             self.data = {}
+        
+    # Content serialization methods.
         
     def get_serialized_data(self):
         """Returns the content data, serialized to XML."""
@@ -351,47 +353,16 @@ class ContentBase(object):
         instance of PageBase that this navigation item represents.
         """
         navigation = []
-        for child in self.page.published_children:
-            if child.in_navigation:
-                navigation_context = {"title": child.short_title or child.title,
-                                      "url": child.get_absolute_url(),
-                                      "navigation": LazyNavigation(lambda: child.navigation),
-                                      "page": child}
-                navigation.append(navigation_context)
+        for entry in self.page.navigation:
+            navigation_context = {"title": entry.short_title or entry.title,
+                                  "url": entry.url,
+                                  "navigation": LazyNavigation(lambda: entry.content.navigation),
+                                  "page": entry}
+            navigation.append(navigation_context)
         return navigation
     
     navigation = property(lambda self: self.get_navigation(),
                           doc="The sub-navigation of the page.")
-    
-    def get_breadcrumb(self, page):
-        """Returns a breadcrumb for the given page."""
-        breadcrumb_context = {"title": page.short_title or page.title,
-                              "url": page.get_absolute_url(),
-                              "page": page}
-        return breadcrumb_context
-    
-    def get_breadcrumbs(self):
-        """
-        Returns the breadcrumbs to this page.
-        
-        This is returned in the form of a dictionary of 'title' and 'url'.
-        An optional item is 'page', which should be an instance of PageBase that
-        this navigation item represents.
-        
-        This list should not include the current page.
-        """
-        page = self.page
-        # Add parent breadcrumbs.
-        if page.parent:
-            parent = page.parent
-            breadcrumbs = parent.content.breadcrumbs
-            breadcrumbs.append(self.get_breadcrumb(parent))
-        else:
-            breadcrumbs = []
-        return breadcrumbs 
-        
-    breadcrumbs = property(lambda self: self.get_breadcrumbs(),
-                           doc="The breadcrumbs to this page.")
         
     # Content view method.
     
@@ -409,7 +380,7 @@ class ContentBase(object):
         """Performs a reverse URL lookup."""
         return self.page.url + self.url_resolver.reverse(view_func, *args, **kwargs)
     
-    def dispatch(self, request, path_info, default_kwargs=None):
+    def dispatch(self, request, path_info):
         """Generates a HttpResponse for this context."""
         page = self.page
         # Update the request.
@@ -419,6 +390,7 @@ class ContentBase(object):
         try:
             callback, callback_args, callback_kwargs = resolver.resolve(path_info)
         except Resolver404:
+            # First of all see if adding a slash will help matters.
             if settings.APPEND_SLASH:
                 new_path_info = path_info + "/"
                 try:
@@ -427,10 +399,21 @@ class ContentBase(object):
                     pass
                 else:
                     return HttpResponseRedirect(page.get_absolute_url() + new_path_info)
+            # See if a child page can help out.
+            path_parts = path_info.split("/", 1)
+            child_url_title = path_parts[0]
+            try:
+                child = page.children.get(url_title=child_url_title)
+            except ObjectDoesNotExist:
+                pass 
+            else:
+                try:
+                    path_info = path_parts[1]
+                except IndexError:
+                    return HttpResponseRedirect(page.get_absolute_url() + new_path_info)
+                return child.content.dispatch(request, path_info)
             raise Http404, "No match for the current path '%s' found in the url conf of %s." % (path_info, self.__class__.__name__)
-        default_kwargs = default_kwargs or {}
-        default_kwargs.update(callback_kwargs)
-        response = callback(self, request, *callback_args, **default_kwargs)
+        response = callback(self, request, *callback_args, **callback_kwargs)
         # Validate the response.
         if not isinstance(response, HttpResponse):
             raise ValueError, "The view %s.%s didn't return an HttpResponse object." % (self.__class__.__name__, callback.__name__)
@@ -448,15 +431,6 @@ class ContentBase(object):
         template_name = ("pages/%s.html" % content_name,
                          "base.html")
         return self.render_to_response(request, template_name, {})
-        
-    @view("^([a-zA-Z0-9_\-]+)/(.*)$", priority=-100)
-    def dispatch_to_child(self, request, child_slug, path_info):
-        """Dispatches the request to a child page."""
-        page = self.page
-        for child in page.children:
-            if child.url_title == child_slug:
-                return child.content.dispatch(request, path_info)
-        raise Http404, "The %s '%s' does not have a child with a url title of '%s'" % (page.__class__.__name__.lower(), page, child_slug)
         
     # Administration methods.
         

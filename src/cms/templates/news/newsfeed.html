@@ -1,4 +1,4 @@
-{% extends "content.html" %}
+{% extends "base.html" %}
 {% load pages %}
 
 
@@ -19,10 +19,10 @@
                     </h2>
                     
                     {% if article.content.summary %}
-                        <p>{{article.content.summary}}</p>
+                        {{article.content.summary|linebreaks}}
                     {% else %}
                         {% if article.content.main %}
-                            <p>{{article.content.main|first_paragraph|striptags}}</p>
+                            {{article.content.main|truncatewords_html:100|safe}}
                         {% endif %}
                     {% endif %}
                     
