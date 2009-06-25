@@ -94,9 +94,27 @@ def reorder_pages(request):
     # Send a positive response.
     return HttpResponse("Swapped page '%s' with page '%s'." % (pages[0], pages[1]))
         
-
-def handler500(self, request):
+        
+def handler404(request):
     """Renders the server error document."""
-    content = template.loader.render_to_string("500.html", {}, template.RequestContext(request))
-    return HttpResponseServerError(content)
+    try:
+        page = request.breadcrumbs[-1]
+    except:
+        page = Page.objects.get_homepage()
+    context = {"title": "Page Not Found"}
+    response = page.content.render_to_response(request, "404.html", context)
+    response.status_code = 404
+    return response
+        
+
+def handler500(request):
+    """Renders the server error document."""
+    try:
+        page = request.breadcrumbs[-1]
+    except:
+        page = Page.objects.get_homepage()
+    context = {"title": "Server Error"}
+    response = page.content.render_to_response(request, "404.html", context)
+    response.status_code = 500
+    return response
 

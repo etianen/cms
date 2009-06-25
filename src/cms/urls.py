@@ -9,7 +9,6 @@ from django.views.static import serve
 from cms.apps.pages.admin import site as admin_site
 from cms.apps.pages.sitemaps import registered_sitemaps
 from cms.apps.pages.feeds import registered_feeds
-from cms.apps.pages.views import handler500
 
 
 admin.autodiscover()
@@ -55,3 +54,8 @@ urlpatterns += patterns("cms.apps.pages.views",
                         url(r"^(.*)$", "render_page", name="render_page"),
                         url(r"^$", "render_page", name="render_homepage"),)
 
+
+handler404 = "cms.apps.pages.views.handler404"
+
+
+handler500 = "cms.apps.pages.views.handler500"
