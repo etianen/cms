@@ -17,9 +17,6 @@ def render_page(request, path_info=""):
         homepage = Page.objects.get_homepage()
     except Page.DoesNotExist:
         raise Http404, "The site does not have a homepage."
-    # Check publication state.
-    if not homepage.is_published:
-        raise Http404, "The site homepage has not been published."
     # Dispatch the request!
     request.breadcrumbs = []
     return homepage.content.dispatch(request, path_info)
