@@ -73,7 +73,6 @@ class NewsFeed(content.Content):
         context = {"articles": articles,
                    "title": "Archive for %i" % year,
                    "short_title": year,
-                   "breadcrumbs": self.breadcrumbs,
                    "year": year}
         return self.render_to_response(request, "news/article_list.html", context)
     

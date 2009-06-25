@@ -443,7 +443,6 @@ class ContentBase(object):
     
     def render_to_response(self, request, template_name, context, **kwargs):
         """Renders this content to the response."""
-        context.setdefault("breadcrumbs", self.breadcrumbs[:-1])
         return self.render_page(self.page, request, template_name, context, **kwargs)
     
     def render_page(self, page, request, template_name, context, **kwargs):
@@ -468,6 +467,10 @@ class ContentBase(object):
         else:
             subsection = None
             nav_tertiary = None
+        # Intelligently set the breadcrumbs.
+        template_breadcrumbs = self.breadcrumbs
+        if self.page.url == request.path:
+            template_breadcrumbs = template_breadcrumbs[:-1]
         # Generate the context.
         context.setdefault("page", page)
         context.setdefault("content", self)
@@ -480,7 +483,7 @@ class ContentBase(object):
         context.setdefault("robots_archive", page.robots_archive)
         context.setdefault("robots_follow", page.robots_follow)
         context.setdefault("homepage", homepage)
-        context.setdefault("breadcrumbs", self.breadcrumbs)
+        context.setdefault("breadcrumbs", template_breadcrumbs)
         context.setdefault("is_homepage", (page == homepage))
         context.setdefault("site_title", homepage.browser_title or homepage.title)
         context.setdefault("nav_primary", homepage.content.navigation)
