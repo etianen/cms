@@ -89,6 +89,11 @@ SITE_ID = 1
 PAGINATION_KEY = "page"
 
 
+# Feed settings.
+
+FEED_LENGTH = 30
+
+
 # Media settings.
 
 FILE_TYPES = (("mp3", "Audio"),

@@ -2,11 +2,15 @@
 
 
 from django.conf import settings
+from django.contrib.syndication.feeds import Feed
+from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage
 from django.http import Http404
 from django.utils.dates import MONTHS
 
 from cms.apps.pages import content
+from cms.apps.pages.feeds import registered_feeds
+from cms.apps.pages.models import Page
 from cms.apps.news.models import Article
 
 
@@ -18,6 +22,18 @@ class NewsFeed(content.Content):
     
     articles_per_page = content.PositiveIntegerField(required=True,
                                                      default=10)
+    
+    def get_feed_url(self):
+        """Returns the URL of the RSS feed for this page."""
+        return reverse("feeds", kwargs={"url": ARTICLE_FEED_KEY}) + unicode(self.page.id) + "/"
+        
+    feed_url = property(get_feed_url,
+                        doc="The URL of the RSS feed for this page.")
+    
+    def render_to_response(self, request, template_name, context, **kwargs):
+        """Renders the given page."""
+        context.setdefault("feed_url", self.feed_url)
+        return super(NewsFeed, self).render_to_response(request, template_name, context, **kwargs)
     
     def get_published_articles(self):
         """Returns all the published articles for this news feed."""
@@ -95,4 +111,49 @@ class NewsFeed(content.Content):
     
     
 content.register(NewsFeed)
+
+
+ARTICLE_FEED_KEY = "news"
+
+
+class NewsArticleFeed(Feed):
+    
+    """Feed generator for articles."""
+    
+    def get_object(self, bits):
+        """Allows customization of the feed."""
+        if len(bits) == 0:
+            return None
+        elif len(bits) == 1:
+            return Page.published_objects.get(id=bits[0])
+        else:
+            raise ObjectDoesNotExist
+        
+    def title(self, obj=None):
+        """Generates the feed title."""
+        homepage = Page.objects.get_homepage()
+        site_title = homepage.browser_title or homepage.title
+        if obj is None:
+            return "%s Latest News" % site_title
+        return obj.title
+
+    def link(self, obj=None):
+        if obj is None:
+            return "/"
+        return obj.url
+
+    def description(self, obj=None):
+        """Generates the feed description."""
+        homepage = Page.objects.get_homepage()
+        site_title = homepage.browser_title or homepage.title
+        return "Latest news from %s." % site_title
+        
+    def items(self, obj=None):
+        """Generates the feed items."""
+        if obj is None:
+            return Article.published_objects.all()[:settings.FEED_LENGTH]
+        return obj.content.published_articles.all()[:settings.FEED_LENGTH]
+    
+    
+registered_feeds[ARTICLE_FEED_KEY] = NewsArticleFeed
 
