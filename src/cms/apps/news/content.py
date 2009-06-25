@@ -2,12 +2,12 @@
 
 
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage
 from django.http import Http404
 from django.utils.dates import MONTHS
 
 from cms.apps.pages import content
+from cms.apps.news.models import Article
 
 
 class NewsFeed(content.Content):
@@ -86,7 +86,7 @@ class NewsFeed(content.Content):
                                                           publication_date__month=month)
         try:
             article = all_articles.get(url_title=article_slug)
-        except ObjectDoesNotExist:
+        except Article.DoesNotExist:
             raise Http404, "An article with a URL title of '%s' does not exist." % article_slug
         breadcrumbs = self.breadcrumbs + [{"url": self.reverse("year_archive", year), "title": year},
                                           {"url": self.reverse("month_archive", year, month), "title": MONTHS[month]},]
@@ -94,3 +94,5 @@ class NewsFeed(content.Content):
         return self.render_page(article, request, "news/article_detail.html", context)    
     
     
+content.register(NewsFeed)
+

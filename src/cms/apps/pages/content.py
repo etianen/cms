@@ -1,7 +1,7 @@
 """Pluggable page content, serialized to XML."""
 
 
-import cStringIO, datetime, types, re
+import cStringIO, datetime, imp, types, re
 from xml.dom import minidom
 from xml.sax.saxutils import XMLGenerator
 
@@ -9,7 +9,6 @@ from django import forms, template
 from django.conf import settings
 from django.conf.urls.defaults import url, patterns
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import RegexURLResolver, Resolver404, Http404
 from django.db.models.options import get_verbose_name
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseServerError
@@ -427,7 +426,7 @@ class ContentBase(object):
             child_url_title = path_parts[0]
             try:
                 child = page.children.get(url_title=child_url_title)
-            except ObjectDoesNotExist:
+            except page.DoesNotExist:
                 pass 
             else:
                 try:
@@ -524,11 +523,62 @@ DEFAULT_CONTENT_SLUG = "content"
 
 # Permissions control.
 
-def get_add_permission(slug, model):
+def get_add_permission(slug):
     """Generates the add permission codename for the given slug."""
     if slug == DEFAULT_CONTENT_SLUG:
         raise ValueError, "Base content model does not have an add permission."
-    return u"add_%s_%s" % (slug, model.__name__.lower())
+    return u"add_%s_page" % slug
+
+
+# Content registration methods.
+
+class ContentRegistrationError(Exception):
+    
+    """Exception raised when content registration goes wrong."""
+
+
+registered_content = {}
+
+
+def register(content_cls, slug=None):
+    """
+    Registers the given content type with this class under the given slug.
+    """
+    slug = slug or content_cls.__name__.lower()
+    registered_content[slug] = content_cls
+  
+  
+def unregister(slug):
+    """Unregisters the content type associated with the given slug."""
+    try:
+        del registered_content[slug]
+    except KeyError:
+        raise ContentRegistrationError, "No content type is registered under %r." % slug
+
+
+def lookup(slug):
+    """Looks up the given content type by type slug."""
+    try:
+        return registered_content[slug]
+    except KeyError:
+        raise ContentRegistrationError, "No content type is registered under %r." % slug
+
+
+def autoregister():
+    """
+    Scans all installed applications for content.py files, and trys to import
+    them.
+    """
+    for app in settings.INSTALLED_APPS:
+        try:
+            app_path = __import__(app, {}, {}, [app.split(".")[-1]]).__path__
+        except AttributeError:
+            continue
+        try:
+            imp.find_module("content", app_path)
+        except ImportError:
+            continue
+        __import__("%s.content" % app)
 
 
 # Simple base content models.
@@ -542,6 +592,9 @@ class Content(ContentBase):
     content_primary = HtmlField("main content")      
 
 
+register(Content)
+
+
 class Redirect(ContentBase):
     
     """A redirect to another URL."""
@@ -550,4 +603,7 @@ class Redirect(ContentBase):
     
     redirect_url = CharField(help_text="The URL where the user will be redirected.")
     
+        
+register(Redirect)
+
     

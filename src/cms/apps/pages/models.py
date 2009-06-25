@@ -214,48 +214,9 @@ class PageManager(PageBaseManager):
         return self.get(parent=None)
 
 
-class ContentRegistrationError(Exception):
-    
-    """Exception raised when content registration goes wrong."""
-
-
-class PageMetaClass(ModelBase):
-    
-    """Metaclass for Page models."""
-    
-    def __init__(self, name, bases, attrs):
-        """Initializes the PageMetaClass."""
-        super(PageMetaClass, self).__init__(name, bases, attrs)
-        self.content_registry = {}
-        self.register_content(content.Content, content.DEFAULT_CONTENT_SLUG)
-
-    def register_content(self, content_cls, slug=None):
-        """
-        Registers the given content type with this class under the given slug.
-        """
-        slug = slug or content_cls.__name__.lower()
-        self.content_registry[slug] = content_cls
-      
-    def unregister_content(self, slug):
-        """Unregisters the content type associated with the given slug."""
-        try:
-            del self.content_registry[slug]
-        except KeyError:
-            raise ContentRegistrationError, "No content type is registered under %r." % slug
-    
-    def lookup_content(self, slug):
-        """Looks up the given content type by type slug."""
-        try:
-            return self.content_registry[slug]
-        except KeyError:
-            raise ContentRegistrationError, "No content type is registered under %r." % slug
-
-
 class Page(PageBase):
 
     """A page within the site."""
-
-    __metaclass__ = PageMetaClass
 
     objects = PageManager()
     
@@ -342,7 +303,7 @@ class Page(PageBase):
         """Returns the content object associated with this page."""
         if not self.content_type:
             return None
-        content_cls = self.__class__.lookup_content(self.content_type)
+        content_cls = content.lookup(self.content_type)
         content_instance = content_cls(self)
         return content_instance
 
@@ -365,10 +326,4 @@ class Page(PageBase):
     
     class Meta:
         unique_together = (("parent", "url_title",),)
-
-
-# Add some base content types.
-    
-       
-Page.register_content(content.Redirect)
 

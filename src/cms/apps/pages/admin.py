@@ -153,7 +153,7 @@ class PageAdmin(PageBaseAdmin):
     def get_page_content(self, request, obj=None):
         """Retrieves the page content object."""
         page_content_type = self.get_page_content_type(request, obj)
-        page_content_cls = self.model.lookup_content(page_content_type)
+        page_content_cls = content.lookup(page_content_type)
         # Create new page content instance.
         page_content = page_content_cls(obj)
         return page_content
@@ -234,7 +234,7 @@ class PageAdmin(PageBaseAdmin):
         if slug == content.DEFAULT_CONTENT_SLUG:
             return True
         # Check user has correct permission.
-        add_permission = "%s.%s" % (opts.app_label, content.get_add_permission(slug, model))
+        add_permission = "%s.%s" % (opts.app_label, content.get_add_permission(slug))
         return request.user.has_perm(add_permission)
     
     def add_view(self, request, *args, **kwargs):
@@ -244,7 +244,7 @@ class PageAdmin(PageBaseAdmin):
         user = request.user
         if not PAGE_TYPE_PARAMETER in request.GET:
             # Generate the available content items.
-            content_items = self.model.content_registry.items()
+            content_items = content.registered_content.items()
             content_items.sort(lambda a, b: cmp(a[1].verbose_name, b[1].verbose_name))
             content_types = []
             for slug, content_type in content_items:
