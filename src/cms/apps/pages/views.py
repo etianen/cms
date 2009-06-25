@@ -4,6 +4,7 @@
 from django import template
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import resolve, Resolver404
 from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import render_to_response
 
@@ -12,6 +13,16 @@ from cms.apps.pages.models import Page
 
 def render_page(request, path_info=""):
     """Dispatches the request to the site pages."""
+    # Append the slash if it will match an existing URL.
+    if settings.APPEND_SLASH and not request.path.endswith("/"):
+        new_path = request.path + "/"
+        try:
+            callback, callback_args, callback_kwargs = resolve(new_path)
+        except Resolver404:
+            pass
+        else:
+            if callback != render_page:
+                return HttpResponseRedirect(new_path)
     # Attempt to retrieve the homepage.
     try:
         homepage = Page.objects.get_homepage()
