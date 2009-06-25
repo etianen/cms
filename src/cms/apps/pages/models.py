@@ -179,25 +179,25 @@ class PageBase(models.Model):
             subsection = None
             nav_tertiary = None
         # Generate the context.
-        base_context = {"page": self,
-                        "title": self.title,
-                        "short_title": self.short_title,
-                        "browser_title": self.browser_title,
-                        "meta_description": self.meta_description,
-                        "meta_keywords": self.meta_keywords,
-                        "robots_index": self.robots_index,
-                        "robots_archive": self.robots_archive,
-                        "robots_follow": self.robots_follow,
-                        "breadcrumbs": [], # TODO
-                        "homepage": homepage,
-                        "is_homepage": (self == homepage),
-                        "nav_primary": homepage.content.navigation,
-                        "section": section,
-                        "nav_secondary": nav_secondary,
-                        "subsection": subsection,
-                        "nav_tertiary": nav_tertiary}
-        base_context.update(context)
-        return render_to_response(template_name, base_context, template.RequestContext(request), **kwargs)
+        context.setdefault("page", self)
+        context.setdefault("title", self.title)
+        context.setdefault("short_title", context["title"])
+        context.setdefault("browser_title", self.browser_title or context["title"])
+        context.setdefault("meta_description", self.meta_description or homepage.meta_description)
+        context.setdefault("meta_keywords", self.meta_keywords or homepage.meta_keywords)
+        context.setdefault("robots_index", self.robots_index)
+        context.setdefault("robots_archive", self.robots_archive)
+        context.setdefault("robots_follow", self.robots_follow)
+        context.setdefault("homepage", homepage)
+        context.setdefault("is_homepage", (self == homepage))
+        context.setdefault("site_title", homepage.browser_title or homepage.title)
+        context.setdefault("robots_index", self.robots_index)
+        context.setdefault("nav_primary", homepage.content.navigation)
+        context.setdefault("section", section)
+        context.setdefault("nav_secondary", nav_secondary)
+        context.setdefault("subsection", subsection)
+        context.setdefault("nav_tertiary", nav_tertiary)
+        return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
     
     # Base model methods.
     

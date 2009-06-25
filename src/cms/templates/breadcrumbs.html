@@ -5,7 +5,7 @@
             {% for breadcrumb in breadcrumbs %}
                 <span><a href="{{breadcrumb.url}}">{{breadcrumb.title}}</a> &rsaquo; </span>
             {% endfor %}
-            <span>{% firstof short_title title %}</span>
+            <span>{{short_title}}</span>
         </div>
     {% endif %}
 {% endspaceless %}

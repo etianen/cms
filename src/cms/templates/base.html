@@ -5,13 +5,13 @@
 {% block browser_title %}{% include "browser_title.html" %}{% endblock %}
 
 
-{% block meta_description %}{% include "meta_description.html" %}{% endblock %}
+{% block meta_description %}{{meta_description}}{% endblock %}
 
 
-{% block meta_keywords %}{% include "meta_keywords.html" %}{% endblock %}
+{% block meta_keywords %}{{meta_keywords}}{% endblock %}
 
 
-{% block meta_robots %}{% include "meta_robots.html" %}{% endblock %}
+{% block meta_robots %}{% if robots_index %}INDEX{% else %}NOINDEX{% endif %}, {% if robots_follow %}FOLLOW{% else %}NOFOLLOW{% endif %}, {% if robots_archive %}ARCHIVE{% else %}NOARCHIVE{% endif %}{% endblock %}
 
 
 {% block title %}{% include "title.html" %}{% endblock %}
