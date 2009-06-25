@@ -12,7 +12,7 @@ tinyMCE.init({
     theme_advanced_buttons2: "",
     theme_advanced_buttons3: "",
     width: "700px",
-    height: "300px",
+    height: "350px",
     dialog_type: "modal",
     theme_advanced_blockformats: "h2,h3,p",
     external_link_list_url: "{% url tinymce_link_list %}",
