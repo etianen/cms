@@ -7,7 +7,6 @@ from django import template
 from django.conf import settings
 
 from cms.apps.pages import permalinks, thumbnails
-from cms.apps.pages.html import first_paragraph
 
 
 register = template.Library()
@@ -51,11 +50,6 @@ def pagination_url(context, page_number, pagination_key=None):
 
 
 # HTML tags.
-
-
-def first_paragraph_(text):
-    return first_paragraph(text)
-first_paragraph_ = register.filter("first_paragraph", first_paragraph_)
 
 
 @register.inclusion_tag("mark_here.html", takes_context=True)

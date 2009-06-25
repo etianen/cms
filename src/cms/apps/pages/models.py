@@ -13,46 +13,10 @@ from django.http import Http404
 from django.shortcuts import render_to_response
 
 from cms.apps.pages import content
+from cms.apps.pages.forms import HtmlWidget
 from cms.apps.pages.optimizations import cached_getter, cached_setter
 
 
-class ContentRegistrationError(Exception):
-    
-    """Exception raised when content registration goes wrong."""
-
-
-class PageMetaClass(ModelBase):
-    
-    """Metaclass for Page models."""
-    
-    def __init__(self, name, bases, attrs):
-        """Initializes the PageMetaClass."""
-        super(PageMetaClass, self).__init__(name, bases, attrs)
-        self.content_registry = {}
-        self.register_content(content.Content, content.DEFAULT_CONTENT_SLUG)
-
-    def register_content(self, content_cls, slug=None):
-        """
-        Registers the given content type with this class under the given slug.
-        """
-        slug = slug or content_cls.__name__.lower()
-        self.content_registry[slug] = content_cls
-      
-    def unregister_content(self, slug):
-        """Unregisters the content type associated with the given slug."""
-        try:
-            del self.content_registry[slug]
-        except KeyError:
-            raise ContentRegistrationError, "No content type is registered under %r." % slug
-    
-    def lookup_content(self, slug):
-        """Looks up the given content type by type slug."""
-        try:
-            return self.content_registry[slug]
-        except KeyError:
-            raise ContentRegistrationError, "No content type is registered under %r." % slug
-  
-  
 PAGE_PUBLICATION_SQL = """
     is_online = TRUE AND
     (
@@ -106,8 +70,6 @@ class PageBase(models.Model):
     
     """Base model for models used to generate a HTML page."""
     
-    __metaclass__ = PageMetaClass
-    
     # Model management.
     
     objects = PageBaseManager()
@@ -125,48 +87,6 @@ class PageBase(models.Model):
     title = models.CharField(max_length=1000)
     
     url_title = models.SlugField("URL title")
-    
-    # Hierarchy fields.
-    
-    parent = None
-    
-    def get_all_parents(self):
-        """Returns a list of all parents of this page."""
-        if self.parent:
-            return [self.parent] + self.parent.all_parents
-        return []
-    
-    all_parents = property(get_all_parents,
-                           doc="A list of all parents of this page.")
-
-    def get_children(self):
-        """Returns a queryset of all children of this page."""
-        return self.__class__.objects.none()
-    
-    children = property(lambda self: self.get_children(),
-                        doc="All children of this page.")
-    
-    def get_all_children(self):
-        """
-        Returns all the children of this page, cascading down to their children
-        too.
-        """
-        children = []
-        for child in self.children:
-            children.append(child)
-            children.extend(child.all_children)
-        return children
-            
-    all_children = property(get_all_children,
-                            doc="All the children of this page, cascading down to their children too.")
-    
-    @cached_getter
-    def get_published_children(self):
-        """Returns all the published children of this page."""
-        return self.__class__.published_objects.select_published(self.children)
-
-    published_children = property(get_published_children,
-                                  doc="All the published children of this page.")
     
     # Publication fields.
     
@@ -187,8 +107,6 @@ class PageBase(models.Model):
                                    blank=True,
                                    null=True,
                                    help_text="A shorter version of the title that will be used in site navigation. Leave blank to use the full-length title.")
-    
-    in_navigation = True
     
     # SEO fields.
     
@@ -232,49 +150,54 @@ class PageBase(models.Model):
                                          help_text="Uncheck this box to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis.")
 
     robots_follow = models.BooleanField("follow links",
-                                              default=True,
-                                              help_text="Uncheck this box to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise.")
+                                        default=True,
+                                        help_text="Uncheck this box to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise.")
 
-    # Content fields.
-
-    content_type = models.CharField(max_length=20,
-                                    editable=False,
-                                    help_text="The type of page content.")
-
-    content_data = models.TextField(editable=False,
-                                    help_text="The encoded data of this page.")
-
-    @cached_getter
-    def get_content(self):
-        """Returns the content object associated with this page."""
-        if not self.content_type:
-            return None
-        content_cls = self.__class__.lookup_content(self.content_type)
-        content_instance = content_cls(self)
-        return content_instance
-
-    @cached_setter(get_content)
-    def set_content(self, content):
-        """Sets the content object for this page."""
-        self.content_data = content.serialized_data
-
-    content = property(get_content,
-                       set_content,
-                       doc="The content object associated with this page.")
-    
     # Page rendering methods.
     
-    def dispatch(self, request, path_info):
-        """
-        Dispatches the request to this page.
-        
-        Returns a HttpResponse of some sort.
-        """
+    def render_to_response(self, request, template_name, context, **kwargs):
+        """Renders the given template using the given context."""
         # Check for publication state.
         if not self.is_published:
             if not (request.user.is_authenticated() and request.user.is_staff and request.user.is_active):
                 raise Http404, "The page '%s' has not been published yet." % self
-        return self.content.dispatch(request, path_info)
+        # Parse context variables.
+        breadcrumbs = request.breadcrumbs
+        homepage = breadcrumbs[0]
+        # Parse the main section.
+        if len(breadcrumbs) > 1:
+            section = breadcrumbs[1]
+            nav_secondary = section.content.navigation
+        else:
+            section = None
+            nav_secondary = None
+        # Parse the subsection.
+        if len(breadcrumbs) > 2:
+            subsection = breadcrumbs[2]
+            nav_tertiary = subsection.content.navigation
+        else:
+            subsection = None
+            nav_tertiary = None
+        # Generate the context.
+        base_context = {"page": self,
+                        "title": self.title,
+                        "short_title": self.short_title,
+                        "browser_title": self.browser_title,
+                        "meta_description": self.meta_description,
+                        "meta_keywords": self.meta_keywords,
+                        "robots_index": self.robots_index,
+                        "robots_archive": self.robots_archive,
+                        "robots_follow": self.robots_follow,
+                        "breadcrumbs": [], # TODO
+                        "homepage": homepage,
+                        "is_homepage": (self == homepage),
+                        "nav_primary": homepage.content.navigation,
+                        "section": section,
+                        "nav_secondary": nav_secondary,
+                        "subsection": subsection,
+                        "nav_tertiary": nav_tertiary}
+        base_context.update(context)
+        return render_to_response(template_name, base_context, template.RequestContext(request), **kwargs)
     
     # Base model methods.
     
@@ -295,7 +218,6 @@ class PageBase(models.Model):
     class Meta:
         abstract = True
         ordering = ("title",)
-        unique_together = (("parent", "url_title",),)
 
 
 class PageField(models.ForeignKey):
@@ -319,6 +241,16 @@ class PageField(models.ForeignKey):
             return None
 
 
+class HtmlField(models.TextField):
+    
+    """A field that contains HTML data."""
+    
+    def formfield(self, **kwargs):
+        """Returns a HtmlWidget."""
+        kwargs["widget"] = HtmlWidget
+        return super(HtmlField, self).formfield(**kwargs)
+
+
 class PageManager(PageBaseManager):
     
     """Manager for Page objects."""
@@ -328,9 +260,48 @@ class PageManager(PageBaseManager):
         return self.get(parent=None)
 
 
+class ContentRegistrationError(Exception):
+    
+    """Exception raised when content registration goes wrong."""
+
+
+class PageMetaClass(ModelBase):
+    
+    """Metaclass for Page models."""
+    
+    def __init__(self, name, bases, attrs):
+        """Initializes the PageMetaClass."""
+        super(PageMetaClass, self).__init__(name, bases, attrs)
+        self.content_registry = {}
+        self.register_content(content.Content, content.DEFAULT_CONTENT_SLUG)
+
+    def register_content(self, content_cls, slug=None):
+        """
+        Registers the given content type with this class under the given slug.
+        """
+        slug = slug or content_cls.__name__.lower()
+        self.content_registry[slug] = content_cls
+      
+    def unregister_content(self, slug):
+        """Unregisters the content type associated with the given slug."""
+        try:
+            del self.content_registry[slug]
+        except KeyError:
+            raise ContentRegistrationError, "No content type is registered under %r." % slug
+    
+    def lookup_content(self, slug):
+        """Looks up the given content type by type slug."""
+        try:
+            return self.content_registry[slug]
+        except KeyError:
+            raise ContentRegistrationError, "No content type is registered under %r." % slug
+
+
 class Page(PageBase):
 
     """A page within the site."""
+
+    __metaclass__ = PageMetaClass
 
     objects = PageManager()
     
@@ -339,6 +310,15 @@ class Page(PageBase):
     parent = PageField("self",
                        blank=True,
                        null=True)
+
+    def get_all_parents(self):
+        """Returns a list of all parents of this page."""
+        if self.parent:
+            return [self.parent] + self.parent.all_parents
+        return []
+    
+    all_parents = property(get_all_parents,
+                           doc="A list of all parents of this page.")
 
     order = models.PositiveSmallIntegerField(unique=True,
                                              editable=False,
@@ -352,12 +332,64 @@ class Page(PageBase):
         state.
         """
         return self.page_set.all().order_by("order")
+    
+    children = property(get_children,
+                        doc="All children of this page.")
+    
+    def get_all_children(self):
+        """
+        Returns all the children of this page, cascading down to their children
+        too.
+        """
+        children = []
+        for child in self.children:
+            children.append(child)
+            children.extend(child.all_children)
+        return children
+            
+    all_children = property(get_all_children,
+                            doc="All the children of this page, cascading down to their children too.")
+    
+    @cached_getter
+    def get_published_children(self):
+        """Returns all the published children of this page."""
+        return self.__class__.published_objects.select_published(self.children)
+
+    published_children = property(get_published_children,
+                                  doc="All the published children of this page.")
 
     # Navigation fields.
 
     in_navigation = models.BooleanField("add to navigation",
                                         default=True,
                                         help_text="Uncheck this box to remove this content from the site navigation.")
+
+    # Content fields.
+    
+    content_type = models.CharField(max_length=20,
+                                    editable=False,
+                                    help_text="The type of page content.")
+
+    content_data = models.TextField(editable=False,
+                                    help_text="The encoded data of this page.")
+    
+    @cached_getter
+    def get_content(self):
+        """Returns the content object associated with this page."""
+        if not self.content_type:
+            return None
+        content_cls = self.__class__.lookup_content(self.content_type)
+        content_instance = content_cls(self)
+        return content_instance
+
+    @cached_setter(get_content)
+    def set_content(self, content):
+        """Sets the content object for this page."""
+        self.content_data = content.serialized_data
+
+    content = property(get_content,
+                       set_content,
+                       doc="The content object associated with this page.")
 
     # Standard model methods.
     
@@ -366,6 +398,9 @@ class Page(PageBase):
         if self.parent:
             return self.parent.content.reverse("dispatch_to_child", self.url_title, "")
         return reverse("render_homepage")
+    
+    class Meta:
+        unique_together = (("parent", "url_title",),)
 
 
 # Add some base content types.

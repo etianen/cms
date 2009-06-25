@@ -15,12 +15,14 @@ class ArticleAdmin(PageBaseAdmin):
     
     list_filter = ("is_online", "is_featured",)
     
+    content_fieldsets = (("Article content", {"fields": ("content", "summary",),}),)
+    
     publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online", "is_featured"),
                                               "classes": ("collapse",)}),)
     
-    fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),) + publication_fieldsets + PageBaseAdmin.navigation_fieldsets + PageBaseAdmin.seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title", "news_feed",),},),) + content_fieldsets + publication_fieldsets + PageBaseAdmin.navigation_fieldsets + PageBaseAdmin.seo_fieldsets
     
-    radio_fields = {"parent": admin.VERTICAL}
+    radio_fields = {"news_feed": admin.VERTICAL}
     
     
 site.register(Article, ArticleAdmin)

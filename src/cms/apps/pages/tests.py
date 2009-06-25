@@ -8,7 +8,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.files.images import ImageFile
 
 from cms.apps.pages import thumbnails
-from cms.apps.pages.html import first_paragraph
 from cms.apps.pages.optimizations import cached_getter, cached_setter, cached_deleter
 
 
@@ -55,23 +54,6 @@ class ThumbnailGenerationTest(unittest.TestCase):
         self.assertEqual(cropped_thumbnail.width, 5)
         self.assertEqual(cropped_thumbnail.height, 8)
         self.deleteThumbnail(cropped_thumbnail)
-
-
-# Test the HTML utilities.
-
-
-class TestHtmlUtilities(unittest.TestCase):
-    
-    """Tests the HTML utilities."""
-    
-    TWO_PARAGRAPHS = "<p>First paragraph</p><p>Second paragraph</p>"
-    
-    NO_PARAGRAPHS = "<h1>Foo</h1><h2>Bar</h2>"
-    
-    def testFirstParagraph(self):
-        """Tests the first_paragraph function."""
-        self.assertEqual(first_paragraph(self.TWO_PARAGRAPHS), "First paragraph")
-        self.assertEqual(first_paragraph(self.NO_PARAGRAPHS), "")
 
 
 # Test the optimizations.

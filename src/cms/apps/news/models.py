@@ -3,7 +3,7 @@
 
 from django.db import models
 
-from cms.apps.pages.models import Page, PageBase, PageField
+from cms.apps.pages.models import Page, PageBase, PageField, HtmlField
 from cms.apps.news.content import NewsFeed, NewsArticle
 
 
@@ -11,9 +11,15 @@ class Article(PageBase):
     
     """A news article."""
     
-    parent = PageField(Page,
-                       "newsfeed",
-                       verbose_name="news feed")
+    news_feed = PageField(Page,
+                          "newsfeed")
+    
+    content = HtmlField(blank=True,
+                        null=True)
+    
+    summary = models.TextField(blank=True,
+                               null=True,
+                               help_text="A short summary of this article.  This will be used on news pages and RSS feeds.  If not specified, then a summarized version of the content will be used.")
     
     is_featured = models.BooleanField("featured",
                                       default=False,
@@ -27,7 +33,6 @@ class Article(PageBase):
         verbose_name = "news article"
         
         
-Article.register_content(NewsArticle, "content")
 
 
 Page.register_content(NewsFeed)

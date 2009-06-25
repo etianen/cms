@@ -22,7 +22,7 @@ def render_page(request, path_info=""):
         raise Http404, "The site homepage has not been published."
     # Dispatch the request!
     request.breadcrumbs = []
-    return homepage.dispatch(request, path_info)
+    return homepage.content.dispatch(request, path_info)
 
 
 def permalink_redirect(request, content_type_id, object_id):

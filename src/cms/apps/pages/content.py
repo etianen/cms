@@ -17,7 +17,6 @@ from django.utils.html import strip_tags
 
 from cms.apps.pages.forms import PageForm, HtmlWidget
 from cms.apps.pages.optimizations import cached_getter
-from cms.apps.pages.html import first_paragraph
 
 
 class Field(object):
@@ -438,46 +437,9 @@ class ContentBase(object):
         return response
     
     def render_to_response(self, request, template_name, context, **kwargs):
-        """Renders the given template using the given context."""
-        # Parse context variables.
-        page = self.page
-        breadcrumbs = request.breadcrumbs
-        homepage = breadcrumbs[0]
-        # Parse the main section.
-        if len(breadcrumbs) > 1:
-            section = breadcrumbs[1]
-            nav_secondary = section.content.navigation
-        else:
-            section = None
-            nav_secondary = None
-        # Parse the subsection.
-        if len(breadcrumbs) > 2:
-            subsection = breadcrumbs[2]
-            nav_tertiary = subsection.content.navigation
-        else:
-            subsection = None
-            nav_tertiary = None
-        # Generate the context.
-        base_context = {"page": page,
-                        "title": page.title,
-                        "short_title": page.short_title,
-                        "browser_title": page.browser_title,
-                        "meta_description": page.meta_description,
-                        "meta_keywords": page.meta_keywords,
-                        "robots_index": page.robots_index,
-                        "robots_archive": page.robots_archive,
-                        "robots_follow": page.robots_follow,
-                        "content": self,
-                        "breadcrumbs": self.breadcrumbs,
-                        "homepage": homepage,
-                        "is_homepage": (page == homepage),
-                        "nav_primary": homepage.content.navigation,
-                        "section": section,
-                        "nav_secondary": nav_secondary,
-                        "subsection": subsection,
-                        "nav_tertiary": nav_tertiary}
-        base_context.update(context)
-        return render_to_response(template_name, base_context, template.RequestContext(request), **kwargs)
+        """Renders this content to the response."""
+        context.setdefault("content", self)
+        return self.page.render_to_response(request, template_name, context, **kwargs)
     
     @view("^$")
     def index(self, request):
@@ -493,7 +455,7 @@ class ContentBase(object):
         page = self.page
         for child in page.children:
             if child.url_title == child_slug:
-                return child.dispatch(request, path_info)
+                return child.content.dispatch(request, path_info)
         raise Http404, "The %s '%s' does not have a child with a url title of '%s'" % (page.__class__.__name__.lower(), page, child_slug)
         
     # Administration methods.
