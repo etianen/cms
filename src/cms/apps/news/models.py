@@ -31,8 +31,7 @@ class Article(PageBase):
     
     class Meta:
         verbose_name = "news article"
-        
-        
+        unique_together = (("news_feed", "url_title",),)
 
 
 Page.register_content(NewsFeed)
