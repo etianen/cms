@@ -153,52 +153,6 @@ class PageBase(models.Model):
                                         default=True,
                                         help_text="Uncheck this box to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise.")
 
-    # Page rendering methods.
-    
-    def render_to_response(self, request, template_name, context, **kwargs):
-        """Renders the given template using the given context."""
-        # Check for publication state.
-        if not self.is_published:
-            if not (request.user.is_authenticated() and request.user.is_staff and request.user.is_active):
-                raise Http404, "The page '%s' has not been published yet." % self
-        # Parse context variables.
-        breadcrumbs = request.breadcrumbs
-        homepage = breadcrumbs[0]
-        # Parse the main section.
-        if len(breadcrumbs) > 1:
-            section = breadcrumbs[1]
-            nav_secondary = section.content.navigation
-        else:
-            section = None
-            nav_secondary = None
-        # Parse the subsection.
-        if len(breadcrumbs) > 2:
-            subsection = breadcrumbs[2]
-            nav_tertiary = subsection.content.navigation
-        else:
-            subsection = None
-            nav_tertiary = None
-        # Generate the context.
-        context.setdefault("page", self)
-        context.setdefault("title", self.title)
-        context.setdefault("short_title", context["title"])
-        context.setdefault("browser_title", self.browser_title or context["title"])
-        context.setdefault("meta_description", self.meta_description or homepage.meta_description)
-        context.setdefault("meta_keywords", self.meta_keywords or homepage.meta_keywords)
-        context.setdefault("robots_index", self.robots_index)
-        context.setdefault("robots_archive", self.robots_archive)
-        context.setdefault("robots_follow", self.robots_follow)
-        context.setdefault("homepage", homepage)
-        context.setdefault("is_homepage", (self == homepage))
-        context.setdefault("site_title", homepage.browser_title or homepage.title)
-        context.setdefault("robots_index", self.robots_index)
-        context.setdefault("nav_primary", homepage.content.navigation)
-        context.setdefault("section", section)
-        context.setdefault("nav_secondary", nav_secondary)
-        context.setdefault("subsection", subsection)
-        context.setdefault("nav_tertiary", nav_tertiary)
-        return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
-    
     # Base model methods.
     
     def get_absolute_url(self):

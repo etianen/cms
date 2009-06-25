@@ -18,15 +18,15 @@
                         <a href="{{article.url}}">{{article.title}}</a>
                     </h2>
                     
-                    {% if article.content.summary %}
-                        {{article.content.summary|linebreaks}}
+                    {% if article.summary %}
+                        {{article.summary|linebreaks}}
                     {% else %}
-                        {% if article.content.main %}
-                            {{article.content.main|truncatewords_html:100|safe}}
+                        {% if article.content %}
+                            {{article.content|truncatewords_html:100|safe}}
                         {% endif %}
                     {% endif %}
                     
-                    {% if article.content.main %}
+                    {% if article.content %}
                         <p class="read-more"><a href="{{article.url}}">Read more</a></p>
                     {% endif %}
                     

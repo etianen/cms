@@ -4,7 +4,7 @@
 from django.db import models
 
 from cms.apps.pages.models import Page, PageBase, PageField, HtmlField
-from cms.apps.news.content import NewsFeed, NewsArticle
+from cms.apps.news.content import NewsFeed
 
 
 class Article(PageBase):
@@ -27,7 +27,10 @@ class Article(PageBase):
     
     def get_absolute_url(self):
         """Returns the absolute URL of the article."""
-        return self.parent.content.reverse("article_detail", self.publication_date.year, self.publication_date.month, self.url_title, "")
+        try:
+            return self.news_feed.content.reverse("article_detail", self.publication_date.year, self.publication_date.month, self.url_title)
+        except Exception, ex:
+            print ex
     
     class Meta:
         verbose_name = "news article"

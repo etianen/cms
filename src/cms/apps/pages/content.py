@@ -364,6 +364,30 @@ class ContentBase(object):
     navigation = property(lambda self: self.get_navigation(),
                           doc="The sub-navigation of the page.")
         
+    def get_breadcrumb(self, page):
+        """Generates a breadcrumb from the given page."""
+        breadcrumb = {"url": page.url,
+                      "title": page.short_title or page.title,
+                      "page": page}
+        return breadcrumb
+        
+    def get_breadcrumbs(self):
+        """
+        Returns the list of breadcrumbs to the page that contains this content.
+        
+        This is returned in the form of a dictionary of 'title' and 'url'.
+        An optional item is 'page', which should be an instance of PageBase that
+        this breadcrumb represents.
+        
+        This list should not include the current page.
+        """
+        page = self.page
+        breadcrumbs = [self.get_breadcrumb(parent) for parent in reversed([page] + page.all_parents)]
+        return breadcrumbs
+        
+    breadcrumbs = property(get_breadcrumbs,
+                           doc="The list of breadcrumbs to the page that contains this content.")
+        
     # Content view method.
     
     @cached_getter
@@ -383,7 +407,6 @@ class ContentBase(object):
     def dispatch(self, request, path_info):
         """Generates a HttpResponse for this context."""
         page = self.page
-        # Update the request.
         request.breadcrumbs.append(self.page)
         # Dispatch to the appropriate view.
         resolver = self.url_resolver
@@ -421,8 +444,52 @@ class ContentBase(object):
     
     def render_to_response(self, request, template_name, context, **kwargs):
         """Renders this content to the response."""
+        context.setdefault("breadcrumbs", self.breadcrumbs[:-1])
+        return self.render_page(self.page, request, template_name, context, **kwargs)
+    
+    def render_page(self, page, request, template_name, context, **kwargs):
+        """Renders the given page to a HttpResponse."""
+        if not page.is_published:
+            if not (request.user.is_authenticated() and request.user.is_staff and request.user.is_active):
+                raise Http404, "The page '%s' has not been published yet." % page
+        # Parse context variables.
+        breadcrumbs = request.breadcrumbs
+        homepage = breadcrumbs[0]
+        # Parse the main section.
+        if len(breadcrumbs) > 1:
+            section = breadcrumbs[1]
+            nav_secondary = section.content.navigation
+        else:
+            section = None
+            nav_secondary = None
+        # Parse the subsection.
+        if len(breadcrumbs) > 2:
+            subsection = breadcrumbs[2]
+            nav_tertiary = subsection.content.navigation
+        else:
+            subsection = None
+            nav_tertiary = None
+        # Generate the context.
+        context.setdefault("page", page)
         context.setdefault("content", self)
-        return self.page.render_to_response(request, template_name, context, **kwargs)
+        context.setdefault("title", page.title)
+        context.setdefault("short_title", context["title"])
+        context.setdefault("browser_title", page.browser_title or context["title"])
+        context.setdefault("meta_description", page.meta_description or homepage.meta_description)
+        context.setdefault("meta_keywords", page.meta_keywords or homepage.meta_keywords)
+        context.setdefault("robots_index", page.robots_index)
+        context.setdefault("robots_archive", page.robots_archive)
+        context.setdefault("robots_follow", page.robots_follow)
+        context.setdefault("homepage", homepage)
+        context.setdefault("breadcrumbs", self.breadcrumbs)
+        context.setdefault("is_homepage", (page == homepage))
+        context.setdefault("site_title", homepage.browser_title or homepage.title)
+        context.setdefault("nav_primary", homepage.content.navigation)
+        context.setdefault("section", section)
+        context.setdefault("nav_secondary", nav_secondary)
+        context.setdefault("subsection", subsection)
+        context.setdefault("nav_tertiary", nav_tertiary)
+        return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
     
     @view("^$")
     def index(self, request):
