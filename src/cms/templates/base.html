@@ -28,3 +28,12 @@
 
 {% block nav_tertiary %}{% include "nav_tertiary.html" %}{% endblock %}
 
+
+{% block content_primary %}{{content.content_primary|safe}}{% endblock %}
+
+
+{% block content_secondary %}{{content.content_secondary|safe}}{% endblock %}
+
+
+{% block content_tertiary %}{{content.content_tertiary|safe}}{% endblock %}
+

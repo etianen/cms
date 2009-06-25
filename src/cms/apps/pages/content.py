@@ -294,7 +294,10 @@ class ContentBase(object):
             key = field.name
             value = self.data[key]
             generator.startElement("attribute", {"name": key})
-            serialized_value = field.serialize(value)
+            if value is None:
+                serialized_value = ""
+            else:
+                serialized_value = field.serialize(value)
             generator.characters(serialized_value)
             generator.endElement("attribute")
         # Return the generated XML.
@@ -325,8 +328,11 @@ class ContentBase(object):
         data = {}
         for field in self.fields:
             key = field.name
-            serialized_value = raw_data[key]
-            value = field.deserialize(serialized_value)
+            serialized_value = raw_data.get(key, "")
+            if serialized_value == "":
+                value = None
+            else:
+                value = field.deserialize(serialized_value)
             data[key] = value
         self.data = data
         
@@ -476,13 +482,9 @@ class ContentBase(object):
     @view("^$")
     def index(self, request):
         """Renders the content as a HTML page."""
-        model = self.page.__class__
-        model_name = model.__name__.lower()
         content_name = self.__class__.__name__.lower()
-        opts = model._meta
-        template_name = ("%s/%s/%s.html" % (opts.app_label, model_name, content_name),
-                         "%s/%s.html" % (opts.app_label, content_name),
-                         "%s.html" % (content_name),)
+        template_name = ("pages/%s.html" % content_name,
+                         "base.html")
         return self.render_to_response(request, template_name, {})
         
     @view("^([a-zA-Z0-9_\-]+)/(.*)$", priority=-100)
@@ -534,7 +536,7 @@ class Content(ContentBase):
     
     verbose_name_plural = "content"
     
-    main = HtmlField("main content")      
+    content_primary = HtmlField("main content")      
 
 
 class Redirect(ContentBase):
