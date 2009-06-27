@@ -21,14 +21,23 @@ PAGE_PUBLICATION_SQL = """
     is_online = TRUE AND
     (
         (
-            publication_date <= NOW()
+            publication_date <= TIMESTAMP('%(now)s')
         ) AND
         (
             expiry_date IS NULL OR
-            expiry_date > NOW()
+            expiry_date > TIMESTAMP('%(now)s')
         )
     )
 """
+
+
+MYSQL_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+
+def get_page_publication_sql():
+    """Returns the SQL query for determining publication date."""
+    now = datetime.datetime.now().strftime(MYSQL_DATE_FORMAT)
+    return PAGE_PUBLICATION_SQL % {"now": now}
 
 
 class PageBaseManager(models.Manager):
@@ -45,7 +54,7 @@ class PageBaseManager(models.Manager):
         """Adds the is_published property to all loaded pages."""
         queryset = super(PageBaseManager, self).get_query_set()
         queryset = queryset.filter(site=Site.objects.get_current())
-        queryset = queryset.extra(select={"is_published": PAGE_PUBLICATION_SQL})
+        queryset = queryset.extra(select={"is_published": get_page_publication_sql()})
         return queryset
 
 
@@ -57,7 +66,7 @@ class PublishedPageManager(PageBaseManager):
     
     def select_published(self, queryset):
         """Filters out unpublished objects from the queryset."""
-        return queryset.extra(where=[PAGE_PUBLICATION_SQL])
+        return queryset.extra(where=[get_page_publication_sql()])
     
     def get_query_set(self):
         """Returns the filtered query set."""
