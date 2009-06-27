@@ -16,21 +16,20 @@
         <ul id="article-list">
             {% for article in articles.object_list %}
                 <li>
+                
                     <h2>
-                        <span class="date">{{article.publication_date|date}}</span>
+                        <span class="article-list-date">{{article.publication_date|date}}</span>
                         <a href="{{article.url}}">{{article.title}}</a>
                     </h2>
                     
                     {% if article.summary %}
                         {{article.summary|linebreaks}}
                     {% else %}
-                        {% if article.content %}
-                            {{article.content|truncatewords_html:100|safe}}
-                        {% endif %}
+                        {{article.content|truncatewords_html:100|safe}}
                     {% endif %}
                     
                     {% if article.content %}
-                        <p class="read-more"><a href="{{article.url}}">Read more</a></p>
+                        <p class="article-list-read-more"><a href="{{article.url}}">Read more</a></p>
                     {% endif %}
                     
                 </li>

@@ -32,10 +32,14 @@ def synchronize_current_site(**kwargs):
     Renames the current site object with the site name and domain name in the
     Django settings file.
     """
-    site = Site.objects.get_current()
-    site.name = settings.SITE_NAME
-    site.domain = settings.SITE_DOMAIN
-    site.save()
+    try:
+        site = Site.objects.get_current()
+    except Site.DoesNotExist:
+        pass
+    else:
+        site.name = settings.SITE_NAME
+        site.domain = settings.SITE_DOMAIN
+        site.save()
     
     
 post_syncdb.connect(synchronize_current_site)
