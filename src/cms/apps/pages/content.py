@@ -94,7 +94,7 @@ class CharField(Field):
         return attrs
     
     
-class TextField(CharField):
+class TextField(Field):
     
     """A text data field."""
     
