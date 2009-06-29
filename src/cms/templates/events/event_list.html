@@ -13,12 +13,12 @@
     
         {% pagination events %}
     
-        <ul id="article-list">
+        <ul id="event-list">
             {% for event in events.object_list %}
                 <li>
                 
                     <h2>
-                        <span class="event-list-date">{{event.publication_date|date}}</span>
+                        <span class="event-list-date">{{event.start_date|date}}{% if event.end_date %} - {{event.end_date|date}}{% endif %}</span>
                         <a href="{{event.url}}">{{event.title}}</a>
                     </h2>
                     
