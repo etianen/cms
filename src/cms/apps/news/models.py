@@ -33,10 +33,7 @@ class Article(ArticleBase):
     
     def get_absolute_url(self):
         """Returns the absolute URL of the article."""
-        try:
-            return self.news_feed.content.reverse("article_detail", self.publication_date.year, self.publication_date.month, self.url_title)
-        except Exception, ex:
-            print ex
+        return self.news_feed.content.reverse("article_detail", self.publication_date.year, self.publication_date.month, self.url_title)
     
     class Meta:
         verbose_name = "news article"

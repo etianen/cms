@@ -7,9 +7,20 @@ from django import template
 from django.conf import settings
 
 from cms.apps.pages import permalinks, thumbnails
+from cms.apps.pages.models import Page
 
 
 register = template.Library()
+
+
+# Page linking.
+
+@register.simple_tag
+def page_url(page, view_func="index"):
+    """Renders the URL of the given view func in the given page."""
+    if isinstance(page, int):
+        page = Page.objects.get(id=page)
+    return page.content.reverse(view_func)
 
 
 # Pagination.
