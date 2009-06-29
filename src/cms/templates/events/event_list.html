@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load pages %}
+
+
+{% block feeds %}<link rel="alternate" type="application/rss+xml" title="{{page.title}}" href="{{feed_url}}"/>{% endblock %}
+
+
+{% block content_primary %}
+    
+    {% if events.object_list %}
+    
+        {{block.super}}
+    
+        {% pagination events %}
+    
+        <ul id="article-list">
+            {% for event in events.object_list %}
+                <li>
+                
+                    <h2>
+                        <span class="event-list-date">{{event.publication_date|date}}</span>
+                        <a href="{{event.url}}">{{event.title}}</a>
+                    </h2>
+                    
+                    {% if event.summary %}
+                        {{event.summary|linebreaks}}
+                    {% else %}
+                        {{event.content|truncatewords_html:100|safe}}
+                    {% endif %}
+                    
+                    {% if event.content %}
+                        <p class="event-list-read-more"><a href="{{event.url}}">Read more</a></p>
+                    {% endif %}
+                    
+                </li>
+            {% endfor %}
+        </ul>
+        
+        {% pagination events %}
+    
+    {% else %}
+    
+        <p>There are no events to display.</p>
+    
+    {% endif %}
+    
+{% endblock %}
+

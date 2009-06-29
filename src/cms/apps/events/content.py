@@ -11,21 +11,21 @@ from django.utils.dates import MONTHS
 from cms.apps.pages import content
 from cms.apps.pages.feeds import registered_feeds
 from cms.apps.pages.models import Page
-from cms.apps.news.models import Article
+from cms.apps.events.models import Event
 
 
-class NewsFeed(content.Content):
+class EventsFeed(content.Content):
     
     """An archive of published news articles."""
     
-    icon = settings.CMS_MEDIA_URL + "img/content-types/news-feed.png"
+    icon = settings.CMS_MEDIA_URL + "img/content-types/events-feed.png"
     
-    articles_per_page = content.PositiveIntegerField(required=True,
-                                                     default=10)
+    events_per_page = content.PositiveIntegerField(required=True,
+                                                   default=10)
     
     def get_feed_url(self):
         """Returns the URL of the RSS feed for this page."""
-        return reverse("feeds", kwargs={"url": ARTICLE_FEED_KEY}) + unicode(self.page.id) + "/"
+        return reverse("feeds", kwargs={"url": EVENT_FEED_KEY}) + unicode(self.page.id) + "/"
         
     feed_url = property(get_feed_url,
                         doc="The URL of the RSS feed for this page.")
@@ -33,23 +33,23 @@ class NewsFeed(content.Content):
     def render_to_response(self, request, template_name, context, **kwargs):
         """Renders the given page."""
         context.setdefault("feed_url", self.feed_url)
-        return super(NewsFeed, self).render_to_response(request, template_name, context, **kwargs)
+        return super(EventsFeed, self).render_to_response(request, template_name, context, **kwargs)
     
-    def get_published_articles(self):
-        """Returns all the published articles for this news feed."""
-        return Article.published_objects.filter(news_feed=self.page)
+    def get_published_events(self):
+        """Returns all the published events for this events feed."""
+        return self.page.article_set.all()
     
-    published_articles = property(get_published_articles,
-                                  doc="All the published articles for this news feed.")
+    published_events = property(get_published_events,
+                                doc="All the published events for this events feed.")
     
     def get_page(self, request, articles):
-        """Returns an object paginator for the given articles."""
+        """Returns an object paginator for the given events."""
         page = request.GET.get(settings.PAGINATION_KEY, 1)
         try:
             page = int(page)
         except ValueError:
             raise Http404, "'%s' is not a valid page number." % page 
-        paginator = Paginator(articles, self.articles_per_page)
+        paginator = Paginator(articles, self.events_per_page)
         try:
             page = paginator.page(page)
         except EmptyPage:
@@ -58,11 +58,11 @@ class NewsFeed(content.Content):
     
     @content.view(r"^$")
     def index(self, request):
-        """Generates a page of the latest news articles."""
-        all_articles = self.published_articles
-        articles = self.get_page(request, all_articles)
-        context = {"articles": articles}
-        return self.render_to_response(request, "news/article_list.html", context)
+        """Generates a page of the upcoming events."""
+        all_events = self.published_events
+        events = self.get_page(request, all_events)
+        context = {"events": events}
+        return self.render_to_response(request, "events/event_list.html", context)
     
     @content.view(r"^(\d+)/$")
     def year_archive(self, request, year):
@@ -109,13 +109,13 @@ class NewsFeed(content.Content):
         return self.render_page(article, request, "news/article_detail.html", context)    
     
     
-content.register(NewsFeed)
+content.register(EventsFeed)
 
 
-ARTICLE_FEED_KEY = "news"
+EVENT_FEED_KEY = "events"
 
 
-class NewsRSSFeed(Feed):
+class EventsRSSFeed(Feed):
     
     """Feed generator for articles."""
     
@@ -133,7 +133,7 @@ class NewsRSSFeed(Feed):
         homepage = Page.objects.get_homepage()
         site_title = homepage.browser_title or homepage.title
         if obj is None:
-            return "%s Latest News" % site_title
+            return "%s Latest Events" % site_title
         return obj.title
 
     def link(self, obj=None):
@@ -145,16 +145,14 @@ class NewsRSSFeed(Feed):
         """Generates the feed description."""
         homepage = Page.objects.get_homepage()
         site_title = homepage.browser_title or homepage.title
-        return "Latest news from %s." % site_title
+        return "Latest events from %s." % site_title
         
     def items(self, obj=None):
         """Generates the feed items."""
-        articles = Article.published_objects.all()
-        if obj is not None:
-            articles = articles.filter(news_feed=obj)
-        articles = articles.order_by("-publication_date", "-id")[:settings.FEED_LENGTH]
-        return articles
+        if obj is None:
+            return Article.published_objects.all()[:settings.FEED_LENGTH]
+        return obj.content.published_events.all()[:settings.FEED_LENGTH]
     
     
-registered_feeds[ARTICLE_FEED_KEY] = NewsRSSFeed
+registered_feeds[EVENT_FEED_KEY] = EventsRSSFeed
 

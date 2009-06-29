@@ -1,0 +1,5 @@
+{% if obj.summary %}
+    {{obj.summary|linebreaks}}
+{% else %}
+    {{obj.content|safe}}
+{% endif %}

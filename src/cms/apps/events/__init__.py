@@ -1,0 +1,2 @@
+"""Event publication application."""
+

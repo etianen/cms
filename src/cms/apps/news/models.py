@@ -5,12 +5,14 @@ import datetime
 
 from django.db import models
 
-from cms.apps.pages.models import Page, ArticleBase, PageField, HtmlField
+from cms.apps.pages.models import Page, ArticleBase, PageField, HtmlField, PageBaseManager, PublishedPageManager
 
 
 class Article(ArticleBase):
     
     """A news article."""
+    
+    publication_clause = "is_online = TRUE AND publication_date <= TIMESTAMP('%(now)s')"
     
     news_feed = PageField(Page,
                           "newsfeed")
@@ -38,5 +40,5 @@ class Article(ArticleBase):
     class Meta:
         verbose_name = "news article"
         unique_together = (("news_feed", "url_title",),)
-        ordering = "-is_featured", "-publication_date"
+        ordering = ("-is_featured", "-publication_date", "-id")
 
