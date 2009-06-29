@@ -57,7 +57,7 @@ class UserAdmin(BaseUserAdmin):
                 elif "_continue" in request.POST:
                     message = message + " You may edit it again below."
                     self.message_user(request, message)
-                    return HttpResponseRedirect("./%i/" % new_user.id)
+                    return HttpResponseRedirect("../%i/" % new_user.id)
                 else:
                     self.message_user(request, message)
                     return HttpResponseRedirect("../")
