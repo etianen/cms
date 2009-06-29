@@ -1,5 +1,4 @@
 {% extends "layout.html" %}
-[% load page %}
 
 
 {% block browser_title %}{% include "browser_title.html" %}{% endblock %}
@@ -29,11 +28,11 @@
 {% block nav_tertiary %}{% include "nav_tertiary.html" %}{% endblock %}
 
 
-{% block content_primary %}{{content.content_primary|safe}}{% endblock %}
+{% block content_primary %}{% include "content_primary.html" %}{% endblock %}
 
 
-{% block content_secondary %}{{content.content_secondary|safe}}{% endblock %}
+{% block content_secondary %}{% include "content_secondary.html" %}{% endblock %}
 
 
-{% block content_tertiary %}{{content.content_tertiary|safe}}{% endblock %}
+{% block content_tertiary %}{% include "content_tertiary.html" %}{% endblock %}
 
