@@ -37,7 +37,7 @@ class NewsFeed(content.Content):
     
     def get_published_articles(self):
         """Returns all the published articles for this news feed."""
-        return self.page.article_set.order_by("is_featured", "-publication_date")
+        return self.page.article_set.all()
     
     published_articles = property(get_published_articles,
                                   doc="All the published articles for this news feed.")

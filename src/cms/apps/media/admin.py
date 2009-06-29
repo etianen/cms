@@ -31,7 +31,7 @@ class MediaAdmin(admin.ModelAdmin):
     
     """Base admin settings for Media models."""
     
-    date_hierarchy = "publication_date"
+    date_hierarchy = "last_modified"
     
     fieldsets = ((None, {"fields": ("title", "file",),},),
                  ("Media management", {"fields": ("folder", "keywords", "notes",),},),)
@@ -67,7 +67,7 @@ class FileAdmin(MediaAdmin):
     
     """Admin settings for File models."""
     
-    list_display = ("title", "get_type", "get_folder", "get_size", "publication_date",)
+    list_display = ("title", "get_type", "get_folder", "get_size", "last_modified",)
     
     # Custom display routines.
     
@@ -92,7 +92,7 @@ class ImageAdmin(MediaAdmin):
     
     """Admin settings for Image models."""
     
-    list_display = ("get_thumbnail", "title", "get_folder", "width", "height", "get_size", "publication_date",)
+    list_display = ("get_thumbnail", "title", "get_folder", "width", "height", "get_size", "last_modified",)
     
     # Custom display routines.
     

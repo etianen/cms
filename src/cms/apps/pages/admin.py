@@ -101,31 +101,43 @@ site = AdminSite()
 # Page admin classes.
 
 
-class PageBaseAdmin(admin.ModelAdmin):
+class ArticleBaseAdmin(admin.ModelAdmin):
     
-    """Base admin class for Content models."""
+    """Base admin class for ArticleBase models."""
     
-    date_hierarchy = "publication_date"
+    date_hierarchy = "last_modified"
+    
+    publication_fieldsets = (("Publication", {"fields": ("is_online",),
+                                              "classes": ("collapse",)}),)
+    
+    navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
+                                            "classes": ("collapse",),}),)
     
     seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_changefreq", "robots_index", "robots_archive", "robots_follow",),
                                                      "classes": ("collapse",),},),)
     
-    publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online",),
-                                              "classes": ("collapse",)}),)
-
-    navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
-                                            "classes": ("collapse",),}),)
-
     fieldsets = ((None, {"fields": ("title", "url_title",),},),) + publication_fieldsets + navigation_fieldsets + seo_fieldsets
-    
-    list_display = ("title", "publication_date", "is_online",)
+
+    list_display = ("title", "last_modified", "is_online",)
     
     list_filter = ("is_online",)
     
     prepopulated_fields = {"url_title": ("title",),}
     
-    search_fields = ("title", "browser_title",)
+    search_fields = ("title",)
+    
+    ordering = ("title",)
 
+
+class PageBaseAdmin(ArticleBaseAdmin):
+    
+    """Base admin class for PageBase models."""
+    
+    publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online",),
+                                              "classes": ("collapse",)}),)
+
+    fieldsets = ((None, {"fields": ("title", "url_title",),},),) + publication_fieldsets + ArticleBaseAdmin.navigation_fieldsets + ArticleBaseAdmin.seo_fieldsets
+    
     
 # The GET parameter used to indicate content type.
 PAGE_TYPE_PARAMETER = "type"

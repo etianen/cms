@@ -17,27 +17,7 @@ from cms.apps.pages.forms import HtmlWidget
 from cms.apps.pages.optimizations import cached_getter, cached_setter
 
 
-PAGE_PUBLICATION_SQL = """
-    is_online = TRUE AND
-    (
-        (
-            publication_date <= TIMESTAMP('%(now)s')
-        ) AND
-        (
-            expiry_date IS NULL OR
-            expiry_date > TIMESTAMP('%(now)s')
-        )
-    )
-"""
-
-
 MYSQL_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-
-
-def get_page_publication_sql():
-    """Returns the SQL query for determining publication date."""
-    now = datetime.datetime.now().strftime(MYSQL_DATE_FORMAT)
-    return PAGE_PUBLICATION_SQL % {"now": now}
 
 
 class PageBaseManager(models.Manager):
@@ -50,11 +30,16 @@ class PageBaseManager(models.Manager):
     
     use_for_related_fields = True
     
+    def get_publication_clause(self):
+        """Returns the publiction criteria for this page."""
+        now = datetime.datetime.now().strftime(MYSQL_DATE_FORMAT)
+        return self.model.publication_clause % {"now": now}
+    
     def get_query_set(self):
         """Adds the is_published property to all loaded pages."""
         queryset = super(PageBaseManager, self).get_query_set()
         queryset = queryset.filter(site=Site.objects.get_current())
-        queryset = queryset.extra(select={"is_published": get_page_publication_sql()})
+        queryset = queryset.extra(select={"is_published": self.get_publication_clause()})
         return queryset
 
 
@@ -66,22 +51,30 @@ class PublishedPageManager(PageBaseManager):
     
     def select_published(self, queryset):
         """Filters out unpublished objects from the queryset."""
-        return queryset.extra(where=[get_page_publication_sql()])
+        return queryset.extra(where=[self.get_publication_clause()])
     
     def get_query_set(self):
         """Returns the filtered query set."""
         queryset = super(PublishedPageManager, self).get_query_set()
         queryset = self.select_published(queryset)
         return queryset
-  
-  
-class PageBase(models.Model):
+
+
+class ArticleBase(models.Model):
     
-    """Base model for models used to generate a HTML page."""
+    """
+    Base model for models used to generate a HTML page.
+    
+    This class is suited to pages that are to be included in feed-based views.
+    For permanent or semi-permanent fixtures in a site, use the PageBase model
+    instead.
+    """
     
     # Model management.
     
     objects = PageBaseManager()
+    
+    publication_clause = "is_online = TRUE"
     
     published_objects = PublishedPageManager()
         
@@ -102,13 +95,6 @@ class PageBase(models.Model):
     is_online = models.BooleanField("online",
                                     default=True,
                                     help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by directly visiting it's URL.")
-    
-    publication_date = models.DateTimeField(default=datetime.datetime.now,
-                                            help_text="The date that this page will appear on the website.  Leave this blank to immediately publish this page.")
-
-    expiry_date = models.DateTimeField(blank=True,
-                                       null=True,
-                                       help_text="The date that this page will be removed from the website.  Leave this blank to never expire this page.")
     
     # Navigation fields.
     
@@ -181,6 +167,39 @@ class PageBase(models.Model):
     class Meta:
         abstract = True
         ordering = ("title",)
+  
+
+class PageBase(ArticleBase):
+    
+    """
+    Base model for models used to generate a permanent or semi-permanent HTML
+    page.
+    """
+    
+    publication_clause = """
+        is_online = TRUE AND
+        (
+            publication_date IS NULL OR
+            publication_date <= TIMESTAMP('%(now)s')
+        ) AND
+        (
+            expiry_date IS NULL OR
+            expiry_date > TIMESTAMP('%(now)s')
+        )
+    """
+    
+    # Publication fields.
+    
+    publication_date = models.DateTimeField(blank=True,
+                                            null=True,
+                                            help_text="The date that this page will appear on the website.  Leave this blank to immediately publish this page.")
+
+    expiry_date = models.DateTimeField(blank=True,
+                                       null=True,
+                                       help_text="The date that this page will be removed from the website.  Leave this blank to never expire this page.")
+    
+    class Meta:
+        abstract = True
 
 
 class PageField(models.ForeignKey):

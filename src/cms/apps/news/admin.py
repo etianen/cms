@@ -3,11 +3,11 @@
 
 from django.contrib import admin
 
-from cms.apps.pages.admin import site, PageBaseAdmin
+from cms.apps.pages.admin import site, ArticleBaseAdmin
 from cms.apps.news.models import Article
 
 
-class ArticleAdmin(PageBaseAdmin):
+class ArticleAdmin(ArticleBaseAdmin):
     
     """Admin settings used by news articles."""
     
@@ -17,10 +17,10 @@ class ArticleAdmin(PageBaseAdmin):
     
     content_fieldsets = (("Article content", {"fields": ("content", "summary",),}),)
     
-    publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online", "is_featured"),
+    publication_fieldsets = (("Publication", {"fields": ("publication_date", "is_online", "is_featured"),
                                               "classes": ("collapse",)}),)
     
-    fieldsets = ((None, {"fields": ("title", "url_title", "news_feed",),},),) + content_fieldsets + publication_fieldsets + PageBaseAdmin.navigation_fieldsets + PageBaseAdmin.seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title", "news_feed",),},),) + content_fieldsets + publication_fieldsets + ArticleBaseAdmin.navigation_fieldsets + ArticleBaseAdmin.seo_fieldsets
     
     radio_fields = {"news_feed": admin.VERTICAL}
     

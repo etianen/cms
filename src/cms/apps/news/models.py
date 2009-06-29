@@ -1,12 +1,14 @@
 """Models used by the news publication application."""
 
 
+import datetime
+
 from django.db import models
 
-from cms.apps.pages.models import Page, PageBase, PageField, HtmlField
+from cms.apps.pages.models import Page, ArticleBase, PageField, HtmlField
 
 
-class Article(PageBase):
+class Article(ArticleBase):
     
     """A news article."""
     
@@ -19,6 +21,11 @@ class Article(PageBase):
     summary = models.TextField(blank=True,
                                null=True,
                                help_text="A short summary of this article.  This will be used on news pages and RSS feeds.  If not specified, then a summarized version of the content will be used.")
+    
+    # Publication fields.
+    
+    publication_date = models.DateField(default=lambda: datetime.datetime.now().date(),
+                                        help_text="The date that this article will appear on the website.")
     
     is_featured = models.BooleanField("featured",
                                       default=False,
@@ -34,4 +41,5 @@ class Article(PageBase):
     class Meta:
         verbose_name = "news article"
         unique_together = (("news_feed", "url_title",),)
+        ordering = "-is_featured", "-publication_date"
 
