@@ -19,7 +19,10 @@ register = template.Library()
 def page_url(page, view_func="index"):
     """Renders the URL of the given view func in the given page."""
     if isinstance(page, int):
-        page = Page.objects.get(id=page)
+        try:
+            page = Page.objects.get(id=page)
+        except Page.DoesNotExist:
+            return "#"
     return page.content.reverse(view_func)
 
 
