@@ -2,7 +2,7 @@
     {% load pages %}
     <ul id="latest-news">
         {% for article in articles %}
-            <li class="{% mark_first %} {% mark_last %}">
+            <li class="latest-news-item {% mark_first %} {% mark_last %}">
                 <a href="{{article.url}}">
                     <span class="latest-news-heading">
                         <span class="latest-news-date">{{article.publication_date|date}}</span>
