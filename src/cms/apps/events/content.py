@@ -6,7 +6,6 @@ import datetime
 from django.conf import settings
 from django.contrib.syndication.feeds import Feed
 from django.core.urlresolvers import reverse
-from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage
 from django.http import Http404
 from django.utils.dates import MONTHS
@@ -63,7 +62,7 @@ class EventsFeed(content.Content):
     def index(self, request):
         """Generates a page of the upcoming events."""
         now = datetime.datetime.now()
-        all_events = self.published_events.filter(Q(start_date__gte=now.date()))
+        all_events = self.published_events.filter(start_date__gte=now.date())
         events = self.get_page(request, all_events)
         context = {"events": events}
         return self.render_to_response(request, "events/event_list.html", context)

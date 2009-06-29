@@ -12,7 +12,7 @@ register = template.Library()
 @register.inclusion_tag("news/latest_news.html")
 def latest_news(count=5):
     """Renders a list of the latest news articles."""
-    articles = Article.published_objects.order_by("-is_featured", "-publication_date")[:5]
+    articles = Article.published_objects.all()[:count]
     context = {"articles": articles}
     return context
 

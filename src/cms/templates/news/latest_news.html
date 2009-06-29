@@ -1,16 +1,18 @@
 {% spaceless %}
     {% load pages %}
-    <ul id="latest-news">
-        {% for article in articles %}
-            <li class="latest-news-item {% mark_first %} {% mark_last %}">
-                <a href="{{article.url}}">
-                    <span class="latest-news-heading">
-                        <span class="latest-news-date">{{article.publication_date|date}}</span>
-                        <span class="latest-news-title">{{article}}</span>
-                    </span>
-                    <span class="latest-news-description">{% if article.summary %}{{article.summary|truncatewords:5}}{% else %}{{article.content|striptags|truncatewords:5}}{% endif %}</span>
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
+    {% if articles %}
+        <ul id="latest-news">
+            {% for article in articles %}
+                <li class="latest-news-item {% mark_first %} {% mark_last %}">
+                    <a href="{{article.url}}">
+                        <span class="latest-news-heading">
+                            <span class="latest-news-date">{{article.publication_date|date}}</span>
+                            <span class="latest-news-title">{{article}}</span>
+                        </span>
+                        <span class="latest-news-description">{% if article.summary %}{{article.summary|truncatewords:5}}{% else %}{{article.content|striptags|truncatewords:5}}{% endif %}</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 {% endspaceless %}
