@@ -34,6 +34,17 @@ class EventsFeed(content.Content):
     
     def render_to_response(self, request, template_name, context, **kwargs):
         """Renders the given page."""
+        # Generate list of available years.
+        try:
+            first_event = self.published_events.order_by("start_date")[0]
+            last_event = self.published_events.order_by("-start_date")[0]
+        except IndexError:
+            available_years = []
+        else:
+            available_years = range(first_event.start_date.year, last_event.start_date.year + 1)
+        year_archives = [{"year": year, "url": self.reverse("year_archive", year)} for year in available_years]
+        context.setdefault("year_archives", year_archives)
+        # Generate the feed URL.
         context.setdefault("feed_url", self.feed_url)
         return super(EventsFeed, self).render_to_response(request, template_name, context, **kwargs)
     
@@ -92,7 +103,8 @@ class EventsFeed(content.Content):
                    "title": u"Archive for %s %i" % (MONTHS[month], year),
                    "short_title": MONTHS[month],
                    "breadcrumbs": breadcrumbs,
-                   "year": year}
+                   "year": year,
+                   "month": month}
         return self.render_to_response(request, "events/event_list.html", context)
     
     @content.view(r"^(\d+)/(\d+)/([a-zA-Z0-9_\-]+)/$")

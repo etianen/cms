@@ -46,3 +46,23 @@
     
 {% endblock %}
 
+
+{% block content_secondary %}
+
+    {{block.super}}
+    
+    {% if year_archives %}
+        <div id="news-archives">
+            <h2>Articles By Year</h2>
+            <ul>
+                {% for year_archive in year_archives %}
+                    <li class="{% mark_first %} {% mark_last %}">
+                        <a class="{% mark_here year_archive.url %}" href="{{year_archive.url}}">{{year_archive.year}}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+{% endblock %}
+
