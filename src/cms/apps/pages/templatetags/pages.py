@@ -5,6 +5,10 @@ import re, urllib
 
 from django import template
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from django.forms.util import flatatt
+from django.template.defaultfilters import stringfilter
+from django.utils.safestring import mark_safe
 
 from cms.apps.pages import permalinks, thumbnails
 from cms.apps.pages.models import Page
@@ -13,7 +17,73 @@ from cms.apps.pages.models import Page
 register = template.Library()
 
 
+# HTML processing.
+
+
+RE_ANCHOR = re.compile(r"""<a.*?\shref=["'](.+?)["'].*?>""", re.IGNORECASE)
+
+RE_IMG = re.compile(r"<img(.+?)/>", re.IGNORECASE)
+
+RE_ATTR = re.compile(r"""\s(\w+)=["']([^"']+)["']""", re.IGNORECASE)
+
+
+@register.filter
+@stringfilter
+def html(text):
+    """
+    Processes HTML text.
+    
+    The text is checked for permalinks embedded in <a> tags, expanding the
+    permalinks to their referenced URL.
+    """
+    if not text:
+        return ""
+    # Process permalinks.
+    offset = 0
+    for match in RE_ANCHOR.finditer(text):
+        href = match.group(1)
+        try:
+            obj = permalinks.resolve(href)
+        except permalinks.PermalinkError:
+            continue
+        except ObjectDoesNotExist:
+            continue
+        new_href = obj.get_absolute_url()
+        start = match.start(1)
+        end = match.end(1)
+        text = u"".join((text[:start+offset], new_href, text[end+offset:]))
+        offset += len(new_href) - len(href)
+    # Process thumbnails.
+    offset = 0
+    for match in RE_IMG.finditer(text):
+        attrs = match.group(1)
+        attr_dict = dict(RE_ATTR.findall(attrs))
+        try:
+            src = attr_dict["src"]
+            width = int(attr_dict["width"])
+            height = int(attr_dict["height"])
+        except KeyError:
+            continue
+        except ValueError:
+            continue
+        try:
+            obj = permalinks.resolve(src)
+        except ObjectDoesNotExist:
+            continue
+        thumbnail = thumbnails.resize(obj.file, width, height)
+        attr_dict["src"] = thumbnail.url
+        attr_dict["width"] = thumbnail.width
+        attr_dict["height"] = thumbnail.height
+        new_attrs = flatatt(attr_dict)
+        start = match.start(1)
+        end = match.end(1)
+        text = u"".join((text[:start+offset], new_attrs, text[end+offset:]))
+        offset += len(new_attrs) - len(attrs)
+    return mark_safe(text)
+
+    
 # Page linking.
+
 
 @register.simple_tag
 def page_url(page, view_func="index"):

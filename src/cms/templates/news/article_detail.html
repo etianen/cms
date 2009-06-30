@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load pages %}
 
 
 {% block title %}<span id="article-date">{{page.publication_date|date}}</span> {{block.super}}{% endblock %}
 
 
-{% block content_primary %}{{page.content|safe}}{% endblock %}
+{% block content_primary %}{{page.content|html}}{% endblock %}
 

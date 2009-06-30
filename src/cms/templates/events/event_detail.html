@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load pages %}
 
 
 {% block title %}<span id="event-date">{{page.start_date|date}}{% if event.end_date %} - {{event.end_date}}{% endif %}</span> {{block.super}}{% endblock %}
 
 
-{% block content_primary %}{{page.content|safe}}{% endblock %}
+{% block content_primary %}{{page.content|html}}{% endblock %}
 
