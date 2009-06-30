@@ -9,7 +9,7 @@
                             <span class="latest-news-date">{{article.publication_date|date}}</span>
                             <span class="latest-news-title">{{article}}</span>
                         </span>
-                        <span class="latest-news-description">{% if article.summary %}{{article.summary|truncatewords:5}}{% else %}{{article.content|striptags|truncatewords:5}}{% endif %}</span>
+                        <span class="latest-news-description">{% if article.summary %}{{article.summary|truncatewords:5}}{% else %}{{article.content|html|striptags|truncatewords:5}}{% endif %}</span>
                     </a>
                 </li>
             {% endfor %}
