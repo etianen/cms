@@ -117,11 +117,37 @@ class HtmlField(TextField):
         return attrs
     
     
+class ChoiceField(Field):
+    
+    """A field that allows a number of text choices."""
+    
+    form_field = forms.ChoiceField
+    
+    def __init__(self, choices, label=None, **kwargs):
+        """Initializes the ChoiceField."""
+        super(ChoiceField, self).__init__(label, **kwargs)
+        self.choices = choices
+        
+    def get_formfield_attrs(self, obj):
+        """Primes the choices in the form field."""
+        attrs = super(ChoiceField, self).get_formfield_attrs(obj)
+        attrs["choices"] = self.choices
+        del attrs["widget"]
+        return attrs
+    
+    
 class URLField(CharField):
     
     """A URL data field."""
     
     form_field = forms.URLField
+    
+    
+class EmailField(CharField):
+    
+    """An Email data field."""
+    
+    form_field = forms.EmailField
     
     
 class IntegerField(Field):
@@ -155,6 +181,9 @@ class PositiveIntegerField(IntegerField):
     def __init__(self, label=None, max_value=None, **kwargs):
         """Initializes the PositiveIntegerField."""
         super(PositiveIntegerField, self).__init__(label, 0, max_value, **kwargs)
+    
+    
+# View processing.
     
     
 view_id_counter = 0
@@ -547,7 +576,7 @@ def unregister(slug):
     try:
         del registered_content[slug]
     except KeyError:
-        raise ContentRegistrationError, "No content type is registered under %r." % slug
+        raise ContentRegistrationError, "No content type is registered under '%s'." % slug
 
 
 def lookup(slug):
@@ -555,7 +584,7 @@ def lookup(slug):
     try:
         return registered_content[slug]
     except KeyError:
-        raise ContentRegistrationError, "No content type is registered under %r." % slug
+        raise ContentRegistrationError, "No content type is registered under '%s'." % slug
 
 
 def autoregister():

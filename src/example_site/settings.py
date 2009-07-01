@@ -80,7 +80,8 @@ LANGUAGE_CODE = "en-gb"
 
 # A list of additional installed applications.
 
-INSTALLED_APPS += ("cms.apps.news",)
+INSTALLED_APPS += ("cms.apps.news",
+                   "cms.apps.contact",)
 
 
 # Absolute path to the directory containing this project.

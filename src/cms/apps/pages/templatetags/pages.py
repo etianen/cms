@@ -28,7 +28,6 @@ RE_ATTR = re.compile(r"""\s(\w+)=["']([^"']+)["']""", re.IGNORECASE)
 
 
 @register.filter
-@stringfilter
 def html(text):
     """
     Processes HTML text.
