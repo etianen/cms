@@ -71,7 +71,6 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "django.contrib.contenttypes",
                   "django.contrib.sessions",
                   "django.contrib.admin",
-                  "django.contrib.sites",
                   "django.contrib.sitemaps",
                   "django.contrib.webdesign",
                   "reversion",
@@ -80,7 +79,7 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "cms.apps.media",)
 
 
-# Multi-site settings.
+# HACK: Needed to make sites framework work.
 
 SITE_ID = 1
 

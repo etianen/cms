@@ -6,7 +6,6 @@ import datetime
 from django import forms, template
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.contrib.sites.models import Site
 from django.db import models
 from django.db.models.base import ModelBase
 from django.http import Http404
@@ -38,7 +37,6 @@ class PageBaseManager(models.Manager):
     def get_query_set(self):
         """Adds the is_published property to all loaded pages."""
         queryset = super(PageBaseManager, self).get_query_set()
-        queryset = queryset.filter(site=Site.objects.get_current())
         queryset = queryset.extra(select={"is_published": self.get_publication_clause()})
         return queryset
 
@@ -81,10 +79,6 @@ class ArticleBase(models.Model):
     # Base fields.
     
     last_modified = models.DateTimeField(auto_now=True)
-    
-    site = models.ForeignKey(Site,
-                             default=Site.objects.get_current,
-                             editable=False)
     
     title = models.CharField(max_length=1000)
     

@@ -4,7 +4,6 @@
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.sites.models import Site
 from django.db import models
 from django.db.models.signals import post_syncdb
 
@@ -25,22 +24,4 @@ def create_content_permissions(**kwargs):
                                                                defaults={"name": name})
     
 post_syncdb.connect(create_content_permissions)
-
-
-def synchronize_current_site(**kwargs):
-    """
-    Renames the current site object with the site name and domain name in the
-    Django settings file.
-    """
-    try:
-        site = Site.objects.get_current()
-    except Site.DoesNotExist:
-        pass
-    else:
-        site.name = settings.SITE_NAME
-        site.domain = settings.SITE_DOMAIN
-        site.save()
-    
-    
-post_syncdb.connect(synchronize_current_site)
 
