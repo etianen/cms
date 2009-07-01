@@ -73,7 +73,7 @@ class NewsFeed(content.Content):
         all_articles = self.published_articles
         articles = self.get_page(request, all_articles)
         context = {"articles": articles}
-        return self.render_to_response(request, "news/article_list.html", context)
+        return self.render_to_response(request, "news/base.html", context)
     
     @content.view(r"^(\d+)/$")
     def year_archive(self, request, year):
@@ -85,7 +85,7 @@ class NewsFeed(content.Content):
                    "title": "Archive for %i" % year,
                    "short_title": year,
                    "year": year}
-        return self.render_to_response(request, "news/article_list.html", context)
+        return self.render_to_response(request, "news/base.html", context)
     
     @content.view(r"^(\d+)/(\d+)/$")
     def month_archive(self, request, year, month):
@@ -102,7 +102,7 @@ class NewsFeed(content.Content):
                    "breadcrumbs": breadcrumbs,
                    "year": year,
                    "month": month}
-        return self.render_to_response(request, "news/article_list.html", context)
+        return self.render_to_response(request, "news/base.html", context)
     
     @content.view(r"^(\d+)/(\d+)/([a-zA-Z0-9_\-]+)/$")
     def article_detail(self, request, year, month, article_slug):

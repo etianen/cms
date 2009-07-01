@@ -9,6 +9,7 @@ from django import forms, template
 from django.conf import settings
 from django.conf.urls.defaults import url, patterns
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
+from django.core.serializers.xml_serializer import getInnerText
 from django.core.urlresolvers import RegexURLResolver, Resolver404, Http404
 from django.db.models.options import get_verbose_name
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseServerError
@@ -305,16 +306,6 @@ class ContentBase(object):
         generator.endDocument()
         return out.getvalue()
     
-    def _get_element_value(self, element):
-        """Reads the content of the node as a unicode object."""
-        text = []
-        for child in element.childNodes:
-            if child.nodeType == child.TEXT_NODE or child.nodeType == child.CDATA_SECTION_NODE:
-                text.append(child.data)
-            elif child.nodeType == child.ELEMENT_NODE:
-                text.extend(self._get_element_value(child))
-        return u"".join(text)
-    
     def set_serialized_data(self, serialized_data):
         """Deserializes the given data into a dictionary."""
         # Generate a dictionary of serialized data.
@@ -322,7 +313,7 @@ class ContentBase(object):
         xml_data = minidom.parseString(serialized_data).documentElement
         for element in xml_data.getElementsByTagName("attribute"):
             key = element.attributes["name"].nodeValue
-            value = self._get_element_value(element)
+            value = getInnerText(element)
             raw_data[key] = value
         # Deserialize the data using fields.
         data = {}

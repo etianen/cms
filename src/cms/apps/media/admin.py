@@ -13,6 +13,7 @@ from django.template.defaultfilters import filesizeformat
 from cms.apps.pages import thumbnails
 from cms.apps.pages.admin import site
 from cms.apps.media.models import Folder, File, Image
+from cms.apps.versions.admin import VersionAdmin
 
 
 class FolderAdmin(admin.ModelAdmin):
@@ -27,7 +28,7 @@ class FolderAdmin(admin.ModelAdmin):
 site.register(Folder, FolderAdmin)
 
 
-class MediaAdmin(admin.ModelAdmin):
+class MediaAdmin(VersionAdmin):
     
     """Base admin settings for Media models."""
     

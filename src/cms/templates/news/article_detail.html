@@ -2,7 +2,7 @@
 {% load pages %}
 
 
-{% block title %}<span id="article-date">{{page.publication_date|date}}</span> {{block.super}}{% endblock %}
+{% block title %}<span class="date">{{page.publication_date|date}}</span> <span class="title">{{block.super}}</span>{% endblock %}
 
 
 {% block content_primary %}{{page.content|html}}{% endblock %}

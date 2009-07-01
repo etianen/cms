@@ -21,6 +21,7 @@ from django.shortcuts import render_to_response
 from cms.apps.pages import content
 from cms.apps.pages.forms import EditDetailsForm
 from cms.apps.pages.models import Page
+from cms.apps.versions.admin import VersionAdmin
 
 
 # The GET parameter used to indicate where page admin actions originated.
@@ -101,7 +102,7 @@ site = AdminSite()
 # Page admin classes.
 
 
-class ArticleBaseAdmin(admin.ModelAdmin):
+class ArticleBaseAdmin(VersionAdmin):
     
     """Base admin class for ArticleBase models."""
     

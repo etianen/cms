@@ -1,6 +1,2 @@
 {% load pages %}
-{% if obj.summary %}
-    {{obj.summary|linebreaks}}
-{% else %}
-    {{obj.content|html}}
-{% endif %}
+{{obj.summary|default:obj.content|html}}
