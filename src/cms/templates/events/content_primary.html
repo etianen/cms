@@ -1,0 +1,32 @@
+{% load pages %}
+
+{{block.super}}
+    
+{% if events.object_list %}
+
+    {% pagination events %}
+
+    <ul id="event-list">
+        {% for event in events.object_list %}
+            <li class="{% if event.is_featured %}featured{% endif %} {% mark_first %} {% mark_last %}">
+            
+                <h2>
+                    <span class="date">{{event.start_date|date}}</span>
+                    <a class="title" href="{{event.url}}">{{event.title}}</a>
+                </h2>
+                
+                {{event.summary|default:event.content|truncatewords_html:100|html}}
+                
+                <p class="read-more"><a href="{{event.url}}">Read more</a></p>
+                
+            </li>
+        {% endfor %}
+    </ul>
+    
+    {% pagination events %}
+
+{% else %}
+
+    <p>There are no events to display.</p>
+
+{% endif %}

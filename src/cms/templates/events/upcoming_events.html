@@ -1,18 +1,28 @@
-{% spaceless %}
-    {% load pages %}
-    {% if events %}
-        <ul id="upcoming-events">
-            {% for event in events %}
-                <li class="upcoming-events-item {% mark_first %} {% mark_last %}">
-                    <a href="{{event.url}}">
-                        <span class="upcoming-events-heading">
-                            <span class="upcoming-events-date">{{event.publication_date|date}}</span>
-                            <span class="upcoming-events-title">{{event}}</span>
-                        </span>
-                        <span class="upcoming-events-description">{% if event.summary %}{{event.summary|truncatewords:5}}{% else %}{{event.content|striptags|truncatewords:5}}{% endif %}</span>
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-{% endspaceless %}
+{% load pages %}
+
+{% if events %}
+
+    <ul id="latest-news">
+    
+        {% for event in events %}
+        
+            <li class="{% mark_first %} {% mark_last %}">
+                
+                <a href="{{event.url}}">
+                    
+                    <span class="heading">
+                        <span class="date">{{event.start_date|date}}</span>
+                        <span class="title">{{event}}</span>
+                    </span>
+                    
+                    <span class="summary">{{event.summary|default:event.content|striptags|truncatewords:5|safe}}</span>
+                    
+                </a>
+                
+            </li>
+            
+        {% endfor %}
+        
+    </ul>
+    
+{% endif %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load pages %}
+
+
+{% block feeds %}<link rel="alternate" type="application/rss+xml" title="{{page.title}}" href="{{feed_url}}"/>{% endblock %}
+
+
+{% block content_primary %}{% include "events/content_primary.html" %}{% endblock %}
+
+
+{% block content_secondary %}{% include "events/content_secondary.html" %}{% endblock %}
+

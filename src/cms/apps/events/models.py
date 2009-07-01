@@ -18,9 +18,9 @@ class Event(ArticleBase):
     content = HtmlField(blank=True,
                         null=True)
     
-    summary = models.TextField(blank=True,
-                               null=True,
-                               help_text="A short summary of this event.  This will be used on events pages and RSS feeds.  If not specified, then a summarized version of the content will be used.")
+    summary = HtmlField(blank=True,
+                        null=True,
+                        help_text="A short summary of this event.  This will be used on events pages and RSS feeds.  If not specified, then a summarized version of the content will be used.")
     
     # Publication fields.
     

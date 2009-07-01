@@ -76,7 +76,7 @@ class EventsFeed(content.Content):
         all_events = self.published_events.filter(start_date__gte=now.date())
         events = self.get_page(request, all_events)
         context = {"events": events}
-        return self.render_to_response(request, "events/event_list.html", context)
+        return self.render_to_response(request, "events/base.html", context)
     
     @content.view(r"^(\d+)/$")
     def year_archive(self, request, year):
@@ -88,7 +88,7 @@ class EventsFeed(content.Content):
                    "title": "Archive for %i" % year,
                    "short_title": year,
                    "year": year}
-        return self.render_to_response(request, "events/event_list.html", context)
+        return self.render_to_response(request, "events/base.html", context)
     
     @content.view(r"^(\d+)/(\d+)/$")
     def month_archive(self, request, year, month):
@@ -105,7 +105,7 @@ class EventsFeed(content.Content):
                    "breadcrumbs": breadcrumbs,
                    "year": year,
                    "month": month}
-        return self.render_to_response(request, "events/event_list.html", context)
+        return self.render_to_response(request, "events/base.html", context)
     
     @content.view(r"^(\d+)/(\d+)/([a-zA-Z0-9_\-]+)/$")
     def event_detail(self, request, year, month, event_slug):
