@@ -1,6 +1,8 @@
 """Content types used by the news application."""
 
 
+import datetime
+
 from django.conf import settings
 from django.contrib.syndication.feeds import Feed
 from django.core.urlresolvers import reverse
@@ -30,21 +32,22 @@ class NewsFeed(content.Content):
     feed_url = property(get_feed_url,
                         doc="The URL of the RSS feed for this page.")
     
-    def render_to_response(self, request, template_name, context, **kwargs):
+    def render_page(self, page, request, template_name, context, **kwargs):
         """Renders the given page."""
         # Generate list of available years.
-        try:
-            first_article = self.published_articles.order_by("publication_date")[0]
-            last_article = self.published_articles.order_by("-publication_date")[0]
-        except IndexError:
-            available_years = []
-        else:
-            available_years = range(first_article.publication_date.year, last_article.publication_date.year + 1)
-        year_archives = [{"year": year, "url": self.reverse("year_archive", year)} for year in available_years]
-        context.setdefault("year_archives", year_archives)
+        available_months = self.published_articles.dates("publication_date", "month")
+        news_archive = []
+        year = None
+        for date in available_months:
+            month = date.month
+            if date.year != year:
+                year = date.year
+                news_archive.append({"year": year, "months": [], "url": self.reverse("year_archive", year)})
+            news_archive[-1]["months"].append({"month": MONTHS[month], "url": self.reverse("month_archive", year, month)})
+        context.setdefault("news_archive", news_archive)
         # Generate the feed URL.
         context.setdefault("feed_url", self.feed_url)
-        return super(NewsFeed, self).render_to_response(request, template_name, context, **kwargs)
+        return super(NewsFeed, self).render_page(page, request, template_name, context, **kwargs)
     
     def get_published_articles(self):
         """Returns all the published articles for this news feed."""
@@ -70,9 +73,11 @@ class NewsFeed(content.Content):
     @content.view(r"^$")
     def index(self, request):
         """Generates a page of the latest news articles."""
+        now = datetime.datetime.now()
         all_articles = self.published_articles
         articles = self.get_page(request, all_articles)
-        context = {"articles": articles}
+        context = {"articles": articles,
+                   "year": now.year}
         return self.render_to_response(request, "news/base.html", context)
     
     @content.view(r"^(\d+)/$")
@@ -117,7 +122,9 @@ class NewsFeed(content.Content):
             raise Http404, "An article with a URL title of '%s' does not exist." % article_slug
         breadcrumbs = self.breadcrumbs + [{"url": self.reverse("year_archive", year), "title": year},
                                           {"url": self.reverse("month_archive", year, month), "title": MONTHS[month]},]
-        context = {"breadcrumbs": breadcrumbs}
+        context = {"breadcrumbs": breadcrumbs,
+                   "year": article.publication_date.year,
+                   "month": article.publication_date.month}
         return self.render_page(article, request, "news/article_detail.html", context)    
     
     

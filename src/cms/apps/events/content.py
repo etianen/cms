@@ -32,21 +32,22 @@ class EventsFeed(content.Content):
     feed_url = property(get_feed_url,
                         doc="The URL of the RSS feed for this page.")
     
-    def render_to_response(self, request, template_name, context, **kwargs):
+    def render_page(self, page, request, template_name, context, **kwargs):
         """Renders the given page."""
         # Generate list of available years.
-        try:
-            first_event = self.published_events.order_by("start_date")[0]
-            last_event = self.published_events.order_by("-start_date")[0]
-        except IndexError:
-            available_years = []
-        else:
-            available_years = range(first_event.start_date.year, last_event.start_date.year + 1)
-        year_archives = [{"year": year, "url": self.reverse("year_archive", year)} for year in available_years]
-        context.setdefault("year_archives", year_archives)
+        available_months = self.published_events.dates("start_date", "month")
+        events_archive = []
+        year = None
+        for date in available_months:
+            month = date.month
+            if date.year != year:
+                year = date.year
+                events_archive.append({"year": year, "months": [], "url": self.reverse("year_archive", year)})
+            events_archive[-1]["months"].append({"month": MONTHS[month], "url": self.reverse("month_archive", year, month)})
+        context.setdefault("events_archive", events_archive)
         # Generate the feed URL.
         context.setdefault("feed_url", self.feed_url)
-        return super(EventsFeed, self).render_to_response(request, template_name, context, **kwargs)
+        return super(EventsFeed, self).render_page(page, request, template_name, context, **kwargs)
     
     def get_published_events(self):
         """Returns all the published events for this events feed."""
@@ -75,7 +76,8 @@ class EventsFeed(content.Content):
         now = datetime.datetime.now()
         all_events = self.published_events.filter(start_date__gte=now.date())
         events = self.get_page(request, all_events)
-        context = {"events": events}
+        context = {"events": events,
+                   "year": now.year}
         return self.render_to_response(request, "events/base.html", context)
     
     @content.view(r"^(\d+)/$")
@@ -120,7 +122,9 @@ class EventsFeed(content.Content):
             raise Http404, "An event with a URL title of '%s' does not exist." % event_slug
         breadcrumbs = self.breadcrumbs + [{"url": self.reverse("year_archive", year), "title": year},
                                           {"url": self.reverse("month_archive", year, month), "title": MONTHS[month]},]
-        context = {"breadcrumbs": breadcrumbs}
+        context = {"breadcrumbs": breadcrumbs,
+                   "year": event.start_date.year,
+                   "month": event.start_date.month}
         return self.render_page(event, request, "events/event_detail.html", context)    
     
     
