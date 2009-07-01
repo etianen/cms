@@ -4,7 +4,7 @@
 from django.db import models
 from django.contrib.sitemaps import Sitemap
 
-from cms.apps.pages.models import PageBase
+from cms.apps.pages.models import ArticleBase
 
 
 class PageSitemap(Sitemap):
@@ -37,7 +37,7 @@ registered_sitemaps = {}
 
 # Register all know page types.
 for model in models.get_models():
-    if issubclass(model, PageBase):
+    if issubclass(model, ArticleBase):
         sitemap_key = "%s-%s" % (model._meta.app_label, model.__name__.lower())
         registered_sitemaps[sitemap_key] = PageSitemap(model)
         

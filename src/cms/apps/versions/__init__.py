@@ -1,1 +1,0 @@
-"""Admin version control extension."""

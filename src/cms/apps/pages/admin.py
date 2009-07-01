@@ -18,10 +18,11 @@ from django.db import models
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
 
+from reversion.admin import VersionAdmin
+
 from cms.apps.pages import content
 from cms.apps.pages.forms import EditDetailsForm
 from cms.apps.pages.models import Page
-from cms.apps.versions.admin import VersionAdmin
 
 
 # The GET parameter used to indicate where page admin actions originated.
@@ -152,6 +153,18 @@ class PageAdmin(PageBaseAdmin):
                                             "classes": ("collapse",),},),)
 
     fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),) + PageBaseAdmin.publication_fieldsets + navigation_fieldsets + PageBaseAdmin.seo_fieldsets
+
+    # Reversion
+
+    def get_revision_form_data(self, request, obj, version):
+        """
+        Returns a dictionary of data to set in the admin form in order to revert
+        to the given revision.
+        """
+        data = super(PageAdmin, self).get_revision_form_data(request, obj, version)
+        content_data = version.object_version.object.content.data
+        data.update(content_data)
+        return data
 
     # Plugable content types.
 

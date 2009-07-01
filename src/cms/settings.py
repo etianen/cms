@@ -74,7 +74,7 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "django.contrib.sites",
                   "django.contrib.sitemaps",
                   "django.contrib.webdesign",
-                  "cms.apps.versions",
+                  "reversion",
                   "cms.apps.pages",
                   "cms.apps.staff",
                   "cms.apps.media",)

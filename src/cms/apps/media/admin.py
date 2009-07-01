@@ -10,10 +10,11 @@ from django.contrib import admin
 from django.shortcuts import render_to_response
 from django.template.defaultfilters import filesizeformat
 
+from reversion.admin import VersionAdmin
+
 from cms.apps.pages import thumbnails
 from cms.apps.pages.admin import site
 from cms.apps.media.models import Folder, File, Image
-from cms.apps.versions.admin import VersionAdmin
 
 
 class FolderAdmin(admin.ModelAdmin):
