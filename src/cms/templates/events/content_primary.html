@@ -8,7 +8,7 @@
 
     <ul id="event-list">
         {% for event in events.object_list %}
-            <li class="{% if event.is_featured %}featured{% endif %} {% mark_first %} {% mark_last %}">
+            <li class="{% if event.is_featured %}featured{% endif %} {% first %} {% last %}">
             
                 <h2>
                     <span class="date">{{event.start_date|date}}</span>

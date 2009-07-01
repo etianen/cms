@@ -12,13 +12,13 @@
         
         <ul>
             {% for year_archive in news_archive %}
-                <li class="{% mark_first %} {% mark_last %}">
-                    <a class="{% mark_here year_archive.url %}" href="{{year_archive.url}}">{{year_archive.year}}</a>
+                <li class="{% first %} {% last %}">
+                    <a class="{% here year_archive.url %}" href="{{year_archive.url}}">{{year_archive.year}}</a>
                     {% ifequal year_archive.year year %}
                         <ul>
                             {% for month_archive in year_archive.months %}
-                                <li class="{% mark_first %} {% mark_last %}">
-                                    <a class="{% mark_here month_archive.url %}" href="{{month_archive.url}}">{{month_archive.month}}</a>
+                                <li class="{% first %} {% last %}">
+                                    <a class="{% here month_archive.url %}" href="{{month_archive.url}}">{{month_archive.month}}</a>
                                 </li>
                             {% endfor %}
                         </ul>

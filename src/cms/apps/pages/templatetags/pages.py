@@ -136,8 +136,8 @@ def pagination_url(context, page_number, pagination_key=None):
 # HTML tags.
 
 
-@register.inclusion_tag("mark_here.html", takes_context=True)
-def mark_here(context, url=None):
+@register.inclusion_tag("here.html", takes_context=True)
+def here(context, url=None):
     """
     Generates a class name to mark a URL as being at the current request path.
     
@@ -154,8 +154,8 @@ def mark_here(context, url=None):
     return context
 
 
-@register.inclusion_tag("mark_here.html", takes_context=True)
-def mark_here_exact(context, url=None):
+@register.inclusion_tag("here.html", takes_context=True)
+def here_exact(context, url=None):
     """
     Generates a class name to mark a URL as being *exactly* at the current
     request path.
@@ -173,8 +173,8 @@ def mark_here_exact(context, url=None):
     return context
 
 
-@register.inclusion_tag("mark_first.html", takes_context=True)
-def mark_first(context):
+@register.inclusion_tag("first.html", takes_context=True)
+def first(context):
     """
     Generates a class name to mark items as first in a loop.
     
@@ -190,8 +190,8 @@ def mark_first(context):
     return context
 
 
-@register.inclusion_tag("mark_last.html", takes_context=True)
-def mark_last(context):
+@register.inclusion_tag("last.html", takes_context=True)
+def last(context):
     """
     Generates a class name to mark items as last in a loop.
     

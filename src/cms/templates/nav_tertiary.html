@@ -3,8 +3,8 @@
     {% if nav_tertiary %}
         <ul id="nav-tertiary">
             {% for entry in nav_tertiary %}
-                <li class="{% mark_first %} {% mark_last %}">
-                    <a class="{% mark_here entry.url %}" href="{{entry.url}}">{{entry.title}}</a>
+                <li class="{% first %} {% last %}">
+                    <a class="{% here entry.url %}" href="{{entry.url}}">{{entry.title}}</a>
                 </li>
             {% endfor %}
         </ul>
