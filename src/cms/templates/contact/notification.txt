@@ -1,0 +1,15 @@
+Dear Administrator,
+
+A user has made an online enquiry using your website.  The details of the
+enquiry are shown below.
+
+--------------------------------------------------------------------------------
+{% for field in contact_form %}{{field.label}}: {{field.data}}
+
+{% endfor %}--------------------------------------------------------------------------------
+
+To reply to this user, simply reply to this email,
+
+Best wishes,
+
+The CCSS notification system.
