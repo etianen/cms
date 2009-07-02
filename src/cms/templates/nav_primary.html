@@ -2,7 +2,7 @@
     {% load pages %}
     <ul id="nav-primary">
         {% if homepage.in_navigation %}
-            <li class="{% first %}">
+            <li class="first">
                 <a class="{% here_exact homepage.url %}" href="{{homepage.url}}">Home</a>
             </li>
         {% endif %}

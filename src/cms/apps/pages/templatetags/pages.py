@@ -74,7 +74,7 @@ def pagination(context, page):
     return context
 
 
-@register.inclusion_tag("pagination_url.html", takes_context=True)
+@register.context_tag
 def pagination_url(context, page_number, pagination_key=None):
     """Generates a link to the given page number in the pagination."""
     request = context["request"]
@@ -83,11 +83,7 @@ def pagination_url(context, page_number, pagination_key=None):
     get_params[pagination_key] = page_number
     query_string = urllib.urlencode(get_params)
     url = request.path + "?" + query_string
-    context = {"url": url}
-    return context
-
-
-# HTML tags.
+    return url
 
 
 HERE_CLASS_NAME = "here"
@@ -115,92 +111,45 @@ def here_exact(context, url):
     return ""
 
 
-@register.inclusion_tag("first.html", takes_context=True)
+@register.context_tag
 def first(context):
-    """
-    Generates a class name to mark items as first in a loop.
-    
-    If used in a for loop, then the class name will only be generated on the
-    first iteration.  If used outside of a loop, then the class name will
-    always be generated.
-    """
-    try:
-        first = context["forloop"]["first"]
-    except KeyError:
-        first = True
-    context = {"first": first}
-    return context
+    """Returns 'first' on the first iteration of the parent for loop."""
+    if context["forloop"]["first"]:
+        return "first"
+    return ""
 
 
-@register.inclusion_tag("last.html", takes_context=True)
+@register.context_tag
 def last(context):
-    """
-    Generates a class name to mark items as last in a loop.
-    
-    If used in a for loop, then the class name will only be generated on the
-    last iteration.  If used outside of a loop, then the class name will
-    always be generated.
-    """
-    try:
-        last = context["forloop"]["last"]
-    except KeyError:
-        last = True
-    context = {"last": last}
-    return context
+    """Returns 'last' on the last iteration of the parent for loop."""
+    if context["forloop"]["last"]:
+        return "last"
+    return ""
 
 
-# Generate template tags.
-
-
-class RepeatNode(template.Node):
-    
-    """A node that repeatedly renders its content."""
-    
-    def __init__(self, count, nodelist):
-        """Initializes the RepeatNode."""
-        self.count = count
-        self.nodelist = nodelist
-        
-    def render(self, context):
-        """Renders the node."""
-        count = self.count
-        nodelist = self.nodelist
-        result = []
-        if "forloop" in context:
-            parentloop = context["forloop"]
-        else:
-            parentloop = {}
-        loop_attrs = {"parentloop": parentloop}
-        context.push()
-        context["forloop"] = loop_attrs
-        try:
-            for index in range(count):
-                # Update forloop attrs.
-                loop_attrs["counter0"] = index
-                loop_attrs["counter"] = index + 1
-                loop_attrs["revcounter"] = count - index
-                loop_attrs["revcounter0"] = count - index - 1
-                loop_attrs["first"] = (index == 0)
-                loop_attrs["last"] = (index == count - 1)
-                result.append(nodelist.render(context))
-            return u"".join(result)
-        finally:
-            context.pop()
-
-
-RE_REPEAT_TAG = re.compile(r"^\w+\W+(\d+)$")
-
-
-@register.tag
-def repeat(parser, token):
-    """Generates a range from zero to the given endpoint."""
-    result = RE_REPEAT_TAG.match(token.contents)
-    if result:
-        count = int(result.group(1))
-        nodelist = parser.parse(("endrepeat",))
-        parser.delete_first_token()
-        return RepeatNode(count, nodelist)
+@register.body_tag
+def repeat(context, nodelist, count):
+    """Renders the node."""
+    result = []
+    if "forloop" in context:
+        parentloop = context["forloop"]
     else:
-        raise template.TemplateSyntaxError, "Invalid syntax for repeat tag."
-    
+        parentloop = {}
+    loop_attrs = {"parentloop": parentloop}
+    context.push()
+    context["forloop"] = loop_attrs
+    try:
+        for index in range(count):
+            # Update forloop attrs.
+            loop_attrs["counter0"] = index
+            loop_attrs["counter"] = index + 1
+            loop_attrs["revcounter"] = count - index
+            loop_attrs["revcounter0"] = count - index - 1
+            loop_attrs["first"] = (index == 0)
+            loop_attrs["last"] = (index == count - 1)
+            result.append(nodelist.render(context))
+        return u"".join(result)
+    finally:
+        context.pop()
+
     
