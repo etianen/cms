@@ -86,7 +86,7 @@ INSTALLED_APPS += ("cms.apps.news",
 
 # Absolute path to the directory containing this project.
 
-PROJECT_ROOT = os.path.dirname(__file__)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 
 # Absolute path to the directory where site-specific media files are stored.
