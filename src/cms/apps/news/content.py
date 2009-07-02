@@ -33,6 +33,8 @@ class FeedBase(content.Content):
     
     article_archive_template = "news/article_archive.html"
     
+    latest_articles_template = "news/latest_articles.html"
+    
     items_per_page = content.PositiveIntegerField(required=True,
                                                   default=10)
     
@@ -62,11 +64,18 @@ class FeedBase(content.Content):
             raise Http404, "There are no articles on this page."
         return page
     
+    def get_latest_articles(self):
+        """Returns the list of articles for the latest article feeds."""
+        return self.published_articles
+        
+    latest_articles = property(lambda self: self.get_latest_articles(),
+                               doc="The list of articles for the latest article feeds.")
+    
     @content.view(r"^$")
     def index(self, request):
         """Generates a page of the latest news articles."""
         now = datetime.datetime.now()
-        all_articles = self.published_articles
+        all_articles = self.latest_articles
         articles = self.get_page(request, all_articles)
         context = {"articles": articles,
                    "year": now.year}

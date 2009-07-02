@@ -32,15 +32,11 @@ class EventsFeed(FeedBase):
     
     article_archive_template = ("events/article_archive.html", "news/article_archive.html",)
     
-    @content.view(r"^$")
-    def index(self, request):
-        """Generates a page of the upcoming events."""
-        now = datetime.datetime.now()
-        all_events = self.published_articles.filter(start_date__gte=now.date())
-        events = self.get_page(request, all_events)
-        context = {"articles": events,
-                   "year": now.year}
-        return self.render_to_response(request, self.article_list_template, context)
+    latest_articles_template = ("events/latest_articles.html", "news/latest_articles.html",)
+    
+    def get_latest_articles(self):
+        """Returns the list of articles for the latest article feeds."""
+        return super(EventsFeed, self).get_latest_articles().filter(start_date__gte=datetime.datetime.now().date())
     
     
 content.register(EventsFeed)

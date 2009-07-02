@@ -5,18 +5,26 @@ from django import template
 from django.utils.dates import MONTHS
 
 from cms.apps.news.models import Article
+from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import Library 
 
 
 register = Library()
 
 
-@register.inclusion_tag("news/latest_news.html")
-def latest_news(count=5):
+@register.context_tag
+def latest_articles(context, page, count=5):
     """Renders a list of the latest news articles."""
-    articles = Article.published_objects.all()[:count]
-    context = {"articles": articles}
-    return context
+    if isinstance(page, int):
+        try:
+            page = Page.objects.get(id=page)
+        except Page.DoesNotExist:
+            return ""
+    page_content = page.content
+    articles = page_content.latest_articles.all()[:count]
+    context = {"articles": articles,
+               "page": page}
+    return template.loader.render_to_string(page_content.latest_articles_template, context)
 
 
 @register.filter
