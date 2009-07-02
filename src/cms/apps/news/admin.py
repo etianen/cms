@@ -21,9 +21,9 @@ class ArticleAdmin(ArticleBaseAdmin):
     
     publication_fieldsets = (("Publication", {"fields": ("publication_date", "is_online", "is_featured"),}),)
     
-    fieldsets = ((None, {"fields": ("title", "url_title", "news_feed",),},),) + content_fieldsets + publication_fieldsets + ArticleBaseAdmin.navigation_fieldsets + ArticleBaseAdmin.seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title", "feed",),},),) + content_fieldsets + publication_fieldsets + ArticleBaseAdmin.navigation_fieldsets + ArticleBaseAdmin.seo_fieldsets
     
-    radio_fields = {"news_feed": admin.VERTICAL}
+    radio_fields = {"feed": admin.VERTICAL}
     
     
 site.register(Article, ArticleAdmin)

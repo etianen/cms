@@ -14,8 +14,9 @@ class Article(ArticleBase):
     
     publication_clause = "is_online = TRUE AND publication_date <= TIMESTAMP('%(now)s')"
     
-    news_feed = PageField(Page,
-                          "newsfeed")
+    feed = PageField(Page,
+                     "newsfeed",
+                     verbose_name="news feed")
     
     url_title = models.SlugField("URL title")
     
@@ -37,10 +38,10 @@ class Article(ArticleBase):
     
     def get_absolute_url(self):
         """Returns the absolute URL of the article."""
-        return self.news_feed.content.reverse("article_detail", self.publication_date.year, self.publication_date.month, self.url_title)
+        return self.feed.content.reverse("article_detail", self.publication_date.year, self.publication_date.month, self.url_title)
     
     class Meta:
         verbose_name = "news article"
-        unique_together = (("news_feed", "url_title",),)
+        unique_together = (("feed", "url_title",),)
         ordering = ("-is_featured", "-publication_date", "-id")
 

@@ -11,7 +11,6 @@ from django.http import Http404
 from django.utils.dates import MONTHS
 
 from cms.apps.pages import content
-from cms.apps.pages.feeds import registered_feeds
 from cms.apps.pages.models import Page
 from cms.apps.events.models import Event
 
@@ -116,51 +115,4 @@ class EventsFeed(content.Content):
     
     
 content.register(EventsFeed)
-
-
-EVENT_FEED_KEY = "events"
-
-
-class EventsRSSFeed(Feed):
-    
-    """Feed generator for articles."""
-    
-    def get_object(self, bits):
-        """Allows customization of the feed."""
-        if len(bits) == 0:
-            return None
-        elif len(bits) == 1:
-            return Page.published_objects.get(id=bits[0])
-        else:
-            raise ObjectDoesNotExist
-        
-    def title(self, obj=None):
-        """Generates the feed title."""
-        homepage = Page.objects.get_homepage()
-        site_title = homepage.browser_title or homepage.title
-        if obj is None:
-            return "%s Latest Events" % site_title
-        return obj.title
-
-    def link(self, obj=None):
-        if obj is None:
-            return "/"
-        return obj.url
-
-    def description(self, obj=None):
-        """Generates the feed description."""
-        homepage = Page.objects.get_homepage()
-        site_title = homepage.browser_title or homepage.title
-        return "Latest events from %s." % site_title
-        
-    def items(self, obj=None):
-        """Generates the feed items."""
-        events = Event.published_objects.all()
-        if obj is not None:
-            events = events.filter(events_feed=obj)
-        events = events.order_by("-start_date", "-id")[:settings.FEED_LENGTH]
-        return events
-    
-    
-registered_feeds[EVENT_FEED_KEY] = EventsRSSFeed
 

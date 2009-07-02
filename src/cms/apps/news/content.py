@@ -4,46 +4,41 @@
 import datetime
 
 from django.conf import settings
-from django.contrib.syndication.feeds import Feed
+from django.utils.feedgenerator import DefaultFeed
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.utils.dates import MONTHS
 
 from cms.apps.pages import content
-from cms.apps.pages.feeds import registered_feeds
 from cms.apps.pages.models import Page
 from cms.apps.news.models import Article
+from cms.apps.pages.sites import add_domain
+from cms.apps.pages.templatetags.pages import html
 
 
-class NewsFeed(content.Content):
+class FeedBase(content.Content):
     
-    """An archive of published news articles."""
+    """Base class for content that renders date-based fields."""
+
+    # Set this to a short string for the RSS feed path.
+    feed_slug = None
     
-    icon = settings.CMS_MEDIA_URL + "img/content-types/news-feed.png"
+    # Set this to the subclass of ArticleBase that is rendered by this feed.
+    article_model = None
     
-    articles_per_page = content.PositiveIntegerField(required=True,
-                                                     default=10)
+    # Set this to the date field used to order the article model.
+    date_field = "publication_date"
     
-    def get_feed_url(self):
-        """Returns the URL of the RSS feed for this page."""
-        return reverse("feeds", kwargs={"url": ARTICLE_FEED_KEY}) + unicode(self.page.id) + "/"
-        
-    feed_url = property(get_feed_url,
-                        doc="The URL of the RSS feed for this page.")
-    
-    def render_page(self, page, request, template_name, context, **kwargs):
-        """Renders the given page."""
-        # Generate the feed URL.
-        context.setdefault("feed_url", self.feed_url)
-        return super(NewsFeed, self).render_page(page, request, template_name, context, **kwargs)
+    items_per_page = content.PositiveIntegerField(required=True,
+                                                  default=10)
     
     def get_published_articles(self):
-        """Returns all the published articles for this news feed."""
-        return Article.published_objects.filter(news_feed=self.page)
+        """Returns all the published articles for this feed."""
+        return self.article_model.published_objects.filter(feed=self.page)
     
     published_articles = property(get_published_articles,
-                                  doc="All the published articles for this news feed.")
+                                  doc="All the published articles for this feed.")
     
     def get_page(self, request, articles):
         """Returns an object paginator for the given articles."""
@@ -52,7 +47,7 @@ class NewsFeed(content.Content):
             page = int(page)
         except ValueError:
             raise Http404, "'%s' is not a valid page number." % page 
-        paginator = Paginator(articles, self.articles_per_page)
+        paginator = Paginator(articles, self.items_per_page)
         try:
             page = paginator.page(page)
         except EmptyPage:
@@ -67,27 +62,45 @@ class NewsFeed(content.Content):
         articles = self.get_page(request, all_articles)
         context = {"articles": articles,
                    "year": now.year}
-        return self.render_to_response(request, "news/article_list.html", context)
+        return self.render_to_response(request, "%s/article_list.html" % self.feed_slug, context)
+    
+    @content.view(r"^rss/$")
+    def rss(self, request):
+        """Generates an RSS feed for this feed."""
+        page = self.page
+        generator = DefaultFeed(title=page.title,
+                                link=add_domain(page.url),
+                                description=page.meta_description)
+        for article in self.article_model.published_objects.order_by("-%s" % self.date_field, "-pk")[:settings.FEED_LENGTH]:
+            pubdate = getattr(article, self.date_field)
+            if isinstance(pubdate, datetime.date):
+                pubdate = datetime.datetime(pubdate.year, pubdate.month, pubdate.day)
+            generator.add_item(title=article.title,
+                               link=add_domain(article.url),
+                               description=html(article.content or article.summary),
+                               pubdate=pubdate,
+                               unique_id=unicode(article.pk))
+        return HttpResponse(generator.writeString("utf-8"))
     
     @content.view(r"^(\d+)/$")
     def year_archive(self, request, year):
         """Generates a page showing the articles in a given year."""
         year = int(year)
-        all_articles = self.published_articles.filter(publication_date__year=year)
+        all_articles = self.published_articles.filter(**{"%s__year" % self.date_field: year})
         articles = self.get_page(request, all_articles)
         context = {"articles": articles,
                    "title": "Archive for %i" % year,
                    "short_title": year,
                    "year": year}
-        return self.render_to_response(request, "news/article_list.html", context)
+        return self.render_to_response(request, "%s/article_list.html" % self.feed_slug, context)
     
     @content.view(r"^(\d+)/(\d+)/$")
     def month_archive(self, request, year, month):
         """Generates a page showing the articles in a given year."""
         year = int(year)
         month = int(month)
-        all_articles = self.published_articles.filter(publication_date__year=year,
-                                                      publication_date__month=month)
+        all_articles = self.published_articles.filter(**{"%s__year" % self.date_field: year,
+                                                         "%s__month" % self.date_field: month})
         articles = self.get_page(request, all_articles)
         breadcrumbs = self.breadcrumbs + [{"url": self.reverse("year_archive", year), "title": year},]
         context = {"articles": articles,
@@ -96,71 +109,36 @@ class NewsFeed(content.Content):
                    "breadcrumbs": breadcrumbs,
                    "year": year,
                    "month": month}
-        return self.render_to_response(request, "news/article_list.html", context)
+        return self.render_to_response(request, "%s/article_list.html" % self.feed_slug, context)
     
     @content.view(r"^(\d+)/(\d+)/([a-zA-Z0-9_\-]+)/$")
     def article_detail(self, request, year, month, article_slug):
         """Dispatches to the article detail page."""
         year = int(year)
         month = int(month)
-        all_articles = self.page.article_set.all().filter(publication_date__year=year,
-                                                          publication_date__month=month)
+        all_articles = self.article_model.objects.filter(**{"feed": self.page,
+                                                            "%s__year" % self.date_field: year,
+                                                            "%s__month" % self.date_field: month})
         try:
             article = all_articles.get(url_title=article_slug)
-        except Article.DoesNotExist:
+        except self.article_model.DoesNotExist:
             raise Http404, "An article with a URL title of '%s' does not exist." % article_slug
         breadcrumbs = self.breadcrumbs + [{"url": self.reverse("year_archive", year), "title": year},
                                           {"url": self.reverse("month_archive", year, month), "title": MONTHS[month]},]
         context = {"breadcrumbs": breadcrumbs}
-        return self.render_page(article, request, "news/article_detail.html", context)    
+        return self.render_page(article, request, "%s/article_detail.html" % self.feed_slug, context)
+
+
+class NewsFeed(FeedBase):
+    
+    """An archive of published news articles."""
+    
+    feed_slug = "news"
+    
+    article_model = Article
+    
+    icon = settings.CMS_MEDIA_URL + "img/content-types/news-feed.png"
     
     
 content.register(NewsFeed)
-
-
-ARTICLE_FEED_KEY = "news"
-
-
-class NewsRSSFeed(Feed):
     
-    """Feed generator for articles."""
-    
-    def get_object(self, bits):
-        """Allows customization of the feed."""
-        if len(bits) == 0:
-            return None
-        elif len(bits) == 1:
-            return Page.published_objects.get(id=bits[0])
-        else:
-            raise ObjectDoesNotExist
-        
-    def title(self, obj=None):
-        """Generates the feed title."""
-        homepage = Page.objects.get_homepage()
-        site_title = homepage.browser_title or homepage.title
-        if obj is None:
-            return "%s Latest News" % site_title
-        return obj.title
-
-    def link(self, obj=None):
-        if obj is None:
-            return "/"
-        return obj.url
-
-    def description(self, obj=None):
-        """Generates the feed description."""
-        homepage = Page.objects.get_homepage()
-        site_title = homepage.browser_title or homepage.title
-        return "Latest news from %s." % site_title
-        
-    def items(self, obj=None):
-        """Generates the feed items."""
-        articles = Article.published_objects.all()
-        if obj is not None:
-            articles = articles.filter(news_feed=obj)
-        articles = articles.order_by("-publication_date", "-id")[:settings.FEED_LENGTH]
-        return articles
-    
-    
-registered_feeds[ARTICLE_FEED_KEY] = NewsRSSFeed
-

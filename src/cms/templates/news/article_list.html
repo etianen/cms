@@ -2,7 +2,7 @@
 {% load pages news %}
 
 
-{% block feeds %}<link rel="alternate" type="application/rss+xml" title="{{page.title}}" href="{{feed_url}}"/>{% endblock %}
+{% block feeds %}<link rel="alternate" type="application/rss+xml" title="{{page.title}}" href="{% page_url page "rss" %}"/>{% endblock %}
 
 
 {% block content_primary %}
@@ -34,7 +34,7 @@
     
     {% else %}
     
-        <p>There are no articles to display.</p>
+        <p class="no-articles">There are no articles to display.</p>
     
     {% endif %}
 
@@ -45,6 +45,6 @@
 
     {{block.super}}
     
-    {% news_archive page year %}
+    {% article_archive page year %}
 
 {% endblock %}

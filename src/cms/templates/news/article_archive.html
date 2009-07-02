@@ -1,15 +1,15 @@
 {% load pages %}
 
-{% if news_archive %}
+{% if article_archive %}
 
-    <div id="news-archive">
+    <div class="article-archive">
     
-        <h2>News Archive</h2>
+        <h2>Browse Archive</h2>
         
-        <p>Browse older articles below.</p>
+        <p>View older {{verbose_name_plural}} below.</p>
         
         <ul>
-            {% for year_archive in news_archive %}
+            {% for year_archive in article_archive %}
                 <li class="{% first %} {% last %}">
                     <a class="{% here year_archive.url %}" href="{{year_archive.url}}">{{year_archive.year}}</a>
                     {% ifequal year_archive.year year %}
