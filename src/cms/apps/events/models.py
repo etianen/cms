@@ -15,6 +15,8 @@ class Event(ArticleBase):
     events_feed = PageField(Page,
                            "eventsfeed")
     
+    url_title = models.SlugField("URL title")
+    
     content = HtmlField(blank=True,
                         null=True)
     

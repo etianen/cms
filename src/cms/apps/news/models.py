@@ -17,6 +17,8 @@ class Article(ArticleBase):
     news_feed = PageField(Page,
                           "newsfeed")
     
+    url_title = models.SlugField("URL title")
+    
     content = HtmlField(blank=True,
                         null=True)
     

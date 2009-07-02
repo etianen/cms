@@ -82,8 +82,6 @@ class ArticleBase(models.Model):
     
     title = models.CharField(max_length=1000)
     
-    url_title = models.SlugField("URL title")
-    
     # Publication fields.
     
     is_online = models.BooleanField("online",
@@ -241,6 +239,8 @@ class Page(PageBase):
     """A page within the site."""
 
     objects = PageManager()
+    
+    url_title = models.SlugField("URL title")
     
     # Hierarchy fields.
 
