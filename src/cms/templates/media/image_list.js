@@ -3,7 +3,7 @@
 */
 
 
-{% load pages %}
+{% load permalinks %}
 
 
 var tinyMCEImageList = new Array(
