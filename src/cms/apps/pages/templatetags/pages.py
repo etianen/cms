@@ -10,11 +10,12 @@ from django.template.defaultfilters import stringfilter
 from django.utils.safestring import mark_safe
 
 from cms.apps.pages.models import Page
+from cms.apps.pages.templatetags import Library
 from cms.apps.pages.templatetags.permalinks import expand_permalinks
 from cms.apps.pages.templatetags.thumbnails import generate_thumbnails
 
 
-register = template.Library()
+register = Library()
 
 
 # HTML processing.
@@ -89,41 +90,29 @@ def pagination_url(context, page_number, pagination_key=None):
 # HTML tags.
 
 
-@register.inclusion_tag("here.html", takes_context=True)
-def here(context, url=None):
-    """
-    Generates a class name to mark a URL as being at the current request path.
-    
-    If supplied with a URL, then the class name will be generated if the request
-    path starts with the URL.  If not supplied with a URL, then the class name
-    will always be generated.
-    """
-    request = context["request"]
-    if url is None:
-        is_here = True
-    else:
-        is_here = request.path.startswith(url)
-    context = {"is_here": is_here}
-    return context
+HERE_CLASS_NAME = "here"
 
 
-@register.inclusion_tag("here.html", takes_context=True)
-def here_exact(context, url=None):
+@register.context_tag
+def here(context, url):
     """
-    Generates a class name to mark a URL as being *exactly* at the current
-    request path.
-    
-    If supplied with a URL, then the class name will be generated if the request
-    path exactly equals the URL.  If not supplied with a URL, then the class
-    name will always be generated.
+    Returns 'here' if the url is at the start of the current request path.
     """
     request = context["request"]
-    if url is None:
-        is_here = True
-    else:
-        is_here = request.path == url
-    context = {"is_here": is_here}
-    return context
+    if request.path.startswith(url):
+        return HERE_CLASS_NAME
+    return ""
+
+
+@register.context_tag
+def here_exact(context, url):
+    """
+    Returns 'here' if the url is exactly equal to current request path.
+    """
+    request = context["request"]
+    if request.path == url:
+        return HERE_CLASS_NAME
+    return ""
 
 
 @register.inclusion_tag("first.html", takes_context=True)
