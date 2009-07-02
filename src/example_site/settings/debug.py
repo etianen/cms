@@ -6,7 +6,7 @@ things to work a staging site.
 """
 
 
-from settings import *
+from production import *
 
 
 # Debug settings are enabled, allowing full stack traces to be displayed in the

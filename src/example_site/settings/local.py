@@ -2,13 +2,13 @@
 Settings for local development.
 
 These settings are not fast or efficient, but allow local servers to be run
-using the manage.py utility.
+using the django-admin.py utility.
 """
 
 
 import os
 
-from settings_debug import *
+from debug import *
 
 
 # Save media files to the uploads directory in the user's home folder.
