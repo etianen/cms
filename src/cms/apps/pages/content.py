@@ -606,13 +606,18 @@ def autoregister():
 
 # Simple base content models.
 
+
+CONTENT_AREA_NAMES = tuple([name for name, label in settings.CONTENT_AREAS])
+
+
 class Content(ContentBase):
     
     """The default page content associated by default with all pages."""
     
     verbose_name_plural = "content"
     
-    content_primary = HtmlField("main content")      
+    for name, label in settings.CONTENT_AREAS:
+        locals()[name] = HtmlField(label)      
 
 
 register(Content)

@@ -94,7 +94,7 @@ class ContactForm(content.Content):
     
     def get_fieldsets(self):
         """Returns the fieldsets used to lay out the content form."""
-        return (("Page content", {"fields": ("content_primary", "success_message",)}),
+        return (("Page content", {"fields": content.CONTENT_AREA_NAMES + ("success_message",)}),
                 ("Form details", {"fields": ("form_type", "send_to",),}),
                 ("Confirmation email", {"fields": ("confirmation_subject", "confirmation_message",),}),)
     
