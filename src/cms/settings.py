@@ -79,11 +79,6 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "cms.apps.media",)
 
 
-# HACK: Needed to make sites framework work.
-
-SITE_ID = 1
-
-
 # Pagination settings.
 
 PAGINATION_KEY = "page"

@@ -21,13 +21,14 @@ urlpatterns = patterns("",
                        url(r"^admin/tinymce-image-list.js$", "cms.apps.media.views.tinymce_image_list", name="tinymce_image_list"),
                        # Page admin views.
                        url(r"^admin/reorder-pages/$", "cms.apps.pages.views.reorder_pages", name="reorder_pages"),
+                       # HACK: Django admin redirect requires the sites framework.
+                       url(r"^admin/r/(?P<content_type_id>\d+)/(?P<object_id>.+)/$", "cms.apps.pages.views.permalink_redirect", name="permalink_redirect"),
                        # Admin views.
                        url(r"^admin/(.*)", admin_site.root),
                        # Permalink redirection service.
                        url(r"^links/(?P<content_type_id>\d+)/(?P<object_id>.+)/$", "cms.apps.pages.views.permalink_redirect", name="permalink_redirect"),
                        # Google sitemap service.
-                       url(r"^sitemap.xml$", "django.contrib.sitemaps.views.index", {"sitemaps": registered_sitemaps}),
-                       url(r"^sitemap-(?P<section>.+)\.xml$", "django.contrib.sitemaps.views.sitemap", {"sitemaps": registered_sitemaps}),
+                       url(r"^sitemap.xml$", "django.contrib.sitemaps.views.sitemap", {"sitemaps": registered_sitemaps}),
                        # RSS feed service.
                        url(r"^feeds/(?P<url>.*)/$", "django.contrib.syndication.views.feed", {"feed_dict": registered_feeds}, name="feeds"),
                        # Basic robots.txt.
