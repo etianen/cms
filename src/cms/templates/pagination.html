@@ -1,14 +1,12 @@
-{% spaceless %}
-    {% load pages %}
-    {% if has_other_pages %}
-        <p class="pagination">
-            {% if has_previous %}
-                <a class="previous" href="{% pagination_url previous_page_number %}">Previous</a>
-            {% endif %}
-            <span class="current"> Page {{page_number}} of {{num_pages}} </span>
-            {% if has_next %}
-                <a class="next" href="{% pagination_url next_page_number %}">Next</a>
-            {% endif %}
-        </p>
-    {% endif %}
-{% endspaceless %}
+{% load pages %}
+{% if has_other_pages %}
+    <p class="pagination">
+        {% if has_previous %}
+            <a class="previous" href="{% pagination_url previous_page_number %}">Previous</a>
+        {% endif %}
+        <span class="current"> Page {{page_number}} of {{num_pages}} </span>
+        {% if has_next %}
+            <a class="next" href="{% pagination_url next_page_number %}">Next</a>
+        {% endif %}
+    </p>
+{% endif %}

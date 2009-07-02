@@ -1,10 +1,8 @@
-{% spaceless %}
-    {% if breadcrumbs %}
-        <div id="breadcrumbs">
-            {% for breadcrumb in breadcrumbs %}
-                <span class="breadcrumb"><a href="{{breadcrumb.url}}">{{breadcrumb.title}}</a> &rsaquo; </span>
-            {% endfor %}
-            <span class="breadcrumb">{{short_title}}</span>
-        </div>
-    {% endif %}
-{% endspaceless %}
+{% if breadcrumbs %}
+    <div id="breadcrumbs">
+        {% for breadcrumb in breadcrumbs %}
+            <span class="breadcrumb"><a href="{{breadcrumb.url}}">{{breadcrumb.title}}</a> &rsaquo; </span>
+        {% endfor %}
+        <span class="breadcrumb">{{short_title}}</span>
+    </div>
+{% endif %}

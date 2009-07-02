@@ -1,15 +1,13 @@
-{% spaceless %}
-    {% load pages %}
-    <ul id="nav-primary">
-        {% if homepage.in_navigation %}
-            <li class="first">
-                <a class="{% here_exact homepage.url %}" href="{{homepage.url}}">Home</a>
-            </li>
-        {% endif %}
-        {% for entry in nav_primary %}
-            <li class="{% last %}">
-                <a class="{% here entry.url %}" href="{{entry.url}}">{{entry.title}}</a>
-            </li>
-        {% endfor %}
-    </ul>
-{% endspaceless %}
+{% load pages %}
+<ul id="nav-primary">
+    {% if homepage.in_navigation %}
+        <li class="first">
+            <a class="{% here_exact homepage.url %}" href="{{homepage.url}}">Home</a>
+        </li>
+    {% endif %}
+    {% for entry in nav_primary %}
+        <li class="{% last %}">
+            <a class="{% here entry.url %}" href="{{entry.url}}">{{entry.title}}</a>
+        </li>
+    {% endfor %}
+</ul>
