@@ -7,9 +7,10 @@ from django import template
 from django.core.exceptions import ObjectDoesNotExist
 
 from cms.apps.pages import permalinks
+from cms.apps.pages.templatetags import Library
 
 
-register = template.Library()
+register = Library()
 
 
 @register.filter

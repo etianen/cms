@@ -4,9 +4,10 @@
 from django import template
 
 from cms.apps.pages.admin import PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
+from cms.apps.pages.templatetags import Library
 
 
-register = template.Library()
+register = Library()
 
 
 @register.inclusion_tag("admin/sitemap_entry.html", takes_context=True)

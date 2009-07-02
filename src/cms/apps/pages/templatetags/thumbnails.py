@@ -9,55 +9,24 @@ from django.forms.util import flatatt
 
 from cms.apps.pages import permalinks
 from cms.apps.pages import permalinks, thumbnails
+from cms.apps.pages.templatetags import Library
 
 
-register = template.Library()
+register = Library()
 
 
-RE_THUMBNAIL = re.compile(r"^(\w+)\W+([\w\.]+)\W+(\d+)\W+(\d+)$")
-
-RE_THUMBNAIL_ALIAS = re.compile(RE_THUMBNAIL.pattern[:-1] + r"\W+as\W+(\w+)$") 
-
-
-class ThumbnailNode(template.Node):
-    
-    """Renders the thumbnail tag."""
-    
-    def __init__(self, token, method):
-        """Initializes the ThumbnailNode."""
-        # Parse the token.
-        match = RE_THUMBNAIL_ALIAS.match(token.contents)
-        if match:
-            tag_name, image, width, height, alias = match.groups()
-        else:
-            match = RE_THUMBNAIL.match(token.contents)
-            if match:
-                tag_name, image, width, height = match.groups()
-                alias = None
-            else:
-                bits = token.split_contents()
-                raise template.TemplateSyntaxError, "Invalid syntax for %s tag." % bits[0]
-        # Store the result of the parse.
-        self.image = template.Variable(image)
-        self.width = int(width)
-        self.height = int(height)
-        self.alias = alias
-        self.method = method
-        
-    def render(self, context):
-        """Renders the thumbnail."""
-        image = self.image.resolve(context)
-        thumbnail = thumbnails.generate(image, self.width, self.height, self.method)
-        # Set an alias, if specified.
-        if self.alias:
-            context[self.alias] = thumbnail
-            return ""
-        # Generate the image tag.
-        return '<img src="%s" width="%s" height="%s" alt=""/>' % (thumbnail.url, thumbnail.width, thumbnail.height)
+@register.simple_tag
+def img(image):
+    """Renders the given Django image file as a HTML image."""
+    return '<img src="%s" width="%s" height="%s" alt=""/>' % (image.url, image.width, image.height)
 
 
-@register.tag
-def thumbnail(parser, token):
+THUMBNAIL_TAG_PATTERNS = ("{image} {width} {height} as {alias}",
+                          "{image} {width} {height}",) 
+
+
+@register.pattern_tag(*THUMBNAIL_TAG_PATTERNS)
+def thumbnail(context, image, width, height, alias=None):
     """
     Generates a thumbnail of the given image, preserving aspect ratio.
     
@@ -75,27 +44,39 @@ def thumbnail(parser, token):
     The thumbnail variable will be of type ImageFile, allowing its url, width
     and height to be accessed.
     """
-    return ThumbnailNode(token, thumbnails.THUMBNAIL)
+    thumbnail = thumbnails.thumbnail(image, width, height)
+    if alias:
+        context[alias] = thumbnail
+        return ""
+    return img(thumbnail)
     
     
-@register.tag
+@register.pattern_tag(*THUMBNAIL_TAG_PATTERNS)
 def resize(parser, token):
     """
     Generates a resized thumbnail of the given image, ignoring aspect ratio.
     
     See the 'thumbnail' tag for appropriate syntax.
     """
-    return ThumbnailNode(token, thumbnails.RESIZE)
+    thumbnail = thumbnails.resize(image, width, height)
+    if alias:
+        context[alias] = thumbnail
+        return ""
+    return img(thumbnail)
 
 
-@register.tag
+@register.pattern_tag(*THUMBNAIL_TAG_PATTERNS)
 def crop(parser, token):
     """
     Generates a cropped thumbnail of the given image, preserving aspect ratio.
     
     See the 'thumbnail' tag for appropriate syntax.
     """
-    return ThumbnailNode(token, thumbnails.CROP)
+    thumbnail = thumbnails.crop(image, width, height)
+    if alias:
+        context[alias] = thumbnail
+        return ""
+    return img(thumbnail)
 
 
 RE_IMG = re.compile(r"<img(.+?)/>", re.IGNORECASE)

@@ -1,7 +1,9 @@
 """Template extensions used by the pages application."""
 
 
-from django.template import Library as LibraryBase, Variable, Node
+import re
+
+from django.template import Library as LibraryBase, Variable, Node, TemplateSyntaxError
 
 
 class ContextNode(Node):
@@ -33,6 +35,21 @@ class BodyNode(Node):
         """Renders the node."""
         args = [arg.resolve(context) for arg in self.args]
         return self.func(context, self.nodelist, *args)
+
+
+class PatternNode(Node):
+    
+    """A node for a pattern tag."""
+    
+    def __init__(self, func, kwargs):
+        """Initializes the PatternNode."""
+        self.func = func
+        self.kwargs = kwargs
+        
+    def render(self, context):
+        """Renders the node."""
+        kwargs = dict([(key, value.resolve(context)) for key, value in self.kwargs.items()])
+        return self.func(context, **kwargs)
 
 
 class Library(LibraryBase):
@@ -72,5 +89,31 @@ class Library(LibraryBase):
             return BodyNode(func, args, nodelist)
         self.tag(func.__name__, compiler)
         return func
+    
+    def pattern_tag(self, *patterns):
+        """
+        A tag that obtains its arguments as the basis of one or more pattern
+        constructs.
+        
+        A pattern has the syntax "{placeholder1} filer text {placeholder2}".
+        These placeholders will be provided to the function in the form of
+        keyword arguments. The function will also receive the template context
+        as the first non-keyword argument.
+        
+        These patterns will be matched in the order given, so more complete
+        patterns should be listed first.
+        """
+        def decorator(func):
+            def compiler(parser, token):
+                for pattern in patterns:
+                    regex = r"^\w+ %s$" % re.sub(r"\{(\w+?)\}", r"(?P<\1>'[^']*'|\"[^\"]*\"|[\w\.]+?)", pattern)
+                    match = re.match(regex, token.contents)
+                    if match:
+                        kwargs = dict([(key, Variable(value)) for key, value in match.groupdict().items()])
+                        return PatternNode(func, kwargs)
+                raise TemplateSyntaxError, '%s tag expects the following format: "%s"' % (func.__name__, "' or '".join(patterns))
+            self.tag(func.__name__, compiler)
+            return func
+        return decorator
     
     
