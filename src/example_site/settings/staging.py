@@ -6,7 +6,7 @@ subdomain.
 """
 
 
-from production import *
+from debug import *
 
 
 # Use local server.
