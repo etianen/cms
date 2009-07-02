@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load pages news %}
+
+
+{% block feeds %}<link rel="alternate" type="application/rss+xml" title="{{page.title}}" href="{{feed_url}}"/>{% endblock %}
+
+
+{% block content_primary %}
+
+    {{block.super}}
+        
+    {% if articles.object_list %}
+    
+        {% pagination articles %}
+    
+        <ul id="article-list">
+            {% for article in articles.object_list %}
+                <li class="{% if article.is_featured %}featured{% endif %} {% first %} {% last %}">
+                
+                    <h2>
+                        <span class="date">{{article.publication_date|date}}</span>
+                        <a class="title" href="{{article.url}}">{{article.title}}</a>
+                    </h2>
+                    
+                    {{article.summary|default:article.content|truncatewords_html:100|html}}
+                    
+                    <p class="read-more"><a href="{{article.url}}">Read more</a></p>
+                    
+                </li>
+            {% endfor %}
+        </ul>
+        
+        {% pagination articles %}
+    
+    {% else %}
+    
+        <p>There are no articles to display.</p>
+    
+    {% endif %}
+
+{% endblock %}
+
+
+{% block content_secondary %}
+
+    {{block.super}}
+    
+    {% news_archive page year %}
+
+{% endblock %}

@@ -1,5 +1,5 @@
-{% extends "news/base.html" %}
-{% load pages %}
+{% extends "base.html" %}
+{% load pages news %}
 
 
 {% block title %}<span class="date">{{page.publication_date|date}}</span> <span class="title">{{block.super}}</span>{% endblock %}
@@ -7,3 +7,9 @@
 
 {% block content_primary %}{{page.content|html}}{% endblock %}
 
+
+{% block content_secondary %}
+
+    {% news_archive page.news_feed page.publication_date.year %}
+
+{% endblock %}

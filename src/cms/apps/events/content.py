@@ -34,17 +34,6 @@ class EventsFeed(content.Content):
     
     def render_page(self, page, request, template_name, context, **kwargs):
         """Renders the given page."""
-        # Generate list of available years.
-        available_months = self.published_events.dates("start_date", "month")
-        events_archive = []
-        year = None
-        for date in available_months:
-            month = date.month
-            if date.year != year:
-                year = date.year
-                events_archive.append({"year": year, "months": [], "url": self.reverse("year_archive", year)})
-            events_archive[-1]["months"].append({"month": MONTHS[month], "url": self.reverse("month_archive", year, month)})
-        context.setdefault("events_archive", events_archive)
         # Generate the feed URL.
         context.setdefault("feed_url", self.feed_url)
         return super(EventsFeed, self).render_page(page, request, template_name, context, **kwargs)
@@ -78,7 +67,7 @@ class EventsFeed(content.Content):
         events = self.get_page(request, all_events)
         context = {"events": events,
                    "year": now.year}
-        return self.render_to_response(request, "events/base.html", context)
+        return self.render_to_response(request, "events/event_list.html", context)
     
     @content.view(r"^(\d+)/$")
     def year_archive(self, request, year):
@@ -90,7 +79,7 @@ class EventsFeed(content.Content):
                    "title": "Archive for %i" % year,
                    "short_title": year,
                    "year": year}
-        return self.render_to_response(request, "events/base.html", context)
+        return self.render_to_response(request, "events/event_list.html", context)
     
     @content.view(r"^(\d+)/(\d+)/$")
     def month_archive(self, request, year, month):
@@ -107,7 +96,7 @@ class EventsFeed(content.Content):
                    "breadcrumbs": breadcrumbs,
                    "year": year,
                    "month": month}
-        return self.render_to_response(request, "events/base.html", context)
+        return self.render_to_response(request, "events/event_list.html", context)
     
     @content.view(r"^(\d+)/(\d+)/([a-zA-Z0-9_\-]+)/$")
     def event_detail(self, request, year, month, event_slug):
@@ -122,9 +111,7 @@ class EventsFeed(content.Content):
             raise Http404, "An event with a URL title of '%s' does not exist." % event_slug
         breadcrumbs = self.breadcrumbs + [{"url": self.reverse("year_archive", year), "title": year},
                                           {"url": self.reverse("month_archive", year, month), "title": MONTHS[month]},]
-        context = {"breadcrumbs": breadcrumbs,
-                   "year": event.start_date.year,
-                   "month": event.start_date.month}
+        context = {"breadcrumbs": breadcrumbs}
         return self.render_page(event, request, "events/event_detail.html", context)    
     
     
