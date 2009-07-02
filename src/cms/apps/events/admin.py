@@ -21,9 +21,9 @@ class EventAdmin(ArticleBaseAdmin):
     
     publication_fieldsets = (("Publication", {"fields": ("start_date", "end_date", "is_online", "is_featured"),}),)
     
-    fieldsets = ((None, {"fields": ("title", "url_title", "events_feed",),},),) + content_fieldsets + publication_fieldsets + ArticleBaseAdmin.navigation_fieldsets + ArticleBaseAdmin.seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title", "feed",),},),) + content_fieldsets + publication_fieldsets + ArticleBaseAdmin.navigation_fieldsets + ArticleBaseAdmin.seo_fieldsets
     
-    radio_fields = {"events_feed": admin.VERTICAL}
+    radio_fields = {"feed": admin.VERTICAL}
     
     
 site.register(Event, EventAdmin)

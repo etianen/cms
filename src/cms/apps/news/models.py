@@ -18,7 +18,8 @@ class Article(ArticleBase):
                      "newsfeed",
                      verbose_name="news feed")
     
-    url_title = models.SlugField("URL title")
+    url_title = models.SlugField("URL title",
+                                 db_index=False)
     
     content = HtmlField(blank=True,
                         null=True)
@@ -30,6 +31,7 @@ class Article(ArticleBase):
     # Publication fields.
     
     publication_date = models.DateField(default=lambda: datetime.datetime.now().date(),
+                                        db_index=True,
                                         help_text="The date that this article will appear on the website.")
     
     is_featured = models.BooleanField("featured",

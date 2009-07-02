@@ -2,7 +2,7 @@
 {% load pages news %}
 
 
-{% block title %}<span class="date">{{page.publication_date|date}}</span> <span class="title">{{block.super}}</span>{% endblock %}
+{% block title %}<span class="date">{{page|date_field|date}}</span> <span class="title">{{block.super}}</span>{% endblock %}
 
 
 {% block content_primary %}{{page.content|html}}{% endblock %}
@@ -10,6 +10,6 @@
 
 {% block content_secondary %}
 
-    {% article_archive page.feed page.publication_date.year %}
+    {% article_archive page.feed year %}
 
 {% endblock %}

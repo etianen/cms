@@ -12,10 +12,12 @@ class Event(ArticleBase):
     
     """A news article."""
     
-    events_feed = PageField(Page,
-                           "eventsfeed")
+    feed = PageField(Page,
+                     "eventsfeed",
+                     verbose_name="events feed")
     
-    url_title = models.SlugField("URL title")
+    url_title = models.SlugField("URL title",
+                                 db_index=False)
     
     content = HtmlField(blank=True,
                         null=True)
@@ -27,6 +29,7 @@ class Event(ArticleBase):
     # Publication fields.
     
     start_date = models.DateField(default=lambda: datetime.datetime.now().date(),
+                                  db_index=True,
                                   help_text="The date that this event is due to start.")
     
     end_date = models.DateField(blank=True,
@@ -39,9 +42,9 @@ class Event(ArticleBase):
     
     def get_absolute_url(self):
         """Returns the absolute URL of the article."""
-        return self.events_feed.content.reverse("event_detail", self.start_date.year, self.start_date.month, self.url_title)
+        return self.feed.content.reverse("article_detail", self.start_date.year, self.start_date.month, self.url_title)
     
     class Meta:
-        unique_together = (("events_feed", "url_title",),)
+        unique_together = (("feed", "url_title",),)
         ordering = ("-is_featured", "start_date", "id")
 

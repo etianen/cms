@@ -240,7 +240,8 @@ class Page(PageBase):
 
     objects = PageManager()
     
-    url_title = models.SlugField("URL title")
+    url_title = models.SlugField("URL title",
+                                 db_index=False)
     
     # Hierarchy fields.
 

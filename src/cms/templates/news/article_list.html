@@ -18,7 +18,7 @@
                 <li class="{% if article.is_featured %}featured{% endif %} {% first %} {% last %}">
                 
                     <h2>
-                        <span class="date">{{article.publication_date|date}}</span>
+                        <span class="date">{{article|date_field|date}}</span>
                         <a class="title" href="{{article.url}}">{{article.title}}</a>
                     </h2>
                     
@@ -34,7 +34,7 @@
     
     {% else %}
     
-        <p class="no-articles">There are no articles to display.</p>
+        <p class="no-articles">There are no {{article_type_plural}} to display.</p>
     
     {% endif %}
 

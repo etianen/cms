@@ -21,17 +21,25 @@ class FeedBase(content.Content):
     
     """Base class for content that renders date-based fields."""
 
-    # Set this to a short string for the RSS feed path.
-    feed_slug = None
-    
     # Set this to the subclass of ArticleBase that is rendered by this feed.
     article_model = None
     
     # Set this to the date field used to order the article model.
     date_field = "publication_date"
     
+    article_list_template = "news/article_list.html"
+    
+    article_detail_template = "news/article_detail.html"
+    
+    article_archive_template = "news/article_archive.html"
+    
     items_per_page = content.PositiveIntegerField(required=True,
                                                   default=10)
+    
+    def render_page(self, page, request, template, context, **kwargs):
+        """Renders the given page."""
+        context.setdefault("article_type_plural", self.article_model._meta.verbose_name_plural)
+        return super(FeedBase, self).render_page(page, request, template, context, **kwargs)
     
     def get_published_articles(self):
         """Returns all the published articles for this feed."""
@@ -62,7 +70,7 @@ class FeedBase(content.Content):
         articles = self.get_page(request, all_articles)
         context = {"articles": articles,
                    "year": now.year}
-        return self.render_to_response(request, "%s/article_list.html" % self.feed_slug, context)
+        return self.render_to_response(request, self.article_list_template, context)
     
     @content.view(r"^rss/$")
     def rss(self, request):
@@ -80,7 +88,9 @@ class FeedBase(content.Content):
                                description=html(article.content or article.summary),
                                pubdate=pubdate,
                                unique_id=unicode(article.pk))
-        return HttpResponse(generator.writeString("utf-8"))
+        response = HttpResponse(mimetype=generator.mime_type)
+        generator.write(response, "utf-8")
+        return response
     
     @content.view(r"^(\d+)/$")
     def year_archive(self, request, year):
@@ -92,7 +102,7 @@ class FeedBase(content.Content):
                    "title": "Archive for %i" % year,
                    "short_title": year,
                    "year": year}
-        return self.render_to_response(request, "%s/article_list.html" % self.feed_slug, context)
+        return self.render_to_response(request, self.article_list_template, context)
     
     @content.view(r"^(\d+)/(\d+)/$")
     def month_archive(self, request, year, month):
@@ -109,7 +119,7 @@ class FeedBase(content.Content):
                    "breadcrumbs": breadcrumbs,
                    "year": year,
                    "month": month}
-        return self.render_to_response(request, "%s/article_list.html" % self.feed_slug, context)
+        return self.render_to_response(request, self.article_list_template, context)
     
     @content.view(r"^(\d+)/(\d+)/([a-zA-Z0-9_\-]+)/$")
     def article_detail(self, request, year, month, article_slug):
@@ -125,15 +135,14 @@ class FeedBase(content.Content):
             raise Http404, "An article with a URL title of '%s' does not exist." % article_slug
         breadcrumbs = self.breadcrumbs + [{"url": self.reverse("year_archive", year), "title": year},
                                           {"url": self.reverse("month_archive", year, month), "title": MONTHS[month]},]
-        context = {"breadcrumbs": breadcrumbs}
-        return self.render_page(article, request, "%s/article_detail.html" % self.feed_slug, context)
+        context = {"breadcrumbs": breadcrumbs,
+                   "year": getattr(article, self.date_field).year}
+        return self.render_page(article, request, self.article_detail_template, context)
 
 
 class NewsFeed(FeedBase):
     
     """An archive of published news articles."""
-    
-    feed_slug = "news"
     
     article_model = Article
     

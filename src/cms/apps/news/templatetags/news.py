@@ -19,12 +19,19 @@ def latest_news(count=5):
     return context
 
 
+@register.filter
+def date_field(article):
+    """Returns the value of the date field in the article."""
+    page_content = article.feed.content
+    return getattr(article, page_content.date_field)
+
+
 @register.context_tag
 def article_archive(context, page, year):
     """Renders the news archive for the given page."""
     page_content = page.content
     request = context["request"]
-    available_months = page_content.published_articles.dates("publication_date", "month")
+    available_months = page_content.published_articles.dates(page_content.date_field, "month")
     # Generate the news archive.
     article_archive = []
     year = None
@@ -39,6 +46,6 @@ def article_archive(context, page, year):
                "page": page,
                "year": year,
                "article_archive": article_archive,
-               "verbose_name_plural": page_content.article_model._meta.verbose_name_plural}
-    return template.loader.render_to_string("%s/article_archive.html" % page_content.feed_slug, context)
+               "article_type_plural": page_content.article_model._meta.verbose_name_plural}
+    return template.loader.render_to_string(page_content.article_archive_template, context)
 
