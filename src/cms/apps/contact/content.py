@@ -136,7 +136,7 @@ class ContactForm(content.Content):
         else:    
             contact_form = ContactForm()
         context = {"contact_form": contact_form}
-        return self.render_to_response(request, "contact/base.html", context)
+        return self.render_to_response(request, "contact/contact_form.html", context)
     
     @content.view(r"^message-sent/$")
     def message_sent(self, request):
