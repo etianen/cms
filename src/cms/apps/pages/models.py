@@ -337,7 +337,7 @@ class Page(PageBase):
         """Generates the absolute url of the page."""
         if self.parent:
             return self.parent.url + self.url_title + "/"
-        return reverse("render_homepage")
+        return "/"
     
     class Meta:
         unique_together = (("parent", "url_title",),)

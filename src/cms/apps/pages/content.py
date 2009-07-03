@@ -402,7 +402,6 @@ class ContentBase(object):
     def dispatch(self, request, path_info):
         """Generates a HttpResponse for this context."""
         page = self.page
-        request.breadcrumbs.append(self.page)
         # Dispatch to the appropriate view.
         resolver = self.url_resolver
         try:
@@ -417,19 +416,6 @@ class ContentBase(object):
                     pass
                 else:
                     return HttpResponseRedirect(page.get_absolute_url() + new_path_info)
-            # See if a child page can help out.
-            path_parts = path_info.split("/", 1)
-            child_url_title = path_parts[0]
-            try:
-                child = page.children.get(url_title=child_url_title)
-            except page.DoesNotExist:
-                pass 
-            else:
-                try:
-                    path_info = path_parts[1]
-                except IndexError:
-                    return HttpResponseRedirect(page.get_absolute_url() + new_path_info)
-                return child.content.dispatch(request, path_info)
             raise Http404, "No match for the current path '%s' found in the url conf of %s." % (path_info, self.__class__.__name__)
         response = callback(self, request, *callback_args, **callback_kwargs)
         # Validate the response.

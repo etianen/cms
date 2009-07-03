@@ -11,28 +11,6 @@ from django.shortcuts import render_to_response
 from cms.apps.pages.models import Page
 
 
-def render_page(request, path_info=""):
-    """Dispatches the request to the site pages."""
-    # Append the slash if it will match an existing URL.
-    if settings.APPEND_SLASH and not request.path.endswith("/"):
-        new_path = request.path + "/"
-        try:
-            callback, callback_args, callback_kwargs = resolve(new_path)
-        except Resolver404:
-            pass
-        else:
-            if callback != render_page:
-                return HttpResponseRedirect(new_path)
-    # Attempt to retrieve the homepage.
-    try:
-        homepage = Page.objects.get_homepage()
-    except Page.DoesNotExist:
-        raise Http404, "The site does not have a homepage."
-    # Dispatch the request!
-    request.breadcrumbs = []
-    return homepage.content.dispatch(request, path_info)
-
-
 def permalink_redirect(request, content_type_id, object_id):
     """Redirects to the object encoded in the permalink."""
     # Attempt to access the encoded content type.
@@ -97,10 +75,7 @@ def reorder_pages(request):
         
 def handler404(request):
     """Renders the server error document."""
-    try:
-        page = request.breadcrumbs[-1]
-    except:
-        page = Page.objects.get_homepage()
+    page = request.breadcrumbs[-1]
     context = {"title": "Page Not Found"}
     response = page.content.render_to_response(request, "404.html", context)
     response.status_code = 404
@@ -109,12 +84,9 @@ def handler404(request):
 
 def handler500(request):
     """Renders the server error document."""
-    try:
-        page = request.breadcrumbs[-1]
-    except:
-        page = Page.objects.get_homepage()
+    page = request.breadcrumbs[-1]
     context = {"title": "Server Error"}
-    response = page.content.render_to_response(request, "404.html", context)
+    response = page.content.render_to_response(request, "500.html", context)
     response.status_code = 500
     return response
 

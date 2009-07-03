@@ -60,7 +60,8 @@ TEMPLATE_CONTEXT_PROCESSORS = ("django.core.context_processors.auth",
 MIDDLEWARE_CLASSES = ("django.middleware.transaction.TransactionMiddleware",
                       "django.middleware.common.CommonMiddleware",
                       "django.contrib.sessions.middleware.SessionMiddleware",
-                      "django.contrib.auth.middleware.AuthenticationMiddleware",)
+                      "django.contrib.auth.middleware.AuthenticationMiddleware",
+                      "cms.apps.pages.middleware.PageMiddleware",)
 
 ROOT_URLCONF = "cms.urls"
 

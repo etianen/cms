@@ -47,15 +47,3 @@ if settings.SERVE_STATIC_MEDIA:
         media_regex = r"^%s(.*)" % media_url.lstrip("/")
         urlpatterns += patterns("", url(media_regex, serve, {"document_root": media_root}))
 
-
-# Final pattern is the catch-all for page serving.
-
-urlpatterns += patterns("cms.apps.pages.views",
-                        url(r"^(.*)$", "render_page", name="render_page"),
-                        url(r"^$", "render_page", name="render_homepage"),)
-
-
-handler404 = "cms.apps.pages.views.handler404"
-
-
-handler500 = "cms.apps.pages.views.handler500"
