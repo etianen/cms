@@ -44,6 +44,11 @@ class PublishedPageBaseManager(PageBaseManager):
         return queryset
 
 
+# Choices available to the meta robots clauses.
+ROBOTS_CHOICES = ((1, "Yes"),
+                  (0, "No"),)
+
+
 class PageBase(models.Model):
     
     """
@@ -127,18 +132,27 @@ class PageBase(models.Model):
                                           null=True,
                                           help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates.")
     
-    robots_index = models.BooleanField("allow indexing",
-                                        default=True,
-                                        help_text="Uncheck this box to prevent search engines from indexing this page. Disable this only if the page contains information which you do not wish to show up in search results.")
+    robots_index = models.PositiveSmallIntegerField("allow indexing",
+                                                    blank=True,
+                                                    null=True,
+                                                    default=None,
+                                                    choices=ROBOTS_CHOICES,
+                                                    help_text="Use this to prevent search engines from indexing this page. Disable this only if the page contains information which you do not wish to show up in search results. Leave blank to use the setting from the parent page.")
 
-    robots_archive = models.BooleanField("allow archiving",
-                                         default=True,
-                                         help_text="Uncheck this box to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis.")
+    robots_archive = models.PositiveSmallIntegerField("allow archiving",
+                                                      blank=True,
+                                                      null=True,
+                                                      default=None,
+                                                      choices=ROBOTS_CHOICES,
+                                                      help_text="Use this to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis. Leave blank to use the setting from the parent page.")
 
-    robots_follow = models.BooleanField("follow links",
-                                        default=True,
-                                        help_text="Uncheck this box to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise.")
-
+    robots_follow = models.PositiveSmallIntegerField("follow links",
+                                                     blank=True,
+                                                     null=True,
+                                                     default=None,
+                                                     choices=ROBOTS_CHOICES,
+                                                     help_text="Use this to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise. Leave blank to use the setting from the parent page.")
+    
     # Base model methods.
     
     def get_absolute_url(self):

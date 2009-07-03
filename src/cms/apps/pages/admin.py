@@ -115,7 +115,7 @@ class PageBaseAdmin(VersionAdmin):
     navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
                                             "classes": ("collapse",),}),)
     
-    seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_changefreq", "robots_index", "robots_archive", "robots_follow",),
+    seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "robots_index", "robots_archive", "robots_follow", "sitemap_priority", "sitemap_changefreq",),
                                                      "classes": ("collapse",),},),)
     
     fieldsets = ((None, {"fields": ("title", "url_title",),},),) + publication_fieldsets + navigation_fieldsets + seo_fieldsets
