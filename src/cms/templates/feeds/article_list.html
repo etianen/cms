@@ -13,7 +13,7 @@
     
         {% pagination articles %}
     
-        <ul id="article-list">
+        <ul class="article-list">
             {% for article in articles.object_list %}
                 <li class="{% if article.is_featured %}featured{% endif %} {% first %} {% last %}">
                 
@@ -22,7 +22,11 @@
                         <a class="title" href="{{article.url}}">{{article.title}}</a>
                     </h2>
                     
-                    {{article.summary|default:article.content|truncatewords_html:100|html}}
+                    {% if article.summary %}
+                        {{article.summary|html}}
+                    {% else %}
+                        {{article.content|truncatewords_html:100|html}}
+                    {% endif %}
                     
                     <p class="read-more"><a href="{{article.url}}">Read more</a></p>
                     
