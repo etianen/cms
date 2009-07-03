@@ -109,13 +109,16 @@ class PageBaseAdmin(VersionAdmin):
     
     date_hierarchy = "last_modified"
     
+    publication_fieldsets = (("Publication", {"fields": ("is_online",),
+                                              "classes": ("collapse",),}),)
+    
     navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
                                             "classes": ("collapse",),}),)
     
     seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_changefreq", "robots_index", "robots_archive", "robots_follow",),
                                                      "classes": ("collapse",),},),)
     
-    fieldsets = ((None, {"fields": ("title", "url_title", "is_online",),},),) + navigation_fieldsets + seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title",),},),) + publication_fieldsets + navigation_fieldsets + seo_fieldsets
 
     list_display = ("title", "last_modified", "is_online",)
     
@@ -136,7 +139,7 @@ class PageAdmin(PageBaseAdmin):
 
     """Admin settings for Page models."""
 
-    publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date",),
+    publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online",),
                                               "classes": ("collapse",)}),)
 
     navigation_fieldsets = (("Navigation", {"fields": ("short_title", "in_navigation",),

@@ -19,9 +19,9 @@ class EventAdmin(PageBaseAdmin):
     
     content_fieldsets = (("Event content", {"fields": ("content", "summary",),}),)
     
-    publication_fieldsets = (("Publication", {"fields": ("start_date", "end_date", "is_featured"),}),)
+    publication_fieldsets = (("Publication", {"fields": ("start_date", "end_date", "is_online", "is_featured"),}),)
     
-    fieldsets = ((None, {"fields": ("title", "url_title", "feed", "is_online",),},),) + content_fieldsets + publication_fieldsets + PageBaseAdmin.navigation_fieldsets + PageBaseAdmin.seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title", "feed",),},),) + content_fieldsets + publication_fieldsets + PageBaseAdmin.navigation_fieldsets + PageBaseAdmin.seo_fieldsets
     
     radio_fields = {"feed": admin.VERTICAL}
     
