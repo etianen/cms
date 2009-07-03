@@ -3,7 +3,7 @@
     <ul id="nav-secondary">
         {% for entry in nav_secondary %}
             <li class="{% first %} {% last %}">
-                {% link entry.url entry.title %}
+                {% link entry.url entry %}
             </li>
         {% endfor %}
     </ul>

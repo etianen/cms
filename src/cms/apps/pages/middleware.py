@@ -14,31 +14,44 @@ class PageMiddleware(object):
     
     """Serves up pages when no other view is matched."""
     
-    def process_request(self, request):
-        """Adds the breadcrumbs to the request."""
-        slugs = request.path.strip("/").split("/")
-        breadcrumbs = []
-        request.breadcrumbs = breadcrumbs
+    def not_found_response(self, request, page):
+        """Renders a pretty not found page."""
+        context = {"title": "Page Not Found"}
+        response = page.content.render_to_response(request, "404.html", context)
+        response.status_code = 404
+        return response
+    
+    def error_response(self, request, page):
+        """Renders a pretty error page."""
+        context = {"title": "Server Error"}
+        response = page.content.render_to_response(request, "500.html", context)
+        response.status_code = 500
+        return response
+    
+    def process_response(self, request, response):
+        """Falls back to page dispatch."""
+        # If the urlconf matched the request with no error, then ignore.
+        if response.status_code not in (404, 500):
+            return response
+        # See if we have pages to dispatch to.
         try:
             page = Page.objects.get_homepage()
-            breadcrumbs.append(page)
-            for slug in slugs:
+        except PageDoesNotExist:
+            return response
+        # Get the most exact page match.
+        breadcrumbs = [page]
+        try:
+            for slug in request.path.strip("/").split("/"):
                 page = page.children.get(url_title=slug)
                 breadcrumbs.append(page)
         except Page.DoesNotExist:
-            return
-        
-    def process_response(self, request, response):
-        """Falls back to page dispatch."""
-        # If no breadcrumbs, ignore.
-        breadcrumbs = getattr(request, "breadcrumbs", [])
-        if not breadcrumbs:
-            return response
-        # If the urlconf matched the request, then ignore.
-        if response.status_code != 404:
-            return response
+            pass
+        # Handle server errors.
+        if response.status_code == 500:
+            if settings.DEBUG:
+                return response
+            return self.error_response(request, page)
         # Try to dispatch to a page.
-        page = breadcrumbs[-1]
         path_info = request.path[len(page.url):]
         # Append a slash to match the page precisely.
         if not path_info and not request.path.endswith("/") and settings.APPEND_SLASH:
@@ -49,15 +62,10 @@ class PageMiddleware(object):
         except Http404, ex:
             if settings.DEBUG:
                 return technical_404_response(request, ex)
-            context = {"title": "Page Not Found"}
-            response = page.content.render_to_response(request, "404.html", context)
-            response.status_code = 404
-            return response
+            return self.not_found_response(request, page)
         except:
             if settings.DEBUG:
                 return technical_500_response(request, *sys.exc_info())
-            context = {"title": "Server Error"}
-            response = page.content.render_to_response(request, "500.html", context)
-            response.status_code = 500
-            return response
+            return self.error_response(request, page)
+    
     

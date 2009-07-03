@@ -99,7 +99,7 @@ class FeedBase(content.Content):
         generator.write(response, "utf-8")
         return response
     
-    @content.view(r"^(\d+)/$")
+    @content.view(r"^(\d{4})/$")
     def year_archive(self, request, year):
         """Generates a page showing the articles in a given year."""
         year = int(year)
@@ -111,7 +111,7 @@ class FeedBase(content.Content):
                    "year": year}
         return self.render_to_response(request, self.article_list_template, context)
     
-    @content.view(r"^(\d+)/(\d+)/$")
+    @content.view(r"^(\d{4})/(\d{1,2})/$")
     def month_archive(self, request, year, month):
         """Generates a page showing the articles in a given year."""
         year = int(year)
@@ -119,7 +119,7 @@ class FeedBase(content.Content):
         all_articles = self.published_articles.filter(**{"%s__year" % self.date_field: year,
                                                          "%s__month" % self.date_field: month})
         articles = self.get_page(request, all_articles)
-        breadcrumbs = self.breadcrumbs + [{"url": self.reverse("year_archive", year), "title": year},]
+        breadcrumbs = self.breadcrumbs + [content.Breadcrumb(year, self.reverse("year_archive", year))]
         context = {"articles": articles,
                    "title": u"Archive for %s %i" % (MONTHS[month], year),
                    "short_title": MONTHS[month],
@@ -128,7 +128,7 @@ class FeedBase(content.Content):
                    "month": month}
         return self.render_to_response(request, self.article_list_template, context)
     
-    @content.view(r"^(\d+)/(\d+)/([a-zA-Z0-9_\-]+)/$")
+    @content.view(r"^(\d{4})/(\d{1,2})/([a-zA-Z0-9_\-]+)/$")
     def article_detail(self, request, year, month, article_slug):
         """Dispatches to the article detail page."""
         year = int(year)
@@ -140,8 +140,8 @@ class FeedBase(content.Content):
             article = all_articles.get(url_title=article_slug)
         except self.article_model.DoesNotExist:
             raise Http404, "An article with a URL title of '%s' does not exist." % article_slug
-        breadcrumbs = self.breadcrumbs + [{"url": self.reverse("year_archive", year), "title": year},
-                                          {"url": self.reverse("month_archive", year, month), "title": MONTHS[month]},]
+        breadcrumbs = self.breadcrumbs + [content.Breadcrumb(year, self.reverse("year_archive", year)),
+                                          content.Breadcrumb(MONTHS[month], self.reverse("month_archive", year, month))]
         context = {"breadcrumbs": breadcrumbs,
                    "year": getattr(article, self.date_field).year}
         return self.render_page(article, request, self.article_detail_template, context)

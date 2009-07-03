@@ -74,19 +74,19 @@ def reorder_pages(request):
         
         
 def handler404(request):
-    """Renders the server error document."""
-    page = request.breadcrumbs[-1]
-    context = {"title": "Page Not Found"}
-    response = page.content.render_to_response(request, "404.html", context)
-    response.status_code = 404
-    return response
+    """
+    Renders a basic 404 error.
+    
+    This will be replaced by a better one in the PageMiddleware.
+    """
+    return HttpResponseNotFound("Page Not Found")
         
 
 def handler500(request):
-    """Renders the server error document."""
-    page = request.breadcrumbs[-1]
-    context = {"title": "Server Error"}
-    response = page.content.render_to_response(request, "500.html", context)
-    response.status_code = 500
-    return response
+    """
+    Renders a basic 500 error.
+    
+    This will be replaced by a better one in the PageMiddleware.
+    """
+    return HttpResponseServerError("Server Error")
 

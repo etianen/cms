@@ -246,7 +246,26 @@ class ContentMetaClass(type):
             self.verbose_name_plural = self.verbose_name + "s"
         
         
-class NavEntry(object):
+class Breadcrumb(object):
+    
+    """
+    An entry in the breadcrumb trail.
+    
+    This conforms to the same interface as Page, allowing both to be used
+    as entries in the breadcrumb trail.
+    """
+    
+    def __init__(self, title, url):
+        """Initializes the Breadcrumb."""
+        self.title = title
+        self.url = url
+    
+    def __unicode__(self):
+        """Returns the title of the NavEntry."""
+        return self.title
+        
+        
+class NavEntry(Breadcrumb):
     
     """
     An entry in the site navigation.
@@ -257,13 +276,8 @@ class NavEntry(object):
     
     def __init__(self, title, url, navigation=None):
         """Initializes the NavEntry."""
-        self.title = title
-        self.url = url
+        super(NavEntry, self).__init__(title, url)
         self.navigation = navigation or ()
-        
-    def __unicode__(self):
-        """Returns the title of the NavEntry."""
-        return self.title
         
         
 class ContentBase(object):
@@ -359,29 +373,16 @@ class ContentBase(object):
     navigation = property(lambda self: self.get_navigation(),
                           doc="The sub-navigation of the page.")
         
-    def get_breadcrumb(self, page):
-        """Generates a breadcrumb from the given page."""
-        breadcrumb = {"url": page.url,
-                      "title": page.short_title or page.title,
-                      "page": page}
-        return breadcrumb
-        
     def get_breadcrumbs(self):
-        """
-        Returns the list of breadcrumbs to the page that contains this content.
-        
-        This is returned in the form of a dictionary of 'title' and 'url'.
-        An optional item is 'page', which should be an instance of PageBase that
-        this breadcrumb represents.
-        
-        This list should not include the current page.
-        """
+        """Returns the breadcrumbs leading to this page."""
         page = self.page
-        breadcrumbs = [self.get_breadcrumb(parent) for parent in reversed([page] + page.all_parents)]
+        breadcrumbs = page.all_parents
+        breadcrumbs.reverse()
+        breadcrumbs.append(page)
         return breadcrumbs
-        
+    
     breadcrumbs = property(get_breadcrumbs,
-                           doc="The list of breadcrumbs to the page that contains this content.")
+                           doc="The breadcrumbs leading to this page.")
         
     # Content view method.
     
@@ -432,10 +433,16 @@ class ContentBase(object):
         if not page.is_published:
             if not (request.user.is_authenticated() and request.user.is_staff and request.user.is_active):
                 raise Http404, "The page '%s' has not been published yet." % page
-        # Parse context variables.
-        breadcrumbs = request.breadcrumbs
-        homepage = breadcrumbs[0]
+        # Generate the breadcrumbs.
+        breadcrumbs = self.breadcrumbs
+        # Generate SEO information
+        meta_description = page.meta_description
+        meta_keywords = page.meta_keywords
+        for breadcrumb in breadcrumbs:
+            meta_description = breadcrumb.meta_description or meta_description
+            meta_keywords = breadcrumb.meta_keywords or meta_keywords
         # Parse the main section.
+        homepage = breadcrumbs[0]
         if len(breadcrumbs) > 1:
             section = breadcrumbs[1]
             nav_secondary = section.content.navigation
@@ -449,23 +456,22 @@ class ContentBase(object):
         else:
             subsection = None
             nav_tertiary = None
-        # Intelligently set the breadcrumbs.
-        template_breadcrumbs = self.breadcrumbs
+        # Snip off last breadcrumb if the page is at the current URL.
         if self.page.url == request.path:
-            template_breadcrumbs = template_breadcrumbs[:-1]
+            breadcrumbs = breadcrumbs[:-1]
         # Generate the context.
         context.setdefault("page", page)
         context.setdefault("content", self)
+        context.setdefault("short_title", context.get("title") or page.short_title or page.title)
+        context.setdefault("browser_title", context.get("title") or page.browser_title or page.title)
         context.setdefault("title", page.title)
-        context.setdefault("short_title", context["title"])
-        context.setdefault("browser_title", page.browser_title or context["title"])
-        context.setdefault("meta_description", page.meta_description or homepage.meta_description)
-        context.setdefault("meta_keywords", page.meta_keywords or homepage.meta_keywords)
+        context.setdefault("meta_description", meta_description)
+        context.setdefault("meta_keywords", meta_keywords)
         context.setdefault("robots_index", page.robots_index)
         context.setdefault("robots_archive", page.robots_archive)
         context.setdefault("robots_follow", page.robots_follow)
         context.setdefault("homepage", homepage)
-        context.setdefault("breadcrumbs", template_breadcrumbs)
+        context.setdefault("breadcrumbs", breadcrumbs)
         context.setdefault("is_homepage", (page == homepage))
         context.setdefault("site_title", homepage.browser_title or homepage.title)
         context.setdefault("nav_primary", homepage.content.navigation)
