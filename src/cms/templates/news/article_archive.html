@@ -11,12 +11,12 @@
         <ul>
             {% for year_archive in article_archive %}
                 <li class="{% first %} {% last %}">
-                    <a class="{% here year_archive.url %}" href="{{year_archive.url}}">{{year_archive.year}}</a>
+                    {% link year_archive.url year_archive.year %}
                     {% ifequal year_archive.year year %}
                         <ul>
                             {% for month_archive in year_archive.months %}
                                 <li class="{% first %} {% last %}">
-                                    <a class="{% here month_archive.url %}" href="{{month_archive.url}}">{{month_archive.month}}</a>
+                                    {% link month_archive.url month_archive.month %}
                                 </li>
                             {% endfor %}
                         </ul>

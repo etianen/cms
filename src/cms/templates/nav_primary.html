@@ -7,7 +7,7 @@
     {% endif %}
     {% for entry in nav_primary %}
         <li class="{% last %}">
-            <a class="{% here entry.url %}" href="{{entry.url}}">{{entry.title}}</a>
+            {% link entry.url entry.title %}
         </li>
     {% endfor %}
 </ul>

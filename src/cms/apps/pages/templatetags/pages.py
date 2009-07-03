@@ -50,6 +50,20 @@ def page_url(page, view_func="index"):
     return page.content.reverse(view_func)
 
 
+@register.inclusion_tag("link.html", takes_context=True)
+def link(context, url, title=None):
+    """
+    Generates a hyperlink to the given url.
+    
+    The link will be marked as 'here' according to the 'here' template tag.
+    """
+    request = context["request"]
+    context = {"request": request,
+               "title": title or url,
+               "url": url}
+    return context
+
+
 # Pagination.
 
 
@@ -84,6 +98,9 @@ def pagination_url(context, page_number, pagination_key=None):
     query_string = urllib.urlencode(get_params)
     url = request.path + "?" + query_string
     return url
+
+
+# Dynamic class generation.
 
 
 HERE_CLASS_NAME = "here"
@@ -125,6 +142,9 @@ def last(context):
     if context["forloop"]["last"]:
         return "last"
     return ""
+
+
+# Flow control.
 
 
 @register.body_tag

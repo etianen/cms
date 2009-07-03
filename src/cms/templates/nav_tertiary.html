@@ -3,7 +3,7 @@
     <ul id="nav-tertiary">
         {% for entry in nav_tertiary %}
             <li class="{% first %} {% last %}">
-                <a class="{% here entry.url %}" href="{{entry.url}}">{{entry.title}}</a>
+                {% link entry.url entry.title %}
             </li>
         {% endfor %}
     </ul>
