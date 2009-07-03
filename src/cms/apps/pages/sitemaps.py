@@ -11,28 +11,11 @@ from cms.apps.pages.models import PageBase
 from cms.apps.pages.sites import add_domain
 
 
-class BaseSitemap(Sitemap):
-    
-    """A sitemap implementation that does not requires the sites framework."""
-    
-    def get_urls(self, page=1):
-        """Returns the list of URLS."""
-        urls = []
-        
-        for item in self.paginator.page(page).object_list:
-            url_info = {"location": add_domain(self._Sitemap__get("location", item)),
-                        "lastmod": self._Sitemap__get("lastmod", item, None),
-                        "changefreq": self._Sitemap__get("changefreq", item, None),
-                        "priority": self._Sitemap__get("priority", item, None)}
-            urls.append(url_info)
-        return urls
-
-
 # A dictionary of registered sitemap classes.
 registered_sitemaps = {}
 
 
-class PageSitemap(BaseSitemap):
+class PageSitemap(Sitemap):
     
     """Generates a sitemap for subclasses of PageBase."""
     
@@ -41,8 +24,8 @@ class PageSitemap(BaseSitemap):
         pages = []
         for model in models.get_models():
             if issubclass(model, PageBase):
-                pages.append(model.published_objects.all().iterator())
-        return chain(*pages)
+                pages.extend(model.published_objects.all())
+        return pages
         
     def changefreq(self, obj):
         """Returns the change frequency of the given page."""

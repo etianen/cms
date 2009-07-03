@@ -5,11 +5,11 @@ import datetime
 
 from django.db import models
 
-from cms.apps.pages.models import Page, PageField, HtmlField, PublishedPageManager
+from cms.apps.pages.models import Page, PageField, HtmlField, PublishedPageBaseManager, PageBaseManager
 from cms.apps.feeds.models import ArticleBase
 
 
-class PublishedArticleManager(PublishedPageManager):
+class PublishedArticleManager(PublishedPageBaseManager):
     
     """Manager that controls publication for news articles."""
     
@@ -25,7 +25,7 @@ class Article(ArticleBase):
     
     """A news article."""
     
-    objects = models.Manager()
+    objects = PageBaseManager()
     
     published_objects = PublishedArticleManager()
     

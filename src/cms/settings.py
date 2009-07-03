@@ -72,12 +72,18 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "django.contrib.sessions",
                   "django.contrib.admin",
                   "django.contrib.sitemaps",
+                  "django.contrib.sites",
                   "django.contrib.webdesign",
                   "reversion",
                   "cms.apps.pages",
                   "cms.apps.feeds",
                   "cms.apps.staff",
                   "cms.apps.media",)
+
+
+# Multi-site settings.
+
+SITE_ID = 1
 
 
 # Pagination settings.

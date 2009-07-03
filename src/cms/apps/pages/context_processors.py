@@ -2,12 +2,12 @@
 
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 
 
 def site(request):
     """Sets the site name and domain in the template."""
-    context = {"SITE_NAME": settings.SITE_NAME,
-               "SITE_DOMAIN": settings.SITE_DOMAIN}
+    context = {"site": Site.objects.get_current()}
     return context
 
 

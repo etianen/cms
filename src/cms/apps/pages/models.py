@@ -5,6 +5,7 @@ import datetime
 
 from django import forms, template
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
@@ -17,13 +18,28 @@ from cms.apps.pages.forms import HtmlWidget
 from cms.apps.pages.optimizations import cached_getter, cached_setter
 
 
-class PublishedPageManager(models.Manager):
+class PageBaseManager(models.Manager):
     
-    """Manager that selects only published pages."""
+    """Base managed for pages."""
+    
+    use_for_related_fields = True
     
     def get_query_set(self):
         """Returns the filtered query set."""
-        queryset = super(PublishedPageManager, self).get_query_set()
+        queryset = super(PageBaseManager, self).get_query_set()
+        queryset = queryset.filter(site=Site.objects.get_current())
+        return queryset
+
+
+class PublishedPageBaseManager(PageBaseManager):
+    
+    """Manager that selects only published pages."""
+    
+    use_for_related_fields = False
+    
+    def get_query_set(self):
+        """Returns the filtered query set."""
+        queryset = super(PublishedPageBaseManager, self).get_query_set()
         queryset = queryset.filter(is_online=True)
         return queryset
 
@@ -40,13 +56,17 @@ class PageBase(models.Model):
     
     # Model management.
     
-    objects = models.Manager()
+    objects = PageBaseManager()
     
-    published_objects = PublishedPageManager()
-        
+    published_objects = PublishedPageBaseManager()
+    
     # Base fields.
     
     last_modified = models.DateTimeField(auto_now=True)
+    
+    site = models.ForeignKey(Site,
+                             editable=False,
+                             default=Site.objects.get_current)
     
     title = models.CharField(max_length=1000)
     
@@ -171,7 +191,7 @@ class HtmlField(models.TextField):
         return super(HtmlField, self).formfield(**kwargs)
 
 
-class PageManager(models.Manager):
+class PageManager(PageBaseManager):
     
     """Manager for Page objects."""
     
@@ -180,14 +200,14 @@ class PageManager(models.Manager):
         return self.get(parent=None)
 
 
-class PublishedDatedPageManager(PublishedPageManager):
+class PublishedPageManager(PublishedPageBaseManager):
     
     """Manager that controls publication for dated pages."""
     
     def get_query_set(self):
         """Returns the filtered queryset."""
         now = datetime.datetime.now()
-        queryset = super(PublishedDatedPageManager, self).get_query_set()
+        queryset = super(PublishedPageManager, self).get_query_set()
         queryset = queryset.filter(Q(publication_date=None) | Q(publication_date__lte=now))
         queryset = queryset.filter(Q(expiry_date=None) | Q(expiry_date__gt=now))
         return queryset
@@ -199,7 +219,7 @@ class Page(PageBase):
 
     objects = PageManager()
     
-    published_objects = PublishedDatedPageManager()
+    published_objects = PublishedPageManager()
     
     url_title = models.SlugField("URL title",
                                  db_index=False)
