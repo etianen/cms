@@ -7,6 +7,7 @@ from django import forms, template
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Q
 from django.db.models.base import ModelBase
 from django.http import Http404
 from django.shortcuts import render_to_response
@@ -16,49 +17,18 @@ from cms.apps.pages.forms import HtmlWidget
 from cms.apps.pages.optimizations import cached_getter, cached_setter
 
 
-MYSQL_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-
-
-class PageBaseManager(models.Manager):
-    
-    """
-    Base manager for all pages.
-    
-    This must be subclassed when creating managers for Page subclasses.
-    """
-    
-    use_for_related_fields = True
-    
-    def get_publication_clause(self):
-        """Returns the publiction criteria for this page."""
-        now = datetime.datetime.now().strftime(MYSQL_DATE_FORMAT)
-        return self.model.publication_clause % {"now": now}
-    
-    def get_query_set(self):
-        """Adds the is_published property to all loaded pages."""
-        queryset = super(PageBaseManager, self).get_query_set()
-        queryset = queryset.extra(select={"is_published": self.get_publication_clause()})
-        return queryset
-
-
-class PublishedPageManager(PageBaseManager):
+class PublishedPageManager(models.Manager):
     
     """Manager that selects only published pages."""
-    
-    use_for_related_fields = False
-    
-    def select_published(self, queryset):
-        """Filters out unpublished objects from the queryset."""
-        return queryset.extra(where=[self.get_publication_clause()])
     
     def get_query_set(self):
         """Returns the filtered query set."""
         queryset = super(PublishedPageManager, self).get_query_set()
-        queryset = self.select_published(queryset)
+        queryset = queryset.filter(is_online=True)
         return queryset
 
 
-class ArticleBase(models.Model):
+class PageBase(models.Model):
     
     """
     Base model for models used to generate a HTML page.
@@ -70,9 +40,7 @@ class ArticleBase(models.Model):
     
     # Model management.
     
-    objects = PageBaseManager()
-    
-    publication_clause = "is_online = TRUE"
+    objects = models.Manager()
     
     published_objects = PublishedPageManager()
         
@@ -82,11 +50,22 @@ class ArticleBase(models.Model):
     
     title = models.CharField(max_length=1000)
     
-    # Publication fields.
-    
     is_online = models.BooleanField("online",
                                     default=True,
                                     help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by directly visiting it's URL.")
+    
+    @cached_getter
+    def get_is_published(self):
+        """Returns whether this page is published."""
+        model = self.__class__
+        try:
+            model.published_objects.get(pk=self.pk)
+        except model.DoesNotExist:
+            return False
+        return True
+        
+    is_published = property(get_is_published,
+                            doc="Whether this page is published.")
     
     # Navigation fields.
     
@@ -159,39 +138,6 @@ class ArticleBase(models.Model):
     class Meta:
         abstract = True
         ordering = ("title",)
-  
-
-class PageBase(ArticleBase):
-    
-    """
-    Base model for models used to generate a permanent or semi-permanent HTML
-    page.
-    """
-    
-    publication_clause = """
-        is_online = TRUE AND
-        (
-            publication_date IS NULL OR
-            publication_date <= TIMESTAMP('%(now)s')
-        ) AND
-        (
-            expiry_date IS NULL OR
-            expiry_date > TIMESTAMP('%(now)s')
-        )
-    """
-    
-    # Publication fields.
-    
-    publication_date = models.DateTimeField(blank=True,
-                                            null=True,
-                                            help_text="The date that this page will appear on the website.  Leave this blank to immediately publish this page.")
-
-    expiry_date = models.DateTimeField(blank=True,
-                                       null=True,
-                                       help_text="The date that this page will be removed from the website.  Leave this blank to never expire this page.")
-    
-    class Meta:
-        abstract = True
 
 
 class PageField(models.ForeignKey):
@@ -225,7 +171,7 @@ class HtmlField(models.TextField):
         return super(HtmlField, self).formfield(**kwargs)
 
 
-class PageManager(PageBaseManager):
+class PageManager(models.Manager):
     
     """Manager for Page objects."""
     
@@ -234,11 +180,26 @@ class PageManager(PageBaseManager):
         return self.get(parent=None)
 
 
+class PublishedDatedPageManager(PublishedPageManager):
+    
+    """Manager that controls publication for dated pages."""
+    
+    def get_query_set(self):
+        """Returns the filtered queryset."""
+        now = datetime.datetime.now()
+        queryset = super(PublishedDatedPageManager, self).get_query_set()
+        queryset = queryset.filter(Q(publication_date=None) | Q(publication_date__lte=now))
+        queryset = queryset.filter(Q(expiry_date=None) | Q(expiry_date__gt=now))
+        return queryset
+
+
 class Page(PageBase):
 
     """A page within the site."""
 
     objects = PageManager()
+    
+    published_objects = PublishedDatedPageManager()
     
     url_title = models.SlugField("URL title",
                                  db_index=False)
@@ -269,7 +230,7 @@ class Page(PageBase):
         Returns all the children of this page, regardless of their publication
         state.
         """
-        return self.page_set.all().order_by("order")
+        return Page.objects.filter(parent=self)
     
     children = property(get_children,
                         doc="All children of this page.")
@@ -291,10 +252,20 @@ class Page(PageBase):
     @cached_getter
     def get_published_children(self):
         """Returns all the published children of this page."""
-        return self.__class__.published_objects.select_published(self.children)
+        return Page.published_objects.filter(parent=self)
 
     published_children = property(get_published_children,
                                   doc="All the published children of this page.")
+
+    # Publication fields.
+    
+    publication_date = models.DateTimeField(blank=True,
+                                            null=True,
+                                            help_text="The date that this page will appear on the website.  Leave this blank to immediately publish this page.")
+
+    expiry_date = models.DateTimeField(blank=True,
+                                       null=True,
+                                       help_text="The date that this page will be removed from the website.  Leave this blank to never expire this page.")
 
     # Navigation fields.
 
@@ -316,6 +287,7 @@ class Page(PageBase):
     
     content_type = models.CharField(max_length=20,
                                     editable=False,
+                                    db_index=True,
                                     help_text="The type of page content.")
 
     content_data = models.TextField(editable=False,
@@ -349,4 +321,5 @@ class Page(PageBase):
     
     class Meta:
         unique_together = (("parent", "url_title",),)
+        ordering = ("order",)
 

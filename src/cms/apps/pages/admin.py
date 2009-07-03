@@ -103,14 +103,11 @@ site = AdminSite()
 # Page admin classes.
 
 
-class ArticleBaseAdmin(VersionAdmin):
+class PageBaseAdmin(VersionAdmin):
     
     """Base admin class for ArticleBase models."""
     
     date_hierarchy = "last_modified"
-    
-    publication_fieldsets = (("Publication", {"fields": ("is_online",),
-                                              "classes": ("collapse",)}),)
     
     navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
                                             "classes": ("collapse",),}),)
@@ -118,7 +115,7 @@ class ArticleBaseAdmin(VersionAdmin):
     seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_changefreq", "robots_index", "robots_archive", "robots_follow",),
                                                      "classes": ("collapse",),},),)
     
-    fieldsets = ((None, {"fields": ("title", "url_title",),},),) + publication_fieldsets + navigation_fieldsets + seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title", "is_online",),},),) + navigation_fieldsets + seo_fieldsets
 
     list_display = ("title", "last_modified", "is_online",)
     
@@ -131,16 +128,6 @@ class ArticleBaseAdmin(VersionAdmin):
     ordering = ("title",)
 
 
-class PageBaseAdmin(ArticleBaseAdmin):
-    
-    """Base admin class for PageBase models."""
-    
-    publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online",),
-                                              "classes": ("collapse",)}),)
-
-    fieldsets = ((None, {"fields": ("title", "url_title",),},),) + publication_fieldsets + ArticleBaseAdmin.navigation_fieldsets + ArticleBaseAdmin.seo_fieldsets
-    
-    
 # The GET parameter used to indicate content type.
 PAGE_TYPE_PARAMETER = "type"
     
@@ -149,10 +136,13 @@ class PageAdmin(PageBaseAdmin):
 
     """Admin settings for Page models."""
 
+    publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date",),
+                                              "classes": ("collapse",)}),)
+
     navigation_fieldsets = (("Navigation", {"fields": ("short_title", "in_navigation",),
                                             "classes": ("collapse",),},),)
 
-    fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),) + PageBaseAdmin.publication_fieldsets + navigation_fieldsets + PageBaseAdmin.seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),) + publication_fieldsets + navigation_fieldsets + PageBaseAdmin.seo_fieldsets
 
     # Reversion
 

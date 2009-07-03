@@ -1,10 +1,9 @@
-"""Template tags used to render news articles."""
+"""Template tags used to render feed articles."""
 
 
 from django import template
 from django.utils.dates import MONTHS
 
-from cms.apps.news.models import Article
 from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import Library 
 

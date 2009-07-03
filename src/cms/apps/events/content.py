@@ -1,18 +1,12 @@
-"""Content types used by the news application."""
+"""Content types used by the events application."""
 
 
 import datetime
 
 from django.conf import settings
-from django.contrib.syndication.feeds import Feed
-from django.core.urlresolvers import reverse
-from django.core.paginator import Paginator, EmptyPage
-from django.http import Http404
-from django.utils.dates import MONTHS
 
 from cms.apps.pages import content
-from cms.apps.pages.models import Page
-from cms.apps.news.content import FeedBase
+from cms.apps.feeds.content import FeedBase
 from cms.apps.events.models import Event
 
 
@@ -26,13 +20,13 @@ class EventsFeed(FeedBase):
     
     icon = settings.CMS_MEDIA_URL + "img/content-types/events-feed.png"
     
-    article_list_template = ("events/article_list.html", "news/article_list.html",)
+    article_list_template = ("events/article_list.html", "feeds/article_list.html",)
     
-    article_detail_template = ("events/article_detail.html", "news/article_detail.html",)
+    article_detail_template = ("events/article_detail.html", "feeds/article_detail.html",)
     
-    article_archive_template = ("events/article_archive.html", "news/article_archive.html",)
+    article_archive_template = ("events/article_archive.html", "feeds/article_archive.html",)
     
-    latest_articles_template = ("events/latest_articles.html", "news/latest_articles.html",)
+    latest_articles_template = ("events/latest_articles.html", "feeds/latest_articles.html",)
     
     def get_latest_articles(self):
         """Returns the list of articles for the latest article feeds."""

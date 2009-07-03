@@ -5,10 +5,10 @@ import datetime
 
 from django.db import models
 
-from cms.apps.pages.models import Page, ArticleBase, PageField, HtmlField
+from cms.apps.pages.models import Page, PageBase, PageField, HtmlField
 
 
-class Event(ArticleBase):
+class Event(PageBase):
     
     """A news article."""
     

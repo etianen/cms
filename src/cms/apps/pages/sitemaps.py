@@ -1,11 +1,13 @@
 """Google sitemaps used by the page managment application."""
 
 
+from itertools import chain
+
 from django.db import models
 from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 
-from cms.apps.pages.models import ArticleBase
+from cms.apps.pages.models import PageBase
 from cms.apps.pages.sites import add_domain
 
 
@@ -26,17 +28,21 @@ class BaseSitemap(Sitemap):
         return urls
 
 
+# A dictionary of registered sitemap classes.
+registered_sitemaps = {}
+
+
 class PageSitemap(BaseSitemap):
     
     """Generates a sitemap for subclasses of PageBase."""
     
-    def __init__(self, page_cls):
-        """Initializes the PageSitemap."""
-        self.page_cls = page_cls
-        
     def items(self):
         """Returns all items in this sitemap."""
-        return self.page_cls.published_objects.all()
+        pages = []
+        for model in models.get_models():
+            if issubclass(model, PageBase):
+                pages.append(model.published_objects.all().iterator())
+        return chain(*pages)
         
     def changefreq(self, obj):
         """Returns the change frequency of the given page."""
@@ -50,14 +56,5 @@ class PageSitemap(BaseSitemap):
         return obj.last_modified
     
     
-# A dictionary of registered sitemap classes.
-registered_sitemaps = {}
+registered_sitemaps["pages"] = PageSitemap
 
-
-# Register all know page types.
-for model in models.get_models():
-    if issubclass(model, ArticleBase):
-        sitemap_key = "%s-%s" % (model._meta.app_label, model.__name__.lower())
-        registered_sitemaps[sitemap_key] = PageSitemap(model)
-        
-        
