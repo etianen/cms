@@ -246,41 +246,24 @@ class ContentMetaClass(type):
             self.verbose_name_plural = self.verbose_name + "s"
         
         
-class LazyNavigation(object):
+class NavEntry(object):
     
     """
-    A wrapper around a callable that is only evaluated at the last minute to
-    generate page navigation.
+    An entry in the site navigation.
+    
+    This conforms to the same interface as Page, allowing both to be used
+    as entries in the site navigation.
     """
     
-    def __init__(self, callable):
-        """Initializes the LazyNavigation."""
-        self._callable = callable
+    def __init__(self, title, url, navigation=None):
+        """Initializes the NavEntry."""
+        self.title = title
+        self.url = url
+        self.navigation = navigation or ()
         
-    @cached_getter
-    def get_list(self):
-        """Generates the list of navigation items."""
-        return self._callable()
-    
-    def __len__(self):
-        """Delegates to the wrapped list."""
-        return self.get_list().__len__()
-    
-    def __getitem__(self, key):
-        """Delegates to the wrapped list."""
-        return self.get_list().__getitem__(key)
-    
-    def __setitem__(self, key, value):
-        """Delegates to the wrapped list."""
-        return self.get_list().__setitem__(key, value)
-    
-    def __delitem__(self, key):
-        """Delegates to the wrapped list."""
-        return self.get_list().__delitem__(key)
-    
-    def __iter__(self):
-        """Delegates to the wrapped list."""
-        return self.get_list().__iter__()
+    def __unicode__(self):
+        """Returns the title of the NavEntry."""
+        return self.title
         
         
 class ContentBase(object):
@@ -366,19 +349,12 @@ class ContentBase(object):
         """
         Returns the sub-navigation of the page.
         
-        This is returned in the form of a dictionary of 'title' and 'url'.
-        An optional item is 'navigation', which should be a list of sub
-        navigation.  Another optional item is 'page', which should be an
-        instance of PageBase that this navigation item represents.
+        This can be extended to add additional, programmatic entries to the
+        navigation.  Navigation entries must conform to the interface of
+        NavEntry.  Instances of PageBase already conform to this specification,
+        alowing either to be used by this method.
         """
-        navigation = []
-        for entry in self.page.navigation:
-            navigation_context = {"title": entry.short_title or entry.title,
-                                  "url": entry.url,
-                                  "navigation": LazyNavigation(lambda: entry.content.navigation),
-                                  "page": entry}
-            navigation.append(navigation_context)
-        return navigation
+        return self.page.navigation
     
     navigation = property(lambda self: self.get_navigation(),
                           doc="The sub-navigation of the page.")
