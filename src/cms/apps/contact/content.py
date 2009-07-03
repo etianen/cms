@@ -72,6 +72,8 @@ class ContactForm(content.Content):
     
     classifier = "utilities"
     
+    icon = settings.CMS_MEDIA_URL + "img/content-types/contact-form.png"
+    
     form_type = content.ChoiceField(choices=form_choices(),
                                     default=DEFAULT_CONTACT_FORM_SLUG,
                                     required=True,

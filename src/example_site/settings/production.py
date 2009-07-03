@@ -86,7 +86,9 @@ LANGUAGE_CODE = "en-gb"
 # A list of additional installed applications.
 
 INSTALLED_APPS += ("cms.apps.news",
-                   "cms.apps.contact",)
+                   "cms.apps.events",
+                   "cms.apps.contact",
+                   "cms.apps.redirects",)
 
 
 # Absolute path to the directory containing this project.
