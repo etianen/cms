@@ -11,6 +11,8 @@ class Redirect(content.ContentBase):
     
     """A redirect to another URL."""
     
+    classifier = "utilities"
+    
     icon = settings.CMS_MEDIA_URL + "img/content-types/redirect.png"
     
     redirect_url = content.CharField("redirect URL",

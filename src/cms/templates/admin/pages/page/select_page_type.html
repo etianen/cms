@@ -12,20 +12,35 @@
 
 
 {% block content %}
+
     {% if content_types %}
+    
         <p>Select a type of page from the choices below.</p>
-        <ul id="content-types">
-            {% for content_type in content_types %}
-                <li>
-                    <a href="{{content_type.url}}">
-                        <img class="content-type-icon" src="{{content_type.icon}}" width="64" height="64" alt=""/>
-                        <span class="content-type-name">{{content_type.name|capfirst}}</span>
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
+        
+        {% regroup content_types by classifier as classifiers %}
+        
+        {% for classifier in classifiers %}
+        
+            <h3 class="classifier">{{classifier.grouper|capfirst}}</h3>
+         
+            <ul class="content-types">
+                {% for content_type in classifier.list %}
+                    <li>
+                        <a href="{{content_type.url}}">
+                            <img class="content-type-icon" src="{{content_type.icon}}" width="64" height="64" alt=""/>
+                            <span class="content-type-name">{{content_type.name|capfirst}}</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+            
+        {% endfor %}
+        
     {% else %}
+    
         <p>You do not have permission to create any type of page.</p>
+        
     {% endif %}
+    
 {% endblock %}
 

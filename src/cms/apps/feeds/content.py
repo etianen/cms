@@ -19,6 +19,8 @@ class FeedBase(content.Content):
     
     """Base class for content that renders date-based fields."""
 
+    classifier = "feeds"
+
     # Set this to the subclass of ArticleBase that is rendered by this feed.
     article_model = None
     

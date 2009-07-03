@@ -70,6 +70,8 @@ class ContactForm(content.Content):
     
     """A standard method of creating contact forms."""
     
+    classifier = "utilities"
+    
     form_type = content.ChoiceField(choices=form_choices(),
                                     default=DEFAULT_CONTACT_FORM_SLUG,
                                     required=True,

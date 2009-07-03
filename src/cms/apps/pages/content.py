@@ -294,6 +294,9 @@ class ContentBase(object):
     # This must be a 64 x 64 pixel image.
     icon = settings.CMS_MEDIA_URL + "img/content-types/content.png"
     
+    # The heading that the admin places this content under.
+    classifier = "content"
+    
     def __init__(self, page):
         """
         Initializes the page content.

@@ -148,18 +148,24 @@ body.dashboard div.sitemap-entry div.move-down:hover {
 */
 
 
-ul#content-types {
-    padding: 5px 0px 0px 0px;
+h3.classifier {
+    clear: left;
+    padding: 5px 0px 5px 0px;
+    border-bottom: 1px #eeeeee solid;
 }
 
-ul#content-types li {
+ul.content-types {
+    padding: 0px 0px 0px 0px;
+}
+
+ul.content-types li {
     float: left;
     list-style: none;
-    margin: 0px 0px 10px 10px;
+    margin: 0px 10px 10px 0px;
     
 }
 
-ul#content-types a {
+ul.content-types a {
     display: block;
     position: relative;
     width: 100px;
@@ -167,7 +173,7 @@ ul#content-types a {
     border: 1px white solid;
 }
 
-ul#content-types a:hover {
+ul.content-types a:hover {
     border: 1px #b0b0b0 solid;
 }
 
