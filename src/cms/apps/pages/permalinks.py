@@ -40,6 +40,8 @@ def resolve(url):
         callback, callback_args, callback_kwargs = resolve_url(url)
     except Resolver404:
         raise PermalinkError, "'%s' is not a recognised URL in this site." % url
+    except TypeError:
+        raise PermalinkError, "'%s' is not a valid permalink." % url
     # Check if the URL refers to a permalink.
     if callback != permalink_redirect:
         raise PermalinkError, "'%s' is not a valid permalink." % url

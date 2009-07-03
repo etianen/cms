@@ -15,6 +15,7 @@ from django.db.models.options import get_verbose_name
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import render_to_response
 from django.utils.html import strip_tags
+from django.utils.text import capfirst
 
 from cms.apps.pages.forms import PageForm, HtmlWidget
 from cms.apps.pages.optimizations import cached_getter
@@ -58,7 +59,7 @@ class Field(object):
     def get_formfield_attrs(self, obj):
         """Returns the default attributes for a form field."""
         initial = self.get_value_from_object(obj)
-        attrs = {"label": self.label and self.label.capitalize() or None,
+        attrs = {"label": self.label and capfirst(self.label) or None,
                  "required": self.required,
                  "help_text": self.help_text,
                  "widget": AdminTextInputWidget,
@@ -598,17 +599,5 @@ class Content(ContentBase):
 
 
 register(Content)
-
-
-class Redirect(ContentBase):
-    
-    """A redirect to another URL."""
-    
-    icon = settings.CMS_MEDIA_URL + "img/content-types/redirect.png"
-    
-    redirect_url = CharField(help_text="The URL where the user will be redirected.")
-    
-        
-register(Redirect)
 
     
