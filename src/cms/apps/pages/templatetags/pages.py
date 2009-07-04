@@ -42,11 +42,10 @@ def html(text):
 @register.simple_tag
 def page_url(page, view_func="index"):
     """Renders the URL of the given view func in the given page."""
-    if isinstance(page, int):
-        try:
-            page = Page.objects.get(id=page)
-        except Page.DoesNotExist:
-            return "#"
+    try:
+        page = Page.objects.get_page(page)
+    except Page.DoesNotExist:
+        return "#"
     return page.content.reverse(view_func)
 
 

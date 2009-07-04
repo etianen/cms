@@ -14,11 +14,10 @@ register = Library()
 @register.context_tag
 def latest_articles(context, page, count=5):
     """Renders a list of the latest news articles."""
-    if isinstance(page, int):
-        try:
-            page = Page.objects.get(id=page)
-        except Page.DoesNotExist:
-            return ""
+    try:
+        page = Page.objects.get_page(page)
+    except Page.DoesNotExist:
+        return ""
     page_content = page.content
     articles = page_content.latest_articles.all()[:count]
     context = {"articles": articles,
