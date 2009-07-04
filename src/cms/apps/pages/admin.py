@@ -103,9 +103,11 @@ site = AdminSite()
 # Page admin classes.
 
 
-class PublishedModelAdmin(VersionAdmin):
+class PublishedModelAdmin(admin.ModelAdmin):
     
     """Base admin class for published models."""
+    
+    change_form_template = "admin/pages/publishedmodel/change_form.html"
     
     publication_fieldsets = (("Publication", {"fields": ("is_online",),
                                               "classes": ("collapse",),}),)
@@ -113,7 +115,7 @@ class PublishedModelAdmin(VersionAdmin):
     list_filter = ("is_online",)
 
 
-class PageBaseAdmin(PublishedModelAdmin):
+class PageBaseAdmin(VersionAdmin, PublishedModelAdmin):
     
     """Base admin class for ArticleBase models."""
     

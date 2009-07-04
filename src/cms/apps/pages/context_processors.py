@@ -17,3 +17,9 @@ def media(request):
                "CMS_MEDIA_URL": settings.CMS_MEDIA_URL}
     return context
 
+
+def conf(request):
+    """Gives the settings object to the template."""
+    context = {"settings" : settings}
+    return context
+
