@@ -29,8 +29,7 @@ class Article(ArticleBase):
     
     published_objects = PublishedArticleManager()
     
-    feed = PageField(Page,
-                     "newsfeed",
+    feed = PageField("newsfeed",
                      verbose_name="news feed")
     
     publication_date = models.DateField(default=lambda: datetime.datetime.now().date(),

@@ -142,7 +142,7 @@ class PageAdmin(PageBaseAdmin):
     publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online",),
                                               "classes": ("collapse",)}),)
 
-    navigation_fieldsets = (("Navigation", {"fields": ("short_title", "in_navigation",),
+    navigation_fieldsets = (("Navigation", {"fields": ("short_title", "permalink", "in_navigation",),
                                             "classes": ("collapse",),},),)
 
     fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),) + publication_fieldsets + navigation_fieldsets + PageBaseAdmin.seo_fieldsets

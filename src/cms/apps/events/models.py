@@ -12,8 +12,7 @@ class Event(PageBase):
     
     """A news article."""
     
-    feed = PageField(Page,
-                     "eventsfeed",
+    feed = PageField("eventsfeed",
                      verbose_name="events feed")
     
     url_title = models.SlugField("URL title",

@@ -1,7 +1,7 @@
 """Core models used by the CMS."""
 
 
-import datetime
+import datetime, threading
 
 from django import forms, template
 from django.conf import settings
@@ -9,7 +9,7 @@ from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
-from django.db.models.base import ModelBase
+from django.db.models.fields.related import ReverseSingleRelatedObjectDescriptor
 from django.http import Http404
 from django.shortcuts import render_to_response
 
@@ -174,18 +174,36 @@ class PageBase(models.Model):
         ordering = ("title",)
 
 
+class PageDescriptor(ReverseSingleRelatedObjectDescriptor):
+    
+    """A descriptor used to access referenced Page models."""
+    
+    def __get__(self, instance, instance_type=None):
+        """Accesses the related page."""
+        if instance is None:
+            raise AttributeError, "%s must be accessed via instance" % self.field.name
+        page_id = getattr(instance, self.field.attname)
+        # Allow NULL values.
+        if page_id is None:
+            if self.field.null:
+                return None
+            raise self.field.rel.to.DoesNotExist
+        # Access the page.
+        return Page.objects.get_by_id(page_id)
+        
+
 class PageField(models.ForeignKey):
     
     """A foreign key to a Page model."""
     
-    def __init__(self, to, content_type=None, limit_choices_to=None, **kwargs):
+    def __init__(self, content_type=None, limit_choices_to=None, **kwargs):
         """Initializes the Page Field."""
         # Generate the page filter.
         if content_type is not None:
             limit_choices_to = limit_choices_to or {}
             limit_choices_to.setdefault("content_type", content_type)
         # Initialize the PageField.
-        super(PageField, self).__init__(to=to, limit_choices_to=limit_choices_to, default=self.get_default, **kwargs)
+        super(PageField, self).__init__(to="pages.Page", limit_choices_to=limit_choices_to, default=self.get_default, **kwargs)
         
     def get_default(self):
         """Returns the default page."""
@@ -193,6 +211,11 @@ class PageField(models.ForeignKey):
             return self.rel.to._default_manager.filter(**self.rel.limit_choices_to)[0].pk
         except IndexError:
             return None
+        
+    def contribute_to_class(self, cls, name):
+        """Sets the PageDescriptor on the class."""
+        super(PageField, self).contribute_to_class(cls, name)
+        setattr(cls, self.name, PageDescriptor(self))
 
 
 class HtmlField(models.TextField):
@@ -205,6 +228,18 @@ class HtmlField(models.TextField):
         return super(HtmlField, self).formfield(**kwargs)
 
 
+class PageCache(threading.local):
+    
+    """
+    A local cache of pages, used to seriously cut down on database queries.
+    """
+    
+    def __init__(self):
+        """Initializes the PageCache."""
+        self._id_cache = {}
+        self._permalink_cache = {}
+
+
 class PageManager(PageBaseManager):
     
     """Manager for Page objects."""
@@ -212,6 +247,31 @@ class PageManager(PageBaseManager):
     def get_homepage(self):
         """Returns the site homepage."""
         return self.get(parent=None)
+    
+    def get_by_id(self, id):
+        """Returns the page referenced by the given id."""
+        return self.get(id=id)
+    
+    def get_by_permalink(self, permalink):
+        """Returns the page referenced by the given permalink."""
+        return self.get(permalink=permalink)
+    
+    def get_page(self, id):
+        """
+        Returns the page referenced by the given id.
+        
+        This general-perpose method accepts three possible types of id.  If
+        given an integer or basestring, then the page will be looked up by id
+        or permalink respectively.  If passed a page instance, then the instance
+        will be returned.
+        """
+        if isinstance(id, self.model):
+            return id
+        if isinstance(id, int):
+            return self.get_by_id(id)
+        if isinstance(id, basestring):
+            return self.get_by_permalink(id)
+        raise TypeError, "Expected Page, int or basestring.  Found %s." % type(id).__name__
 
 
 class PublishedPageManager(PublishedPageBaseManager):
@@ -316,6 +376,11 @@ class Page(PageBase):
         
     navigation = property(get_navigation,
                           doc="All published children that should be added to the navigation.")
+
+    permalink = models.SlugField(unique=True,
+                                 blank=True,
+                                 null=True,
+                                 help_text="A unique identifier for this page.  This will be set by your design team in order to link to this page from any custom templates they write.")
 
     # Content fields.
     
