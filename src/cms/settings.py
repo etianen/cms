@@ -92,6 +92,11 @@ SITE_ID = 1
 PAGINATION_KEY = "page"
 
 
+# Publication settings.
+
+PUBLICATION_PREVIEW_KEY = "preview"
+
+
 # Feed settings.
 
 FEED_LENGTH = 30

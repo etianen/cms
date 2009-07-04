@@ -5,29 +5,21 @@ import datetime
 
 from django.db import models
 
-from cms.apps.pages.models import Page, PageField, HtmlField, PublishedPageBaseManager, PageBaseManager
+from cms.apps.pages.models import Page, PageField, HtmlField, PageBaseManager
 from cms.apps.feeds.models import ArticleBase
-
-
-class PublishedArticleManager(PublishedPageBaseManager):
-    
-    """Manager that controls publication for news articles."""
-    
-    def get_query_set(self):
-        """Returns the filtered queryset."""
-        now = datetime.datetime.now()
-        queryset = super(PublishedArticleManager, self).get_query_set()
-        queryset = queryset.filter(publication_date__lte=now)
-        return queryset
 
 
 class Article(ArticleBase):
     
     """A news article."""
     
-    objects = PageBaseManager()
-    
-    published_objects = PublishedArticleManager()
+    @classmethod
+    def select_published(cls, queryset):
+        """Filters out unpublished articles."""
+        queryset = super(Article, cls).select_published(queryset)
+        now = datetime.datetime.now()
+        queryset = queryset.filter(publication_date__lte=now)
+        return queryset
     
     feed = PageField("newsfeed",
                      verbose_name="news feed")

@@ -37,7 +37,7 @@ def article_archive(context, page, year):
     """Renders the news archive for the given page."""
     page_content = page.content
     request = context["request"]
-    available_months = page_content.published_articles.dates(page_content.date_field, "month")
+    available_months = page_content.articles.dates(page_content.date_field, "month")
     # Generate the news archive.
     article_archive = []
     year = None

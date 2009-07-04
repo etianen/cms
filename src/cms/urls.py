@@ -4,11 +4,14 @@
 from django.conf import settings
 from django.conf.urls.defaults import *
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap, index as sitemap_index
+from django.contrib.syndication.views import feed
 from django.views.static import serve
 
 from cms.apps.feeds import registered_feeds
 from cms.apps.pages.admin import site as admin_site
 from cms.apps.pages.sitemaps import registered_sitemaps
+from cms.apps.pages.models import publication_manager
 
 
 admin.autodiscover()
@@ -26,10 +29,10 @@ urlpatterns = patterns("",
                        # Permalink redirection service.
                        url(r"^links/(?P<content_type_id>\d+)/(?P<object_id>.+)/$", "cms.apps.pages.views.permalink_redirect", name="permalink_redirect"),
                        # Google sitemap service.
-                       url(r"^sitemap.xml$", "django.contrib.sitemaps.views.index", {"sitemaps": registered_sitemaps}, name="sitemap_index"),
-                       url(r"^sitemap-(?P<section>.+)\.xml$", "django.contrib.sitemaps.views.sitemap", {"sitemaps": registered_sitemaps}, name="sitemap"),
+                       url(r"^sitemap.xml$", publication_manager.published_view(sitemap_index), {"sitemaps": registered_sitemaps}, name="sitemap_index"),
+                       url(r"^sitemap-(?P<section>.+)\.xml$", publication_manager.published_view(sitemap), {"sitemaps": registered_sitemaps}, name="sitemap"),
                        # RSS feed service.
-                       url(r"^feeds/(?P<url>.*)/$", "django.contrib.syndication.views.feed", {"feed_dict": registered_feeds}),
+                       url(r"^feeds/(?P<url>.*)/$", publication_manager.published_view(feed), {"feed_dict": registered_feeds}),
                        # Basic robots.txt.
                        url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}),)
 

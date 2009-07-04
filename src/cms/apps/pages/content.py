@@ -434,9 +434,6 @@ class ContentBase(object):
     
     def render_page(self, page, request, template_name, context, **kwargs):
         """Renders the given page to a HttpResponse."""
-        if not page.is_published:
-            if not (request.user.is_authenticated() and request.user.is_staff and request.user.is_active):
-                raise Http404, "The page '%s' has not been published yet." % page
         # Generate the breadcrumbs.
         breadcrumbs = self.breadcrumbs
         # Generate SEO information

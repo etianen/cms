@@ -1,7 +1,9 @@
 """Core models used by the CMS."""
 
 
-import datetime, threading
+from __future__ import with_statement
+
+import datetime, threading, contextlib, functools
 
 from django import forms, template
 from django.conf import settings
@@ -18,11 +20,135 @@ from cms.apps.pages.forms import HtmlWidget
 from cms.apps.pages.optimizations import cached_getter, cached_setter
 
 
-class PageBaseManager(models.Manager):
+class PublicationManagementError(Exception):
     
-    """Base managed for pages."""
+    """
+    Exception thrown when something goes wrong with publication management.
+    """
+
+
+class PublicationManager(threading.local):
+    
+    """
+    Tracks a thread-local state of whether querysets should be filtered based on
+    publication state.
+    """
+    
+    def __init__(self):
+        """Initializes the PublicationManager."""
+        self._stack = []
+        
+    def _begin(self, select_published):
+        """Starts a block using the given publication setting."""
+        self._stack.append(select_published)
+        
+    def select_published_active(self):
+        """
+        Returns True if querysets should be filtered to exclude unpublished
+        content.
+        """
+        try:
+            return self._stack[-1]
+        except IndexError:
+            return False
+        
+    def _end(self):
+        """Ends a block of publication control."""
+        try:
+            self._stack.pop()
+        except IndexError:
+            raise PublicationManagementError, "There is no active block of publication management."
+        
+    @contextlib.contextmanager
+    def select_published(self, select_published=True):
+        """Marks a block of publication management."""
+        self._begin(select_published)
+        try:
+            yield
+        except:
+            raise
+        finally:
+            self._end()
+            
+    def preview_mode_active(self, request):
+        """
+        Checks whether the request is sucessfuly signalling for preview mode.
+        """
+        # See if preview mode is requested.
+        try:
+            preview_mode = int(request.GET.get(settings.PUBLICATION_PREVIEW_KEY, 0))
+        except ValueError:
+            preview_mode = False
+        # Only allow preview mode if the user is a logged in administrator.
+        return preview_mode and request.user.is_authenticated() and request.user.is_staff and request.user.is_active
+            
+    def published_view(self, func):
+        """Decorator that enables publication filtering in the given view."""
+        @functools.wraps(func)
+        def func_(request, *args, **kwargs):
+            # Execute the function in the correct publication context.
+            with self.select_published(not self.preview_mode_active(request)):
+                return func(request, *args, **kwargs)
+        return func_
+            
+    
+# A single, thread-safe publication manager.
+publication_manager = PublicationManager()
+
+
+class PublishedModelManager(models.Manager):
+    
+    """Manager that fetches published models."""
     
     use_for_related_fields = True
+    
+    def get_query_set(self):
+        """"Returns the queryset, filtered if appropriate."""
+        queryset = super(PublishedModelManager, self).get_query_set()
+        if publication_manager.select_published_active():
+            queryset = self.model.select_published(queryset)
+        return queryset
+
+
+class PublishedModel(models.Model):
+    
+    """A model with publication controls."""
+    
+    objects = PublishedModelManager()
+    
+    @classmethod
+    def select_published(cls, queryset):
+        """
+        Filters out unpublished objects from the given queryset.
+        
+        This method will automatically be applied to all querysets of this model
+        when in an active publication context.
+        
+        Subclasses can override this method to define additinal publication
+        rules.
+        """
+        return queryset.filter(is_online=True)
+    
+    is_online = models.BooleanField("online",
+                                    default=True,
+                                    help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by directly visiting it's URL.")
+    
+    # Nicer alias for URL generation.
+    
+    def get_absolute_url(self):
+        """All pages must publish an absolute URL."""
+        raise NotImplemented
+    
+    url = property(lambda self: self.get_absolute_url(),
+                   doc="The absolute URL of the page.")
+    
+    class Meta:
+        abstract = True
+    
+
+class PageBaseManager(PublishedModelManager):
+    
+    """Base managed for pages."""
     
     def get_query_set(self):
         """Returns the filtered query set."""
@@ -31,25 +157,12 @@ class PageBaseManager(models.Manager):
         return queryset
 
 
-class PublishedPageBaseManager(PageBaseManager):
-    
-    """Manager that selects only published pages."""
-    
-    use_for_related_fields = False
-    
-    def get_query_set(self):
-        """Returns the filtered query set."""
-        queryset = super(PublishedPageBaseManager, self).get_query_set()
-        queryset = queryset.filter(is_online=True)
-        return queryset
-
-
 # Choices available to the meta robots clauses.
 ROBOTS_CHOICES = ((1, "Yes"),
                   (0, "No"),)
 
 
-class PageBase(models.Model):
+class PageBase(PublishedModel):
     
     """
     Base model for models used to generate a HTML page.
@@ -59,11 +172,7 @@ class PageBase(models.Model):
     instead.
     """
     
-    # Model management.
-    
     objects = PageBaseManager()
-    
-    published_objects = PublishedPageBaseManager()
     
     # Base fields.
     
@@ -74,23 +183,6 @@ class PageBase(models.Model):
                              default=Site.objects.get_current)
     
     title = models.CharField(max_length=1000)
-    
-    is_online = models.BooleanField("online",
-                                    default=True,
-                                    help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by directly visiting it's URL.")
-    
-    @cached_getter
-    def get_is_published(self):
-        """Returns whether this page is published."""
-        model = self.__class__
-        try:
-            model.published_objects.get(pk=self.pk)
-        except model.DoesNotExist:
-            return False
-        return True
-        
-    is_published = property(get_is_published,
-                            doc="Whether this page is published.")
     
     # Navigation fields.
     
@@ -154,13 +246,6 @@ class PageBase(models.Model):
                                                      help_text="Use this to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise. Leave blank to use the setting from the parent page.")
     
     # Base model methods.
-    
-    def get_absolute_url(self):
-        """All pages must publish an absolute URL."""
-        raise NotImplemented
-    
-    url = property(lambda self: self.get_absolute_url(),
-                   doc="The absolute URL of the page.")
     
     def __unicode__(self):
         """
@@ -344,26 +429,22 @@ class PageManager(PageBaseManager):
         raise TypeError, "Expected Page, int or basestring.  Found %s." % type(id).__name__
 
 
-class PublishedPageManager(PublishedPageBaseManager):
-    
-    """Manager that controls publication for dated pages."""
-    
-    def get_query_set(self):
-        """Returns the filtered queryset."""
-        now = datetime.datetime.now()
-        queryset = super(PublishedPageManager, self).get_query_set()
-        queryset = queryset.filter(Q(publication_date=None) | Q(publication_date__lte=now))
-        queryset = queryset.filter(Q(expiry_date=None) | Q(expiry_date__gt=now))
-        return queryset
-
-
 class Page(PageBase):
 
     """A page within the site."""
 
     objects = PageManager()
     
-    published_objects = PublishedPageManager()
+    @classmethod
+    def select_published(cls, queryset):
+        """Selects only published pages."""
+        queryset = super(Page, cls).select_published(queryset)
+        now = datetime.datetime.now()
+        queryset = queryset.filter(Q(publication_date=None) | Q(publication_date__lte=now))
+        queryset = queryset.filter(Q(expiry_date=None) | Q(expiry_date__gt=now))
+        return queryset
+    
+    # Base fields.
     
     url_title = models.SlugField("URL title",
                                  db_index=False)
@@ -418,14 +499,6 @@ class Page(PageBase):
     all_children = property(get_all_children,
                             doc="All the children of this page, cascading down to their children too.")
     
-    @cached_getter
-    def get_published_children(self):
-        """Returns all the published children of this page."""
-        return Page.published_objects.filter(parent=self)
-
-    published_children = property(get_published_children,
-                                  doc="All the published children of this page.")
-
     # Publication fields.
     
     publication_date = models.DateTimeField(blank=True,
@@ -447,7 +520,7 @@ class Page(PageBase):
         """
         Returns all published children that should be added to the navigation.
         """
-        return self.published_children.filter(in_navigation=True)
+        return self.children.filter(in_navigation=True)
         
     navigation = property(get_navigation,
                           doc="All published children that should be added to the navigation.")

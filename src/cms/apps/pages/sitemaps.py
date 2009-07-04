@@ -24,7 +24,7 @@ class PageSitemap(Sitemap):
         pages = []
         for model in models.get_models():
             if issubclass(model, PageBase):
-                pages.extend(model.published_objects.all())
+                pages.extend(model.objects.all())
         return pages
         
     def changefreq(self, obj):
