@@ -103,14 +103,21 @@ site = AdminSite()
 # Page admin classes.
 
 
-class PageBaseAdmin(VersionAdmin):
+class PublishedModelAdmin(VersionAdmin):
+    
+    """Base admin class for published models."""
+    
+    publication_fieldsets = (("Publication", {"fields": ("is_online",),
+                                              "classes": ("collapse",),}),)
+    
+    list_filter = ("is_online",)
+
+
+class PageBaseAdmin(PublishedModelAdmin):
     
     """Base admin class for ArticleBase models."""
     
     date_hierarchy = "last_modified"
-    
-    publication_fieldsets = (("Publication", {"fields": ("is_online",),
-                                              "classes": ("collapse",),}),)
     
     navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
                                             "classes": ("collapse",),}),)
@@ -118,11 +125,9 @@ class PageBaseAdmin(VersionAdmin):
     seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "robots_index", "robots_archive", "robots_follow", "sitemap_priority", "sitemap_changefreq",),
                                                      "classes": ("collapse",),},),)
     
-    fieldsets = ((None, {"fields": ("title", "url_title",),},),) + publication_fieldsets + navigation_fieldsets + seo_fieldsets
+    fieldsets = ((None, {"fields": ("title", "url_title",),},),) + PublishedModelAdmin.publication_fieldsets + navigation_fieldsets + seo_fieldsets
 
     list_display = ("title", "last_modified", "is_online",)
-    
-    list_filter = ("is_online",)
     
     prepopulated_fields = {"url_title": ("title",),}
     
