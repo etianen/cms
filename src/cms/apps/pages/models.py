@@ -300,8 +300,7 @@ class Page(PageBase):
     
     # Hierarchy fields.
 
-    parent = PageField("self",
-                       blank=True,
+    parent = PageField(blank=True,
                        null=True)
 
     def get_all_parents(self):
@@ -377,8 +376,7 @@ class Page(PageBase):
     navigation = property(get_navigation,
                           doc="All published children that should be added to the navigation.")
 
-    permalink = models.SlugField(unique=True,
-                                 blank=True,
+    permalink = models.SlugField(blank=True,
                                  null=True,
                                  help_text="A unique identifier for this page.  This will be set by your design team in order to link to this page from any custom templates they write.")
 

@@ -20,7 +20,18 @@ class PageForm(forms.ModelForm):
     
     """Form used to edit Page models."""
     
-    pass
+    def clean_permalink(self):
+        """"Ensures that the permalink is None, or unique."""
+        value = self.cleaned_data["permalink"]
+        instance = self.instance
+        model = instance.__class__
+        try:
+            other = model.objects.get_by_permalink(value)
+            if other != instance:
+                raise forms.ValidationError, "Page with this permalink already exists."
+        except model.DoesNotExist:
+            pass
+        return value
     
     
 class HtmlWidget(forms.Textarea):
