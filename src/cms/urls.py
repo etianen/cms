@@ -4,7 +4,7 @@
 from django.conf import settings
 from django.conf.urls.defaults import *
 from django.contrib import admin
-from django.contrib.sitemaps.views import sitemap, index as sitemap_index
+from django.contrib.sitemaps.views import sitemap
 from django.contrib.syndication.views import feed
 from django.views.static import serve
 
@@ -29,8 +29,7 @@ urlpatterns = patterns("",
                        # Permalink redirection service.
                        url(r"^links/(?P<content_type_id>\d+)/(?P<object_id>.+)/$", "cms.apps.pages.views.permalink_redirect", name="permalink_redirect"),
                        # Google sitemap service.
-                       url(r"^sitemap.xml$", publication_manager.published_view(sitemap_index), {"sitemaps": registered_sitemaps}, name="sitemap_index"),
-                       url(r"^sitemap-(?P<section>.+)\.xml$", publication_manager.published_view(sitemap), {"sitemaps": registered_sitemaps}, name="sitemap"),
+                       url(r"^sitemap.xml$", publication_manager.published_view(sitemap), {"sitemaps": registered_sitemaps}, name="sitemap"),
                        # RSS feed service.
                        url(r"^feeds/(?P<url>.*)/$", publication_manager.published_view(feed), {"feed_dict": registered_feeds}),
                        # Basic robots.txt.
