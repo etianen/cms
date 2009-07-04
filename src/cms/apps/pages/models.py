@@ -238,6 +238,60 @@ class PageCache(threading.local):
         """Initializes the PageCache."""
         self._id_cache = {}
         self._permalink_cache = {}
+        
+    def add(self, page):
+        """Adds the given page to the cache."""
+        self._id_cache[page.id] = page
+        if page.permalink:
+            self._permalink_cache[page.permalink] = page
+        
+    def remove(self, page):
+        """
+        Removes the given page from the cache.
+        
+        If the page is not in the cache, this is a no-op.
+        """
+        try:
+            del self._id_cache[page.id]
+        except KeyError:
+            pass
+        if page.permalink:
+            try:
+                del self._permalink_cache[page.permalink]
+            except KeyError:
+                pass
+            
+    def clear(self):
+        """Clears the page cache."""
+        self._id_cache.clear()
+        self._permalink_cache.clear()
+        
+    def contains_permalink(self, permalink):
+        """Checks whether the given permalink is in the cache."""
+        return permalink in self._permalink_cache
+    
+    def get_by_permalink(self, permalink):
+        """
+        Returns the page referenced by the given permalink.
+        
+        Raises a KeyError if the page does not exist.
+        """
+        return self._permalink_cache[permalink]
+    
+    def contains_id(self, id):
+        """Checks whether the given page id is in the cache."""
+        return id in self._id_cache
+    
+    def get_by_id(self, id):
+        """
+        Returns the page referenced by the given id.
+        
+        Raises a KeyError if the page does not exist.
+        """
+        return self._id_cache[id]
+
+
+cache = PageCache()
 
 
 class PageManager(PageBaseManager):
@@ -249,12 +303,26 @@ class PageManager(PageBaseManager):
         return self.get(parent=None)
     
     def get_by_id(self, id):
-        """Returns the page referenced by the given id."""
-        return self.get(id=id)
+        """
+        Returns the page referenced by the given id.
+        
+        The result is cached in the page cache.
+        """
+        try:
+            return cache.get_by_id(id)
+        except KeyError:
+            return self.get(id=id)
     
     def get_by_permalink(self, permalink):
-        """Returns the page referenced by the given permalink."""
-        return self.get(permalink=permalink)
+        """
+        Returns the page referenced by the given permalink.
+        
+        The result is cached in the page cache.
+        """
+        try:
+            return cache.get_by_permalink(permalink)
+        except KeyError:
+            return self.get(permalink=permalink)
     
     def get_page(self, id):
         """
@@ -264,6 +332,8 @@ class PageManager(PageBaseManager):
         given an integer or basestring, then the page will be looked up by id
         or permalink respectively.  If passed a page instance, then the instance
         will be returned.
+        
+        The result is cached in the page cache.
         """
         if isinstance(id, self.model):
             return id
@@ -297,6 +367,12 @@ class Page(PageBase):
     
     url_title = models.SlugField("URL title",
                                  db_index=False)
+
+    def __init__(self, *args, **kwargs):
+        """"Initializes the Page."""
+        super(Page, self).__init__(*args, **kwargs)
+        if self.id:
+            cache.add(self)
     
     # Hierarchy fields.
 
@@ -415,6 +491,16 @@ class Page(PageBase):
         if self.parent:
             return self.parent.url + self.url_title + "/"
         return "/"
+    
+    def save(self, *args, **kwargs):
+        """Saves the page."""
+        super(Page, self).save(*args, **kwargs)
+        cache.add(self)
+        
+    def delete(self, *args, **kwargs):
+        """Deletes the page."""
+        super(Page, self).delete(*args, **kwargs)
+        cache.remove(self)
     
     class Meta:
         unique_together = (("parent", "url_title",),)
