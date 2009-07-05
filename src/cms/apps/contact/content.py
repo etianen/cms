@@ -76,23 +76,18 @@ class ContactForm(content.Content):
     
     form_type = content.ChoiceField(choices=form_choices(),
                                     default=DEFAULT_CONTACT_FORM_SLUG,
-                                    required=True,
                                     help_text="The type of form used for this contact page.")
     
-    send_to = content.EmailField(required=True,
-                                 help_text="The email address that shall be sent messages from this contact form.")
+    send_to = content.EmailField(help_text="The email address that shall be sent messages from this contact form.")
     
-    success_message = content.HtmlField(required=True,
-                                        default=DEFAULT_SUCCESS_MESSAGE,
+    success_message = content.HtmlField(default=DEFAULT_SUCCESS_MESSAGE,
                                         help_text="The message that shall be displayed to the user once the form is submitted.")
     
     confirmation_subject = content.CharField("subject",
-                                             required=True,
                                              default="%s - Online Enquiry" % settings.SITE_NAME,
                                              help_text="The subject of the confirmation email is sent to the user.")
     
     confirmation_message = content.TextField("message",
-                                             required=True,
                                              default=DEFAULT_CONFIRMATION_MESSAGE,
                                              help_text="The confirmation email that is sent to the user.")
     

@@ -35,8 +35,7 @@ class FeedBase(content.Content):
     
     latest_articles_template = "feeds/latest_articles.html"
     
-    items_per_page = content.PositiveIntegerField(required=True,
-                                                  default=10)
+    items_per_page = content.PositiveIntegerField(default=10)
     
     def render_page(self, page, request, template, context, **kwargs):
         """Renders the given page."""

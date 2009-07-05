@@ -29,7 +29,7 @@ class Field(object):
     
     form_field = forms.CharField
     
-    def __init__(self, label=None, required=False, default=None, help_text=""):
+    def __init__(self, label=None, required=True, default=None, help_text=""):
         """"Initializes the Field."""
         self.label = label
         self.required = required
@@ -595,7 +595,8 @@ class Content(ContentBase):
     verbose_name_plural = "content"
     
     for name, label in settings.CONTENT_AREAS:
-        locals()[name] = HtmlField(label)      
+        locals()[name] = HtmlField(label,
+                                   required=False)      
 
 
 register(Content)
