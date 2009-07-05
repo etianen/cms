@@ -31,7 +31,7 @@ urlpatterns = patterns("",
                        # Google sitemap service.
                        url(r"^sitemap.xml$", publication_manager.published_view(sitemap), {"sitemaps": registered_sitemaps}, name="sitemap"),
                        # RSS feed service.
-                       url(r"^feeds/(?P<url>.*)/$", publication_manager.published_view(feed), {"feed_dict": registered_feeds}),
+                       url(r"^feeds/(?P<url>.*)/$", publication_manager.published_view(feed), {"feed_dict": registered_feeds}, name="feeds"),
                        # Basic robots.txt.
                        url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}),)
 

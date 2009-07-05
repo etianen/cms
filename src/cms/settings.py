@@ -98,11 +98,6 @@ PAGINATION_KEY = "page"
 PUBLICATION_PREVIEW_KEY = "preview"
 
 
-# Feed settings.
-
-FEED_LENGTH = 30
-
-
 # Media settings.
 
 FILE_TYPES = (("mp3", "Audio"),

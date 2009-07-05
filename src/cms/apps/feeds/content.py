@@ -3,21 +3,40 @@
 
 import datetime
 
+from django import template
 from django.conf import settings
-from django.utils.feedgenerator import DefaultFeed
+from django.contrib.sites.models import Site
+from django.contrib.syndication.feeds import Feed
 from django.core.paginator import Paginator, EmptyPage
+from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
 from django.utils.dates import MONTHS
 
+from cms.apps.feeds import registered_feeds
 from cms.apps.pages.sites import add_domain
 from cms.apps.pages.templatetags.pages import html
 from cms.apps.pages.models import Page
 from cms.apps.pages import content
 
 
+class FeedMetaClass(content.ContentMetaClass):
+    
+    """Auto-registers feed content models with the syndication framework."""
+    
+    def __init__(self, name, bases, attrs):
+        """Initializes the FeedMetaClass."""
+        super(FeedMetaClass, self).__init__(name, bases, attrs)
+        if self.feed_key:
+            class ArticleFeed(ArticleFeedBase):
+                content_cls = self
+            registered_feeds[self.feed_key] = ArticleFeed
+
+
 class FeedBase(content.Content):
     
     """Base class for content that renders date-based fields."""
+
+    __metaclass__ = FeedMetaClass
 
     classifier = "feeds"
 
@@ -26,6 +45,12 @@ class FeedBase(content.Content):
     
     # Set this to the date field used to order the article model.
     date_field = None
+    
+    # The number of items to publish in the RSS feed.
+    feed_length = 30
+    
+    # The key under which the RSS feed is registered.
+    feed_key = None
     
     article_list_template = "feeds/article_list.html"
     
@@ -40,6 +65,9 @@ class FeedBase(content.Content):
     def render_page(self, page, request, template, context, **kwargs):
         """Renders the given page."""
         context.setdefault("article_type_plural", self.article_model._meta.verbose_name_plural)
+        if self.feed_key:
+            feed_url = reverse("feeds", kwargs={"url": self.feed_key}) + unicode(self.page.permalink or self.page.id) + u"/"
+            context.setdefault("feed_url", feed_url)
         return super(FeedBase, self).render_page(page, request, template, context, **kwargs)
     
     def get_page(self, request, articles):
@@ -79,26 +107,6 @@ class FeedBase(content.Content):
         context = {"articles": articles,
                    "year": now.year}
         return self.render_to_response(request, self.article_list_template, context)
-    
-    @content.view(r"^rss/$")
-    def rss(self, request):
-        """Generates an RSS feed for this feed."""
-        page = self.page
-        generator = DefaultFeed(title=page.title,
-                                link=add_domain(page.url),
-                                description=page.meta_description)
-        for article in self.article_model.objects.order_by("-%s" % self.date_field, "-pk")[:settings.FEED_LENGTH]:
-            pubdate = getattr(article, self.date_field)
-            if isinstance(pubdate, datetime.date):
-                pubdate = datetime.datetime(pubdate.year, pubdate.month, pubdate.day)
-            generator.add_item(title=article.title,
-                               link=add_domain(article.url),
-                               description=html(article.content or article.summary),
-                               pubdate=pubdate,
-                               unique_id=unicode(article.pk))
-        response = HttpResponse(mimetype=generator.mime_type)
-        generator.write(response, "utf-8")
-        return response
     
     @content.view(r"^(\d{4})/$")
     def year_archive(self, request, year):
@@ -146,4 +154,61 @@ class FeedBase(content.Content):
         context = {"breadcrumbs": breadcrumbs,
                    "year": getattr(article, self.date_field).year}
         return self.render_page(article, request, self.article_detail_template, context)
+
+
+class ArticleFeedBase(Feed):
+    
+    """A feed of articles."""
+    
+    description_template = "feeds/article_description.html"
+    
+    def __init__(self, *args, **kwargs):
+        """Initializes the ArticleFeedBase."""
+        super(ArticleFeedBase, self).__init__(*args, **kwargs)
+        self.homepage = Page.objects.get_homepage()
+    
+    def get_object(self, bits):
+        """Allows customization of the feed."""
+        if len(bits) == 0:
+            return None
+        elif len(bits) == 1:
+            # Accept integer page id or permalink.
+            try:
+                page_id = int(bits[0])
+            except ValueError:
+                page_id = bits[0]
+            return Page.objects.get_page(page_id)
+        else:
+            raise ObjectDoesNotExist
+        
+    def title(self, obj=None):
+        """Generates the feed title."""
+        site_title = self.homepage.browser_title or self.homepage.title
+        if obj is None:
+            title = u"Latest %s" % self.content_cls.article_model._meta.verbose_name_plural.title()
+        else:
+            title = obj.browser_title or obj.title
+        context = {"is_homepage": False,
+                   "site_title": site_title,
+                   "browser_title": title}
+        return template.loader.render_to_string("browser_title.html", context)
+
+    def link(self, obj):
+        if obj is None:
+            return "/"
+        return obj.url
+
+    def description(self, obj):
+        """Generates the feed description."""
+        if obj is None:
+            return self.homepage.meta_description
+        return obj.meta_description
+        
+    def items(self, obj):
+        """Generates the feed items."""
+        content_cls = self.content_cls
+        articles = content_cls.article_model.objects.order_by("-%s" % content_cls.date_field, "-pk")
+        if obj:
+            articles = articles.filter(feed=obj)
+        return articles[:content_cls.feed_length]
 

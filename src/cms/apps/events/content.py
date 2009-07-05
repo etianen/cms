@@ -18,6 +18,8 @@ class EventsFeed(FeedBase):
     
     date_field = "start_date"
     
+    feed_key = "events"
+    
     icon = settings.CMS_MEDIA_URL + "img/content-types/events-feed.png"
     
     article_list_template = ("events/article_list.html", "feeds/article_list.html",)
