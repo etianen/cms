@@ -10,10 +10,9 @@ class ContactForm(forms.Form):
     
     verbose_name = "simple contact form"
     
-    name = forms.CharField(required=True)
+    name = forms.CharField()
     
-    email = forms.EmailField(required=True)
+    email = forms.EmailField()
     
-    message = forms.CharField(required=True,
-                              widget=forms.Textarea)
+    message = forms.CharField(widget=forms.Textarea)
     

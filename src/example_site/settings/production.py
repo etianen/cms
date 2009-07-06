@@ -91,6 +91,11 @@ INSTALLED_APPS += ("cms.apps.news",
                    "cms.apps.redirects",)
 
 
+# A list of registered contact form types.
+
+CONTACT_FORMS = (("contact", "cms.apps.contact.forms.ContactForm"),)
+
+
 # Absolute path to the directory containing this project.
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

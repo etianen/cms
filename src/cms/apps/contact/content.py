@@ -6,8 +6,7 @@ from django.conf import settings
 from django.core.mail import send_mass_mail
 from django.http import HttpResponseRedirect
 
-from cms.apps.pages import content
-from cms.apps.contact.forms import ContactForm
+from cms.apps.pages import content, loader
 
 
 DEFAULT_SUCCESS_MESSAGE = """<p>Thank you for your enquiry. We will be in touch with you shortly.</p>"""
@@ -22,50 +21,17 @@ Best wishes,
 The %s Team.""" % settings.SITE_NAME 
 
 
-registered_forms = {}
+# Dynamically load contact form choices.
 
+CONTACT_FORMS = tuple((key, loader.load_object(value)) for key, value in settings.CONTACT_FORMS)
 
-class FormRegistrationError(Exception):
-    
-    """Exception raised when something goes wrong with form registration."""
+CONTACT_FORM_CHOICES = tuple((key, value.verbose_name.capitalize()) for key, value in CONTACT_FORMS)
 
+CONTACT_FORM_CHOICES_DEFAULT = CONTACT_FORM_CHOICES[0][0]
 
-def register_form(form_cls, slug=None):
-    """Registers the fiven contact form under the given slug."""
-    slug = slug or form_cls.__name__.lower()
-    registered_forms[slug] = form_cls
-    
-
-def unregister_form(slug):
-    """Unregisters the given contact form."""
-    try:
-        del registered_forms[slug]
-    except KeyError:
-        raise FormRegistrationError, "No contact form is registered under '%s'." % slug
+CONTACT_FORMS = dict(CONTACT_FORMS)
     
     
-def lookup_form(slug):
-    """Looks up the contact form associated with the given slug."""
-    try:
-        return registered_forms[slug]
-    except KeyError:
-        raise FormRegistrationError, "No contact form is registered under '%s'." % slug
-    
-    
-def form_choices():
-    """Returns a sorted list of all form choices."""
-    choices = registered_forms.items()
-    choices.sort(lambda a, b: cmp(a[1].verbose_name, b[1].verbose_name))
-    choices = [(slug, form_cls.verbose_name.capitalize()) for slug, form_cls in choices]
-    return choices
-
-
-DEFAULT_CONTACT_FORM_SLUG = "contact"
-
-
-register_form(ContactForm, DEFAULT_CONTACT_FORM_SLUG)
-
-
 class ContactForm(content.Content):
     
     """A standard method of creating contact forms."""
@@ -74,8 +40,8 @@ class ContactForm(content.Content):
     
     icon = settings.CMS_MEDIA_URL + "img/content-types/contact-form.png"
     
-    form_type = content.ChoiceField(choices=form_choices(),
-                                    default=DEFAULT_CONTACT_FORM_SLUG,
+    form_type = content.ChoiceField(choices=CONTACT_FORM_CHOICES,
+                                    default=CONTACT_FORM_CHOICES_DEFAULT,
                                     help_text="The type of form used for this contact page.")
     
     send_to = content.EmailField(help_text="The email address that shall be sent messages from this contact form.")
@@ -100,7 +66,7 @@ class ContactForm(content.Content):
     @content.view(r"^$")
     def index(self, request):
         """Renders the contact form."""
-        ContactForm = lookup_form(self.form_type)
+        ContactForm = CONTACT_FORMS[self.form_type]
         # Respond to POST data.
         if request.method == "POST":
             contact_form = ContactForm(request.POST)
