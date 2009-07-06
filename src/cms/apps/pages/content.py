@@ -470,7 +470,7 @@ class ContentBase(object):
     
     def render_to_response(self, request, template_name, context, **kwargs):
         """Renders this content to the response."""
-        return self.render_page(request, template_name, context, page, **kwargs)
+        return self.render_page(request, template_name, context, self.page, **kwargs)
     
     def render_page(self, request, template_name, context, page, **kwargs):
         """Renders the given page to a HttpResponse."""
