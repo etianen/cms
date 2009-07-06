@@ -273,7 +273,7 @@ class PageAdmin(PageBaseAdmin):
         if not PAGE_TYPE_PARAMETER in request.GET:
             # Generate the available content items.
             content_items = content.registered_content.items()
-            content_items.sort(lambda a, b: cmp(a[1].classifier, b[1].classifier) or cmp(a[1].verbose_name, b[1].verbose_name))
+            content_items.sort(lambda a, b: cmp(a[1].classifier, b[1].classifier) or cmp(a[1].verbose_name.lower(), b[1].verbose_name.lower()))
             content_types = []
             for slug, content_type in content_items:
                 if self.has_add_content_permission(request, slug):
