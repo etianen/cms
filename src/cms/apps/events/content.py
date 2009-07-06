@@ -33,5 +33,3 @@ class EventsFeed(FeedBase):
         return super(EventsFeed, self).get_latest_articles().filter(start_date__gte=datetime.datetime.now().date())
     
     
-content.register(EventsFeed)
-

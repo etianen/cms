@@ -28,5 +28,3 @@ class NewsFeed(FeedBase):
     latest_articles_template = ("news/latest_articles.html", "feeds/latest_articles.html",)
     
     
-content.register(NewsFeed)
-

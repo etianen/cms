@@ -9,4 +9,3 @@ from cms.apps.pages import content
 
 
 content.autoregister()
-

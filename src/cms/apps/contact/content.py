@@ -110,5 +110,3 @@ class ContactForm(content.Content):
         return self.render_to_response(request, "contact/message_sent.html", context)
         
         
-content.register(ContactForm)
-

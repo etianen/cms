@@ -26,6 +26,3 @@ class Redirect(content.ContentBase):
         redirect_url = Page.objects.get_url(redirect_url)
         return HttpResponseRedirect(redirect_url)
     
-        
-content.register(Redirect)
-

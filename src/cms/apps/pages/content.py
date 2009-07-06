@@ -17,6 +17,7 @@ from django.shortcuts import render_to_response
 from django.utils.html import strip_tags
 from django.utils.text import capfirst
 
+from cms.apps.pages import loader
 from cms.apps.pages.forms import PageForm, HtmlWidget
 from cms.apps.pages.optimizations import cached_getter
 
@@ -213,6 +214,22 @@ def view(url):
     return decorator
     
     
+registered_content = {}
+
+
+class ContentRegistrationError(Exception):
+    
+    """Exception raised when content registration goes astray.""" 
+
+
+def lookup(slug):
+    """Looks up the given content type by type slug."""
+    try:
+        return registered_content[slug]
+    except KeyError:
+        raise ContentRegistrationError, "No content type is registered under '%s'." % slug
+    
+    
 class ContentMetaClass(type):
     
     """Metaclass for Content objects."""
@@ -242,9 +259,16 @@ class ContentMetaClass(type):
         # Generate a verbose name, if required.
         if not "verbose_name" in attrs:
             verbose_name = get_verbose_name(name)
-            setattr(self, "verbose_name", verbose_name)
+            self.verbose_name = verbose_name
         if not "verbose_name_plural" in attrs:
             self.verbose_name_plural = self.verbose_name + "s"
+        # Auto-register the content.
+        if not "registration_key" in attrs:
+            self.registration_key = name.lower()
+        if not "abstract" in attrs:
+            self.abstract = False
+        if not self.abstract:
+            registered_content[self.registration_key] = self
         
         
 class Breadcrumb(object):
@@ -291,11 +315,22 @@ class ContentBase(object):
     
     __metaclass__ = ContentMetaClass
     
+    # Setting abstract to True prevents registration of this content class.
+    abstract = True
+    
     # This must be a 64 x 64 pixel image.
     icon = settings.CMS_MEDIA_URL + "img/content-types/content.png"
     
     # The heading that the admin places this content under.
     classifier = "content"
+    
+    # The key that this content should be registered under.  Leave blank to use
+    # the lowercase class name.
+    registration_key = None
+    
+    # Use to override the auto-generated verbose names.
+    verbose_name = None
+    verbose_name_plural = None
     
     def __init__(self, page):
         """
@@ -533,37 +568,6 @@ def get_add_permission(slug):
 
 # Content registration methods.
 
-class ContentRegistrationError(Exception):
-    
-    """Exception raised when content registration goes wrong."""
-
-
-registered_content = {}
-
-
-def register(content_cls, slug=None):
-    """
-    Registers the given content type with this class under the given slug.
-    """
-    slug = slug or content_cls.__name__.lower()
-    registered_content[slug] = content_cls
-  
-  
-def unregister(slug):
-    """Unregisters the content type associated with the given slug."""
-    try:
-        del registered_content[slug]
-    except KeyError:
-        raise ContentRegistrationError, "No content type is registered under '%s'." % slug
-
-
-def lookup(slug):
-    """Looks up the given content type by type slug."""
-    try:
-        return registered_content[slug]
-    except KeyError:
-        raise ContentRegistrationError, "No content type is registered under '%s'." % slug
-
 
 def autoregister():
     """
@@ -585,20 +589,13 @@ def autoregister():
 # Simple base content models.
 
 
-CONTENT_AREA_NAMES = tuple([name for name, label in settings.CONTENT_AREAS])
-
-
 class Content(ContentBase):
     
     """The default page content associated by default with all pages."""
     
     verbose_name_plural = "content"
     
-    for name, label in settings.CONTENT_AREAS:
-        locals()[name] = HtmlField(label,
-                                   required=False)      
-
-
-register(Content)
+    content_primary = HtmlField("primary content",
+                                required=False)   
 
     
