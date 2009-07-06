@@ -7,6 +7,7 @@ from django import template
 from django.core.exceptions import ObjectDoesNotExist
 
 from cms.apps.pages import permalinks
+from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import Library
 
 
@@ -30,13 +31,19 @@ def expand_permalinks(text):
     offset = 0
     for match in RE_ANCHOR.finditer(text):
         href = match.group(1)
+        # Try to match a generic permalink.
         try:
             obj = permalinks.resolve(href)
         except permalinks.PermalinkError:
-            continue
+            # Not a permalink... try to match a page permalink.
+            try:
+                obj = Page.objects.get_page(href)
+            except Page.DoesNotExist:
+                continue
         except ObjectDoesNotExist:
             continue
         new_href = obj.get_absolute_url()
+        # Substitute in the new href.
         start = match.start(1)
         end = match.end(1)
         text = u"".join((text[:start+offset], new_href, text[end+offset:]))
