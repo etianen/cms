@@ -93,7 +93,8 @@ class File(Media):
     
     """A static file."""
     
-    file = models.FileField(upload_to=get_upload_path)
+    file = models.FileField(upload_to=get_upload_path,
+                            max_length=255)
     
     
 class Image(Media):
@@ -101,6 +102,7 @@ class Image(Media):
     """A static image."""
     
     file = models.ImageField(upload_to=get_upload_path,
+                             max_length=255,
                              width_field="width",
                              height_field="height")
     
