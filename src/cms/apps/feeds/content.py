@@ -13,7 +13,6 @@ from django.http import Http404, HttpResponse
 from django.utils.dates import MONTHS
 
 from cms.apps.feeds import registered_feeds
-from cms.apps.pages.sites import add_domain
 from cms.apps.pages.templatetags.pages import html
 from cms.apps.pages.models import Page
 from cms.apps.pages import content

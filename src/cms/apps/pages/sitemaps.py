@@ -8,7 +8,6 @@ from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 
 from cms.apps.pages.models import PageBase
-from cms.apps.pages.sites import add_domain
 
 
 # A dictionary of registered sitemap classes.
