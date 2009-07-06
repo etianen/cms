@@ -92,6 +92,8 @@ SITE_ID = 1
 
 PAGINATION_KEY = "page"
 
+ITEMS_PER_PAGE = 10
+
 
 # Publication settings.
 

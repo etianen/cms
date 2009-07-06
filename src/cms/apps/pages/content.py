@@ -9,6 +9,7 @@ from django import forms, template
 from django.conf import settings
 from django.conf.urls.defaults import url, patterns
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
+from django.core.paginator import Paginator, EmptyPage
 from django.core.serializers.xml_serializer import getInnerText
 from django.core.urlresolvers import RegexURLResolver, Resolver404, Http404
 from django.db.models.options import get_verbose_name
@@ -428,7 +429,23 @@ class ContentBase(object):
     breadcrumbs = property(get_breadcrumbs,
                            doc="The breadcrumbs leading to this page.")
         
-    # Content view method.
+    def get_page(self, request, models, items_per_page=None, pagination_key=None):
+        """Returns an object paginator for the given models."""
+        items_per_page = items_per_page or settings.ITEMS_PER_PAGE
+        pagination_key = pagination_key or settings.PAGINATION_KEY
+        page = request.GET.get(pagination_key, 1)
+        try:
+            page = int(page)
+        except ValueError:
+            raise Http404, "'%s' is not a valid page number." % page 
+        paginator = Paginator(models, items_per_page)
+        try:
+            page = paginator.page(page)
+        except EmptyPage:
+            raise Http404, "There are no models on this page."
+        return page
+        
+    # Content view methods.
     
     @cached_getter
     def get_url_resolver(self):

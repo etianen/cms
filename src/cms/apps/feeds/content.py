@@ -7,7 +7,6 @@ from django import template
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.contrib.syndication.feeds import Feed
-from django.core.paginator import Paginator, EmptyPage
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
 from django.utils.dates import MONTHS
@@ -46,33 +45,12 @@ class FeedBase(DefaultContent):
     
     latest_articles_template = "feeds/latest_articles.html"
     
-    items_per_page = content.PositiveIntegerField(default=10)
-    
-    def get_fieldsets(self):
-        """Returns the fieldsets used to lay out the content form."""
-        return super(FeedBase, self).get_fieldsets() + (("Pagination", {"fields": ("items_per_page",),
-                                                                           "classes": ("collapse",),}),)
-    
     def get_feed_url(self):
         """Returns the URL of the RSS feed for this page."""
         return reverse("feeds", kwargs={"url": ARTICLE_FEED_KEY}) + unicode(self.page.permalink or self.page.id) + u"/"
     
     feed_url = property(get_feed_url,
                         doc="The URL of the RSS feed for this page.")
-    
-    def get_page(self, request, articles):
-        """Returns an object paginator for the given articles."""
-        page = request.GET.get(settings.PAGINATION_KEY, 1)
-        try:
-            page = int(page)
-        except ValueError:
-            raise Http404, "'%s' is not a valid page number." % page 
-        paginator = Paginator(articles, self.items_per_page)
-        try:
-            page = paginator.page(page)
-        except EmptyPage:
-            raise Http404, "There are no articles on this page."
-        return page
     
     def get_articles(self):
         """Returns all articles of this feed."""
