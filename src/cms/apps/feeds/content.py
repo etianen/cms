@@ -143,7 +143,7 @@ class FeedBase(DefaultContent):
                                           content.Breadcrumb(MONTHS[month], self.reverse("month_archive", year, month))]
         context = {"breadcrumbs": breadcrumbs,
                    "year": getattr(article, self.date_field).year}
-        return self.render_page(article, request, self.article_detail_template, context)
+        return self.render_page(request, self.article_detail_template, context, article)
 
 
 ARTICLE_FEED_KEY = "latest"
