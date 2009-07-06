@@ -18,7 +18,10 @@ from cms.apps.pages.models import Page
 from cms.apps.pages import content
 
 
-class FeedBase(content.Content):
+DefaultContent = content.get_default_content()
+
+
+class FeedBase(DefaultContent):
     
     """Base class for content that renders date-based fields."""
 
@@ -44,6 +47,11 @@ class FeedBase(content.Content):
     latest_articles_template = "feeds/latest_articles.html"
     
     items_per_page = content.PositiveIntegerField(default=10)
+    
+    def get_fieldsets(self):
+        """Returns the fieldsets used to lay out the content form."""
+        return super(FeedBase, self).get_fieldsets() + (("Pagination", {"fields": ("items_per_page",),
+                                                                           "classes": ("collapse",),}),)
     
     def get_feed_url(self):
         """Returns the URL of the RSS feed for this page."""

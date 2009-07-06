@@ -230,6 +230,11 @@ def lookup(slug):
         raise ContentRegistrationError, "No content type is registered under '%s'." % slug
     
     
+def get_default_content():
+    """Looks up the default content class from the settings."""
+    return loader.load_object(settings.DEFAULT_CONTENT)
+    
+    
 class ContentMetaClass(type):
     
     """Metaclass for Content objects."""
@@ -596,6 +601,10 @@ class Content(ContentBase):
     verbose_name_plural = "content"
     
     content_primary = HtmlField("primary content",
-                                required=False)   
+                                required=False)
+    
+    def get_fieldsets(self):
+        """Returns the admin fieldsets."""
+        return (("Page content", {"fields": ("content_primary",)}),)
 
     

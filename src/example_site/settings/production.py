@@ -91,6 +91,11 @@ INSTALLED_APPS += ("cms.apps.news",
                    "cms.apps.redirects",)
 
 
+# The base content type to use for all CMS apps.
+
+DEFAULT_CONTENT = "cms.apps.pages.content.Content"
+
+
 # A list of registered contact form types.
 
 CONTACT_FORMS = (("contact", "cms.apps.contact.forms.ContactForm"),)
