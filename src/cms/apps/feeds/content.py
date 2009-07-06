@@ -18,24 +18,9 @@ from cms.apps.pages.models import Page
 from cms.apps.pages import content
 
 
-class FeedMetaClass(content.ContentMetaClass):
-    
-    """Auto-registers feed content models with the syndication framework."""
-    
-    def __init__(self, name, bases, attrs):
-        """Initializes the FeedMetaClass."""
-        super(FeedMetaClass, self).__init__(name, bases, attrs)
-        if self.feed_key:
-            class ArticleFeed(ArticleFeedBase):
-                content_cls = self
-            registered_feeds[self.feed_key] = ArticleFeed
-
-
 class FeedBase(content.Content):
     
     """Base class for content that renders date-based fields."""
-
-    __metaclass__ = FeedMetaClass
 
     classifier = "feeds"
 
@@ -48,9 +33,6 @@ class FeedBase(content.Content):
     # The number of items to publish in the RSS feed.
     feed_length = 30
     
-    # The key under which the RSS feed is registered.
-    feed_key = None
-    
     article_list_template = "feeds/article_list.html"
     
     article_detail_template = "feeds/article_detail.html"
@@ -61,13 +43,12 @@ class FeedBase(content.Content):
     
     items_per_page = content.PositiveIntegerField(default=10)
     
-    def render_page(self, page, request, template, context, **kwargs):
-        """Renders the given page."""
-        context.setdefault("article_type_plural", self.article_model._meta.verbose_name_plural)
-        if self.feed_key:
-            feed_url = reverse("feeds", kwargs={"url": self.feed_key}) + unicode(self.page.permalink or self.page.id) + u"/"
-            context.setdefault("feed_url", feed_url)
-        return super(FeedBase, self).render_page(page, request, template, context, **kwargs)
+    def get_feed_url(self):
+        """Returns the URL of the RSS feed for this page."""
+        return reverse("feeds", kwargs={"url": ARTICLE_FEED_KEY}) + unicode(self.page.permalink or self.page.id) + u"/"
+    
+    feed_url = property(get_feed_url,
+                        doc="The URL of the RSS feed for this page.")
     
     def get_page(self, request, articles):
         """Returns an object paginator for the given articles."""
@@ -155,59 +136,44 @@ class FeedBase(content.Content):
         return self.render_page(article, request, self.article_detail_template, context)
 
 
-class ArticleFeedBase(Feed):
+ARTICLE_FEED_KEY = "latest"
+
+
+class ArticleFeed(Feed):
     
     """A feed of articles."""
     
     description_template = "feeds/article_description.html"
     
-    def __init__(self, *args, **kwargs):
-        """Initializes the ArticleFeedBase."""
-        super(ArticleFeedBase, self).__init__(*args, **kwargs)
-        self.homepage = Page.objects.get_homepage()
-    
     def get_object(self, bits):
         """Allows customization of the feed."""
-        if len(bits) == 0:
-            return None
-        elif len(bits) == 1:
-            # Accept integer page id or permalink.
-            try:
-                page_id = int(bits[0])
-            except ValueError:
-                page_id = bits[0]
-            return Page.objects.get_page(page_id)
-        else:
-            raise ObjectDoesNotExist
+        if len(bits) == 1:
+            return Page.objects.get_page(bits[0])
+        raise Page.DoesNotExist, "No page id was specified."
         
     def title(self, obj=None):
         """Generates the feed title."""
-        site_title = self.homepage.browser_title or self.homepage.title
-        if obj is None:
-            title = u"Latest %s" % self.content_cls.article_model._meta.verbose_name_plural.title()
-        else:
-            title = obj.browser_title or obj.title
+        homepage = Page.objects.get_homepage()
+        site_title = homepage.browser_title or homepage.title
+        title = obj.browser_title or obj.title
         context = {"is_homepage": False,
                    "site_title": site_title,
                    "browser_title": title}
         return template.loader.render_to_string("browser_title.html", context)
 
     def link(self, obj):
-        if obj is None:
-            return "/"
         return obj.url
 
     def description(self, obj):
         """Generates the feed description."""
-        if obj is None:
-            return self.homepage.meta_description
         return obj.meta_description
         
     def items(self, obj):
         """Generates the feed items."""
-        content_cls = self.content_cls
-        articles = content_cls.article_model.objects.order_by("-%s" % content_cls.date_field, "-pk")
-        if obj:
-            articles = articles.filter(feed=obj)
-        return articles[:content_cls.feed_length]
+        content = obj.content
+        articles = content.articles.order_by("-%s" % content.date_field, "-pk")
+        return articles[:content.feed_length]
+
+
+registered_feeds[ARTICLE_FEED_KEY] = ArticleFeed
 

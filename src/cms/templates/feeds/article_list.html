@@ -2,11 +2,7 @@
 {% load pages feeds %}
 
 
-{% block feeds %}
-    {% if feed_url %}
-        <link rel="alternate" type="application/rss+xml" title="{{page.title}}" href="{{feed_url}}"/>
-    {% endif %}
-{% endblock %}
+{% block feeds %}{% feed page %}{% endblock %}
 
 
 {% block content_primary %}

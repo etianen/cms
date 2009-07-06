@@ -17,8 +17,6 @@ class NewsFeed(FeedBase):
     
     date_field = "publication_date"
     
-    feed_key = "news"
-    
     icon = settings.CMS_MEDIA_URL + "img/content-types/news-feed.png"
     
     article_list_template = ("news/article_list.html", "feeds/article_list.html",)

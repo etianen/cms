@@ -420,12 +420,20 @@ class PageManager(PageBaseManager):
         
         The result is cached in the page cache.
         """
+        # Accept Page arguments.
         if isinstance(id, self.model):
             return id
-        if isinstance(id, int):
+        # Accept int arguments.
+        try:
+            id = int(id)
+        except ValueError:
+            pass
+        else:
             return self.get_by_id(id)
+        # Accept basestring arguments.
         if isinstance(id, basestring):
             return self.get_by_permalink(id)
+        # Complain about an unrecognised argument type.
         raise TypeError, "Expected Page, int or basestring.  Found %s." % type(id).__name__
 
 

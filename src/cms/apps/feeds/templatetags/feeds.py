@@ -11,6 +11,15 @@ from cms.apps.pages.templatetags import Library
 register = Library()
 
 
+@register.inclusion_tag("feeds/feed.html")
+def feed(page):
+    """Generates a link to the RSS feed for the page."""
+    page = Page.objects.get_page(page)
+    context = {"url": page.content.feed_url,
+               "title": page.title}
+    return context
+
+
 @register.context_tag
 def latest_articles(context, page, count=5):
     """Renders a list of the latest news articles."""
