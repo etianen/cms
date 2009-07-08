@@ -2,7 +2,7 @@
 {% load pages feeds %}
 
 
-{% block feeds %}{% feed page.feed %}{% endblock %}
+{% block feeds %}{% feed_link page.feed %}{% endblock %}
 
 
 {% block title %}<span class="date">{{page|date_field|date}}</span> <span class="title">{{block.super}}</span>{% endblock %}
