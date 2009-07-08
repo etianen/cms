@@ -8,8 +8,6 @@ enquiry are shown below.
 
 {% endfor %}--------------------------------------------------------------------------------
 
-To reply to this user, simply reply to this email,
-
 Best wishes,
 
 The CCSS notification system.
