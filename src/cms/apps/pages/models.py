@@ -182,8 +182,7 @@ class PageBase(PublishedModel):
                              editable=False,
                              default=Site.objects.get_current)
     
-    title = models.CharField(max_length=1000,
-                             db_index=True)
+    title = models.CharField(max_length=1000)
     
     # Navigation fields.
     
