@@ -193,13 +193,13 @@ class PageBase(PublishedModel):
     
     # SEO fields.
     
-    browser_title = models.CharField(max_length=1024,
+    browser_title = models.CharField(max_length=1000,
                                      blank=True,
                                      null=True,
                                      help_text="The heading to use in the user's web browser.  Leave blank to use the page title.  Search engines pay particular attention to this attribute.")
     
     meta_keywords = models.CharField("keywords",
-                                     max_length=1024,
+                                     max_length=1000,
                                      blank=True,
                                      null=True,
                                      help_text="A comma-separated list of keywords for this page. Use this to specify common mis-spellings or alternative versions of important words in this page.")
@@ -217,7 +217,7 @@ class PageBase(PublishedModel):
                                          help_text="The relative importance of this content in your site.  Search engines use this as a hint when ranking the pages within your site.")
     
     sitemap_changefreq = models.CharField("change frequency",
-                                          max_length=255,
+                                          max_length=7 ,
                                           choices=settings.SEO_CHANGE_FREQUENCIES,
                                           default=settings.SEO_DEFAULT_CHANGE_FREQUENCY,
                                           blank=True,
