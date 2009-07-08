@@ -86,7 +86,7 @@ class ContactForm(DefaultContent):
                 notification_message = template.loader.render_to_string("contact/notification.txt", notification_context)
                 messages.append((subject, 
                                  notification_message, 
-                                 sender, 
+                                 settings.DEFAULT_FROM_EMAIL, 
                                  [recipient]))
                 # Compile the confirmation email.
                 confirmation_context = template.RequestContext(request, contact_form.cleaned_data)
@@ -94,7 +94,7 @@ class ContactForm(DefaultContent):
                 confirmation_message = confirmation_email.render(confirmation_context)
                 messages.append((subject,
                                  confirmation_message,
-                                 recipient,
+                                 settings.DEFAULT_FROM_EMAIL,
                                  [sender]))
                 # Send both emails.
                 send_mass_mail(messages)
