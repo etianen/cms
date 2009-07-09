@@ -83,7 +83,7 @@ class ContactForm(DefaultContent):
                 notification_context = {"name": name,
                                         "email": email,
                                         "contact_form": contact_form}
-                notification_message = template.loader.render_to_string("contact/notification.txt", notification_context)
+                notification_message = template.loader.render_to_string("contact/notification.txt", notification_context, template.RequestContext(request))
                 messages.append((subject, 
                                  notification_message, 
                                  settings.DEFAULT_FROM_EMAIL, 

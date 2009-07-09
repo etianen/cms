@@ -3,11 +3,10 @@ Dear Administrator,
 A user has made an online enquiry using your website.  The details of the
 enquiry are shown below.
 
---------------------------------------------------------------------------------
-{% for field in contact_form %}{{field.label}}: {{field.data}}
+{% for field in contact_form %}{{field.label}}:
+{{field.data|wordwrap:65|safe}}
 
-{% endfor %}--------------------------------------------------------------------------------
-
+{% endfor %}
 Best wishes,
 
-The CCSS notification system.
+The {{site.name}} notification system.
