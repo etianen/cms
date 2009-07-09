@@ -159,6 +159,8 @@ class IntegerField(Field):
     
     def deserialize(self, value):
         """Converts the value from a unicode string into a Python object."""
+        if value == "":
+            return None
         return int(value)
     
     
