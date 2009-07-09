@@ -70,7 +70,7 @@ class CharField(Field):
     
     """A simple character data field."""
     
-    def __init__(self, label=None, max_length=100, **kwargs):
+    def __init__(self, label=None, max_length=200, **kwargs):
         """Initializes the CharField."""
         super(CharField, self).__init__(label, **kwargs)
         self.max_length = max_length

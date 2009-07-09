@@ -13,7 +13,7 @@ class Folder(models.Model):
     This does not correspond to a physical folder on the disk.
     """
     
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=200)
     
     def __unicode__(self):
         """Returns the name of the folder."""
@@ -32,7 +32,7 @@ class Media(models.Model):
     one of its subclasses.
     """
     
-    title = models.CharField(max_length=100,
+    title = models.CharField(max_length=200,
                              help_text="The title will be used as the default rollover text when this media is embedded in a web page.")
     
     size = models.PositiveIntegerField(editable=False,
@@ -94,7 +94,7 @@ class File(Media):
     """A static file."""
     
     file = models.FileField(upload_to=get_upload_path,
-                            max_length=255)
+                            max_length=200)
     
     
 class Image(Media):
@@ -102,7 +102,7 @@ class Image(Media):
     """A static image."""
     
     file = models.ImageField(upload_to=get_upload_path,
-                             max_length=255,
+                             max_length=200,
                              width_field="width",
                              height_field="height")
     
