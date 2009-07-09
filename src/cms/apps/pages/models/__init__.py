@@ -54,10 +54,10 @@ class Page(PageBase):
     all_parents = property(get_all_parents,
                            doc="A list of all parents of this page.")
 
-    order = models.PositiveSmallIntegerField(unique=True,
-                                             editable=False,
-                                             blank=True,
-                                             null=True)
+    order = models.PositiveIntegerField(unique=True,
+                                        editable=False,
+                                        blank=True,
+                                        null=True)
 
     @cached_getter
     def get_children(self):
@@ -111,7 +111,6 @@ class Page(PageBase):
                           doc="All published children that should be added to the navigation.")
 
     permalink = models.SlugField(blank=True,
-                                 null=True,
                                  help_text="A unique identifier for this page.  This will be set by your design team in order to link to this page from any custom templates they write.")
 
     # Content fields.

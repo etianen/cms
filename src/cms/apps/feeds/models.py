@@ -22,11 +22,9 @@ class ArticleBase(PageBase):
     url_title = models.SlugField("URL title",
                                  db_index=False)
     
-    content = HtmlField(blank=True,
-                        null=True)
+    content = HtmlField(blank=True)
     
     summary = HtmlField(blank=True,
-                        null=True,
                         help_text="A short summary of this article.  If not specified, then a summarized version of the content will be used.")
     
     is_featured = models.BooleanField("featured",
