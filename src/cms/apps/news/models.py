@@ -33,6 +33,7 @@ class Article(ArticleBase):
         return self.feed.content.reverse("article_detail", self.publication_date.year, self.publication_date.month, self.url_title)
     
     class Meta:
+        unique_together = (("feed", "url_title",),)
         verbose_name = "news article"
         ordering = ("-is_featured", "-publication_date", "-id")
 
