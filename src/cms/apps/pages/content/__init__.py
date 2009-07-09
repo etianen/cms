@@ -191,8 +191,7 @@ class ContentBase(object):
         for field in self.fields:
             key = field.name
             serialized_value = raw_data.get(key, "")
-            if serialized_value == "":
-                value = field.deserialize(serialized_value)
+            value = field.deserialize(serialized_value)
             data[key] = value
         self.data = data
         
