@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import Q
 
 from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager
+from cms.apps.pages.models.fields import NullBooleanField
 
 
 class PublishedModel(models.Model):
@@ -46,11 +47,6 @@ class PublishedModel(models.Model):
     class Meta:
         abstract = True
     
-
-# Choices available to the meta robots clauses.
-ROBOTS_CHOICES = ((1, "Yes"),
-                  (0, "No"),)
-
 
 class PageBase(PublishedModel):
     
@@ -110,26 +106,20 @@ class PageBase(PublishedModel):
                                           null=True,
                                           help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates.")
     
-    robots_index = models.PositiveSmallIntegerField("allow indexing",
-                                                    blank=True,
-                                                    null=True,
-                                                    default=None,
-                                                    choices=ROBOTS_CHOICES,
-                                                    help_text="Use this to prevent search engines from indexing this page. Disable this only if the page contains information which you do not wish to show up in search results. Leave blank to use the setting from the parent page.")
+    robots_index = NullBooleanField("allow indexing",
+                                    blank=True,
+                                    default=None,
+                                    help_text="Use this to prevent search engines from indexing this page. Disable this only if the page contains information which you do not wish to show up in search results. Leave blank to use the setting from the parent page.")
 
-    robots_archive = models.PositiveSmallIntegerField("allow archiving",
-                                                      blank=True,
-                                                      null=True,
-                                                      default=None,
-                                                      choices=ROBOTS_CHOICES,
-                                                      help_text="Use this to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis. Leave blank to use the setting from the parent page.")
+    robots_archive = NullBooleanField("allow archiving",
+                                      blank=True,
+                                      default=None,
+                                      help_text="Use this to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis. Leave blank to use the setting from the parent page.")
 
-    robots_follow = models.PositiveSmallIntegerField("follow links",
-                                                     blank=True,
-                                                     null=True,
-                                                     default=None,
-                                                     choices=ROBOTS_CHOICES,
-                                                     help_text="Use this to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise. Leave blank to use the setting from the parent page.")
+    robots_follow = NullBooleanField("follow links",
+                                     blank=True,
+                                     default=None,
+                                     help_text="Use this to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise. Leave blank to use the setting from the parent page.")
     
     # Base model methods.
     

@@ -3,6 +3,7 @@
 
 from django import forms
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
+from django.utils.text import capfirst
 
 from cms.apps.pages.forms import HtmlWidget
 
