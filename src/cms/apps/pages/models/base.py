@@ -31,18 +31,22 @@ class PublishedModel(models.Model):
         """
         return queryset.filter(is_online=True)
     
+    last_modified = models.DateTimeField(auto_now=True)
+    
     is_online = models.BooleanField("online",
                                     default=True,
                                     help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by directly visiting it's URL.")
     
     # Nicer alias for URL generation.
     
-    def get_absolute_url(self):
-        """All pages must publish an absolute URL."""
-        raise NotImplemented
-    
     url = property(lambda self: self.get_absolute_url(),
                    doc="The absolute URL of the page.")
+    
+    # Default class properties for sitemap generation.
+    
+    sitemap_changefreq = None
+    
+    sitemap_priority = None
     
     class Meta:
         abstract = True
@@ -61,8 +65,6 @@ class PageBase(PublishedModel):
     objects = PageBaseManager()
     
     # Base fields.
-    
-    last_modified = models.DateTimeField(auto_now=True)
     
     site = models.ForeignKey(Site,
                              editable=False,

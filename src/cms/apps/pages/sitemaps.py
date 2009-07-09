@@ -7,7 +7,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 
-from cms.apps.pages.models import PageBase
+from cms.apps.pages.models import PublishedModel
 
 
 # A dictionary of registered sitemap classes.
@@ -22,7 +22,7 @@ class PageSitemap(Sitemap):
         """Returns all items in this sitemap."""
         pages = []
         for model in models.get_models():
-            if issubclass(model, PageBase):
+            if issubclass(model, PublishedModel) and hasattr(model, "get_absolute_url"):
                 pages.extend(model.objects.all())
         return pages
         
