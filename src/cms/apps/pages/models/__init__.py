@@ -11,7 +11,7 @@ from cms.apps.pages import content
 from cms.apps.pages.optimizations import cached_getter, cached_setter
 from cms.apps.pages.models.base import PublishedModel, PageBase
 from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager, PageManager, cache, publication_manager
-from cms.apps.pages.models.fields import PageField, HtmlField
+from cms.apps.pages.models.fields import PageField, HtmlField, NullBooleanField, EnumField
 
 
 class Page(PageBase):

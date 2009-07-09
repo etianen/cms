@@ -127,18 +127,6 @@ SEO_PRIORITIES = ((1.0, "Very high"),
                   (0.3, "Low"),
                   (0.0, "Very low"),)
 
-SEO_DEFAULT_PRIORITY = None
-
-SEO_CHANGE_FREQUENCIES = (("always", "Always"),
-                          ("hourly", "Hourly"),
-                          ("daily", "Daily"),
-                          ("weekly", "Weekly"),
-                          ("monthly", "Monthly"),
-                          ("yearly", "Yearly"),
-                          ("never", "Never"))
-
-SEO_DEFAULT_CHANGE_FREQUENCY = None
-
 
 # Internationalization settings.
 

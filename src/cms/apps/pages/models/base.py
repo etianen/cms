@@ -9,7 +9,7 @@ from django.db import models
 from django.db.models import Q
 
 from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager
-from cms.apps.pages.models.fields import NullBooleanField
+from cms.apps.pages.models.fields import NullBooleanField, EnumField
 
 
 class PublishedModel(models.Model):
@@ -93,18 +93,23 @@ class PageBase(PublishedModel):
     
     sitemap_priority = models.FloatField("priority",
                                          choices=settings.SEO_PRIORITIES,
-                                         default=settings.SEO_DEFAULT_PRIORITY,
+                                         default=None,
                                          blank=True,
                                          null=True,
                                          help_text="The relative importance of this content in your site.  Search engines use this as a hint when ranking the pages within your site.")
-    
-    sitemap_changefreq = models.CharField("change frequency",
-                                          max_length=7 ,
-                                          choices=settings.SEO_CHANGE_FREQUENCIES,
-                                          default=settings.SEO_DEFAULT_CHANGE_FREQUENCY,
-                                          blank=True,
-                                          null=True,
-                                          help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates.")
+
+    sitemap_changefreq = EnumField("change frequency",
+                                   choices=((1, "always", "Always"),
+                                            (2, "hourly", "Hourly"),
+                                            (3, "daily", "Daily"),
+                                            (4, "weekly", "Weekly"),
+                                            (5, "monthly", "Monthly"),
+                                            (6, "yearly", "Yearly"),
+                                            (7, "never", "Never")),
+                                   default=None,
+                                   blank=True,
+                                   null=True,
+                                   help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates.")
     
     robots_index = NullBooleanField("allow indexing",
                                     blank=True,

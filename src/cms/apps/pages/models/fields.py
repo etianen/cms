@@ -74,6 +74,8 @@ class EnumField(models.PositiveSmallIntegerField):
     Choices should be specified as a 3-tuple of integer_id, string and label.
     """
     
+    __metaclass__ = models.SubfieldBase
+    
     def __init__(self, *args, **kwargs):
         """Initializes the EnumField."""
         enums = kwargs.get("choices", ())
@@ -87,6 +89,8 @@ class EnumField(models.PositiveSmallIntegerField):
         
     def to_python(self, value):
         """Converts the given value to the string."""
+        if value is None:
+            return value
         # Allow valid enum values.
         if isinstance(value, basestring):
             if value in self._string_lookup:
@@ -104,6 +108,8 @@ class EnumField(models.PositiveSmallIntegerField):
         
     def get_db_prep_value(self, value):
         """Converts the given value to an integer."""
+        if value is None:
+            return value
         # Allow valid enum ids.
         if isinstance(value, int):
             if value in self._id_lookup:
