@@ -16,8 +16,3 @@ DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
 
-
-# Ensure that MySQL creates INNODB tables.
-
-DATABASE_OPTIONS = {"init_command": "SET storage_engine=INNODB",}
-

@@ -19,6 +19,11 @@ SITE_DOMAIN = "staging." + SITE_DOMAIN
 PREPEND_WWW = False
 
 
+# Ensure that MySQL creates INNODB tables.
+
+DATABASE_OPTIONS = {"init_command": "SET storage_engine=INNODB",}
+
+
 # Optional separate media root.
 
 # MEDIA_ROOT = "/var/uploads/%s" % SITE_DOMAIN
