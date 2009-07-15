@@ -5,3 +5,82 @@
     classes defined here will be made available in the drop-down list of styles.
 */
 
+
+/* Standardize the layout. */
+* {
+    font-size: 100%;
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+}
+
+/* Set the default text color. */
+body,
+input,
+textarea,
+select {
+    color: black;
+}
+
+/* Set the default font rendering. */
+body {
+    font-family: sans-serif;
+    font-size: 80%;
+    line-height: 150%;
+}
+
+h1 {
+    font-size: 150%;
+    margin: 0px 0px 25px 0px;
+}
+
+h2 {
+    font-size: 130%;
+    clear: left;
+    margin: 20px 0px 15px 0px;
+}
+
+h3 {
+    font-size: 110%;
+    clear: left;
+    margin: 20px 0px 15px 0px;
+}
+
+p,
+ul,
+ol,
+dl,
+table {
+    margin: 0px 0px 15px 0px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+li {
+    margin: 0px 0px 5px 30px;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+
+/*
+    Drop-down styles for the WYSIWYG editor.
+*/
+
+.left {
+    float: left;
+    margin: 0px 15px 15px 0px;
+}
+
+.right {
+    float: right;
+    margin: 0px 0px 15px 15px;
+}
+

@@ -5,3 +5,91 @@
     in content.css.
 */
 
+
+body {
+    background: #b0b0b0;
+}
+
+div#page {
+    background: white;
+    margin: 0px auto 0px auto;
+    width: 960px;
+}
+
+div#header {
+    height: 100px;
+    position: relative;
+    margin: 0px 0px 20px 0px;
+    background: #eeeeee;
+}
+
+a#branding {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+ul#nav-primary {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    list-style: none;
+    margin: 0px 0px 0px 0px;
+    height: 30px;
+}
+
+ul#nav-primary li {
+    float: left;
+    line-height: 30px;
+    margin: 0px 0px 0px 0px;
+}
+
+ul#nav-primary a {
+    display: block;
+    padding: 0px 10px 0px 10px;
+}
+
+ul#nav-primary a:hover {
+    text-decoration: none;
+    background: #d0d0d0;
+}
+
+ul#nav-primary a.here {
+    background: #d0d0d0;
+}
+
+div#content-primary,
+div#content-secondary {
+    float: left;
+    display: inline;
+    position: relative;
+    margin: 0px 0px 20px 0px;
+}
+
+div#content-primary {
+    width: 600px;
+    padding: 0px 15px 0px 15px;
+}
+
+div#content-secondary {
+    width: 300px;
+    padding: 0px 15px 0px 15px;
+}
+
+div#breadcrumbs {
+    margin: 0px 0px 15px 0px;
+}
+
+div#footer {
+    clear: both;
+    padding: 10px 15px 10px 15px;
+    background: #eeeeee;
+}
+
+/*
+    Styles used outside of editable content areas.
+    
+    Any styles you wish to be available in the WYSIWYG editor should be placed
+    in content.css.
+*/
+

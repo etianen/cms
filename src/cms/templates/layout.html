@@ -11,10 +11,8 @@
         
         <title>{% block browser_title %}{% endblock %}</title>
         
-        <style type="text/css">
-            body {font-family: sans-serif;}
-            a.here {font-weight: bold;}
-        </style>
+        <link rel="stylesheet" href="{{SITE_MEDIA_URL}}css/layout.css"/>
+        <link rel="stylesheet" href="{{SITE_MEDIA_URL}}css/content.css"/>
         
         {% block feeds %}{% endblock %}
         
@@ -22,15 +20,36 @@
     
     <body>
         
-        {% block nav_primary %}{% endblock %}
+        <div id="page">
         
-        {% block breadcrumbs %}{% endblock %}
-        
-        <h1>{% block title %}{% endblock %}</h1>
-
-        {% block content_primary %}{% endblock %}
-        
-        {% block nav_secondary %}{% endblock %}
+            <div id="header">
+                <a id="branding" href="/">Your Company</a>
+                {% block nav_primary %}{% endblock %}
+            </div>
+            
+            <div id="body">
+            
+                <div id="content-primary">
+                
+                    {% block breadcrumbs %}{% endblock %}
+                
+                    <h1>{% block title %}{% endblock %}</h1>
+                    
+                    {% block content_primary %}{% endblock %}
+                    
+                </div>
+                
+                <div id="content-secondary">
+                    {% block nav_secondary %}{% endblock %}
+                </div>
+            
+            </div>
+            
+            <div id="footer">
+                &copy; 2009 Some Company 
+            </div>
+            
+        </div>
         
     </body>
     
