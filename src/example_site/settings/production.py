@@ -57,11 +57,6 @@ DEFAULT_FROM_EMAIL = SERVER_EMAIL
 EMAIL_SUBJECT_PREFIX = "[%s] " % SITE_NAME
 
 
-# Default content areas available on all content models.
-
-CONTENT_AREAS = (("content_primary", "main content"),)
-
-
 # Whether to automatically add www to the start of the domain name.  
 
 PREPEND_WWW = True
