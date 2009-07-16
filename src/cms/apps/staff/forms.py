@@ -9,21 +9,22 @@ from django.contrib.auth.models import User, Group
 from django.utils.safestring import mark_safe
 
 
-groups_field = forms.ModelMultipleChoiceField(queryset=Group.objects.all(),
-                                             initial=settings.DEFAULT_GROUP_IDS,
-                                             widget=FilteredSelectMultiple("groups", False))
-
-
 class UserCreationForm(BaseUserCreationForm):
     
     """Extended user creation form."""
     
-    groups = groups_field
+    is_staff = forms.BooleanField(required=False,
+                                  initial=True,
+                                  help_text=User._meta.get_field("is_staff").help_text)
+    
+    groups = forms.ModelMultipleChoiceField(required=False,
+                                            queryset=Group.objects.all(),
+                                            initial=settings.DEFAULT_GROUP_IDS,
+                                            widget=FilteredSelectMultiple("groups", False))
     
     def save(self, commit=True):
         """Saves the user."""
         user = super(UserCreationForm, self).save(commit=False)
-        user.is_staff = True
         if commit:
             user.save()
             self.save_m2m()
@@ -31,6 +32,6 @@ class UserCreationForm(BaseUserCreationForm):
     
     class Meta:
         model = User
-        fields = ("username", "first_name", "last_name", "email", "groups",)
+        fields = ("username", "is_staff", "first_name", "last_name", "email", "groups",)
         
         

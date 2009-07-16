@@ -21,23 +21,15 @@ class UserAdmin(BaseUserAdmin):
     
     add_form = UserCreationForm
     
-    fieldsets = ((None, {"fields": ("username", "is_active",)}),
+    fieldsets = ((None, {"fields": ("username", "is_staff", "is_active",)}),
                  ("Personal information", {"fields": ("first_name", "last_name", "email",)}),
                  ("Groups", {"fields": ("groups",)}),)
     
     filter_horizontal = ("user_permissions", "groups",)
     
-    list_display = ("username", "first_name", "last_name", "email", "is_active",)
+    list_display = ("username", "first_name", "last_name", "email", "is_staff", "is_active",)
     
-    list_filter = ("is_active",)
-    
-    # Custom admin access.
-    
-    def queryset(self, request):
-        """Only allows staff members to be edited."""
-        queryset = super(UserAdmin, self).queryset(request)
-        queryset = queryset.filter(is_staff=True, is_superuser=False)
-        return queryset
+    list_filter = ("is_staff", "is_active",)
     
     # Custom admin views.
     

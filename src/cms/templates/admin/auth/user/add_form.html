@@ -12,6 +12,18 @@
         </div>
         
         <div class="form-row">
+            {{form.is_staff.errors}}
+            <label for="id_is_staff">Staff status:</label> {{form.is_staff}}
+            <p class="help">{{form.is_staff.help_text}}</p>
+        </div>
+        
+    </fieldset>
+    
+    <fieldset class="module aligned">
+        
+        <h2>Password</h2>
+        
+        <div class="form-row">
             {{form.password1.errors}}
             <label for="id_password1" class="required">Password:</label> {{form.password1}}
         </div>
@@ -21,7 +33,7 @@
             <label for="id_password2" class="required">Password (again):</label> {{form.password2}}
             <p class="help">Enter the same password as above, for verification.</p>
         </div>
-    
+        
     </fieldset>
     
     <fieldset class="module aligned">
@@ -51,7 +63,7 @@
         
         <div class="form-row">
             {{form.groups.errors}}
-            <label for="id_groups" class="required">Groups:</label> {{form.groups}}
+            <label for="id_groups">Groups:</label> {{form.groups}}
         </div>
     
     </fieldset>
