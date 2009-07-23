@@ -62,7 +62,7 @@ class ContactForm(DefaultContent):
     
     def get_fieldsets(self):
         """Returns the fieldsets used to lay out the content form."""
-        return super(ContactForm, self).get_fieldsets() + (("Form details", {"fields": ("form_type", "send_to",),}),
+        return super(ContactForm, self).get_fieldsets() + (("Form details", {"fields": ("form_type", "send_to", "success_message"),}),
                                                            ("Confirmation email", {"fields": ("confirmation_subject", "confirmation_message",),}),)
     
     @content.view(r"^$")
