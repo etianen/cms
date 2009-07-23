@@ -17,7 +17,7 @@ class Breadcrumb(object):
     
     def __unicode__(self):
         """Returns the title of the NavEntry."""
-        return self.title
+        return unicode(self.title)
         
         
 class NavEntry(Breadcrumb):
