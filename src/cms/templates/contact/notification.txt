@@ -1,4 +1,4 @@
-Dear Administrator,
+{% autoescape off %}Dear Administrator,
 
 A user has made an online enquiry using your website.  The details of the
 enquiry are shown below.
@@ -9,4 +9,4 @@ enquiry are shown below.
 {% endfor %}
 Best wishes,
 
-The {{site.name}} notification system.
+The {{site.name}} notification system.{% endautoescape %}
