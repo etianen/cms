@@ -73,6 +73,7 @@ class ContactForm(DefaultContent):
         if request.method == "POST":
             contact_form = ContactForm(request.POST)
             if contact_form.is_valid():
+                cleaned_data = contact_form.cleaned_data
                 subject = self.confirmation_subject
                 name = contact_form.cleaned_data["name"]
                 email = contact_form.cleaned_data["email"]
@@ -80,9 +81,10 @@ class ContactForm(DefaultContent):
                 recipient = self.send_to
                 messages = []
                 # Compile the email to the contact form recipient.
+                data = [(field.label, cleaned_data[field.name]) for field in contact_form]
                 notification_context = {"name": name,
                                         "email": email,
-                                        "contact_form": contact_form}
+                                        "data": data}
                 notification_message = template.loader.render_to_string("contact/notification.txt", notification_context, template.RequestContext(request))
                 messages.append((subject, 
                                  notification_message, 

@@ -3,8 +3,8 @@
 A user has made an online enquiry using your website.  The details of the
 enquiry are shown below.
 
-{% for field in contact_form %}{{field.label}}:
-{{field.data|wordwrap:65|safe}}
+{% for key, value in data %}{{key}}:
+{{value|wordwrap:65|safe}}
 
 {% endfor %}
 Best wishes,
