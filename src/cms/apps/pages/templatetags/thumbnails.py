@@ -52,7 +52,7 @@ def thumbnail(context, image, width, height, alias=None):
     
     
 @register.pattern_tag(*THUMBNAIL_TAG_PATTERNS)
-def resize(parser, token):
+def resize(context, image, width, height, alias=None):
     """
     Generates a resized thumbnail of the given image, ignoring aspect ratio.
     
@@ -66,7 +66,7 @@ def resize(parser, token):
 
 
 @register.pattern_tag(*THUMBNAIL_TAG_PATTERNS)
-def crop(parser, token):
+def crop(context, image, width, height, alias=None):
     """
     Generates a cropped thumbnail of the given image, preserving aspect ratio.
     

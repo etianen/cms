@@ -224,6 +224,7 @@ class PageAdmin(PageBaseAdmin):
 
     def save_model(self, request, obj, form, change):
         """Saves the model and adds its content fields."""
+        # Create the page content.
         page_content_type = self.get_page_content_type(request, obj)
         page_content = self.get_page_content(request, obj)
         for field_name in page_content.get_field_names():
@@ -231,6 +232,7 @@ class PageAdmin(PageBaseAdmin):
             setattr(page_content, field_name, field_data)
         obj.content_type = page_content_type
         obj.content = page_content
+        # Save the model.
         super(PageBaseAdmin, self).save_model(request, obj, form, change)
         # Set the default ordering of the page to its id.
         if not change:

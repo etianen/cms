@@ -1,11 +1,17 @@
 """Field definitions for content models."""
 
 
+import os
+
 from django import forms
-from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget
+from django.core.files.images import get_image_dimensions
+from django.core.files.storage import default_storage
+from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget, AdminFileWidget
+from django.db.models.fields.files import FieldFile
 from django.utils.text import capfirst
 
 from cms.apps.pages.forms import HtmlWidget
+from cms.apps.pages.optimizations import cached_getter
 
 
 class Field(object):
@@ -173,3 +179,117 @@ class PositiveIntegerField(IntegerField):
         super(PositiveIntegerField, self).__init__(label, 0, max_value, **kwargs)
         
         
+class ContentFile(object):
+    
+    """A file associated with a content object."""
+    
+    def __init__(self, name, storage):
+        """Initializes the ContentFile."""
+        self.name = name
+        self.storage = storage
+        
+    def get_url(self):
+        """Returns the URL of the file."""
+        return self.storage.url(self.name)
+    
+    url = property(get_url,
+                   doc="The URL of the file")
+    
+    def get_path(self):
+        """Returns the path of the file on disk."""
+        return self.storage.path(self.name)
+    
+    path = property(get_path,
+                    doc="The path of the file on disk.")
+    
+    def get_size(self):
+        """Returns the size of the file on disk, in bytes."""
+        return self.storage.size(self.name)
+        
+    size = property(get_size,
+                    doc="The size of the file on disk, in bytes.")
+    
+    def __unicode__(self):
+        """Returns the name of the file."""
+        return self.name
+    
+    
+class ContentImageFile(ContentFile):
+    
+    """An image file associated with a content object."""
+    
+    @cached_getter
+    def get_dimensions(self):
+        """Returns a tuple of the dimensions of the image, in pixels."""
+        return get_image_dimensions(self.path)
+    
+    dimensions = property(get_dimensions,
+                          doc="A tuple of the dimensions of the image, in pixels.")
+    
+    def get_width(self):
+        """Returns the width of the image, in pixels."""
+        return self.dimensions[0]
+    
+    width = property(get_width,
+                     doc="The width of the image, in pixels.")
+    
+    def get_height(self):
+        """Returns the height of the image in pixels."""
+        return self.dimensions[1]
+    
+    height = property(get_height,
+                      doc="The height of the image, in pixels.")
+        
+
+class FileField(Field):
+    
+    """A field that holds a path to a file on disk."""
+    
+    form_field = forms.FileField
+        
+    file_class = ContentFile
+        
+    def __init__(self, label=None, upload_to=None, storage=None, **kwargs):
+        """Initializes the FileField."""
+        self.upload_to = upload_to
+        self.storage = storage or default_storage
+        super(FileField, self).__init__(label, **kwargs)
+        
+    def contribute_to_class(self, cls, name):
+        """Sets the default upload path."""
+        super(FileField, self).contribute_to_class(cls, name)
+        self.upload_to = self.upload_to or cls.verbose_name_plural.replace(" ", "-")
+        
+    def get_formfield_attrs(self, obj):
+        """Changes the widget of the form field to an admin file widget."""
+        attrs = super(FileField, self).get_formfield_attrs(obj)
+        attrs["widget"] = AdminFileWidget
+        return attrs
+    
+    def serialize(self, value):
+        """Serializes given value as a unicode string."""
+        # Compatible files are easy.
+        if isinstance(value, ContentFile) and value.storage == self.storage:
+            return value.name
+        # Copy the data across.
+        filename = os.path.basename(value.name)
+        destination = self.upload_to + "/" + filename
+        value.open()
+        return self.storage.save(destination, value)
+    
+    def deserialize(self, value):
+        """Converts the value from a unicode string into a Python object."""
+        if value == "":
+            return None
+        return self.file_class(value, self.storage)
+        
+        
+class ImageField(FileField):
+    
+    """A field that holds a path to an image on disk."""
+    
+    form_field = forms.ImageField
+
+    file_class = ContentImageFile
+    
+    
