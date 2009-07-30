@@ -61,6 +61,7 @@ def article_archive(context, page, year):
                "page": page,
                "year": year,
                "article_archive": article_archive,
+               "article_type": page_content.article_model._meta.verbose_name,
                "article_type_plural": page_content.article_model._meta.verbose_name_plural}
     return template.loader.render_to_string(page_content.article_archive_template, context)
 
