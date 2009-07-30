@@ -2,8 +2,8 @@
 {% if breadcrumbs %}
     <div id="breadcrumbs">
         {% for breadcrumb in breadcrumbs %}
-            <span class="breadcrumb" class="{% first %}"><a href="{{breadcrumb.url}}">{{breadcrumb}}</a> &rsaquo; </span>
+            <span class="breadcrumb {% first %}"><a href="{{breadcrumb.url}}">{{breadcrumb}}</a> &rsaquo; </span>
         {% endfor %}
-        <span class="breadcrumb" class="last">{{short_title}}</span>
+        <span class="breadcrumb last">{{short_title}}</span>
     </div>
 {% endif %}
