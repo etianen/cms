@@ -20,7 +20,7 @@ from cms.apps.pages.forms import PageForm
 from cms.apps.pages.optimizations import cached_getter
 
 from cms.apps.pages.content.helpers import Breadcrumb, NavEntry
-from cms.apps.pages.content.fields import Field, CharField, TextField, HtmlField, ChoiceField, URLField, EmailField, IntegerField, PositiveIntegerField, ImageField
+from cms.apps.pages.content.fields import Field, CharField, TextField, HtmlField, ChoiceField, URLField, EmailField, IntegerField, PositiveIntegerField, FileField, ImageField, ModelField
 
 
 view_id_counter = 0

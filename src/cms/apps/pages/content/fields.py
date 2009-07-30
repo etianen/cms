@@ -293,3 +293,40 @@ class ImageField(FileField):
     file_class = ContentImageFile
     
     
+class ModelField(Field):
+    
+    """A field that holds a reference to a model."""
+    
+    form_field = forms.ModelChoiceField
+    
+    def __init__(self,  queryset, label=None, **kwargs):
+        """Initializes the ModelField."""
+        self.queryset = queryset
+        super(ModelField, self).__init__(label, **kwargs)
+    
+    def get_formfield_attrs(self, obj):
+        """Primes the choices in the form field."""
+        initial = self.get_value_from_object(obj)
+        attrs = super(ModelField, self).get_formfield_attrs(obj)
+        attrs["queryset"] = self.queryset.all()
+        attrs["initial"] = unicode(initial and initial.pk or "")
+        del attrs["widget"]
+        return attrs
+    
+    def serialize(self, value):
+        """Serializes given value as a unicode string."""
+        return unicode(value.pk)
+    
+    def deserialize(self, value):
+        """Converts the value from a unicode string into a Python object."""
+        if value == "":
+            return None
+        model = self.queryset.model
+        try:
+            return self.queryset.model.objects.get(pk=value)
+        except model.DoesNotExist:
+            return None
+        except ValueError:
+            # Be resilient to bad data.
+            return None
+    
