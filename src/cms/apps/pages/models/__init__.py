@@ -115,7 +115,7 @@ class Page(PageBase):
 
     # Content fields.
     
-    content_type = models.CharField(max_length=20,
+    content_type = models.CharField(max_length=100,
                                     editable=False,
                                     db_index=True,
                                     help_text="The type of page content.")
