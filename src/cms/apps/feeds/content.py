@@ -45,6 +45,14 @@ class FeedBase(DefaultContent):
     
     latest_articles_template = "feeds/latest_articles.html"
     
+    def render_to_response(self, request, template_name, context, **kwargs):
+        """Renders this feed to the response."""
+        opts = self.article_model._meta
+        defaults = {"article_type": opts.verbose_name,
+                    "article_type_plural": opts.verbose_name_plural}
+        context.update(defaults)
+        return super(FeedBase, self).render_to_response(request, template_name, context, **kwargs)
+    
     def get_feed_url(self):
         """Returns the URL of the RSS feed for this page."""
         return reverse("feeds", kwargs={"url": ARTICLE_FEED_KEY}) + unicode(self.page.permalink or self.page.id) + u"/"

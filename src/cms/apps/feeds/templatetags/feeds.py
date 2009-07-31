@@ -57,11 +57,12 @@ def article_archive(context, page, year):
             article_archive.append({"year": year, "months": [], "url": page_content.reverse("year_archive", year)})
         article_archive[-1]["months"].append({"month": MONTHS[month], "url": page_content.reverse("month_archive", year, month)})
     # Generate the context.
-    context = {"request": request,
-               "page": page,
-               "year": year,
-               "article_archive": article_archive,
-               "article_type": page_content.article_model._meta.verbose_name,
-               "article_type_plural": page_content.article_model._meta.verbose_name_plural}
-    return template.loader.render_to_string(page_content.article_archive_template, context)
-
+    context.push()
+    try:
+        context.update({"page": page,
+                        "year": year,
+                        "article_archive": article_archive})
+        return template.loader.render_to_string(page_content.article_archive_template, context)
+    finally:
+        context.pop()
+    
