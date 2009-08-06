@@ -105,6 +105,8 @@ def generate_thumbnails(text):
             obj = permalinks.resolve(src)
         except ObjectDoesNotExist:
             continue
+        except permalinks.PermalinkError:
+            continue
         thumbnail = thumbnails.resize(obj.file, width, height)
         attr_dict["src"] = thumbnail.url
         attr_dict["width"] = thumbnail.width
