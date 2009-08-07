@@ -42,7 +42,7 @@ class MediaAdmin(VersionAdmin):
     
     list_select_related = True
     
-    search_fields = ("name", "keywords",)
+    search_fields = ("title", "keywords",)
     
     # Custom display routines.
     
