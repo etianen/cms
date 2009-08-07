@@ -26,8 +26,6 @@ class SiteSearch(DefaultContent):
     @content.view(r"^$")
     def index(self, request):
         """Renders the search results."""
-        search_term = request.GET.get("q", "")
-        context = {"search_term": search_term}
-        return self.render_to_response(request, "search/sitesearch.html", context)
+        return self.render_to_response(request, "search/results.html", {})
     
     
