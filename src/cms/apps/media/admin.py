@@ -102,7 +102,6 @@ class ImageAdmin(MediaAdmin):
         """Generates a thumbnail of the image."""
         thumbnail = thumbnails.thumbnail(obj.file, 150, 100)
         return '<img src="%s" width="%s" height="%s" alt=""/>' % (thumbnail.url, thumbnail.width, thumbnail.height)
-        
     get_thumbnail.short_description = "thumbnail"
     get_thumbnail.allow_tags = True
     
