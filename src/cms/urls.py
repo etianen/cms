@@ -49,3 +49,9 @@ if settings.SERVE_STATIC_MEDIA:
         media_regex = r"^%s(.*)" % media_url.lstrip("/")
         urlpatterns += patterns("", url(media_regex, serve, {"document_root": media_root}))
 
+
+handler404 = "cms.apps.pages.views.handler404"
+
+
+handler500 = "cms.apps.pages.views.handler500"
+
