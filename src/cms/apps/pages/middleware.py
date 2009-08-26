@@ -78,7 +78,7 @@ class PageMiddleware(object):
                         request_repr = repr(request)
                     except:
                         request_repr = "Request repr() unavailable"
-                    formatted_traceback = "\n".join(traceback.format_exception(*(exc_info or sys.exc_info())))
+                    formatted_traceback = "\n".join(traceback.format_exception(*sys.exc_info()))
                     message = "%s\n\n%s" % (formatted_traceback, request_repr)
                     mail_admins(subject, message, fail_silently=True)
                     # Return the branded error page.
