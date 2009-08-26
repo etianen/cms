@@ -80,10 +80,7 @@ LANGUAGE_CODE = "en-gb"
 
 # A list of additional installed applications.
 
-INSTALLED_APPS += ("cms.apps.news",
-                   "cms.apps.events",
-                   "cms.apps.contact",
-                   "cms.apps.redirects",)
+INSTALLED_APPS += ("cms.apps.news",)
 
 
 # The base content type to use for all CMS apps.
