@@ -3,9 +3,10 @@
 
 from __future__ import with_statement
 
-import sys
+import sys, traceback
 
 from django.conf import settings
+from django.core.mail import mail_admins
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.views.debug import technical_404_response, technical_500_response
 
@@ -70,6 +71,17 @@ class PageMiddleware(object):
                 except:
                     if settings.DEBUG:
                         return technical_500_response(request, *sys.exc_info())
+                    # Send an email to the admininistrators.
+                    # HACK: This is a copy and paste from the base handler code.
+                    subject = "Error (%s IP): %s" % ((request.META.get("REMOTE_ADDR") in settings.INTERNAL_IPS and "internal" or "EXTERNAL"), request.path)
+                    try:
+                        request_repr = repr(request)
+                    except:
+                        request_repr = "Request repr() unavailable"
+                    formatted_traceback = "\n".join(traceback.format_exception(*(exc_info or sys.exc_info())))
+                    message = "%s\n\n%s" % (formatted_traceback, request_repr)
+                    mail_admins(subject, message, fail_silently=True)
+                    # Return the branded error page.
                     return self.error_response(request, page)
             finally:
                 cache.clear()
