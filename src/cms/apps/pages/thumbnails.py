@@ -84,12 +84,8 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE,
         return image
     image_path = image.path
     # Calculate image dimensions.
-    try:
-        original_width = image.width
-        original_height = image.height
-    except IOError:
-        # The image could not be found on disk, let the calling method deal with it.
-        return image
+    original_width = image.width
+    original_height = image.height
     requested_width = min(requested_width, original_width)
     requested_height = min(requested_height, original_height)
     # Don't generate thumbnail if no resizing is to take place.
@@ -114,11 +110,7 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE,
     original_aspect = float(original_width) / float(original_height)
     required_aspect = float(requested_width) / float(requested_height)
     # Create an image buffer in memory.
-    try:
-        image_data = Image.open(image.path)
-    except IOError:
-        # Image does not exist, spit it back.
-        return image
+    image_data = Image.open(image.path)
     # Generate a new thumbnail.
     if generation_method == THUMBNAIL:
         image_data.thumbnail((requested_width, requested_height), Image.ANTIALIAS)

@@ -3,11 +3,9 @@
 
 import re
 
-from django import template
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.util import flatatt
 
-from cms.apps.pages import permalinks
 from cms.apps.pages import permalinks, thumbnails
 from cms.apps.pages.templatetags import Library
 
@@ -107,7 +105,10 @@ def generate_thumbnails(text):
             continue
         except permalinks.PermalinkError:
             continue
-        thumbnail = thumbnails.resize(obj.file, width, height)
+        try:
+            thumbnail = thumbnails.resize(obj.file, width, height)
+        except IOError:
+            continue
         attr_dict["src"] = thumbnail.url
         attr_dict["width"] = thumbnail.width
         attr_dict["height"] = thumbnail.height
