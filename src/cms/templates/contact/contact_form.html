@@ -6,11 +6,11 @@
 
     {{block.super}}
     
-        {% form contact_form "post" %}
-            {% for field in form %}
-                {% field field %}
-            {% endfor %}
-            {% submit %}
-        {% endform %}
+    {% form contact_form "post" %}
+        {% for field in form %}
+            {% field field %}
+        {% endfor %}
+        {% submit %}
+    {% endform %}
 
 {% endblock %}
