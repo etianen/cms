@@ -144,6 +144,29 @@ class EmailField(CharField):
     form_field = forms.EmailField
     
     
+class BooleanField(Field):
+    
+    """A field that holds a boolean value."""
+    
+    form_field = forms.BooleanField
+    
+    def get_formfield_attrs(self, obj):
+        """Sets a custom widget default attributes."""
+        attrs = super(BooleanField, self).get_formfield_attrs(obj)
+        attrs["widget"] = forms.CheckboxInput
+        return attrs
+    
+    def serialize(self, value):
+        """Converts the value into a unicode string."""
+        return unicode(int(value))
+    
+    def deserialize(self, value):
+        """Converts the value from a unicode string into a Python object."""
+        if value == "":
+            return None
+        return bool(int(value))
+    
+    
 class IntegerField(Field):
     
     """A field that holds an integer number."""
