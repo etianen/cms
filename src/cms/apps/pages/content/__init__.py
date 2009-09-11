@@ -181,7 +181,7 @@ class ContentBase(object):
         """Deserializes the given data into a dictionary."""
         # Generate a dictionary of serialized data.
         raw_data = {}
-        xml_data = minidom.parseString(serialized_data).documentElement
+        xml_data = minidom.parseString(serialized_data.encode("utf8")).documentElement
         for element in xml_data.getElementsByTagName("attribute"):
             key = element.attributes["name"].nodeValue
             value = getInnerText(element)
