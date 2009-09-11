@@ -269,9 +269,6 @@ class PageAdmin(PageBaseAdmin):
     
     def add_view(self, request, *args, **kwargs):
         """Ensures that a valid content type is chosen."""
-        model = self.model
-        opts = model._meta
-        user = request.user
         if not PAGE_TYPE_PARAMETER in request.GET:
             # Generate the available content items.
             content_items = content.registered_content.items()
