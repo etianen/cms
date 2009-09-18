@@ -1,12 +1,9 @@
 """Abstract base models used by the page management application."""
 
 
-import datetime
-
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
-from django.db.models import Q
 
 from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager
 from cms.apps.pages.models.fields import NullBooleanField, EnumField
@@ -35,7 +32,7 @@ class PublishedModel(models.Model):
     
     is_online = models.BooleanField("online",
                                     default=True,
-                                    help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by directly visiting it's URL.")
+                                    help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by clicking the 'view on site' button.")
     
     # Nicer alias for URL generation.
     

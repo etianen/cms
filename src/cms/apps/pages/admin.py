@@ -107,12 +107,26 @@ class PublishedModelAdmin(admin.ModelAdmin):
     
     """Base admin class for published models."""
     
+    actions = ("publish_selected", "unpublish_selected",)
+    
     change_form_template = "admin/pages/publishedmodel/change_form.html"
     
     publication_fieldsets = (("Publication", {"fields": ("is_online",),
                                               "classes": ("collapse",),}),)
     
     list_filter = ("is_online",)
+    
+    # Custom admin actions.
+    
+    def publish_selected(self, request, queryset):
+        """Publishes the selected models."""
+        queryset.update(is_online=True)
+    publish_selected.short_description = "Place selected %(verbose_name_plural)s online"
+    
+    def unpublish_selected(self, request, queryset):
+        """Unpublishes the selected models."""
+        queryset.update(is_online=False)
+    unpublish_selected.short_description = "Take selected %(verbose_name_plural)s offline"
 
 
 class PageBaseAdmin(VersionAdmin, PublishedModelAdmin):
