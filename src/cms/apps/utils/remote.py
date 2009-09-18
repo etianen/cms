@@ -16,6 +16,11 @@ class NetworkError(IOError):
 class HttpError(IOError):
     
     """Exception thrown when a HTTP error code prevents a fetch operation."""
+    
+    def __init__(self, reason, status_code):
+        """Creates a new HttpError."""
+        super(HttpError, self).__init__(reason)
+        self.status_code = status_code
 
 
 response_codes = BaseHTTPServer.BaseHTTPRequestHandler.responses
@@ -68,9 +73,8 @@ def open(url, data="", headers={}, method=None, username="", password="", requir
     except urllib2.HTTPError, ex:
         # Made a connection, but the server was not happy.
         if require_success:
-            error = HttpError, "Error %i (%s): %s" % (ex.code, response_codes.get(ex.code, ["Unknown Error Code", ""])[0], ex.read())
-            error.code = ex.code
-            raise error
+            error_message = "Error %i (%s): %s" % (ex.code, response_codes.get(ex.code, ["Unknown Error Code", ""])[0], ex.read())
+            raise HttpError(error_message, ex.code)
         content = ex
         status = ex.code
     except urllib2.URLError, ex:
@@ -79,7 +83,7 @@ def open(url, data="", headers={}, method=None, username="", password="", requir
     else:
         status = 200
     # Parse the response.
-    response = HttpResponse(content, status=status)
+    response = HttpResponse(content.read(), status=status)
     for key, value in content.info().items():
         response[key] = value
     return response
