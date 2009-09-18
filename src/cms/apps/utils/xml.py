@@ -13,10 +13,10 @@ class Element(object):
     
     __slots__ = ("name", "attrs", "children",)
     
-    def __init__(self, name, attrs=None):
+    def __init__(self, name, attrs):
         """Initializes the Element."""
         self.name = name
-        self.attrs = attrs or {}
+        self.attrs = attrs
         self.children = []
         
     def get_value(self):
@@ -46,7 +46,7 @@ class XML(object):
     __slots__ = ("_elements",)
     
     def __init__(self, elements):
-        """Initializes the XML object."""
+        """Initializes the XML object from an ordered list of elements."""
         self._elements = elements
         
     def get_value(self):
@@ -70,7 +70,22 @@ class XML(object):
     attrs = property(get_attrs,
                      doc="The attributes of the first matched element.")
     
-    def _iter(self, elements, depth=-1):
+    def _filter(self, names, elements):
+        """
+        Filters the given elements using the given criteria and returns an XML
+        object.
+        """
+        names = frozenset(names)
+        known_elements = set()  # Ensures uniquenes of results.
+        matches = []
+        for element in elements:
+            if element in known_elements:
+                continue
+            if not names or element.name in names:
+                matches.append(element)
+        return XML(matches)
+    
+    def _iter_elements(self, elements):
         """
         Recursively iterates over all the given elements and their children.
         
@@ -81,27 +96,12 @@ class XML(object):
             # Ignore character data.
             if isinstance(element, basestring):
                 continue
+            # Iterate ove element and children.
             yield element
-            if depth != 0:
-                for child in self._iter(element.children, depth - 1):
-                    yield child
+            for child in self._iter_elements(element.children):
+                yield child
     
-    def _filter(self, elements, args):
-        """Filters the given elements using the given criteria."""
-        args = frozenset(args)
-        matches = set()  # Used to ensure unique results.
-        for element in elements:
-            # Ignore if already matched.
-            if element in matches:
-                continue
-            else:
-                matches.add(element)
-            # Ignore if not in list of valid names.
-            if args and not element.name in args:
-                continue
-            yield element
-    
-    def filter(self, *args):
+    def filter(self, *names):
         """
         Returns a filtered version of this XML.
         
@@ -110,15 +110,17 @@ class XML(object):
         matched elements will be matched.  If you only wish to match direct
         descendents, use the `children` method.
         """
-        return XML(list(self._filter(self._iter(self._elements), args)))
+        return self._filter(names, self._iter_elements(self._elements))
         
-    def children(self, *args):
+    def children(self, *names):
         """
         Returns a filtered view of direct children of matched elements.
         
         Please see the documentation for `filter` for more information.
         """
-        return XML(list(self._filter(self._iter(self._elements, 1), args)))
+        children = (child for element in self._elements if not isinstance(element, unicode)
+                          for child in element.children if not isinstance(child, unicode))
+        return self._filter(names, children)
     
     def __unicode__(self):
         """Returns a unicode representation the first matched element."""
@@ -151,11 +153,12 @@ class SimpleContentHandler(object):
     
     def __init__(self):
         """Initializes the SimpleContentHandler."""
-        self.stack = [] 
+        self.stack = []
     
     def startElement(self, name, attrs):
         """Registers the start of an element."""
-        self.stack.append(Element(name, attrs))
+        element = Element(name, attrs)
+        self.stack.append(element)
         
     def endElement(self, name):
         """Registers the end of an element."""
@@ -163,7 +166,7 @@ class SimpleContentHandler(object):
         if self.stack:
             self.stack[-1].children.append(element)
         else:
-            self.xml = XML([element])
+            self.xml = XML((element,))
             
     def characters(self, content):
         """Registers some character data."""
