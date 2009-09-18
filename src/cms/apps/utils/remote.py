@@ -1,4 +1,4 @@
-"""Simple library for fetching remote URLs."""
+"""Simple library for opening remote URLs."""
 
 
 import urllib, urllib2, BaseHTTPServer
@@ -20,32 +20,40 @@ class HttpError(IOError):
 
 response_codes = BaseHTTPServer.BaseHTTPRequestHandler.responses
 
+GET = "GET"
 
-def fetch(url, post={}, get={}, headers={}, username="", password="", require_success=True, timeout=None):
+POST = "POST"
+
+
+def open(url, data="", headers={}, method=None, username="", password="", require_success=True):
     """
     Fetches the given URL, using the parameters provided.
     
-    Any get data will automatically be encoded and appended to the URL.
+    Any data will automatically be encoded and escaped.  Data can be in the form
+    of a dictionary or a character string.  Supplying any data will make the
+    request use the POST method, otherwise the GET method will be used.  The
+    type of method used can be forced by supplying a method parameter.  If data
+    is sent using the GET method, then it will be encoded and appended to the
+    URL.
     
     A standard Django HttpResponse will be returned.  If require_success is
     True (the default), then a non-okay status code will result in a HttpError
     being thrown.  Setting this to False will result in the error being returned
     encoded as a HttpResponse.   
     """
-    # Encode the query string, if any.
-    if get:
-        if "?" in url:
-            url += "&"
-        else:
-            url += "?"
-        if not isinstance(get, basestring):
-            get = urllib.urlencode(get)
-        url += get
-    # Encode the POST data.
-    if not isinstance(post, basestring):
-        post = urllib.urlencode(post)
+    # Encode the data.
+    if isinstance(data, basestring):
+        data = urllib.quote_plus(data)
+    else:
+        data = urllib.urlencode(data, doseq=True)
+    # Allow GET requests to be forced.
+    if method == GET and data:
+        url += "?" + data
+        data = ""
+    elif method == POST and not data:
+        raise ValueError, "Cannot send a POST request with no data."
     # Create the request.
-    request = urllib2.Request(url, post, headers)
+    request = urllib2.Request(url, data, headers)
     # Create an opener.
     opener = urllib2.build_opener()
     # Create an authentication handler.
@@ -56,11 +64,13 @@ def fetch(url, post={}, get={}, headers={}, username="", password="", require_su
         opener.add_handler(auth_handler)
     try:
         # Fetch the response.
-        content = opener.open(request, timeout=timeout)
+        content = opener.open(request)
     except urllib2.HTTPError, ex:
         # Made a connection, but the server was not happy.
         if require_success:
-            raise HttpError, "Error %i (%s): %s" % (ex.code, response_codes.get(ex.code, ["Unknown Error Code", ""])[0], ex.read())
+            error = HttpError, "Error %i (%s): %s" % (ex.code, response_codes.get(ex.code, ["Unknown Error Code", ""])[0], ex.read())
+            error.code = ex.code
+            raise error
         content = ex
         status = ex.code
     except urllib2.URLError, ex:
@@ -75,9 +85,9 @@ def fetch(url, post={}, get={}, headers={}, username="", password="", require_su
     return response
     
     
-def fetch_xml(*args, **kwargs):
+def open_xml(*args, **kwargs):
     """Fetches an XML document, returning an XML object."""
-    response = fetch(*args, **kwargs)
+    response = open(*args, **kwargs)
     return xml.parse(response.content)
     
     
