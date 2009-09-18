@@ -44,6 +44,30 @@ class MediaAdmin(VersionAdmin):
     
     search_fields = ("title", "keywords",)
     
+    # Custom actions.
+    
+    def get_actions(self, request):
+        """Generates the actions for assigning categories."""
+        opts = self.model._meta
+        verbose_name_plural = opts.verbose_name_plural
+        actions = super(MediaAdmin, self).get_actions(request)
+        # Add the dynamic folders.
+        for folder in Folder.objects.all():
+            action_function = lambda model_admin, request, queryset: queryset.update(folder=folder)
+            action_description = u'Move selected %s to folder "%s"' % (verbose_name_plural, folder.name)
+            action_name = action_description.lower().replace(" ", "_")
+            actions[action_name] = (action_function, action_name, action_description)
+        # Add the remove folder action.
+        remove_folder_function = self.__class__.remove_folder
+        remove_folder_description = u"Remove selected %s from folder" % verbose_name_plural
+        remove_folder_name = "folder"
+        actions[remove_folder_name] = (remove_folder_function, remove_folder_name, remove_folder_description)
+        return actions
+    
+    def remove_folder(self, request, queryset):
+        """Removes the folder from selected files."""
+        queryset.update(folder=None)
+    
     # Custom display routines.
     
     def get_folder(self, obj):

@@ -31,6 +31,18 @@ class UserAdmin(BaseUserAdmin):
     
     list_filter = ("is_staff", "is_active",)
     
+    # Custom admin actions.
+    
+    def activate_selected(self, request, queryset):
+        """Activates the selected user accounts."""
+        queryset.update(is_active=True)
+    activate_selected.short_description = "Activate selected users"
+    
+    def deactivate_selected(self, request, queryset):
+        """Deactivates the selected user accounts."""
+        queryset.update(is_active=False)
+    deactivate_selected.short_description = "Deactivate selected users"
+    
     # Custom admin views.
     
     def add_view(self, request):
