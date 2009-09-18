@@ -56,13 +56,6 @@ class XML(object):
     value = property(get_value,
                      doc="The text content of the first matched element.")
         
-    def get_all_values(self):
-        """Returns a list of the text content of all matched elements."""
-        return [element.get_value() for element in self._elements]
-        
-    all_values = property(get_all_values,
-                          doc="A list of all the text content of all matched elements.")
-        
     def get_name(self):
         """Returns the name of the first matched element."""
         return self._elements[0].name
