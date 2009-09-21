@@ -3,18 +3,17 @@
 
 import os
 
-from django import template
 from django.conf import settings
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
-from django.shortcuts import render_to_response
 from django.template.defaultfilters import filesizeformat
 
 from reversion.admin import VersionAdmin
 
-from cms.apps.pages import thumbnails
+from cms.apps.pages import thumbnails, permalinks
 from cms.apps.pages.admin import site
 from cms.apps.media.models import Folder, File, Image
+from cms.apps.utils import xml
 
 
 class FolderAdmin(admin.ModelAdmin):
@@ -109,6 +108,21 @@ class FileAdmin(MediaAdmin):
             return FILE_TYPES[extension]
         return "%s file" % extension.upper()
     get_type.short_description = "type"
+    
+    # Custom views.
+    
+    def get_urls(self):
+        """Enables custom admin views."""
+        urls = super(FileAdmin, self).get_urls()
+        custom_urls = patterns('', url(r'^feed.xml$', self.admin_site.admin_view(self.feed), name="admin_media_file_feed"),)
+        return custom_urls + urls
+    
+    def feed(self, request):
+        """Generates an XML feed of current files."""
+        files = xml.create("files")
+        for file in File.objects.select_related("folder").all():
+            files.append("file", name=file.title, permalink=permalinks.create(file), folder=file.folder and file.folder.name or "")
+        return files.render_to_response()
     
     
 site.register(File, FileAdmin)

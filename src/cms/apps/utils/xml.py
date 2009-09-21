@@ -5,6 +5,9 @@ from __future__ import absolute_import
 
 import sys
 import xml.parsers.expat
+from xml.sax.saxutils import escape
+
+from django.http import HttpResponse
 
 
 class Element(object):
@@ -21,11 +24,11 @@ class Element(object):
         
     def get_value(self):
         """Returns the text content of this element."""
-        return u"".join(unicode(child) for child in self.children)
+        return u"".join(isinstance(child, basestring) and escape(child) or unicode(child) for child in self.children)
     
     def __unicode__(self):
         """Returns the element and all children encoded as XML."""
-        attrs = u"".join(u' %s="%s"' % (name, value) for name, value in self.attrs.iteritems())
+        attrs = u"".join(u' %s="%s"' % (escape(name), escape(value)) for name, value in self.attrs.iteritems())
         value = self.get_value()
         data = {"name": self.name,
                 "attrs": attrs,
@@ -39,6 +42,15 @@ class Element(object):
         return unicode(self).encode(sys.getdefaultencoding(), "xmlcharrefreplace")
 
 
+class ElementDoesNotExist(Exception):
+    
+    """
+    Exception raised when an attempt is made to manipulate an XML object with
+    no matched elements.
+    """
+    
+
+
 class XML(object):
     
     """Some queryable XML data."""
@@ -48,27 +60,64 @@ class XML(object):
     def __init__(self, elements):
         """Initializes the XML object from an ordered list of elements."""
         self._elements = elements
+    
+    # Manipulation API.
+    
+    def _get_element(self):
+        """Returns the first matched element."""
+        try:
+            return self._elements[0]
+        except IndexError:
+            raise ElementDoesNotExist, "There are no matched elements."""
         
     def get_value(self):
         """Returns the text content of the first matched element."""
-        return self._elements[0].get_value()
+        return self._get_element().get_value()
+    
+    def set_value(self, value):
+        """Sets the text content of the first matched element."""
+        self._get_element().children = [value,]
     
     value = property(get_value,
                      doc="The text content of the first matched element.")
         
     def get_name(self):
         """Returns the name of the first matched element."""
-        return self._elements[0].name
+        return self._get_element().name
+    
+    def set_name(self, name):
+        """Sets the name of the first matched element."""
+        self._get_element().name = name 
     
     name = property(get_name,
+                    set_name,
                     doc="The name of the first matched element.")
     
     def get_attrs(self):
         """Returns the attributes of the first matched element."""
-        return self._elements[0].attrs
+        return self._get_element().attrs
+    
+    def set_attrs(self, attrs):
+        """Sets the attributes of the first matched element."""
+        self._get_element().attrs = attrs
     
     attrs = property(get_attrs,
+                     set_attrs,
                      doc="The attributes of the first matched element.")
+    
+    def append(self, element_name, *content, **attrs):
+        """
+        Appends a new element to the first matched element.
+        
+        The new element is returned.
+        """
+        element = Element(element_name, attrs)
+        element.children.extend(content)
+        self._get_element().children.append(element)
+        return XML((element),)
+        
+    
+    # Search API.
     
     def _filter(self, names, elements):
         """
@@ -122,14 +171,6 @@ class XML(object):
                           for child in element.children if not isinstance(child, unicode))
         return self._filter(names, children)
     
-    def __unicode__(self):
-        """Returns a unicode representation the first matched element."""
-        return unicode(self._elements[0])
-    
-    def __str__(self):
-        """Returns an encoded representation of the first matched element."""
-        return str(self._elements[0])
-    
     def __len__(self):
         """Returns the number of matched elements."""
         return len(self._elements)
@@ -141,6 +182,25 @@ class XML(object):
             elements = [elements]
         return XML(elements)
     
+    # Output API.
+    
+    def __unicode__(self):
+        """Returns a unicode representation the first matched element."""
+        return unicode(self._get_element())
+    
+    def __str__(self):
+        """Returns an encoded representation of the first matched element."""
+        return str(self._get_element())
+    
+    def render(self, encoding="utf-8"):
+        """Writes the first matched element as an encoded XML document."""
+        preamble = "<?xml version=\"1.0\" encoding=\"%s\"?>\n" % encoding
+        return preamble + unicode(self).encode(encoding, "xmlcharrefreplace")
+    
+    def render_to_response(self, encoding="utf-8"):
+        """Renders the first matched element to a HttpResponse."""
+        return HttpResponse(self.render(encoding), content_type="application/xml; charset=%s" % encoding)
+    
 
 class SimpleContentHandler(object):
     
@@ -148,7 +208,7 @@ class SimpleContentHandler(object):
     A SAX handler for parsing XML data.
     
     Once the parse has finished, it will have an `xml` property corresponding
-    to the root element of the parsed XML elements.
+    to the root element of the parsed XML.
     """
     
     def __init__(self):
@@ -187,5 +247,12 @@ def parse(data):
     else:
         raise TypeError, "Data should be a string or file-like object, not a %s" % type(data).__name__
     return handler.xml
-    
+
+
+def create(name, *content, **attrs):
+    """Creates a new XML document with the given root element."""
+    element = Element(name, attrs)
+    element.children.extend(content)
+    return XML((element,))
+        
     

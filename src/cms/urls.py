@@ -25,7 +25,7 @@ urlpatterns = patterns("",
                        # Page admin views.
                        url(r"^admin/reorder-pages/$", "cms.apps.pages.views.reorder_pages", name="reorder_pages"),
                        # Admin views.
-                       url(r"^admin/(.*)", admin_site.root),
+                       url(r"^admin/", include(admin_site.urls)),
                        # Permalink redirection service.
                        url(r"^links/(?P<content_type_id>\d+)/(?P<object_id>.+)/$", "cms.apps.pages.views.permalink_redirect", name="permalink_redirect"),
                        # Google sitemap service.
