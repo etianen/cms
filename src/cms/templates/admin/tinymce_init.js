@@ -7,7 +7,7 @@ $(function() {
     $("textarea.html").tinymce({
         script_url: "{{CMS_MEDIA_URL}}js/tiny_mce/tiny_mce.js",
         theme: "advanced",
-        plugins: "table, advimage, media, inlinepopups, paste, etianenLink",
+        plugins: "table, advimage, media, inlinepopups, paste",
         paste_auto_cleanup_on_paste: true,
         paste_remove_spans: true,
         paste_remove_styles: true,
