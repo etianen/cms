@@ -7,7 +7,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 
 from cms.apps.pages.admin import site
 from cms.apps.staff.forms import UserCreationForm
@@ -55,16 +55,16 @@ class UserAdmin(BaseUserAdmin):
                 self.log_addition(request, new_user)
                 if "_addanother" in request.POST:
                     self.message_user(request, message)
-                    return HttpResponseRedirect("./")
+                    return redirect("admin:auth_user_add")
                 elif "_popup" in request.REQUEST:
                     return self.response_add(request, new_user)
                 elif "_continue" in request.POST:
                     message = message + " You may edit it again below."
                     self.message_user(request, message)
-                    return HttpResponseRedirect("../%i/" % new_user.id)
+                    return redirect("admin:auth_user_change", new_user.id)
                 else:
                     self.message_user(request, message)
-                    return HttpResponseRedirect("../")
+                    return redirect("admin:auth_user_changelist")
         else:
             form = self.add_form()
         media = self.media + form.media
@@ -82,7 +82,6 @@ class UserAdmin(BaseUserAdmin):
                    "opts": self.model._meta,
                    "media": media,
                    "save_as": False,
-                   "root_path": self.admin_site.root_path,
                    "app_label": self.model._meta.app_label,}
         return render_to_response("admin/auth/user/add_form.html", context, template.RequestContext(request))
     

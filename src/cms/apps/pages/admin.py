@@ -16,7 +16,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import models
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 
 from reversion.admin import VersionAdmin
 
@@ -39,11 +39,13 @@ class AdminSite(admin.AdminSite):
     
     index_template = "admin/dashboard.html"
     
-    def root(self, request, url):
-        """Adds additional views to the admin site."""
-        if url == "edit-details/":
-            return self.edit_details(request)
-        return super(AdminSite, self).root(request, url)
+    # Custom admin views.
+    
+    def get_urls(self):
+        """Generates custom admin URLS."""
+        urls = super(AdminSite, self).get_urls()
+        custom_urls = patterns("", url(r"^edit-details/$", self.admin_view(self.edit_details), name="edit_details"),)
+        return custom_urls + urls
         
     def index(self, request, extra_context=None):
         """Displays the admin site dashboard."""
@@ -56,7 +58,7 @@ class AdminSite(admin.AdminSite):
         context = {"title": "Dashboard",
                    "homepage": homepage,
                    "page_admin": self._registry[Page],
-                   "create_homepage_url": self.root_path + "pages/page/add/?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE)}
+                   "create_homepage_url": reverse("admin:pages_page_add") + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE)}
         context.update(extra_context or {})
         # Render the index page.
         return super(AdminSite, self).index(request, context)
@@ -71,9 +73,9 @@ class AdminSite(admin.AdminSite):
                 message = "Your details have been updated."
                 request.user.message_set.create(message=message)
                 if "_continue" in request.POST:
-                    return HttpResponseRedirect("./")
+                    return redirect("admin:edit_details")
                 else:
-                    return HttpResponseRedirect("../")
+                    return redirect("admin:index")
         else:
             form = EditDetailsForm(instance=user)
         media = form.media
@@ -91,7 +93,6 @@ class AdminSite(admin.AdminSite):
                    "opts": User._meta,
                    "media": media,
                    "save_as": False,
-                   "root_path": self.root_path,
                    "app_label": User._meta.app_label,}
         return render_to_response("admin/edit_details_form.html", context, template.RequestContext(request))
         
@@ -267,7 +268,7 @@ class PageAdmin(PageBaseAdmin):
         if PAGE_FROM_KEY in request.GET:
             redirect_slug = request.GET[PAGE_FROM_KEY]
             if redirect_slug == PAGE_FROM_SITEMAP_VALUE:
-                return HttpResponseRedirect(self.admin_site.root_path)
+                return redirect("admin:index")
         return super(PageAdmin, self).changelist_view(request, *args, **kwargs)
     
     def has_add_content_permission(self, request, slug):
@@ -305,8 +306,7 @@ class PageAdmin(PageBaseAdmin):
                 return HttpResponseRedirect(content_types[0]["url"])
             # Render the select page template.
             context = {"title": "Select page type",
-                       "content_types": content_types,
-                       "root_path": self.admin_site.root_path}
+                       "content_types": content_types}
             return render_to_response("admin/pages/page/select_page_type.html", context, template.RequestContext(request))
         else:
             if not self.has_add_content_permission(request, request.GET[PAGE_TYPE_PARAMETER]):

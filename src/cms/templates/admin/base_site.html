@@ -17,7 +17,7 @@
 
 
 {% block userlinks %}
-    <a href="{{root_path}}edit-details/">Edit details</a> /
+    <a href="{% url admin:edit_details %}">Edit details</a> /
     {{block.super}}
 {% endblock %}
 

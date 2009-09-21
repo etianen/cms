@@ -3,9 +3,9 @@
 
 {% block breadcrumbs %}
     <div class="breadcrumbs">
-         <a href="{{root_path}}">Home</a> &rsaquo;
-         <a href="{{root_path}}pages/">Pages</a> &rsaquo;
-         <a href="{{root_path}}pages/page/">Page</a> &rsaquo;
+         <a href="{% url admin:index %}">Home</a> &rsaquo;
+         <a href="{% url admin:pages %}">Pages</a> &rsaquo;
+         <a href="{% url admin:pages_page %}">Page</a> &rsaquo;
          {{title}}
     </div>
 {% endblock %}
