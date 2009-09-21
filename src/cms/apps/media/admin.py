@@ -143,6 +143,21 @@ class ImageAdmin(MediaAdmin):
     get_thumbnail.short_description = "thumbnail"
     get_thumbnail.allow_tags = True
     
+    # Custom views.
+    
+    def get_urls(self):
+        """Enables custom admin views."""
+        urls = super(ImageAdmin, self).get_urls()
+        custom_urls = patterns('', url(r'^feed.xml$', self.admin_site.admin_view(self.feed), name="admin_media_image_feed"),)
+        return custom_urls + urls
+    
+    def feed(self, request):
+        """Generates an XML feed of current files."""
+        images = xml.create("images")
+        for image in Image.objects.select_related("folder").all():
+            images.append("image", name=image.title, permalink=permalinks.create(image), folder=image.folder and image.folder.name or "")
+        return images.render_to_response()
+    
     
 site.register(Image, ImageAdmin)
 
