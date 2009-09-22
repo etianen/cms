@@ -28,7 +28,7 @@ class Element(object):
     
     def __unicode__(self):
         """Returns the element and all children encoded as XML."""
-        attrs = u"".join(u' %s="%s"' % (name, quoteattr(value)) for name, value in self.attrs.iteritems())
+        attrs = u"".join(u" %s=%s" % (name, quoteattr(value)) for name, value in self.attrs.iteritems())
         value = self.get_value()
         data = {"name": self.name,
                 "attrs": attrs,
