@@ -5,7 +5,7 @@ from __future__ import absolute_import
 
 import sys
 import xml.parsers.expat
-from xml.sax.saxutils import escape
+from xml.sax.saxutils import escape, quoteattr
 
 from django.http import HttpResponse
 
@@ -28,7 +28,7 @@ class Element(object):
     
     def __unicode__(self):
         """Returns the element and all children encoded as XML."""
-        attrs = u"".join(u' %s="%s"' % (escape(name), escape(value)) for name, value in self.attrs.iteritems())
+        attrs = u"".join(u' %s="%s"' % (name, quoteattr(value)) for name, value in self.attrs.iteritems())
         value = self.get_value()
         data = {"name": self.name,
                 "attrs": attrs,
@@ -245,20 +245,24 @@ class SimpleContentHandler(object):
         
 def parse(data):
     """Parses the given data and returns an XML object."""
+    # Load the data.
+    if isinstance(data, basestring):
+        pass
+    elif hasattr(data, "read"):
+        data = data.read()
+    else:
+        raise TypeError, "Data should be a string or file-like object, not a %s" % type(data).__name__
+    # Set up a parser.
     parser = xml.parsers.expat.ParserCreate()
     handler = SimpleContentHandler()
     parser.StartElementHandler = handler.startElement
     parser.EndElementHandler = handler.endElement
     parser.CharacterDataHandler = handler.characters
     try:
-        if isinstance(data, basestring):
-            parser.Parse(data, True)
-        elif hasattr(data, "read"):
-            parser.ParseFile(data)
-        else:
-            raise TypeError, "Data should be a string or file-like object, not a %s" % type(data).__name__
+        parser.Parse(data, True)
     except xml.parsers.expat.ExpatError, ex:
-        raise ParseError, ex
+        snippet = "... %s ..." % data.splitlines()[ex.lineno-1][ex.offset-30:ex.offset+30]
+        raise ParseError, snippet
     return handler.xml
 
 
