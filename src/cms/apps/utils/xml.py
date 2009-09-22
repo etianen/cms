@@ -125,7 +125,22 @@ class XML(object):
         element.children.extend(content)
         self._get_element().children.append(element)
         return XML((element),)
+       
+    def __getattr__(self, name):
+        """
+        Shortcut to access attributes or child elements of a given element.
         
+        The attribute dictionary of the first matched element is checked.  If
+        no value is present, the values of child elements are checked.  If no
+        matches are found, an AttributeError is raised.
+        """
+        try:
+            return self.attrs[name]
+        except KeyError:
+            try:
+                return self.children(name).value
+            except ElementDoesNotExist:
+                raise AttributeError, "<%s> element does not have an attribute or child with a name of '%s'." % (self.name, name)
     
     # Search API.
     
