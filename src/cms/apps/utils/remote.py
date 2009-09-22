@@ -13,7 +13,7 @@ class NetworkError(IOError):
     """Exception thrown when a network error prevents a fetch operation."""
     
     
-class HttpError(IOError):
+class HttpError(NetworkError):
     
     """Exception thrown when a HTTP error code prevents a fetch operation."""
     

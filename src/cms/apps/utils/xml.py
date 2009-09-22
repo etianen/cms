@@ -42,7 +42,17 @@ class Element(object):
         return unicode(self).encode(sys.getdefaultencoding(), "xmlcharrefreplace")
 
 
-class ElementDoesNotExist(Exception):
+class XMLError(Exception):
+    
+    """Exception raised when something goes wrong with XML."""
+
+
+class ParseError(XMLError):
+    
+    """Exception raised when an XML document cannot be parsed."""
+
+
+class ElementDoesNotExist(XMLError):
     
     """
     Exception raised when an attempt is made to manipulate an XML object with
@@ -240,12 +250,15 @@ def parse(data):
     parser.StartElementHandler = handler.startElement
     parser.EndElementHandler = handler.endElement
     parser.CharacterDataHandler = handler.characters
-    if isinstance(data, basestring):
-        parser.Parse(data, True)
-    elif hasattr(data, "read"):
-        parser.ParseFile(data)
-    else:
-        raise TypeError, "Data should be a string or file-like object, not a %s" % type(data).__name__
+    try:
+        if isinstance(data, basestring):
+            parser.Parse(data, True)
+        elif hasattr(data, "read"):
+            parser.ParseFile(data)
+        else:
+            raise TypeError, "Data should be a string or file-like object, not a %s" % type(data).__name__
+    except xml.parsers.expat.ExpatError, ex:
+        raise ParseError, ex
     return handler.xml
 
 
