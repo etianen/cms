@@ -12,8 +12,8 @@ from django.core.paginator import Paginator, EmptyPage
 from django.core.serializers.xml_serializer import getInnerText
 from django.core.urlresolvers import RegexURLResolver, Resolver404, Http404
 from django.db.models.options import get_verbose_name
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.http import HttpResponse
+from django.shortcuts import render_to_response, redirect
 
 from cms.apps.pages import loader
 from cms.apps.pages.forms import PageForm
@@ -270,11 +270,11 @@ class ContentBase(object):
             if settings.APPEND_SLASH:
                 new_path_info = path_info + "/"
                 try:
-                    result = resolver.resolve(new_path_info)
+                    resolver.resolve(new_path_info)
                 except Resolver404:
                     pass
                 else:
-                    return HttpResponseRedirect(page.get_absolute_url() + new_path_info)
+                    return redirect(page.get_absolute_url() + new_path_info)
             raise Http404, "No match for the current path '%s' found in the url conf of %s." % (path_info, self.__class__.__name__)
         response = callback(self, request, *callback_args, **callback_kwargs)
         # Validate the response.

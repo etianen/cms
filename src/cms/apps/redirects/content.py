@@ -2,7 +2,7 @@
 
 
 from django.conf import settings
-from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 
 from cms.apps.pages import content
 from cms.apps.pages.models import Page
@@ -24,5 +24,5 @@ class Redirect(content.ContentBase):
         """Redirects to the redirect URL."""
         redirect_url = self.redirect_url
         redirect_url = Page.objects.get_url(redirect_url)
-        return HttpResponseRedirect(redirect_url)
+        return redirect(redirect_url)
     

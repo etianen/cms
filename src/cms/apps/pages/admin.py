@@ -8,13 +8,12 @@ standard implementation.
 
 import urllib
 
-from django import forms, template
+from django import template
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.db import models
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, redirect
 
@@ -303,7 +302,7 @@ class PageAdmin(PageBaseAdmin):
                     content_types.append(content_type_context)
             # Shortcut for when there is a single content type.
             if len(content_types) == 1:
-                return HttpResponseRedirect(content_types[0]["url"])
+                return redirect(content_types[0]["url"])
             # Render the select page template.
             context = {"title": "Select page type",
                        "content_types": content_types}

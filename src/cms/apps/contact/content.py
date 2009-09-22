@@ -4,7 +4,7 @@
 from django import template
 from django.conf import settings
 from django.core.mail import send_mass_mail
-from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 
 from cms.apps.pages import content, loader
 
@@ -101,7 +101,7 @@ class ContactForm(DefaultContent):
                 # Send both emails.
                 send_mass_mail(messages)
                 # Redirect the user.
-                return HttpResponseRedirect(self.reverse("message_sent"))
+                return redirect(self.reverse("message_sent"))
         else:    
             contact_form = ContactForm()
         context = {"contact_form": contact_form}

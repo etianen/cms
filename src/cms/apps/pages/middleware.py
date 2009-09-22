@@ -7,8 +7,9 @@ import sys, traceback
 
 from django.conf import settings
 from django.core.mail import mail_admins
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import Http404
 from django.views.debug import technical_404_response, technical_500_response
+from django.shortcuts import redirect
 
 from cms.apps.pages.models import Page, cache, publication_manager
 
@@ -60,7 +61,7 @@ class PageMiddleware(object):
                 path_info = request.path[len(page.url):]
                 # Append a slash to match the page precisely.
                 if not path_info and not request.path.endswith("/") and settings.APPEND_SLASH:
-                    return HttpResponseRedirect(request.path + "/")
+                    return redirect(request.path + "/")
                 # Dispatch to the content.
                 try:
                     return page.content.dispatch(request, path_info)

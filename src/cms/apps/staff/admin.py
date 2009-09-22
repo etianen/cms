@@ -6,7 +6,6 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, redirect
 
 from cms.apps.pages.admin import site
