@@ -19,11 +19,8 @@ admin.autodiscover()
 
 urlpatterns = patterns("",
                        # TinyMCE configuration views.
-                       url(r"^admin/tinymce-init.js$", "cms.apps.pages.views.tinymce_init", name="tinymce_init"),
                        url(r"^admin/tinymce-link-list.js$", "cms.apps.media.views.tinymce_link_list", name="tinymce_link_list"),
                        url(r"^admin/tinymce-image-list.js$", "cms.apps.media.views.tinymce_image_list", name="tinymce_image_list"),
-                       # Page admin views.
-                       url(r"^admin/reorder-pages/$", "cms.apps.pages.views.reorder_pages", name="reorder_pages"),
                        # Admin views.
                        url(r"^admin/", include(admin_site.urls)),
                        # Permalink redirection service.
@@ -34,12 +31,6 @@ urlpatterns = patterns("",
                        url(r"^feeds/(?P<url>.*)/$", publication_manager.published_view(feed), {"feed_dict": registered_feeds}, name="feeds"),
                        # Basic robots.txt.
                        url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}),)
-
-
-# Template preview service, only in DEBUG and TEMPLATE_DEBUG.
-
-if settings.DEBUG and settings.TEMPLATE_DEBUG:
-    urlpatterns += patterns("", url(r"^templates/(.*)", "cms.apps.pages.views.render_template"))
 
 
 # Set up static media serving.

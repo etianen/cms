@@ -81,7 +81,7 @@ def get_upload_path(instance, filename):
     folder_name = instance._meta.verbose_name_plural.replace(" ", "-")
     file_version = 1
     while True:
-        upload_path = "%s/%i/%s" % (folder_name, file_version, filename)
+        upload_path = "uploads/%s/%i/%s" % (folder_name, file_version, filename)
         if not default_storage.exists(upload_path):
             return upload_path
         file_version += 1

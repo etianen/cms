@@ -12,9 +12,10 @@ from django import template
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.conf.urls.defaults import patterns, url
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response, redirect
 
 from reversion.admin import VersionAdmin
@@ -43,7 +44,10 @@ class AdminSite(admin.AdminSite):
     def get_urls(self):
         """Generates custom admin URLS."""
         urls = super(AdminSite, self).get_urls()
-        custom_urls = patterns("", url(r"^edit-details/$", self.admin_view(self.edit_details), name="edit_details"),)
+        custom_urls = patterns("",
+                               url(r"^edit-details/$", self.admin_view(self.edit_details), name="edit_details"),
+                               url(r"^reorder-pages/$", self.admin_view(self.reorder_pages), name="reorder_pages"),
+                               url(r"^tinymce-init/$", self.admin_view(self.tinymce_init), name="tinymce_init"),)
         return custom_urls + urls
         
     def index(self, request, extra_context=None):
@@ -94,6 +98,31 @@ class AdminSite(admin.AdminSite):
                    "save_as": False,
                    "app_label": User._meta.app_label,}
         return render_to_response("admin/edit_details_form.html", context, template.RequestContext(request))
+    
+    def reorder_pages(self, request):
+        """Swaps the ordering of two pages."""
+        # Get the POST variables.
+        page_ids = request.POST.getlist("pages")
+        # Get the page objects.
+        pages = Page.objects.filter(id__in=page_ids)
+        page_0_order = pages[0].order
+        page_1_order = pages[1].order
+        # Blank their order fields.
+        for page in pages:
+            page.order = None
+            page.save()
+        # Swap their order fields.
+        pages[0].order = page_1_order
+        pages[1].order = page_0_order
+        pages[0].save()
+        pages[1].save()
+        # Send a positive response.
+        return HttpResponse("Swapped page '%s' with page '%s'." % (pages[0], pages[1]))
+    
+    def tinymce_init(self, request):
+        """Renders the TinyMCE initialization script."""
+        context = {"TINYMCE_CONTENT_CSS": settings.TINYMCE_CONTENT_CSS}
+        return render_to_response("admin/tinymce_init.js", context, template.RequestContext(request), mimetype="text/javascript")
         
     
 # The default instance of the CMS admin site.

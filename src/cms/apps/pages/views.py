@@ -28,48 +28,6 @@ def permalink_redirect(request, content_type_id, object_id):
     except AttributeError:
         raise Http404, "%s objects do not publish an absolute URL." % content_type.name.title()
     return redirect(redirect_url)
-    
-    
-def render_template(request, path, base_path=""):
-    """
-    Serves static template files based on the given path.
-    
-    If supplied, `base_path` will be prepended onto the path.
-    """
-    template_name = base_path + path
-    if not template_name or template_name.endswith("/"):
-        template_name += "base.html"
-    try:
-        return render_to_response(template_name, {}, template.RequestContext(request))
-    except template.TemplateDoesNotExist:
-        raise Http404, "The template '%s' does not exist." % template_name
-    
-    
-def tinymce_init(request):
-    """Renders the TinyMCE initialization script."""
-    context = {"TINYMCE_CONTENT_CSS": settings.TINYMCE_CONTENT_CSS}
-    return render_to_response("admin/tinymce_init.js", context, template.RequestContext(request), mimetype="text/javascript")
-
-
-def reorder_pages(request):
-    """Swaps the ordering of two pages."""
-    # Get the POST variables.
-    page_ids = request.POST.getlist("pages")
-    # Get the page objects.
-    pages = Page.objects.filter(id__in=page_ids)
-    page_0_order = pages[0].order
-    page_1_order = pages[1].order
-    # Blank their order fields.
-    for page in pages:
-        page.order = None
-        page.save()
-    # Swap their order fields.
-    pages[0].order = page_1_order
-    pages[1].order = page_0_order
-    pages[0].save()
-    pages[1].save()
-    # Send a positive response.
-    return HttpResponse("Swapped page '%s' with page '%s'." % (pages[0], pages[1]))
         
         
 def handler404(request):
