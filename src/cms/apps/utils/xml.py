@@ -88,6 +88,7 @@ class XML(object):
     def set_value(self, value):
         """Sets the text content of the first matched element."""
         self._get_element().children = [value,]
+        return self
     
     value = property(get_value,
                      doc="The text content of the first matched element.")
@@ -99,6 +100,7 @@ class XML(object):
     def set_name(self, name):
         """Sets the name of the first matched element."""
         self._get_element().name = name 
+        return self
     
     name = property(get_name,
                     set_name,
@@ -111,21 +113,31 @@ class XML(object):
     def set_attrs(self, attrs):
         """Sets the attributes of the first matched element."""
         self._get_element().attrs = attrs
+        return self
     
     attrs = property(get_attrs,
                      set_attrs,
                      doc="The attributes of the first matched element.")
     
-    def append(self, element_name, *content, **attrs):
-        """
-        Appends a new element to the first matched element.
+    def get_attr(self, name):
+        """Returns the named attribute from the first matched element."""
+        return self.attrs[name]
         
-        The new element is returned.
-        """
-        element = Element(element_name, attrs)
-        element.children.extend(content)
-        self._get_element().children.append(element)
-        return XML((element),)
+    def set_attr(self, name, value):
+        """Sets the given attribute in the first matched element."""
+        self.attrs[name] = value
+        return self
+    
+    def append(self, *elements):
+        """Appends a new element to the first matched element."""
+        return self.append_all(elements)
+    
+    def append_all(self, elements):
+        """Appends all the given elements to the first matched element."""
+        self._get_element().children.extend(elements)
+        return self
+       
+    # High-level access API.
        
     def __getattr__(self, name):
         """
@@ -139,7 +151,7 @@ class XML(object):
             return self.attrs[name]
         except KeyError:
             try:
-                return self.children(name).value
+                return self.filter(name).value
             except ElementDoesNotExist:
                 raise AttributeError, "<%s> element does not have an attribute or child with a name of '%s'." % (self.name, name)
     
@@ -195,6 +207,8 @@ class XML(object):
                           for child in element.children if not isinstance(child, unicode))
         return XML(iteration.cache(self._filter(names, children)))
     
+    # Iteration API.
+    
     def __iter__(self):
         """Iterates over all matched elements."""
         for element in self._elements:
@@ -208,7 +222,10 @@ class XML(object):
         """Returns the item at the given index."""
         if isinstance(index, int):
             return XML((self._elements[index],))
-        return XML(self._elements.__getitem__(index))
+        elif isinstance(index, slice):
+            return XML(self._elements.__getitem__(index))
+        else:
+            raise ValueError, "Only integer and slice indices are supported."
     
     # Output API.
     
@@ -284,10 +301,7 @@ def parse(data):
     return handler.xml
 
 
-def create(name, *content, **attrs):
+def create(name, **attrs):
     """Creates a new XML document with the given root element."""
-    element = Element(name, attrs)
-    element.children.extend(content)
-    return XML((element,))
-        
-    
+    return XML((Element(name, attrs),))
+

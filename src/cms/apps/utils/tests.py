@@ -59,12 +59,12 @@ class RemoteTest(TestCase):
         response = remote.open(MISSING_URL, require_success=False)
         self.assertContains(response, "Page Not Found", status_code=404)
         
-    def testForceGet(self):
+    def testQuery(self):
         """Tests that data can be sent using GET."""
-        response = remote.open("http://www.girton.cam.ac.uk/news/", {"page": 2}, method=remote.GET)
+        response = remote.open("http://www.girton.cam.ac.uk/news/", query={"page": 2})
         self.assertContains(response, "Page 2")
         
-    def testPostRequest(self):
+    def testPost(self):
         """Tests that a post request can be sent."""
         response = remote.open("http://www.etianen.com/admin/", {"username": "david", "password": "password"})
         self.assertContains(response, '<p class="errornote">')

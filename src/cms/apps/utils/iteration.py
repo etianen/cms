@@ -41,7 +41,10 @@ class CachedIterator(object):
                 return islice(iter(self), index, index + 1).next()
             except StopIteration:
                 raise IndexError, index
-        return list(islice(iter(self), index.start, index.stop, index.step))
+        elif isinstance(index, slice):
+            return list(islice(iter(self), index.start, index.stop, index.step))
+        else:
+            raise ValueError, "Only integer and slice indices are supported."
         
           
 cache = CachedIterator

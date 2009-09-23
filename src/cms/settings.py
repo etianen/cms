@@ -16,7 +16,7 @@ For an explanation of these settings, please see the Django documentation at:
 """
 
 
-import os
+import datetime, os
 
 
 # Absolute path to the directory containing the CMS.
@@ -137,4 +137,11 @@ USE_I18N = False
 # Staff management settings.
 
 DEFAULT_GROUP_IDS = (1,)
+
+
+# Remote URL settings.
+
+DEFAULT_RESPONSE_CACHE_TIMEOUT = datetime.timedelta(minutes=15)
+
+DEFAULT_RESPONSE_PREFETCH_TIMEOUT = datetime.timedelta(days=1)
 
