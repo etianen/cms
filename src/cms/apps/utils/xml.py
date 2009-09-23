@@ -9,6 +9,8 @@ from xml.sax.saxutils import escape, quoteattr
 
 from django.http import HttpResponse
 
+from cms.apps.utils import iteration
+
 
 class Element(object):
     
@@ -60,7 +62,6 @@ class ElementDoesNotExist(XMLError):
     """
     
 
-
 class XML(object):
     
     """Some queryable XML data."""
@@ -68,18 +69,18 @@ class XML(object):
     __slots__ = ("_elements",)
     
     def __init__(self, elements):
-        """Initializes the XML object from an ordered list of elements."""
+        """Initializes the XML object from an ordered iterator of elements."""
         self._elements = elements
-    
-    # Manipulation API.
-    
+
     def _get_element(self):
         """Returns the first matched element."""
         try:
             return self._elements[0]
         except IndexError:
             raise ElementDoesNotExist, "There are no matched elements."""
-        
+    
+    # Manipulation API.
+    
     def get_value(self):
         """Returns the text content of the first matched element."""
         return self._get_element().get_value()
@@ -151,13 +152,11 @@ class XML(object):
         """
         names = frozenset(names)
         known_elements = set()  # Ensures uniquenes of results.
-        matches = []
         for element in elements:
             if element in known_elements:
                 continue
             if not names or element.name in names:
-                matches.append(element)
-        return XML(matches)
+                yield element
     
     def _iter_elements(self, elements):
         """
@@ -170,7 +169,7 @@ class XML(object):
             # Ignore character data.
             if isinstance(element, basestring):
                 continue
-            # Iterate ove element and children.
+            # Iterate over element and children.
             yield element
             for child in self._iter_elements(element.children):
                 yield child
@@ -184,7 +183,7 @@ class XML(object):
         matched elements will be matched.  If you only wish to match direct
         descendents, use the `children` method.
         """
-        return self._filter(names, self._iter_elements(self._elements))
+        return XML(iteration.cache(self._filter(names, self._iter_elements(self._elements))))
         
     def children(self, *names):
         """
@@ -194,7 +193,12 @@ class XML(object):
         """
         children = (child for element in self._elements if not isinstance(element, unicode)
                           for child in element.children if not isinstance(child, unicode))
-        return self._filter(names, children)
+        return XML(iteration.cache(self._filter(names, children)))
+    
+    def __iter__(self):
+        """Iterates over all matched elements."""
+        for element in self._elements:
+            yield XML((element,))
     
     def __len__(self):
         """Returns the number of matched elements."""
@@ -202,10 +206,9 @@ class XML(object):
     
     def __getitem__(self, index):
         """Returns the item at the given index."""
-        elements = self._elements.__getitem__(index)
-        if isinstance(elements, Element):
-            elements = [elements]
-        return XML(elements)
+        if isinstance(index, int):
+            return XML((self._elements[index],))
+        return XML(self._elements.__getitem__(index))
     
     # Output API.
     

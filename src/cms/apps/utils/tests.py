@@ -5,7 +5,33 @@ import cStringIO
 
 from django.test.testcases import TestCase
 
-from cms.apps.utils import remote, xml
+from cms.apps.utils import remote, xml, iteration
+
+
+class CachedIteratorTest(TestCase):
+    
+    """Tests the cached interator functionality."""
+    
+    def testCacheIsActive(self):
+        """Tests that a cached iterator actually caches items!"""
+        iterator = iteration.cache(xrange(4))
+        # Iterator once.
+        for item_1 in iterator:
+            pass
+        self.assertEqual(item_1, 3)
+        # Iterate twice.
+        for item_2 in iterator:
+            pass
+        self.assertEqual(item_2, 3)
+        
+    def testRandomAccess(self):
+        """Tests that a cached iterator actually caches items!"""
+        iterator = iteration.cache(xrange(4))
+        self.assertEqual(len(iterator), 4)
+        self.assertEqual(iterator[0], 0)
+        self.assertEqual(iterator[2], 2)
+        self.assertRaises(IndexError, lambda: iterator[4])
+        self.assertEqual(iterator[0:4], [0, 1, 2, 3])
 
 
 OK_URL = "http://www.etianen.com/"
