@@ -1,7 +1,7 @@
 """Simple library for opening remote URLs."""
 
 
-import datetime, urllib, urllib2, BaseHTTPServer
+import datetime, urllib, urllib2, BaseHTTPServer, threading
 
 from django.conf import settings
 from django.http import HttpResponse
@@ -40,8 +40,11 @@ def encode(data):
         return urllib.urlencode(iteration.sorted_items(data), doseq=True)
 
 
-def _open(request, username="", password=""):
+def _open(request, log, username="", password=""):
     """Opens the give URL, and returns a HttpResponse."""
+    # Log the request.
+    if log is not None:
+        log.append(request)
     # Create an opener.
     opener = urllib2.build_opener()
     # Create an authentication handler.
@@ -68,7 +71,7 @@ def _open(request, username="", password=""):
     return response
 
 
-def open(url, data="", query="", headers={}, username="", password="", require_success=True, cache=False, cache_timeout=None, prefetch=False):
+def open(url, data="", query="", headers={}, username="", password="", require_success=True, cache=False, cache_timeout=None, prefetch=False, log=None):
     """
     Fetches the given URL, using the parameters provided.
     
@@ -104,10 +107,9 @@ def open(url, data="", query="", headers={}, username="", password="", require_s
             # This is the first time the request was made.
             cached_resource = CachedRemoteResource()
             cached_resource.request = request
-            cached_resource.timestamp = now - cache_timeout  # Force reload.
         # Reload if expired.
-        if cached_resource.timestamp + cache_timeout <= now:
-            response = _open(request)
+        if (cached_resource.timestamp is None) or (cached_resource.timestamp + cache_timeout <= now):
+            response = _open(request, log)
             cached_resource.response = response 
             cached_resource.timestamp = now
         else:
@@ -116,7 +118,7 @@ def open(url, data="", query="", headers={}, username="", password="", require_s
         cached_resource.prefetch_expires = now + settings.REMOTE_PREFETCH_TIMEOUT
         cached_resource.save()
     else:
-        response = _open(request, username=username, password=password)
+        response = _open(request, log, username=username, password=password)
     # Check for success.
     if require_success and (response.status_code < 200 or response.status_code >= 300):
         status_code = response.status_code
@@ -126,11 +128,11 @@ def open(url, data="", query="", headers={}, username="", password="", require_s
     return response
             
             
-def prefetch():
+def prefetch(log=None):
     """Prefetches all applicable cached responses."""
     now = datetime.datetime.now()
     for cached_resource in CachedRemoteResource.objects.filter(prefetch_expires__gt=now):
-        cached_resource.response = _open(cached_resource.request)
+        cached_resource.response = _open(cached_resource.request, log)
         cached_resource.timestamp = now()
         cached_resource.save()
             

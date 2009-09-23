@@ -68,10 +68,14 @@ class RemoteTest(TestCase):
         self.assertContains(response, '<p class="errornote">')
         
     def testCache(self):
+        log = []
         self.assertEqual(CachedRemoteResource.objects.count(), 0)
-        response_1 = remote.open(OK_URL, cache=True)
+        response_1 = remote.open(OK_URL, cache=True, log=log)
         self.assertEqual(CachedRemoteResource.objects.count(), 1)
-        response_2 = remote.open(OK_URL, cache=True)
+        self.assertEqual(len(log), 1)
+        response_2 = remote.open(OK_URL, cache=True, log=log)
+        self.assertEqual(CachedRemoteResource.objects.count(), 1)
+        self.assertEqual(len(log), 1)
         self.assertEqual(response_1.content, response_2.content)
         
     

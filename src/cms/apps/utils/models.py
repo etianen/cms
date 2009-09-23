@@ -11,7 +11,7 @@ from cms.apps.utils import xml, iteration
 
 def headers_to_xml(headers):
     """Encodes the given headers as XML."""
-    return xml.create("headers").append_all(xml.create("header", name=name, value=value) for name, value in iteration.sorted_items(headers)).render()
+    return xml.create("headers").append_all(xml.create("header", name=name, content=content) for name, content in iteration.sorted_items(headers)).render()
 
 
 def xml_to_headers(headers_xml):
@@ -49,7 +49,7 @@ class CachedRemoteResource(models.Model):
     
     def set_request_headers(self, headers):
         """Sets the headers of the cached request."""
-        self.headers_xml = headers_to_xml(headers)
+        self.request_headers_xml = headers_to_xml(headers)
         
     request_headers = property(get_request_headers,
                                set_request_headers,
@@ -83,7 +83,7 @@ class CachedRemoteResource(models.Model):
     
     def set_response_headers(self, headers):
         """Sets the headers of the cached response."""
-        self.headers_xml = headers_to_xml(headers) 
+        self.response_headers_xml = headers_to_xml(headers) 
             
     response_headers = property(get_response_headers,
                                 set_response_headers,

@@ -296,7 +296,8 @@ def parse(data):
     try:
         parser.Parse(data, True)
     except xml.parsers.expat.ExpatError, ex:
-        snippet = "... %s ..." % data.splitlines()[ex.lineno-1][ex.offset-30:ex.offset+30]
+        line = data.splitlines()[ex.lineno-1]
+        snippet = "... %s ..." % line[max(ex.offset-30, 0):min(ex.offset+30,len(line))]
         raise ParseError, snippet
     return handler.xml
 
