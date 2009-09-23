@@ -301,7 +301,7 @@ def parse(data):
     return handler.xml
 
 
-def create(name, **attrs):
+def create(element_name, **attrs):
     """Creates a new XML document with the given root element."""
-    return XML((Element(name, attrs),))
+    return XML((Element(element_name, attrs),))
 

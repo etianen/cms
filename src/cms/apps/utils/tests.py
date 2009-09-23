@@ -6,6 +6,7 @@ import cStringIO
 from django.test.testcases import TestCase
 
 from cms.apps.utils import remote, xml, iteration
+from cms.apps.utils.models import CachedRemoteResource
 
 
 class CachedIteratorTest(TestCase):
@@ -65,7 +66,14 @@ class RemoteTest(TestCase):
         """Tests that a post request can be sent."""
         response = remote.open("http://www.etianen.com/admin/", {"username": "david", "password": "password"})
         self.assertContains(response, '<p class="errornote">')
-    
+        
+    def testCache(self):
+        self.assertEqual(CachedRemoteResource.objects.count(), 0)
+        response_1 = remote.open(OK_URL, cache=True)
+        self.assertEqual(CachedRemoteResource.objects.count(), 1)
+        response_2 = remote.open(OK_URL, cache=True)
+        self.assertEqual(response_1.content, response_2.content)
+        
     
 XML_DATA = """<?xml version="1.0" encoding="UTF-8"?>
 <document>

@@ -6,7 +6,7 @@ import datetime, urllib, urllib2, BaseHTTPServer
 from django.conf import settings
 from django.http import HttpResponse
 
-from cms.apps.utils import xml
+from cms.apps.utils import xml, iteration
 from cms.apps.utils.models import CachedRemoteResource
 
 
@@ -37,7 +37,7 @@ def encode(data):
     if isinstance(data, basestring):
         return urllib.quote_plus(data)
     else:
-        return urllib.urlencode(data, doseq=True)
+        return urllib.urlencode(iteration.sorted_items(data), doseq=True)
 
 
 def _open(request, username="", password=""):
@@ -130,9 +130,8 @@ def prefetch():
     """Prefetches all applicable cached responses."""
     now = datetime.datetime.now()
     for cached_resource in CachedRemoteResource.objects.filter(prefetch_expires__gt=now):
-        cache_expires = now + (cached_resource.expires - cached_resource.timestamp)
-        cached_resource.response = _open(cached_resource.request, require_success=False)
-        cached_resource.expires = cache_expires
+        cached_resource.response = _open(cached_resource.request)
+        cached_resource.timestamp = now()
         cached_resource.save()
             
     

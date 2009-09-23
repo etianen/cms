@@ -49,3 +49,10 @@ class CachedIterator(object):
           
 cache = CachedIterator
 
+
+def sorted_items(mapping):
+    """
+    Returns an iterable of the items in the given mapping, sorted by the key.
+    """
+    return sorted(mapping.iteritems(), lambda a, b: cmp(a[0], b[0]))
+

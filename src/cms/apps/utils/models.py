@@ -6,12 +6,12 @@ import urllib2
 from django.db import models
 from django.http import HttpResponse
 
-from cms.apps.utils import xml
+from cms.apps.utils import xml, iteration
 
 
 def headers_to_xml(headers):
     """Encodes the given headers as XML."""
-    return xml.create("headers").append_all(xml.create("header", name=name, value=value) for name, value in headers.iteritems())
+    return xml.create("headers").append_all(xml.create("header", name=name, value=value) for name, value in iteration.sorted_items(headers)).render()
 
 
 def xml_to_headers(headers_xml):
@@ -25,9 +25,9 @@ class CachedRemoteResouceManager(models.Manager):
     
     def get_by_request(self, request):
         """Loads the cached remote resource for the given request."""
-        return self.get(request_url=request.url,
-                        request_headers_xml=headers_to_xml(dict(request.header_items)),
-                        request_data=request.get_data())
+        return self.get(request_url=request.get_full_url(),
+                        request_headers_xml=headers_to_xml(dict(request.header_items())),
+                        request_content=request.get_data())
 
 
 class CachedRemoteResource(models.Model):
@@ -38,8 +38,8 @@ class CachedRemoteResource(models.Model):
     
     # Request encoding.
     
-    request_url = models.URLField(unique=True,
-                          help_text="The URL of the response that was cached.")
+    request_url = models.URLField(db_index=True,
+                                  help_text="The URL of the response that was cached.")
     
     request_headers_xml = models.TextField(help_text="An XML representation of the headers of the cached request.")
     
@@ -101,7 +101,7 @@ class CachedRemoteResource(models.Model):
         """Sets the cached HttpResponse."""
         self.response_content = response.content
         self.response_code = response.status_code
-        self.response_headers = response._headers
+        self.response_headers = dict(response.items())
         
     response = property(get_response,
                         set_response,
