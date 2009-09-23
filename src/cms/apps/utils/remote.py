@@ -128,13 +128,18 @@ def open(url, data="", query="", headers={}, username="", password="", require_s
     return response
             
             
-def prefetch(log=None):
+def prefetch(log=None, fail_silently=False):
     """Prefetches all applicable cached responses."""
     now = datetime.datetime.now()
     for cached_resource in CachedRemoteResource.objects.filter(prefetch_expires__gt=now):
-        cached_resource.response = _open(cached_resource.request, log)
-        cached_resource.timestamp = now()
-        cached_resource.save()
+        try:
+            cached_resource.response = _open(cached_resource.request, log)
+        except NetworkError:
+            if not fail_silently:
+                raise
+        else:
+            cached_resource.timestamp = now
+            cached_resource.save()
             
     
 def open_xml(*args, **kwargs):

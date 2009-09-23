@@ -1,7 +1,7 @@
 """Unit tests for the various CMS utilities."""
 
 
-import cStringIO
+import cStringIO, datetime
 
 from django.test.testcases import TestCase
 
@@ -70,13 +70,42 @@ class RemoteTest(TestCase):
     def testCache(self):
         log = []
         self.assertEqual(CachedRemoteResource.objects.count(), 0)
-        response_1 = remote.open(OK_URL, cache=True, log=log)
+        # Send the first request, which is uncached.
+        response_1 = remote.open(OK_URL, cache=True, prefetch=True, log=log)
         self.assertEqual(CachedRemoteResource.objects.count(), 1)
         self.assertEqual(len(log), 1)
-        response_2 = remote.open(OK_URL, cache=True, log=log)
+        # Send the second request, which should be cached.
+        response_2 = remote.open(OK_URL, cache=True, prefetch=True, log=log)
         self.assertEqual(CachedRemoteResource.objects.count(), 1)
         self.assertEqual(len(log), 1)
         self.assertEqual(response_1.content, response_2.content)
+        # Hack the cache to force a reload.
+        cached_resource = CachedRemoteResource.objects.get()
+        cached_resource.timestamp = datetime.datetime(1985, 6, 30)  # Jenny's birthday!
+        cached_resource.save()
+        response_3 = remote.open(OK_URL, cache=True, prefetch=True, log=log)
+        self.assertEqual(CachedRemoteResource.objects.count(), 1)
+        self.assertEqual(len(log), 2)
+        self.assertEqual(response_2.content, response_3.content)
+        # Hack the cache to force a reload, then use prefetch to satisfy it.
+        cached_resource = CachedRemoteResource.objects.get()
+        cached_resource.timestamp = datetime.datetime(1984, 5, 19)  # My birthday!  Hint hint...
+        cached_resource.save()
+        remote.prefetch(log)
+        self.assertEqual(len(log), 3)
+        response_4 = remote.open(OK_URL, cache=True, prefetch=True, log=log)
+        self.assertEqual(CachedRemoteResource.objects.count(), 1)
+        self.assertEqual(len(log), 3)
+        self.assertEqual(response_3.content, response_4.content)
+        # Make sure that prefetch preloads all resources, regardless of expiry date.
+        remote.prefetch(log)
+        self.assertEqual(len(log), 4)
+        # Hack the cache to expire the prefetch period, then make sure prefetch ignores the url.
+        cached_resource = CachedRemoteResource.objects.get()
+        cached_resource.prefetch_expires = datetime.datetime(1987, 4, 8)  # Rachael's birthday!
+        cached_resource.save()
+        remote.prefetch(log)
+        self.assertEqual(len(log), 4)
         
     
 XML_DATA = """<?xml version="1.0" encoding="UTF-8"?>
