@@ -51,10 +51,7 @@ class RemoteTest(TestCase):
     def testBrokenLink(self):
         """Tests that broken links are handled correctly."""
         # The first method should raise an error.
-        try:
-            remote.open(MISSING_URL)
-        except remote.HttpError, ex:
-            self.assertEqual(ex.status_code, 404)
+        self.assertRaises(remote.HttpError, remote.open, MISSING_URL)
         # The second method should return an error response.
         response = remote.open(MISSING_URL, require_success=False)
         self.assertContains(response, "Page Not Found", status_code=404)

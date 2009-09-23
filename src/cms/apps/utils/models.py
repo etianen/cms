@@ -1,50 +1,107 @@
 """General utility models."""
 
 
+import urllib2
+
 from django.db import models
 from django.http import HttpResponse
 
 from cms.apps.utils import xml
 
 
-class CachedResponse(models.Model):
+def headers_to_xml(headers):
+    """Encodes the given headers as XML."""
+    return xml.create("headers").append_all(xml.create("header", name=name, value=value) for name, value in headers.iteritems())
+
+
+def xml_to_headers(headers_xml):
+    """Decodes the given XML to headers."""
+    return dict((header.name, header.content) for header in xml.parse(headers_xml).filter("header"))
+
+
+class CachedRemoteResouceManager(models.Manager):
+    
+    """Manages remote requests."""
+    
+    def get_by_request(self, request):
+        """Loads the cached remote resource for the given request."""
+        return self.get(request_url=request.url,
+                        request_headers_xml=headers_to_xml(dict(request.header_items)),
+                        request_data=request.get_data())
+
+
+class CachedRemoteResource(models.Model):
     
     """A remote request that was cached by the application."""
     
-    url = models.URLField(unique=True,
+    objects = CachedRemoteResouceManager()
+    
+    # Request encoding.
+    
+    request_url = models.URLField(unique=True,
                           help_text="The URL of the response that was cached.")
+    
+    request_headers_xml = models.TextField(help_text="An XML representation of the headers of the cached request.")
+    
+    def get_request_headers(self):
+        """Returns the headers of the cached request."""
+        return xml_to_headers(self.request_headers_xml)
+    
+    def set_request_headers(self, headers):
+        """Sets the headers of the cached request."""
+        self.headers_xml = headers_to_xml(headers)
+        
+    request_headers = property(get_request_headers,
+                               set_request_headers,
+                               doc="The headers of the cached request.")
+        
+    request_content = models.TextField(help_text="The content of the cached request.")
+        
+    def get_request(self):
+        """Returns the cached request."""
+        return urllib2.Request(self.request_url, self.request_content, self.request_headers)
+    
+    def set_request(self, request):
+        """Sets the cached request."""
+        self.request_url = request.get_full_url()
+        self.request_headers = dict(request.header_items())
+        self.request_content = request.get_data()
+        
+    request = property(get_request,
+                       set_request,
+                       doc="The cached request.")
     
     # Response encoding.
     
-    status_code = models.PositiveIntegerField(help_text="The status code of the cached response.")
+    response_code = models.PositiveIntegerField(help_text="The status code of the cached response.")
     
-    headers_xml = models.TextField(help_text="An XML representation of the headers of the cached response.")
+    response_headers_xml = models.TextField(help_text="An XML representation of the headers of the cached response.")
     
-    def get_headers(self):
+    def get_response_headers(self):
         """Returns the headers of the cached response."""
-        return dict((header.name, header.content) for header in xml.parse(self.headers_xml).filter("header"))
+        return xml_to_headers(self.response_headers_xml)
     
-    def set_headers(self, headers):
+    def set_response_headers(self, headers):
         """Sets the headers of the cached response."""
-        self.headers_xml = xml.create("headers").append_all(xml.create("header", name=name, value=value) for name, value in headers.iteritems())
+        self.headers_xml = headers_to_xml(headers) 
             
-    headers = property(get_headers,
-                       set_headers,
-                       doc="The headers of the cached response.")
+    response_headers = property(get_response_headers,
+                                set_response_headers,
+                                doc="The headers of the cached response.")
     
-    content = models.TextField(help_text="The content of the cached response.")
+    response_content = models.TextField(help_text="The content of the cached response.")
     
     def get_response(self):
         """Returns the cached HttpResponse."""
-        response = HttpResponse(self.content, status=self.status_code)
-        response._headers = self.headers
+        response = HttpResponse(self.response_content, status=self.response_code)
+        response._headers = self.response_headers
         return response
             
     def set_response(self, response):
         """Sets the cached HttpResponse."""
-        self.content = response.content
-        self.status_code = response.status_code
-        self.headers = response._headers
+        self.response_content = response.content
+        self.response_code = response.status_code
+        self.response_headers = response._headers
         
     response = property(get_response,
                         set_response,
@@ -53,8 +110,6 @@ class CachedResponse(models.Model):
     # Timestamps.
     
     timestamp = models.DateTimeField(help_text="The time that the this response was cached.")
-    
-    expires = models.DateTimeField(help_text="The time at which point this response requires reloading.")
     
     prefetch_expires = models.DateTimeField(blank=True,
                                             null=True,

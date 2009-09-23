@@ -141,7 +141,7 @@ DEFAULT_GROUP_IDS = (1,)
 
 # Remote URL settings.
 
-DEFAULT_RESPONSE_CACHE_TIMEOUT = datetime.timedelta(minutes=15)
+DEFAULT_REMOTE_CACHE_TIMEOUT = datetime.timedelta(minutes=15)
 
-DEFAULT_RESPONSE_PREFETCH_TIMEOUT = datetime.timedelta(days=1)
+REMOTE_PREFETCH_TIMEOUT = datetime.timedelta(days=1)
 
