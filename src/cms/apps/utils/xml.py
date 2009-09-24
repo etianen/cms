@@ -12,6 +12,9 @@ from django.http import HttpResponse
 from cms.apps.utils import iteration
 
 
+__all__ = ("parse", "create",)
+
+
 class Element(object):
     
     """An XML element."""
@@ -139,9 +142,9 @@ class XML(object):
        
     # High-level access API.
        
-    def __getattr__(self, name):
+    def get_property(self, name):
         """
-        Shortcut to access attributes or child elements of a given element.
+        High-level interface to read values from an element.
         
         The attribute dictionary of the first matched element is checked.  If
         no value is present, the values of child elements are checked.  If no
@@ -154,6 +157,10 @@ class XML(object):
                 return self.filter(name).value
             except ElementDoesNotExist:
                 raise AttributeError, "<%s> element does not have an attribute or child with a name of '%s'." % (self.name, name)
+    
+    def __getattr__(self, name):
+        """Shortcut to the get_property method."""
+        return self.get_property(name)
     
     # Search API.
     
