@@ -1,7 +1,7 @@
 """Simple library for opening remote URLs."""
 
 
-import datetime, urllib, urllib2, BaseHTTPServer, threading
+import datetime, urllib, urllib2, BaseHTTPServer
 
 from django.conf import settings
 from django.http import HttpResponse
@@ -10,15 +10,15 @@ from cms.apps.utils import xml, iteration
 from cms.apps.utils.models import CachedRemoteResource
 
 
-__all__ = ("NetworkError", "HttpError", "encode", "open", "prefetch", "open_xml",)
+__all__ = ("RemoteError", "HttpError", "encode", "open", "prefetch", "open_xml",)
 
 
-class NetworkError(IOError):
+class RemoteError(IOError):
     
     """Exception thrown when a network error prevents a fetch operation."""
     
     
-class HttpError(NetworkError):
+class HttpError(RemoteError):
     
     """Exception thrown when a HTTP error code prevents a fetch operation."""
     
@@ -64,7 +64,7 @@ def _open(request, log, username="", password=""):
         status = ex.code
     except urllib2.URLError, ex:
         # No network connection - go nuts!
-        raise NetworkError, ex.reason
+        raise RemoteError, ex.reason
     else:
         status = 200
     # Parse the response.
@@ -137,7 +137,7 @@ def prefetch(log=None, fail_silently=False, prefetch_timeout=None):
     for cached_resource in CachedRemoteResource.objects.filter(last_accessed__gt=prefetch_threshold):
         try:
             cached_resource.response = _open(cached_resource.request, log)
-        except NetworkError:
+        except RemoteError:
             if not fail_silently:
                 raise
         else:
