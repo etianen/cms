@@ -14,6 +14,9 @@ from cms.apps.pages.sitemaps import registered_sitemaps
 from cms.apps.pages.models import publication_manager
 
 
+__all__ = ("patterns", "url", "urlpatters", "handler404", "handler500",)
+
+
 admin.autodiscover()
 
 
