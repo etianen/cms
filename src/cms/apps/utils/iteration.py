@@ -47,7 +47,7 @@ class CachedIterator(object):
         elif isinstance(index, slice):
             return list(islice(iter(self), index.start, index.stop, index.step))
         else:
-            raise ValueError, "Only integer and slice indices are supported."
+            raise TypeError, "Only integer and slice indices are supported."
         
           
 cache = CachedIterator

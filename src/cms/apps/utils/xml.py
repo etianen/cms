@@ -232,7 +232,7 @@ class XML(object):
         elif isinstance(index, slice):
             return XML(self._elements.__getitem__(index))
         else:
-            raise ValueError, "Only integer and slice indices are supported."
+            raise TypeError, "Only integer and slice indices are supported."
     
     # Output API.
     
