@@ -10,6 +10,9 @@ from cms.apps.utils import xml, iteration
 from cms.apps.utils.models import CachedRemoteResource
 
 
+__all__ = ("NetworkError", "HttpError", "encode", "open", "prefetch", "open_xml",)
+
+
 class NetworkError(IOError):
     
     """Exception thrown when a network error prevents a fetch operation."""
@@ -71,7 +74,7 @@ def _open(request, log, username="", password=""):
     return response
 
 
-def open(url, data="", query="", headers={}, username="", password="", require_success=True, cache=False, cache_timeout=None, prefetch=False, log=None):
+def open(url, data="", query="", headers={}, username="", password="", require_success=True, cache=False, cache_timeout=None, log=None):
     """
     Fetches the given URL, using the parameters provided.
     
@@ -89,9 +92,7 @@ def open(url, data="", query="", headers={}, username="", password="", require_s
     cache_timeout = cache_timeout or settings.DEFAULT_REMOTE_CACHE_TIMEOUT
     # Some sanity checking.
     if cache and (username or password):
-        raise ValueError, "Cannot requests that send data or require authentication."
-    if prefetch and not cache:
-        raise ValueError, "Only cached requests may be prefetched."
+        raise ValueError, "Cannot requests that require authentication."
     # Create the request.
     data = encode(data)
     query = encode(query)
@@ -108,14 +109,14 @@ def open(url, data="", query="", headers={}, username="", password="", require_s
             cached_resource = CachedRemoteResource()
             cached_resource.request = request
         # Reload if expired.
-        if (cached_resource.timestamp is None) or (cached_resource.timestamp + cache_timeout <= now):
+        if (cached_resource.last_updated is None) or (cached_resource.last_updated + cache_timeout <= now):
             response = _open(request, log)
             cached_resource.response = response 
-            cached_resource.timestamp = now
+            cached_resource.last_updated = now
         else:
             response = cached_resource.response
-        # Update the prefetch expire time.
-        cached_resource.prefetch_expires = now + settings.REMOTE_PREFETCH_TIMEOUT
+        # Update the last accessed time.
+        cached_resource.last_accessed = now
         cached_resource.save()
     else:
         response = _open(request, log, username=username, password=password)
@@ -128,17 +129,19 @@ def open(url, data="", query="", headers={}, username="", password="", require_s
     return response
             
             
-def prefetch(log=None, fail_silently=False):
+def prefetch(log=None, fail_silently=False, prefetch_timeout=None):
     """Prefetches all applicable cached responses."""
     now = datetime.datetime.now()
-    for cached_resource in CachedRemoteResource.objects.filter(prefetch_expires__gt=now):
+    prefetch_timeout = prefetch_timeout or settings.DEFAULT_REMOTE_PREFETCH_TIMEOUT
+    prefetch_threshold = now - prefetch_timeout
+    for cached_resource in CachedRemoteResource.objects.filter(last_accessed__gt=prefetch_threshold):
         try:
             cached_resource.response = _open(cached_resource.request, log)
         except NetworkError:
             if not fail_silently:
                 raise
         else:
-            cached_resource.timestamp = now
+            cached_resource.last_updated = now
             cached_resource.save()
             
     

@@ -4,6 +4,9 @@
 from itertools import chain, islice
 
 
+__all__ = ("cache", "sorted_items",)
+
+
 class CachedIterator(object):
     
     """Wraps an iterator, providing random access through the use of a cache."""

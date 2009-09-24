@@ -109,11 +109,9 @@ class CachedRemoteResource(models.Model):
     
     # Timestamps.
     
-    timestamp = models.DateTimeField(help_text="The time that the this response was cached.")
+    last_updated = models.DateTimeField(help_text="The time that the this resource was lasted fetched from the remote server.")
     
-    prefetch_expires = models.DateTimeField(blank=True,
-                                            null=True,
-                                            db_index=True,
-                                            help_text="The time at which this URL should no longer be prefetched.  If NULL, then this URL should never be prefetched.  Please note: the prefetch_urls admin command must be added the the server cronjob for this feature to work.")
+    last_accessed = models.DateTimeField(db_index=True,
+                                         help_text="The time that this resource was last accessed by the application.")
     
     

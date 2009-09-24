@@ -143,5 +143,5 @@ DEFAULT_GROUP_IDS = (1,)
 
 DEFAULT_REMOTE_CACHE_TIMEOUT = datetime.timedelta(minutes=15)
 
-REMOTE_PREFETCH_TIMEOUT = datetime.timedelta(days=1)
+DEFAULT_REMOTE_PREFETCH_TIMEOUT = datetime.timedelta(days=1)
 
