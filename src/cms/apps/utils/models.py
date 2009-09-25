@@ -11,7 +11,7 @@ from cms.apps.utils import xml, iteration
 
 def headers_to_xml(headers):
     """Encodes the given headers as XML."""
-    return xml.create("headers").append_all(xml.create("header", name=name, content=content) for name, content in iteration.sorted_items(headers)).render()
+    return xml.create("headers").append_all(xml.create("header", name=name, content=content) for name, content in sorted(iteration.iteritems(headers))).render()
 
 
 def xml_to_headers(headers_xml):
@@ -26,7 +26,7 @@ class CachedRemoteResouceManager(models.Manager):
     def get_by_request(self, request):
         """Loads the cached remote resource for the given request."""
         return self.get(request_url=request.get_full_url(),
-                        request_headers_xml=headers_to_xml(dict(request.header_items())),
+                        request_headers_xml=headers_to_xml(request.header_items()),
                         request_content=request.get_data())
 
 
@@ -64,7 +64,7 @@ class CachedRemoteResource(models.Model):
     def set_request(self, request):
         """Sets the cached request."""
         self.request_url = request.get_full_url()
-        self.request_headers = dict(request.header_items())
+        self.request_headers = request.header_items()
         self.request_content = request.get_data()
         
     request = property(get_request,

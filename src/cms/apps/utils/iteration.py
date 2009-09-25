@@ -4,7 +4,7 @@
 from itertools import chain, islice
 
 
-__all__ = ("cache", "sorted_items",)
+__all__ = ("cache",)
 
 
 class CachedIterator(object):
@@ -53,9 +53,16 @@ class CachedIterator(object):
 cache = CachedIterator
 
 
-def sorted_items(mapping):
+def iteritems(object):
     """
-    Returns an iterable of the items in the given mapping, sorted by the key.
+    Iterates over the items in an object.
+    
+    Both dictionary and two-tuple iterables are supported.
     """
-    return sorted(mapping.iteritems(), lambda a, b: cmp(a[0], b[0]))
-
+    if hasattr(object, "iteritems"):
+        return object.iteritems()
+    if hasattr(object, "items"):
+        return iter(object.items())
+    return iter(object)
+    
+    

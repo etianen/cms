@@ -40,7 +40,7 @@ def encode(data):
     if isinstance(data, basestring):
         return urllib.quote_plus(data)
     else:
-        return urllib.urlencode(iteration.sorted_items(data), doseq=True)
+        return urllib.urlencode(sorted(iteration.iteritems(data)), doseq=True)
 
 
 def _open(request, log, username="", password=""):
