@@ -5,6 +5,7 @@ import datetime, urllib, urllib2, BaseHTTPServer
 
 from django.conf import settings
 from django.http import HttpResponse
+from django.utils import simplejson
 
 from cms.apps.utils import xml, iteration
 from cms.apps.utils.models import CachedRemoteResource
@@ -74,7 +75,7 @@ def _open(request, log, username="", password=""):
     return response
 
 
-def open(url, data="", query="", headers={}, username="", password="", require_success=True, cache=False, cache_timeout=None, log=None):
+def open(url, data=None, query="", headers={}, username="", password="", require_success=True, cache=False, cache_timeout=None, log=None):
     """
     Fetches the given URL, using the parameters provided.
     
@@ -94,7 +95,8 @@ def open(url, data="", query="", headers={}, username="", password="", require_s
     if cache and (username or password):
         raise ValueError, "Cannot requests that require authentication."
     # Create the request.
-    data = encode(data)
+    if data:
+        data = encode(data)
     query = encode(query)
     if query:
         url += "?" + query
@@ -149,5 +151,11 @@ def open_xml(*args, **kwargs):
     """Fetches an XML document, returning an XML object."""
     response = open(*args, **kwargs)
     return xml.parse(response.content)
+    
+    
+def open_json(*args, **kwargs):
+    """Fetches a JSON document, returning a JSON object."""
+    response = open(*args, **kwargs)
+    return simplejson.loads(response.content)
     
     

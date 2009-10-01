@@ -55,7 +55,9 @@ class CachedRemoteResource(models.Model):
                                set_request_headers,
                                doc="The headers of the cached request.")
         
-    request_content = models.TextField(help_text="The content of the cached request.")
+    request_content = models.TextField(help_text="The content of the cached request.",
+                                       blank=True,
+                                       null=True)
         
     def get_request(self):
         """Returns the cached request."""
