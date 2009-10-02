@@ -39,7 +39,7 @@ def encode(data):
     Strings, dictionaries and tuple sequences are all allowed.
     """
     if isinstance(data, basestring):
-        return urllib.quote_plus(data)
+        return data
     else:
         return urllib.urlencode(sorted(iteration.iteritems(data)), doseq=True)
 
