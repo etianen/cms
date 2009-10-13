@@ -2,6 +2,7 @@
 
 
 import os
+from functools import partial
 
 from django.conf import settings
 from django.conf.urls.defaults import patterns, url
@@ -45,6 +46,10 @@ class MediaAdmin(VersionAdmin):
     
     # Custom actions.
     
+    def update_folder_action(self, request, queryset, folder):
+        """Updates the folder on the given queryset."""
+        queryset.update(folder=folder)
+    
     def get_actions(self, request):
         """Generates the actions for assigning categories."""
         opts = self.model._meta
@@ -52,7 +57,7 @@ class MediaAdmin(VersionAdmin):
         actions = super(MediaAdmin, self).get_actions(request)
         # Add the dynamic folders.
         for folder in Folder.objects.all():
-            action_function = lambda model_admin, request, queryset: queryset.update(folder=folder)
+            action_function = partial(self.__class__.update_folder_action, folder=folder)
             action_description = u'Move selected %s to folder "%s"' % (verbose_name_plural, folder.name)
             action_name = action_description.lower().replace(" ", "_")
             actions[action_name] = (action_function, action_name, action_description)
