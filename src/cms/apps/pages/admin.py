@@ -47,7 +47,7 @@ class AdminSite(admin.AdminSite):
         custom_urls = patterns("",
                                url(r"^edit-details/$", self.admin_view(self.edit_details), name="edit_details"),
                                url(r"^reorder-pages/$", self.admin_view(self.reorder_pages), name="reorder_pages"),
-                               url(r"^tinymce-init/$", self.admin_view(self.tinymce_init), name="tinymce_init"),)
+                               url(r"^tinymce-init.js$", self.admin_view(self.tinymce_init), name="tinymce_init"),)
         return custom_urls + urls
         
     def index(self, request, extra_context=None):

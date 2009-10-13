@@ -119,7 +119,7 @@ class FileAdmin(MediaAdmin):
     def get_urls(self):
         """Enables custom admin views."""
         urls = super(FileAdmin, self).get_urls()
-        custom_urls = patterns('', url(r'^feed.xml$', self.admin_site.admin_view(self.feed), name="admin:media_file_feed"),)
+        custom_urls = patterns('', url(r'^feed.xml$', self.admin_site.admin_view(self.feed), name="media_file_feed"),)
         return custom_urls + urls
     
     def feed(self, request):
@@ -153,7 +153,7 @@ class ImageAdmin(MediaAdmin):
     def get_urls(self):
         """Enables custom admin views."""
         urls = super(ImageAdmin, self).get_urls()
-        custom_urls = patterns('', url(r'^feed.xml$', self.admin_site.admin_view(self.feed), name="admin:media_image_feed"),)
+        custom_urls = patterns('', url(r'^feed.xml$', self.admin_site.admin_view(self.feed), name="media_image_feed"),)
         return custom_urls + urls
     
     def feed(self, request):
