@@ -24,6 +24,7 @@ class Event(ArticleBase):
     
     end_date = models.DateField(blank=True,
                                 null=True,
+                                db_index=True,
                                 help_text="The date that this event is due to end.  Leave blank for a single-day event.")
     
     def get_absolute_url(self):
