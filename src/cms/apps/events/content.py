@@ -4,8 +4,8 @@
 import datetime
 
 from django.conf import settings
+from django.db.models import Q
 
-from cms.apps.pages import content
 from cms.apps.feeds.content import FeedBase
 from cms.apps.events.models import Event
 
@@ -30,6 +30,9 @@ class EventsFeed(FeedBase):
     
     def get_latest_articles(self):
         """Returns the list of articles for the latest article feeds."""
-        return super(EventsFeed, self).get_latest_articles().filter(start_date__gte=datetime.datetime.now().date())
+        events = super(EventsFeed, self).get_latest_articles()
+        now = datetime.datetime.now().date()
+        events = events.filter(Q(start_date__gte=now) | Q(end_date__gte=now))
+        return events
     
     
