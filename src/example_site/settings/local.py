@@ -16,13 +16,6 @@ from debug import *
 MEDIA_ROOT = os.path.expanduser("~/Sites/%s/media" % SITE_DOMAIN)
 
 
-# Use local database file.
-
-DATABASE_ENGINE = "sqlite3"
-
-DATABASE_NAME = os.path.expanduser("~/Sites/%s/database.sqlite" % SITE_DOMAIN)
-
-
 # Use local server.
 
 SITE_DOMAIN = "localhost:8000"
