@@ -11,6 +11,13 @@ from cms.apps.pages.templatetags import Library
 register = Library()
 
 
+@register.simple_tag
+def feed_url(page):
+    """Generates the RSS URL of the given feed."""
+    page = Page.objects.get_page(page)
+    return page.content.feed_url 
+
+
 @register.inclusion_tag("feeds/feed_link.html")
 def feed_link(page):
     """Generates a link to the RSS feed for the page."""
