@@ -105,7 +105,7 @@ class Page(PageBase):
         """
         Returns all published children that should be added to the navigation.
         """
-        return self.children.filter(in_navigation=True)
+        return [child for child in self.children if child.in_navigation]
         
     navigation = property(get_navigation,
                           doc="All published children that should be added to the navigation.")
