@@ -6,8 +6,8 @@ import re
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.util import flatatt
 
-from cms.apps.pages import permalinks, thumbnails
 from cms.apps.pages.templatetags import Library
+from cms.apps.utils import permalinks, thumbnails
 
 
 register = Library()

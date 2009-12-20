@@ -5,15 +5,15 @@ import os
 from functools import partial
 
 from django.conf import settings
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls.defaults import patterns
 from django.contrib import admin
 from django.template.defaultfilters import filesizeformat
 
 from reversion.admin import VersionAdmin
 
-from cms.apps.pages import thumbnails, permalinks
 from cms.apps.pages.admin import site
 from cms.apps.media.models import Folder, File, Image
+from cms.apps.utils import thumbnails
 
 
 class FolderAdmin(admin.ModelAdmin):

@@ -42,12 +42,6 @@ def encode(data):
         return urllib.urlencode(sorted(iteration.iteritems(data)), doseq=True)
 
 
-def _open(request, username="", password=""):
-    """Opens the give URL, and returns a HttpResponse."""
-    
-    return response
-
-
 def open(url, data=None, query="", headers={}, username="", password="", require_success=True):
     """
     Fetches the given URL, using the parameters provided.
