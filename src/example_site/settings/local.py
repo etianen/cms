@@ -33,6 +33,11 @@ STATIC_MEDIA += ((SITE_MEDIA_URL, SITE_MEDIA_ROOT),
 SERVE_STATIC_MEDIA = True
 
 
+# Use a local jQuery file to provide offline development.
+
+JQUERY_URL = CMS_MEDIA_URL + "js/jquery/jquery.js"
+
+
 # Disable prepending www, as local servers run from localhost.
 
 PREPEND_WWW = False
