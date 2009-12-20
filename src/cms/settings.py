@@ -143,10 +143,3 @@ DEFAULT_GROUP_IDS = (1,)
 
 JQUERY_URL = "http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"
 
-
-# Remote URL settings.
-
-DEFAULT_REMOTE_CACHE_TIMEOUT = datetime.timedelta(minutes=15)
-
-DEFAULT_REMOTE_PREFETCH_TIMEOUT = datetime.timedelta(days=1)
-

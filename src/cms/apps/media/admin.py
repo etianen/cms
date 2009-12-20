@@ -14,7 +14,6 @@ from reversion.admin import VersionAdmin
 from cms.apps.pages import thumbnails, permalinks
 from cms.apps.pages.admin import site
 from cms.apps.media.models import Folder, File, Image
-from cms.apps.utils import xml
 
 
 class FolderAdmin(admin.ModelAdmin):
@@ -119,15 +118,8 @@ class FileAdmin(MediaAdmin):
     def get_urls(self):
         """Enables custom admin views."""
         urls = super(FileAdmin, self).get_urls()
-        custom_urls = patterns('', url(r'^feed.xml$', self.admin_site.admin_view(self.feed), name="media_file_feed"),)
+        custom_urls = patterns('',)
         return custom_urls + urls
-    
-    def feed(self, request):
-        """Generates an XML feed of current files."""
-        files = xml.create("files")
-        for file in File.objects.select_related("folder").all():
-            files.append("file", name=file.title, permalink=permalinks.create(file), folder=file.folder and file.folder.name or "")
-        return files.render_to_response()
     
     
 site.register(File, FileAdmin)
@@ -153,15 +145,8 @@ class ImageAdmin(MediaAdmin):
     def get_urls(self):
         """Enables custom admin views."""
         urls = super(ImageAdmin, self).get_urls()
-        custom_urls = patterns('', url(r'^feed.xml$', self.admin_site.admin_view(self.feed), name="media_image_feed"),)
+        custom_urls = patterns('',)
         return custom_urls + urls
-    
-    def feed(self, request):
-        """Generates an XML feed of current files."""
-        images = xml.create("images")
-        for image in Image.objects.select_related("folder").all():
-            images.append("image", name=image.title, permalink=permalinks.create(image), folder=image.folder and image.folder.name or "")
-        return images.render_to_response()
     
     
 site.register(Image, ImageAdmin)
