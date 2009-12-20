@@ -15,10 +15,9 @@ from django.db.models.options import get_verbose_name
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, redirect
 
-from cms.apps.pages import loader
 from cms.apps.pages.forms import PageForm
 from cms.apps.pages.optimizations import cached_getter
-
+from cms.apps.utils import loader
 from cms.apps.pages.content.helpers import Breadcrumb, NavEntry
 from cms.apps.pages.content.fields import Field, CharField, TextField, HtmlField, ChoiceField, URLField, EmailField, IntegerField, PositiveIntegerField, FileField, ImageField, ModelField, BooleanField
 
