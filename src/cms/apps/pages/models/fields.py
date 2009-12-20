@@ -1,12 +1,8 @@
 """Fields used by the page management application."""
 
 
-import datetime
-
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
 from django.db.models.fields.related import ReverseSingleRelatedObjectDescriptor
 
 from cms.apps.pages.forms import HtmlWidget, NullBooleanWidget

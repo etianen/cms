@@ -5,32 +5,35 @@
 
 $(function() {
 
+    var SITEMAP_COLLAPSE_CONTROL_CLASS = "sitemap-collapse-control";
+    var SITEMAP_ENTRY_CLASS = "sitemap-entry";
+    var SITEMAP_MOVE_UP_CLASS = "move-up";
+    var SITEMAP_MOVE_DOWN_CLASS = "move-down";
+    
     // Global flag for disabling sitemap actions during updates.
     var sitemap_enabled = true;
     
+    var sitemap = $("ul#sitemap");
+    
     // Collapse the sitemap.
-    $("ul#sitemap li li").addClass("closed");
+    $("li li", sitemap).addClass("closed");
     
     // Add the sitemap collapse control divs.
-    $("ul#sitemap li li:has(li)").append('<div class="sitemap-collapse-control"/>');
+    $("li li:has(li)", sitemap).append($("<div/>").addClass(SITEMAP_COLLAPSE_CONTROL_CLASS));
     
     // Make the sitemap collapse controls clickable.
-    $("div.sitemap-collapse-control").click(function() {
+    $("div." + SITEMAP_COLLAPSE_CONTROL_CLASS, sitemap).click(function() {
         $(this).parent("li").toggleClass("closed");
     });
     
     // Add the move controls.
-    $("ul#sitemap li li.can-change div.sitemap-entry").append('<div title="Move this page up" class="move-up"/><div title="Move this page down" class="move-down"/>');
-    
-    // Displays an error message in the sitemap.
-    function displayError() {
-        $("ul#sitemap").remove();
-        $("div#sitemap-module").append("<p>The sitemap service is currently unavailable.</p>");
-    }
+    var moveUpControl = $("<div/>").attr("title", "Move this page up").addClass(SITEMAP_MOVE_UP_CLASS);
+    var moveDownControl = $("<div/>").attr("title", "Move this page down").addClass(SITEMAP_MOVE_DOWN_CLASS);
+    $("li li div.can-change." + SITEMAP_ENTRY_CLASS, sitemap).append(moveUpControl).append(moveDownControl);
     
     // Generates the page ID from the given list item.
     function getPageID(li) {
-        var entry = $("div.sitemap-entry", li);
+        var entry = $("div." + SITEMAP_ENTRY_CLASS, li);
         return $(entry).attr("id").split("-")[2];
     }
     
@@ -59,7 +62,10 @@ $(function() {
                     data: {
                         pages: [page_id, other_id]
                     },
-                    error: displayError,
+                    error: function() {
+                        sitemap.remove();
+                        $("div#sitemap-module").append($("<p/>").append("The sitemap service is currently unavailable."));
+                    },
                     success: function(data) {
                         // Adnimate the page move.
                         if (direction == "up") {
@@ -78,12 +84,12 @@ $(function() {
     }
     
     // Make the move up controls clickable.
-    $("div.move-up").click(function() {
+    $("div." + SITEMAP_MOVE_UP_CLASS).click(function() {
         movePage(this, "up");
     });
     
     // Make the move down controls clickable.
-    $("div.move-down").click(function() {
+    $("div." + SITEMAP_MOVE_DOWN_CLASS).click(function() {
         movePage(this, "down");
     });
     
