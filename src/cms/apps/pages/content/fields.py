@@ -11,7 +11,7 @@ from django.db.models.fields.files import FieldFile
 from django.utils.text import capfirst
 
 from cms.apps.pages.forms import HtmlWidget
-from cms.apps.pages.optimizations import cached_getter
+from cms.apps.utils.optimizations import cached_getter
 
 
 class Field(object):
