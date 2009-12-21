@@ -94,7 +94,7 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE,
     # Generate the thumbnail filename.
     image_folder, image_name = os.path.split(image.name)
     image_folder = image_folder.replace("/", "-")
-    thumbnail_name = "thumbnails/%s/%sx%s/%s/%s" % (generation_method, requested_width, requested_height, image_folder, image_name)
+    thumbnail_name = "thumbnails/%s-%sx%s/%s/%s" % (generation_method, requested_width, requested_height, image_folder, image_name)
     thumbnail_path = storage.path(thumbnail_name)
     thumbnail_url = storage.url(thumbnail_name)
     # See if the thumbnail has already been created.

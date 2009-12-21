@@ -77,9 +77,9 @@ def crop(context, image, width, height, alias=None):
     return img(thumbnail)
 
 
-RE_IMG = re.compile(r"<img(.+?)/>", re.IGNORECASE)
+RE_IMG = re.compile(ur"<img(.+?)/>", re.IGNORECASE)
 
-RE_ATTR = re.compile(r"""\s(\w+)=["']([^"']+)["']""", re.IGNORECASE)
+RE_ATTR = re.compile(ur"""\s(\w+)=["']([^"']+)["']""", re.IGNORECASE)
 
 
 @register.filter
@@ -87,8 +87,7 @@ def generate_thumbnails(text):
     """
     Generates thumbnails for all the permalinked images in the given HTML text.
     """
-    offset = 0
-    for match in RE_IMG.finditer(text):
+    def replacement(match):
         attrs = match.group(1)
         attr_dict = dict(RE_ATTR.findall(attrs))
         try:
@@ -96,27 +95,26 @@ def generate_thumbnails(text):
             width = int(attr_dict["width"])
             height = int(attr_dict["height"])
         except KeyError:
-            continue
+            pass
         except ValueError:
-            continue
-        try:
-            obj = permalinks.resolve(src)
-        except ObjectDoesNotExist:
-            continue
-        except permalinks.PermalinkError:
-            continue
-        try:
-            thumbnail = thumbnails.resize(obj.file, width, height)
-        except IOError:
-            continue
-        attr_dict["src"] = thumbnail.url
-        attr_dict["width"] = thumbnail.width
-        attr_dict["height"] = thumbnail.height
-        new_attrs = flatatt(attr_dict)
-        start = match.start(1)
-        end = match.end(1)
-        text = u"".join((text[:start+offset], new_attrs, text[end+offset:]))
-        offset += len(new_attrs) - len(attrs)
-    return text 
-        
+            pass
+        else:
+            try:
+                obj = permalinks.resolve(src)
+            except ObjectDoesNotExist:
+                pass
+            except permalinks.PermalinkError:
+                pass
+            else:
+                try:
+                    thumbnail = thumbnails.resize(obj.file, width, height)
+                except IOError:
+                    pass
+                else:
+                    attr_dict["src"] = thumbnail.url
+                    attr_dict["width"] = thumbnail.width
+                    attr_dict["height"] = thumbnail.height
+        return u"<img%s/>" % flatatt(attr_dict)
+    return RE_IMG.sub(replacement, text)
+    
     

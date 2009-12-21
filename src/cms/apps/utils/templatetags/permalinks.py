@@ -3,7 +3,6 @@
 
 import re
 
-from django import template
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.fields import slug_re
 
@@ -21,7 +20,7 @@ def permalink(obj):
     return permalinks.create(obj)
 
 
-RE_ANCHOR = re.compile(r"""(<a.*?\shref=["'])(.+?)(["'].*?>)""", re.IGNORECASE)
+RE_ANCHOR = re.compile(ur"""(<a.*?\shref=["'])(.+?)(["'].*?>)""", re.IGNORECASE)
 
 
 @register.filter
@@ -51,6 +50,6 @@ def expand_permalinks(text):
                 href = obj.get_absolute_url()
             except AttributeError:
                 pass
-        return "".join((match.group(1), href, match.group(3)))
+        return u"".join((match.group(1), href, match.group(3)))
     return RE_ANCHOR.sub(replacement, text)
 
