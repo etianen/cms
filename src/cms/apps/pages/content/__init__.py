@@ -372,14 +372,11 @@ class ContentBase(object):
         return (("Page content", {"fields": field_names}),)
   
 
-DEFAULT_CONTENT_SLUG = "content"
-
-
 # Permissions control.
 
 def get_add_permission(slug):
     """Generates the add permission codename for the given slug."""
-    if slug == DEFAULT_CONTENT_SLUG:
+    if slug == settings.DEFAULT_CONTENT_REGISTRATION_KEY:
         raise ValueError, "Base content model does not have an add permission."
     return u"add_%s_page" % slug
 

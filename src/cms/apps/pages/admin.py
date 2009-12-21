@@ -304,7 +304,7 @@ class PageAdmin(PageBaseAdmin):
         model = self.model
         opts = model._meta
         # The default page add permission implicitly allows editing of the default content type.
-        if slug == content.DEFAULT_CONTENT_SLUG:
+        if slug == settings.DEFAULT_CONTENT_REGISTRATION_KEY:
             return True
         # Check user has correct permission.
         add_permission = "%s.%s" % (opts.app_label, content.get_add_permission(slug))
