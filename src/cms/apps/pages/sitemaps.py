@@ -1,10 +1,8 @@
 """Google sitemaps used by the page managment application."""
 
 
-from itertools import chain
-
 from django.db import models
-from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.sitemaps import Sitemap
 
 from cms.apps.pages.models import PublishedModel
@@ -16,14 +14,23 @@ registered_sitemaps = {}
 
 class PageSitemap(Sitemap):
     
-    """Generates a sitemap for subclasses of PageBase."""
+    """Generates a sitemap for subclasses of PublishedModel."""
     
     def items(self):
         """Returns all items in this sitemap."""
         pages = []
         for model in models.get_models():
             if issubclass(model, PublishedModel) and hasattr(model, "get_absolute_url"):
-                pages.extend(model.objects.all())
+                for obj in model.objects.all():
+                    # PublishedModel instances might be not be published, due to an
+                    # unpublished parent. This checks to see if they can provide a URL
+                    # before passing them on to the renderer.
+                    try:
+                        obj.url
+                    except ObjectDoesNotExist:
+                        pass
+                    else:
+                        pages.append(obj)
         return pages
         
     def changefreq(self, obj):

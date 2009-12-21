@@ -7,6 +7,7 @@ from django.db import models
 
 from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager
 from cms.apps.pages.models.fields import NullBooleanField, EnumField
+from cms.apps.utils.optimizations import cached_getter
 
 
 class PublishedModel(models.Model):
@@ -36,7 +37,12 @@ class PublishedModel(models.Model):
     
     # Nicer alias for URL generation.
     
-    url = property(lambda self: self.get_absolute_url(),
+    @cached_getter
+    def get_url(self):
+        """Caching proxy method for the absolute URL of the object."""
+        return self.get_absolute_url()
+    
+    url = property(get_url,
                    doc="The absolute URL of the page.")
     
     # Default class properties for sitemap generation.
