@@ -96,7 +96,6 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE,
     image_folder = image_folder.replace("/", "-")
     thumbnail_name = "thumbnails/%s-%sx%s/%s/%s" % (generation_method, requested_width, requested_height, image_folder, image_name)
     thumbnail_path = storage.path(thumbnail_name)
-    thumbnail_url = storage.url(thumbnail_name)
     # See if the thumbnail has already been created.
     if storage.exists(thumbnail_name):
         image_timestamp = os.stat(image_path).st_mtime
@@ -109,7 +108,6 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE,
         if not os.path.exists(dirname):
             os.makedirs(dirname)
     # Calculate aspect ratios.
-    original_aspect = float(original_width) / float(original_height)
     required_aspect = float(requested_width) / float(requested_height)
     # Create an image buffer in memory.
     image_data = Image.open(image.path)
