@@ -100,16 +100,6 @@ class Page(PageBase):
                                         default=True,
                                         help_text="Uncheck this box to remove this content from the site navigation.")
 
-    @cached_getter
-    def get_navigation(self):
-        """
-        Returns all published children that should be added to the navigation.
-        """
-        return [child for child in self.children if child.in_navigation]
-        
-    navigation = property(get_navigation,
-                          doc="All published children that should be added to the navigation.")
-
     permalink = models.SlugField(blank=True,
                                  help_text="A unique identifier for this page.  This will be set by your design team in order to link to this page from any custom templates they write.")
 

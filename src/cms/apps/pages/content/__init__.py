@@ -209,7 +209,7 @@ class ContentBase(object):
         NavEntry.  Instances of PageBase already conform to this specification,
         alowing either to be used by this method.
         """
-        return self.page.navigation
+        return [child for child in self.page.children if child.in_navigation]
     
     navigation = property(lambda self: self.get_navigation(),
                           doc="The sub-navigation of the page.")
