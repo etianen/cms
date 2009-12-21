@@ -5,6 +5,7 @@ import re
 
 from django import template
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms.fields import slug_re
 
 from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import Library
@@ -20,7 +21,7 @@ def permalink(obj):
     return permalinks.create(obj)
 
 
-RE_ANCHOR = re.compile(r"""<a.*?\shref=["'](.+?)["'].*?>""", re.IGNORECASE)
+RE_ANCHOR = re.compile(r"""(<a.*?\shref=["'])(.+?)(["'].*?>)""", re.IGNORECASE)
 
 
 @register.filter
@@ -28,25 +29,28 @@ def expand_permalinks(text):
     """
     Expands all the permalinks found in anchor tags in the given HTML text.
     """
-    offset = 0
-    for match in RE_ANCHOR.finditer(text):
-        href = match.group(1)
+    def replacement(match):
+        href = match.group(2)
+        obj = None
         # Try to match a generic permalink.
         try:
             obj = permalinks.resolve(href)
         except permalinks.PermalinkError:
-            # Not a permalink... try to match a page permalink.
+            pass
+        except ObjectDoesNotExist:
+            pass
+        # Try to match a page permalink.
+        if obj is None and slug_re.search(href):
             try:
                 obj = Page.objects.get_page(href)
             except Page.DoesNotExist:
-                continue
-        except ObjectDoesNotExist:
-            continue
-        new_href = obj.get_absolute_url()
-        # Substitute in the new href.
-        start = match.start(1)
-        end = match.end(1)
-        text = u"".join((text[:start+offset], new_href, text[end+offset:]))
-        offset += len(new_href) - len(href)
-    return text
+                pass
+        # If an object was found, substitute it's href.
+        if obj is not None:
+            try:
+                href = obj.get_absolute_url()
+            except AttributeError:
+                pass
+        return "".join((match.group(1), href, match.group(3)))
+    return RE_ANCHOR.sub(replacement, text)
 
