@@ -15,7 +15,7 @@
         {% if can_delete %}
             <a href="{{delete_url}}" class="deletelink" title="Delete this page">Delete</a>
         {% endif %}
-        {% if can_change %}
+        {% if can_move %}
             <form method="post" action="{% url admin:move_page %}">
                 <input type="hidden" name="page" value="{{page.id}}"/>
                 {% csrf_token %}

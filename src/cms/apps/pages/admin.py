@@ -16,7 +16,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.http import Http404, HttpResponseRedirect, HttpResponse
+from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render_to_response, redirect
 
 from reversion.admin import VersionAdmin
@@ -71,22 +71,33 @@ class AdminSite(admin.AdminSite):
     def move_page(self, request):
         """Moves a page up or down."""
         page = Page.objects.get_by_id(request.POST["page"])
+        # Check that the user has permission to move the page.
+        if not self._registry[Page].has_move_permission(request, page):
+            return HttpResponseForbidden("You do not have permission to move this page.")
+        # Get the page to swap with.
         direction = request.POST["direction"]
-        if direction == "up":
-            other = page.parent.children.order_by("-order").filter(order__lt=page.order)[0]
-        elif direction == "down":
-            other = page.parent.children.order_by("order").filter(order__gt=page.order)[0]
-        else:
-            raise ValueError, "Direction should be 'up' or 'down', not '%s'." % direction
-        # To prevent duplicating the order key, we need to do a little dance here.
-        page_order = page.order
-        other_order = other.order
-        page.order = None
-        page.save()
-        other.order = page_order
-        other.save()
-        page.order = other_order
-        page.save()
+        parent = page.parent
+        if parent is not None:
+            try:
+                if direction == "up":
+                    other = parent.children.order_by("-order").filter(order__lt=page.order)[0]
+                elif direction == "down":
+                    other = parent.children.order_by("order").filter(order__gt=page.order)[0]
+                else:
+                    raise ValueError, "Direction should be 'up' or 'down', not '%s'." % direction
+            except IndexError:
+                # Impossible to move pag up or down because it already is at the top or bottom!
+                pass
+            else:
+                # To prevent duplicating the order key, we need to do a little dance here.
+                page_order = page.order
+                other_order = other.order
+                page.order = None
+                page.save()
+                other.order = page_order
+                other.save()
+                page.order = other_order
+                page.save()
         # Return a response appropriate to whether this was an AJAX request or not.
         if request.is_ajax():
             return HttpResponse("Page #%s was moved %s." % (page.id, direction))
@@ -319,7 +330,7 @@ class PageAdmin(PageBaseAdmin):
     
     def has_move_permission(self, request, obj):
         """Checks whether the given user can move the given page."""
-        self.has 
+        return self.has_change_permission(request, obj.parent)
     
     def add_view(self, request, *args, **kwargs):
         """Ensures that a valid content type is chosen."""

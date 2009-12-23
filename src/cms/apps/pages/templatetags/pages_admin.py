@@ -24,6 +24,7 @@ def sitemap_entry(context, page):
                "can_add": page_admin.has_add_permission(request),
                "can_change": page_admin.has_change_permission(request, page),
                "can_delete": page_admin.has_delete_permission(request, page),
+               "can_move": page_admin.has_move_permission(request, page),
                "add_url": reverse("admin:pages_page_add") + "?%s=%s&parent=%i" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE, page.id),
                "change_url": reverse("admin:pages_page_change", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
                "delete_url": reverse("admin:pages_page_delete", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
