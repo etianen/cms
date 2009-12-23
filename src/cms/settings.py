@@ -139,11 +139,6 @@ USE_I18N = False
 DEFAULT_GROUP_IDS = (1,)
 
 
-# JQuery settings.
-
-JQUERY_URL = "http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"
-
-
 # Content settings.
 
 DEFAULT_CONTENT_REGISTRATION_KEY = "content"
