@@ -22,7 +22,8 @@ $(function() {
         external_image_list_url: "{% url tinymce_image_list %}",
         content_css: "{{TINYMCE_CONTENT_CSS}}",
         extended_valid_elements : "iframe[src|width|height|name|align]",
-        convert_urls: false
+        convert_urls: false,
+        button_tile_map : true
     })
 });
 
