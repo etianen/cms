@@ -109,36 +109,44 @@ body.dashboard li.closed div.sitemap-collapse-control:hover {
     background-position: 0px -13px;
 }
 
-body.dashboard ul#sitemap li:first-child > div.sitemap-entry > div.move-up,
-body.dashboard ul#sitemap li:last-child > div.sitemap-entry > div.move-down {
+body.dashboard ul#sitemap li:first-child > div.sitemap-entry > button.move-up,
+body.dashboard ul#sitemap li:last-child > div.sitemap-entry > button.move-down {
     display: none;
 }
 
-body.dashboard div.sitemap-entry div.move-up,
-body.dashboard div.sitemap-entry div.move-down {
+body.dashboard div.sitemap-entry button span {
+    display: none;
+}
+
+body.dashboard div.sitemap-entry button.move-up,
+body.dashboard div.sitemap-entry button.move-down {
     width: 11px;
     height: 5px;
     background-image: url(../img/arrows.png);
+    background-repeat: no-repeat;
     position: absolute;
     right: 172px;
     cursor: pointer;
+    border: none;
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
 }
 
-body.dashboard div.sitemap-entry div.move-up {
+body.dashboard div.sitemap-entry button.move-up {
     background-position: -15px -29px;
     top: 5px;
 }
 
-body.dashboard div.sitemap-entry div.move-up:hover {
+body.dashboard div.sitemap-entry button.move-up:hover {
     background-position: -1px -29px;
 }
 
-body.dashboard div.sitemap-entry div.move-down {
+body.dashboard div.sitemap-entry button.move-down {
     background-position: -15px -34px;
     top: 14px;
 }
 
-body.dashboard div.sitemap-entry div.move-down:hover {
+body.dashboard div.sitemap-entry button.move-down:hover {
     background-position: -1px -34px;
 }
 

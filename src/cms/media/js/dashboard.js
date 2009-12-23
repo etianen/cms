@@ -5,10 +5,8 @@
 
 $(function() {
 
+    // Define the important CSS classes in one place.
     var SITEMAP_COLLAPSE_CONTROL_CLASS = "sitemap-collapse-control";
-    var SITEMAP_ENTRY_CLASS = "sitemap-entry";
-    var SITEMAP_MOVE_UP_CLASS = "move-up";
-    var SITEMAP_MOVE_DOWN_CLASS = "move-down";
     
     // Global flag for disabling sitemap actions during updates.
     var sitemap_enabled = true;
@@ -25,52 +23,46 @@ $(function() {
     $("div." + SITEMAP_COLLAPSE_CONTROL_CLASS, sitemap).click(function() {
         $(this).parent("li").toggleClass("closed");
     });
-    
-    // Add the move controls.
-    var moveUpControl = $("<div/>").attr("title", "Move this page up").addClass(SITEMAP_MOVE_UP_CLASS);
-    var moveDownControl = $("<div/>").attr("title", "Move this page down").addClass(SITEMAP_MOVE_DOWN_CLASS);
-    $("li li div.can-change." + SITEMAP_ENTRY_CLASS, sitemap).append(moveUpControl).append(moveDownControl);
-    
-    // Generates the page ID from the given list item.
-    function getPageID(li) {
-        var entry = $("div." + SITEMAP_ENTRY_CLASS, li);
-        return $(entry).attr("id").split("-")[2];
-    }
-    
-    // Moves a page in the given direction.
-    function movePage(control, direction) {
+
+    // Make the sitemap controls clickable.
+    $("button", sitemap).click(function() {
+        // Prevent simultanious page moves.
         if (!sitemap_enabled) {
             return;
         }
-        var li = $($(control).parents("li").get(0));
-        var page_id = getPageID(li);
-        if (direction == "up") {
+        var button = $(this);
+        var li = button.parents("li").slice(0, 1);
+        var form = button.parents("form").slice(0, 1);
+        var action = button.attr("value");
+        if (action == "move-up") {
             var other_li = li.prev();
-        } else if (direction == "down") {
+        } else if (action == "move-down") {
             var other_li = li.next();
         }
-        var other_id = getPageID(other_li);
         // Check that there is something to exchange with.
         if (other_li.length > 0) {
+            var data = form.serializeArray();
+            data.push({
+                name: "action",
+                value: action
+            });
             // Disable the sitemap.
             sitemap_enabled = false;
             // Trigger an AJAX call when the list item has faded out.
             li.fadeOut(function() {
                 $.ajax({
-                    url: "/admin/reorder-pages/",
-                    type: "POST",
-                    data: {
-                        pages: [page_id, other_id]
-                    },
+                    url: form.attr("action"),
+                    type: form.attr("method"),
+                    data: data,
                     error: function() {
                         sitemap.remove();
                         $("div#sitemap-module").append($("<p/>").append("The sitemap service is currently unavailable."));
                     },
                     success: function(data) {
                         // Adnimate the page move.
-                        if (direction == "up") {
+                        if (action == "move-up") {
                             other_li.before(li);
-                        } else if (direction == "down") {
+                        } else if (action == "move-down") {
                             other_li.after(li);
                         }
                         li.fadeIn();
@@ -81,17 +73,8 @@ $(function() {
                 });
             });
         }
-    }
-    
-    // Make the move up controls clickable.
-    $("div." + SITEMAP_MOVE_UP_CLASS).click(function() {
-        movePage(this, "up");
+        return false;
     });
-    
-    // Make the move down controls clickable.
-    $("div." + SITEMAP_MOVE_DOWN_CLASS).click(function() {
-        movePage(this, "down");
-    });
-    
+
 });
 

@@ -15,6 +15,7 @@ from django.conf.urls.defaults import patterns, url
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response, redirect
 
@@ -46,12 +47,36 @@ class AdminSite(admin.AdminSite):
         urls = super(AdminSite, self).get_urls()
         custom_urls = patterns("",
                                url(r"^edit-details/$", self.admin_view(self.edit_details), name="edit_details"),
-                               url(r"^reorder-pages/$", self.admin_view(self.reorder_pages), name="reorder_pages"),
                                url(r"^tinymce-init.js$", self.admin_view(self.tinymce_init), name="tinymce_init"),)
         return custom_urls + urls
         
+    @transaction.commit_on_success
     def index(self, request, extra_context=None):
         """Displays the admin site dashboard."""
+        # Respond to page move requests.
+        if request.method == "POST":
+            page = Page.objects.get_by_id(request.POST["page"])
+            action = request.POST["action"]
+            if action == "move-up":
+                other = page.parent.children.order_by("-order").filter(order__lt=page.order)[0]
+            elif action == "move-down":
+                other = page.parent.children.order_by("order").filter(order__gt=page.order)[0]
+            else:
+                raise ValueError, "Action should be 'up' or 'down', not '%s'." % action
+            # To prevent duplicating the order key, we need to do a little dance here.
+            page_order = page.order
+            other_order = other.order
+            page.order = None
+            page.save()
+            other.order = page_order
+            other.save()
+            page.order = other_order
+            page.save()
+            # Return a response appropriate to whether this was an AJAX request or not.
+            if request.is_ajax():
+                return HttpResponse("Page #%s was moved %s." % (page.id, action))
+            else:
+                return redirect("admin:index")
         # Retrieve the homepage in order to render the sitemap.
         try:
             homepage = Page.objects.get_homepage()
@@ -98,26 +123,6 @@ class AdminSite(admin.AdminSite):
                    "save_as": False,
                    "app_label": User._meta.app_label,}
         return render_to_response("admin/edit_details_form.html", context, template.RequestContext(request))
-    
-    def reorder_pages(self, request):
-        """Swaps the ordering of two pages."""
-        # Get the POST variables.
-        page_ids = request.POST.getlist("pages")
-        # Get the page objects.
-        pages = Page.objects.filter(id__in=page_ids)
-        page_0_order = pages[0].order
-        page_1_order = pages[1].order
-        # Blank their order fields.
-        for page in pages:
-            page.order = None
-            page.save()
-        # Swap their order fields.
-        pages[0].order = page_1_order
-        pages[1].order = page_0_order
-        pages[0].save()
-        pages[1].save()
-        # Send a positive response.
-        return HttpResponse("Swapped page '%s' with page '%s'." % (pages[0], pages[1]))
     
     def tinymce_init(self, request):
         """Renders the TinyMCE initialization script."""

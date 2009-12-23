@@ -1,6 +1,6 @@
 {% load pages_admin %}
 <li>
-    <div id="sitemap-entry-{{page.id}}" class="sitemap-entry{% if not is_online %} offline{% endif %}{% if can_change %} can-change{% endif %}">
+    <div class="sitemap-entry{% if not is_online %} offline{% endif %}{% if can_change %} can-change{% endif %}">
         {% if can_change %}
             <a href="{{change_url}}" class="title" title="Edit this {{verbose_name}}">{{page}}</a>
         {% else %}
@@ -14,6 +14,14 @@
         {% endif %}
         {% if can_delete %}
             <a href="{{delete_url}}" class="deletelink" title="Delete this page">Delete</a>
+        {% endif %}
+        {% if can_change %}
+            <form method="post" action="{% url admin:index %}">
+                <input type="hidden" name="page" value="{{page.id}}"/>
+                {% csrf_token %}
+                <button type="submit" class="move-up" title="Move this page up" name="action" value="move-up"><span>Up</span></button>
+                <button type="submit" class="move-down" title="Move this page down" name="action" value="move-down"><span>Down</span></button>
+            </form>
         {% endif %}
     </div>
     {% if children %}
