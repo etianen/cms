@@ -16,11 +16,11 @@
             <a href="{{delete_url}}" class="deletelink" title="Delete this page">Delete</a>
         {% endif %}
         {% if can_change %}
-            <form method="post" action="{% url admin:index %}">
+            <form method="post" action="{% url admin:move_page %}">
                 <input type="hidden" name="page" value="{{page.id}}"/>
                 {% csrf_token %}
-                <button type="submit" class="move-up" title="Move this page up" name="action" value="move-up"><span>Up</span></button>
-                <button type="submit" class="move-down" title="Move this page down" name="action" value="move-down"><span>Down</span></button>
+                <button type="submit" class="move-up" title="Move this page up" name="direction" value="up"><span>Up</span></button>
+                <button type="submit" class="move-down" title="Move this page down" name="direction" value="down"><span>Down</span></button>
             </form>
         {% endif %}
     </div>

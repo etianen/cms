@@ -33,18 +33,18 @@ $(function() {
         var button = $(this);
         var li = button.parents("li").slice(0, 1);
         var form = button.parents("form").slice(0, 1);
-        var action = button.attr("value");
-        if (action == "move-up") {
+        var direction = button.attr("value");
+        if (direction == "up") {
             var other_li = li.prev();
-        } else if (action == "move-down") {
+        } else if (direction == "down") {
             var other_li = li.next();
         }
         // Check that there is something to exchange with.
         if (other_li.length > 0) {
             var data = form.serializeArray();
             data.push({
-                name: "action",
-                value: action
+                name: "direction",
+                value: direction
             });
             // Disable the sitemap.
             sitemap_enabled = false;
@@ -59,10 +59,10 @@ $(function() {
                         $("div#sitemap-module").append($("<p/>").append("The sitemap service is currently unavailable."));
                     },
                     success: function(data) {
-                        // Adnimate the page move.
-                        if (action == "move-up") {
+                        // Animate the page move.
+                        if (direction == "up") {
                             other_li.before(li);
-                        } else if (action == "move-down") {
+                        } else if (direction == "down") {
                             other_li.after(li);
                         }
                         li.fadeIn();

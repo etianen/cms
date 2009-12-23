@@ -47,36 +47,13 @@ class AdminSite(admin.AdminSite):
         urls = super(AdminSite, self).get_urls()
         custom_urls = patterns("",
                                url(r"^edit-details/$", self.admin_view(self.edit_details), name="edit_details"),
+                               url(r"^move-page/$", self.admin_view(self.move_page), name="move_page"),
                                url(r"^tinymce-init.js$", self.admin_view(self.tinymce_init), name="tinymce_init"),)
         return custom_urls + urls
         
     @transaction.commit_on_success
     def index(self, request, extra_context=None):
         """Displays the admin site dashboard."""
-        # Respond to page move requests.
-        if request.method == "POST":
-            page = Page.objects.get_by_id(request.POST["page"])
-            action = request.POST["action"]
-            if action == "move-up":
-                other = page.parent.children.order_by("-order").filter(order__lt=page.order)[0]
-            elif action == "move-down":
-                other = page.parent.children.order_by("order").filter(order__gt=page.order)[0]
-            else:
-                raise ValueError, "Action should be 'up' or 'down', not '%s'." % action
-            # To prevent duplicating the order key, we need to do a little dance here.
-            page_order = page.order
-            other_order = other.order
-            page.order = None
-            page.save()
-            other.order = page_order
-            other.save()
-            page.order = other_order
-            page.save()
-            # Return a response appropriate to whether this was an AJAX request or not.
-            if request.is_ajax():
-                return HttpResponse("Page #%s was moved %s." % (page.id, action))
-            else:
-                return redirect("admin:index")
         # Retrieve the homepage in order to render the sitemap.
         try:
             homepage = Page.objects.get_homepage()
@@ -90,6 +67,31 @@ class AdminSite(admin.AdminSite):
         context.update(extra_context or {})
         # Render the index page.
         return super(AdminSite, self).index(request, context)
+    
+    def move_page(self, request):
+        """Moves a page up or down."""
+        page = Page.objects.get_by_id(request.POST["page"])
+        direction = request.POST["direction"]
+        if direction == "up":
+            other = page.parent.children.order_by("-order").filter(order__lt=page.order)[0]
+        elif direction == "down":
+            other = page.parent.children.order_by("order").filter(order__gt=page.order)[0]
+        else:
+            raise ValueError, "Direction should be 'up' or 'down', not '%s'." % direction
+        # To prevent duplicating the order key, we need to do a little dance here.
+        page_order = page.order
+        other_order = other.order
+        page.order = None
+        page.save()
+        other.order = page_order
+        other.save()
+        page.order = other_order
+        page.save()
+        # Return a response appropriate to whether this was an AJAX request or not.
+        if request.is_ajax():
+            return HttpResponse("Page #%s was moved %s." % (page.id, direction))
+        else:
+            return redirect("admin:index")
     
     def edit_details(self, request):
         """Allows a user to edit their own details."""
@@ -314,6 +316,10 @@ class PageAdmin(PageBaseAdmin):
         # Check user has correct permission.
         add_permission = "%s.%s" % (opts.app_label, content.get_add_permission(slug))
         return request.user.has_perm(add_permission)
+    
+    def has_move_permission(self, request, obj):
+        """Checks whether the given user can move the given page."""
+        self.has 
     
     def add_view(self, request, *args, **kwargs):
         """Ensures that a valid content type is chosen."""
