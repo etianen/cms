@@ -1,12 +1,6 @@
 """Template tags used by the CMS."""
 
 
-import re
-
-from django import template
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
-from django.template.defaultfilters import stringfilter
 from django.utils.safestring import mark_safe
 
 from cms.apps.pages.models import Page
@@ -35,7 +29,7 @@ def html(text):
     text = generate_thumbnails(text)
     return mark_safe(text)
 
-    
+
 # Page linking.
 
 
