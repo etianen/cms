@@ -100,33 +100,4 @@ def last(context):
         return "last"
     return ""
 
-
-# Flow control.
-
-
-@register.body_tag
-def repeat(context, nodelist, count):
-    """Renders the node."""
-    result = []
-    if "forloop" in context:
-        parentloop = context["forloop"]
-    else:
-        parentloop = {}
-    loop_attrs = {"parentloop": parentloop}
-    context.push()
-    context["forloop"] = loop_attrs
-    try:
-        for index in range(count):
-            # Update forloop attrs.
-            loop_attrs["counter0"] = index
-            loop_attrs["counter"] = index + 1
-            loop_attrs["revcounter"] = count - index
-            loop_attrs["revcounter0"] = count - index - 1
-            loop_attrs["first"] = (index == 0)
-            loop_attrs["last"] = (index == count - 1)
-            result.append(nodelist.render(context))
-        return u"".join(result)
-    finally:
-        context.pop()
-
     
