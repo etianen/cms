@@ -1,6 +1,7 @@
 """Template tags used by the CMS."""
 
 
+from django import template
 from django.utils.safestring import mark_safe
 
 from cms.apps.pages.models import Page
@@ -28,6 +29,60 @@ def html(text):
     text = expand_permalinks(text)
     text = generate_thumbnails(text)
     return mark_safe(text)
+
+
+CONTENT_INHERIT_KEYWORD = "inherit"
+
+
+class ContentNode(template.Node):
+    
+    """Renderer for the 'content' template tag."""
+    
+    def __init__(self, content_area, inherited):
+        """Initializes the ContentNode."""
+        super(ContentNode, self).__init__()
+        self.content_area = content_area
+        self.inherited = inherited
+        
+    def render(self, context):
+        """Renders the node."""
+        try:
+            content_obj = context["content"]
+        except IndexError:
+            raise template.VariableDoesNotExist, "The context does not contain a page content object."
+        content = ""
+        while not content:
+            content = getattr(content_obj, self.content_area, "")
+            if not self.inherited:
+                break
+            if content_obj.page.parent:
+                content_obj = content_obj.page.parent.content
+        return html(content)
+    
+
+@register.tag
+def content(parser, token):
+    """
+    Renders the named content area of the current page.
+    
+    For example, to render the content area called 'content_primary'::
+    
+        {% content content_primary %}
+        
+    If you use the 'inherit' keyword, and the page content area is blank, then
+    the parent page content area will be rendered instead::
+    
+        {% content content_primary inherit %}
+    """
+    contents = token.split_contents()
+    content_length = len(contents)
+    tag_name = contents[0]
+    if content_length == 2 or (content_length == 3 and contents[2] == CONTENT_INHERIT_KEYWORD):
+        content_area = contents[1]
+        inherited = content_length == 3
+        return ContentNode(content_area, inherited)
+    else:
+        raise template.TemplateSyntaxError, "'%(tag_name)s' tags should use the following format: %(tag_name)s {content_area} [inherit]" % {"tag_name": tag_name}
 
 
 # Page linking.
