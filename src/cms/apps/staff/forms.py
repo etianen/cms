@@ -6,7 +6,6 @@ from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm
 from django.contrib.auth.models import User, Group
-from django.utils.safestring import mark_safe
 
 
 class UserCreationForm(BaseUserCreationForm):

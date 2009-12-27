@@ -7,7 +7,6 @@ from django import forms
 from django.core.files.images import get_image_dimensions
 from django.core.files.storage import default_storage
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget, AdminFileWidget
-from django.db.models.fields.files import FieldFile
 from django.utils.text import capfirst
 
 from cms.apps.pages.forms import HtmlWidget

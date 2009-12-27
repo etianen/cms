@@ -5,7 +5,7 @@ import datetime
 
 from django.db import models
 
-from cms.apps.pages.models import Page, PageBase, PageField, HtmlField
+from cms.apps.pages.models import PageField
 from cms.apps.feeds.models import ArticleBase
 
 

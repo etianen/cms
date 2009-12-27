@@ -16,7 +16,7 @@ For an explanation of these settings, please see the Django documentation at:
 """
 
 
-import datetime, os
+import os
 
 
 # Absolute path to the directory containing the CMS.

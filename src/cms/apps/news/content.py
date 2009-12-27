@@ -3,9 +3,7 @@
 
 from django.conf import settings
 
-from cms.apps.pages import content
 from cms.apps.news.models import Article
-from cms.apps.feeds import registered_feeds
 from cms.apps.feeds.content import FeedBase
 
 

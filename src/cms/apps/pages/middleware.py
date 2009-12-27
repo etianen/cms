@@ -3,11 +3,10 @@
 
 from __future__ import with_statement
 
-import sys, traceback
+import sys
 
 from django.conf import settings
 from django.core import urlresolvers
-from django.core.mail import mail_admins
 from django.core.handlers.base import BaseHandler
 from django.http import Http404
 from django.views.debug import technical_404_response
