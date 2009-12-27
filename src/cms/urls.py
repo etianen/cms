@@ -19,6 +19,7 @@ admin.autodiscover()
 
 urlpatterns = patterns("",
                        # TinyMCE configuration views.
+                       url(r"^admin/tinymce-init.js$", "django.views.generic.simple.direct_to_template", kwargs={"template": "admin/tinymce_init.js", "mimetype": "text/javascript"}, name="tinymce_init"),
                        url(r"^admin/tinymce-link-list.js$", "cms.apps.media.views.tinymce_link_list", name="tinymce_link_list"),
                        url(r"^admin/tinymce-image-list.js$", "cms.apps.media.views.tinymce_image_list", name="tinymce_image_list"),
                        # Admin views.
@@ -31,7 +32,7 @@ urlpatterns = patterns("",
                        # RSS feed service.
                        url(r"^feeds/(?P<url>.*)/$", "django.contrib.syndication.views.feed", {"feed_dict": registered_feeds}, name="feeds"),
                        # Basic robots.txt.
-                       url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}),)
+                       url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}, name="robots_txt"),)
 
 
 # Set up static media serving.

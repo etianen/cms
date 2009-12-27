@@ -56,8 +56,7 @@ class AdminSite(admin.AdminSite):
         """Generates custom admin URLS."""
         urls = super(AdminSite, self).get_urls()
         custom_urls = patterns("",
-                               url(r"^move-page/$", self.admin_view(self.move_page), name="move_page"),
-                               url(r"^tinymce-init.js$", self.admin_view(self.tinymce_init), name="tinymce_init"),)
+                               url(r"^move-page/$", self.admin_view(self.move_page), name="move_page"),)
         return custom_urls + urls
         
     def index(self, request, extra_context=None):
@@ -113,12 +112,7 @@ class AdminSite(admin.AdminSite):
         else:
             return redirect("admin:index")
     
-    def tinymce_init(self, request):
-        """Renders the TinyMCE initialization script."""
-        context = {"TINYMCE_CONTENT_CSS": settings.TINYMCE_CONTENT_CSS}
-        return render_to_response("admin/tinymce_init.js", context, template.RequestContext(request), mimetype="text/javascript")
-        
-    
+
 # The default instance of the CMS admin site.
 site = AdminSite()
 

@@ -20,7 +20,7 @@ tinyMCE.init({
     theme_advanced_blockformats: "h2,h3,p",
     external_link_list_url: "{% url tinymce_link_list %}",
     external_image_list_url: "{% url tinymce_image_list %}",
-    content_css: "{{TINYMCE_CONTENT_CSS}}",
+    content_css: "{{settings.TINYMCE_CONTENT_CSS}}",
     extended_valid_elements : "iframe[src|width|height|name|align]",
     convert_urls: false,
     button_tile_map : true,
