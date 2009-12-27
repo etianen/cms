@@ -6,9 +6,11 @@ from __future__ import with_statement
 import sys, traceback
 
 from django.conf import settings
+from django.core import urlresolvers
 from django.core.mail import mail_admins
+from django.core.handlers.base import BaseHandler
 from django.http import Http404
-from django.views.debug import technical_404_response, technical_500_response
+from django.views.debug import technical_404_response
 from django.shortcuts import redirect
 
 from cms.apps.pages.models import Page, cache, publication_manager
@@ -18,45 +20,35 @@ class PageMiddleware(object):
     
     """Serves up pages when no other view is matched."""
     
-    def not_found_response(self, request, page):
-        """Renders a pretty not found page."""
-        context = {"title": "Page Not Found"}
-        response = page.content.render_to_response(request, "404.html", context)
-        response.status_code = 404
-        return response
-    
-    def error_response(self, request, page):
-        """Renders a pretty error page."""
-        context = {"title": "Server Error"}
-        response = page.content.render_to_response(request, "500.html", context)
-        response.status_code = 500
-        return response
-    
-    def process_response(self, request, response):
-        """Falls back to page dispatch."""
-        # See if preview mode is requested.
+    def process_request(self, request):
+        """
+        Attempts a page dispatch.
+        
+        A page dispatch will be carried out if the URL conf does not contain a
+        match. This a different strategy to the flatpages app, as it is assumed
+        that most requests will require the page dispatch mechanism. If we
+        simply caught 404 responses, then there would be a lot of wasted
+        template rendering.
+        """
+        resolver = urlresolvers.get_resolver(urlresolvers.get_urlconf())
         try:
-            preview_mode = int(request.GET.get(settings.PUBLICATION_PREVIEW_KEY, 0))
-        except ValueError:
-            preview_mode = False
-        # Only allow preview mode if the user is a logged in administrator.
-        preview_mode = preview_mode and request.user.is_authenticated() and request.user.is_staff and request.user.is_active
-        with publication_manager.select_published(not preview_mode):
+            # Try to match the given path with the URL conf. If it fails, then
+            # attempt to dispatch to a page.
+            resolver.resolve(request.path)
+        except urlresolvers.Resolver404:
+            # See if preview mode is requested.
             try:
-                # If the urlconf matched the request with no error, then ignore.
-                if response.status_code not in (404, 500):
-                    return response
+                preview_mode = int(request.GET.get(settings.PUBLICATION_PREVIEW_KEY, 0))
+            except ValueError:
+                preview_mode = False
+            # Only allow preview mode if the user is a logged in administrator.
+            preview_mode = preview_mode and request.user.is_authenticated() and request.user.is_staff and request.user.is_active
+            with publication_manager.select_published(not preview_mode):
                 # See if we have pages to dispatch to.
                 try:
                     page = Page.objects.get_by_path(request.path)
                 except Page.DoesNotExist:
-                    return response
-                # Handle server errors.
-                if response.status_code == 500:
-                    if settings.DEBUG:
-                        return response
-                    return self.error_response(request, page)
-                # Try to dispatch to a page.
+                    return
                 path_info = request.path[len(page.url):]
                 # Append a slash to match the page precisely.
                 if not path_info and not request.path.endswith("/") and settings.APPEND_SLASH:
@@ -67,23 +59,14 @@ class PageMiddleware(object):
                 except Http404, ex:
                     if settings.DEBUG:
                         return technical_404_response(request, ex)
-                    return self.not_found_response(request, page)
+                    # Let the normal 404 mechanisms render an error page.
+                    return
                 except:
-                    if settings.DEBUG:
-                        return technical_500_response(request, *sys.exc_info())
-                    # Send an email to the admininistrators.
-                    # HACK: This is a copy and paste from the base handler code.
-                    subject = "Error (%s IP): %s" % ((request.META.get("REMOTE_ADDR") in settings.INTERNAL_IPS and "internal" or "EXTERNAL"), request.path)
-                    try:
-                        request_repr = repr(request)
-                    except:
-                        request_repr = "Request repr() unavailable"
-                    formatted_traceback = "\n".join(traceback.format_exception(*sys.exc_info()))
-                    message = "%s\n\n%s" % (formatted_traceback, request_repr)
-                    mail_admins(subject, message, fail_silently=True)
-                    # Return the branded error page.
-                    return self.error_response(request, page)
-            finally:
-                cache.clear()
+                    return BaseHandler().handle_uncaught_exception(request, resolver, sys.exc_info())
             
-    
+    def process_response(self, request, response):
+        """Clears the page cache."""
+        cache.clear()
+        return response
+        
+        

@@ -1,11 +1,9 @@
 """Core views used by the CMS."""
 
 
-from django import template
-from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404, HttpResponse, HttpResponseNotFound, HttpResponseServerError
-from django.shortcuts import render_to_response, redirect
+from django.http import Http404
+from django.shortcuts import redirect
 
 from cms.apps.pages.models import Page
 
@@ -31,19 +29,19 @@ def permalink_redirect(request, content_type_id, object_id):
         
         
 def handler404(request):
-    """
-    Renders a basic 404 error.
-    
-    This will be replaced by a better one in the PageMiddleware.
-    """
-    return HttpResponseNotFound("Page Not Found")
+    """Renders a pretty error page."""
+    page = Page.objects.get_by_path(request.path)
+    context = {"title": "Page Not Found"}
+    response = page.content.render_to_response(request, "404.html", context)
+    response.status_code = 404
+    return response
         
 
 def handler500(request):
-    """
-    Renders a basic 500 error.
-    
-    This will be replaced by a better one in the PageMiddleware.
-    """
-    return HttpResponseServerError("Server Error")
+    """Renders a pretty error page."""
+    page = Page.objects.get_by_path(request.path)
+    context = {"title": "Server Error"}
+    response = page.content.render_to_response(request, "500.html", context)
+    response.status_code = 500
+    return response
 
