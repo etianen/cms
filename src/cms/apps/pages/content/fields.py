@@ -9,7 +9,7 @@ from django.core.files.storage import default_storage
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget, AdminFileWidget
 from django.utils.text import capfirst
 
-from cms.apps.pages.forms import HtmlWidget
+from cms.apps.utils.forms import HtmlWidget
 from cms.apps.utils.optimizations import cached_getter
 
 
