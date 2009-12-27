@@ -231,7 +231,7 @@ class PageManager(PageBaseManager):
         # Complain about an unrecognised argument type.
         raise TypeError, "Expected Page, int or basestring.  Found %s." % type(id).__name__
     
-    def get_page_url(self, slug):
+    def expand_page_url(self, slug):
         """
         Attempts to convert a page shortcut into a full URL.
         

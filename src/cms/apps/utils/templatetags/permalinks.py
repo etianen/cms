@@ -35,7 +35,7 @@ def expand_permalinks(text):
             obj = permalinks.resolve(href)
         except permalinks.PermalinkError:
             # Try to match a page permalink.
-            href = Page.objects.get_page_url(href)
+            href = Page.objects.expand_page_url(href)
         except ObjectDoesNotExist:
             pass
         else:

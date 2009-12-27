@@ -23,6 +23,6 @@ class Redirect(content.ContentBase):
     def index(self, request):
         """Redirects to the redirect URL."""
         redirect_url = self.redirect_url
-        redirect_url = Page.objects.get_page_url(redirect_url)
+        redirect_url = Page.objects.expand_page_url(redirect_url)
         return redirect(redirect_url)
     
