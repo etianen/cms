@@ -3,12 +3,11 @@
 
 from __future__ import with_statement
 
-import datetime, threading, contextlib, functools
+import threading, contextlib
 
-from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
-from django.db.models import Q
+from django.forms.fields import slug_re
 
 
 class PublicationManagementError(Exception):
@@ -226,7 +225,7 @@ class PageManager(PageBaseManager):
         page id.  If successful, the page URL is returned.  Otherwise, the slug
         is returned unchanged.
         """
-        if "/" in slug:
+        if not slug_re.search(slug):
             return slug
         try:
             page = self.get_page(slug)

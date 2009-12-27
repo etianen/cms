@@ -4,7 +4,6 @@
 import re
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.forms.fields import slug_re
 
 from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import Library
