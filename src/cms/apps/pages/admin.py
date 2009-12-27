@@ -6,7 +6,9 @@ user-friendly appearance and providing additional functionality over the
 standard implementation.
 """
 
-import urllib
+from __future__ import with_statement
+
+import urllib, functools
 
 from django import template
 from django.core.exceptions import PermissionDenied
@@ -24,6 +26,7 @@ from reversion.admin import VersionAdmin
 from cms.apps.pages import content
 from cms.apps.pages.forms import EditDetailsForm
 from cms.apps.pages.models import Page
+from cms.apps.pages.models.managers import publication_manager
 
 
 # The GET parameter used to indicate where page admin actions originated.
@@ -41,6 +44,15 @@ class AdminSite(admin.AdminSite):
     index_template = "admin/dashboard.html"
     
     # Custom admin views.
+    
+    def admin_view(self, view, *args, **kwargs):
+        """Turns off publication management for admin views."""
+        view = super(AdminSite, self).admin_view(view, *args, **kwargs)
+        @functools.wraps(view)
+        def wrapper(*args, **kwargs):
+            with publication_manager.select_published(False):
+                return view(*args, **kwargs)
+        return wrapper
     
     def get_urls(self):
         """Generates custom admin URLS."""

@@ -23,6 +23,8 @@ class PublicationManager(threading.local):
     """
     Tracks a thread-local state of whether querysets should be filtered based on
     publication state.
+    
+    By default, unpublished content will be filtered out.
     """
     
     def __init__(self):
@@ -41,7 +43,7 @@ class PublicationManager(threading.local):
         try:
             return self._stack[-1]
         except IndexError:
-            return False
+            return True
         
     def _end(self):
         """Ends a block of publication control."""
@@ -51,7 +53,7 @@ class PublicationManager(threading.local):
             raise PublicationManagementError, "There is no active block of publication management."
         
     @contextlib.contextmanager
-    def select_published(self, select_published=True):
+    def select_published(self, select_published):
         """Marks a block of publication management."""
         self._begin(select_published)
         try:
@@ -60,27 +62,6 @@ class PublicationManager(threading.local):
             raise
         finally:
             self._end()
-            
-    def preview_mode_active(self, request):
-        """
-        Checks whether the request is sucessfuly signalling for preview mode.
-        """
-        # See if preview mode is requested.
-        try:
-            preview_mode = int(request.GET.get(settings.PUBLICATION_PREVIEW_KEY, 0))
-        except ValueError:
-            preview_mode = False
-        # Only allow preview mode if the user is a logged in administrator.
-        return preview_mode and request.user.is_authenticated() and request.user.is_staff and request.user.is_active
-            
-    def published_view(self, func):
-        """Decorator that enables publication filtering in the given view."""
-        @functools.wraps(func)
-        def func_(request, *args, **kwargs):
-            # Execute the function in the correct publication context.
-            with self.select_published(not self.preview_mode_active(request)):
-                return func(request, *args, **kwargs)
-        return func_
             
     
 # A single, thread-safe publication manager.

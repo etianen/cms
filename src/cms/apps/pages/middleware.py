@@ -34,7 +34,14 @@ class PageMiddleware(object):
     
     def process_response(self, request, response):
         """Falls back to page dispatch."""
-        with publication_manager.select_published(not publication_manager.preview_mode_active(request)):
+        # See if preview mode is requested.
+        try:
+            preview_mode = int(request.GET.get(settings.PUBLICATION_PREVIEW_KEY, 0))
+        except ValueError:
+            preview_mode = False
+        # Only allow preview mode if the user is a logged in administrator.
+        preview_mode = preview_mode and request.user.is_authenticated() and request.user.is_staff and request.user.is_active
+        with publication_manager.select_published(not preview_mode):
             try:
                 # If the urlconf matched the request with no error, then ignore.
                 if response.status_code not in (404, 500):
