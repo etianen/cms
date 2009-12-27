@@ -63,7 +63,6 @@ class AdminSite(admin.AdminSite):
                                url(r"^tinymce-init.js$", self.admin_view(self.tinymce_init), name="tinymce_init"),)
         return custom_urls + urls
         
-    @transaction.commit_on_success
     def index(self, request, extra_context=None):
         """Displays the admin site dashboard."""
         # Retrieve the homepage in order to render the sitemap.
@@ -80,6 +79,7 @@ class AdminSite(admin.AdminSite):
         # Render the index page.
         return super(AdminSite, self).index(request, context)
     
+    @transaction.commit_on_success
     def move_page(self, request):
         """Moves a page up or down."""
         page = Page.objects.get_by_id(request.POST["page"])
@@ -116,6 +116,7 @@ class AdminSite(admin.AdminSite):
         else:
             return redirect("admin:index")
     
+    @transaction.commit_on_success
     def edit_details(self, request):
         """Allows a user to edit their own details."""
         user = request.user
