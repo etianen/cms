@@ -187,6 +187,20 @@ class PageManager(PageBaseManager):
             return cache.get_by_permalink(permalink)
         except KeyError:
             return self.get(permalink=permalink)
+        
+    def get_by_path(self, path):
+        """Returns the page that best matches the given URL."""
+        page = self.get_homepage()
+        # Get the most exact page match.
+        for slug in path.strip("/").split("/"):
+            matched = False
+            for child in page.children:
+                if child.url_title == slug:
+                    page = child
+                    matched = True
+            if not matched:
+                break
+        return page
     
     def get_page(self, id):
         """

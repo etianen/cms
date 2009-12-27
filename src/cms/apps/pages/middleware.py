@@ -48,20 +48,9 @@ class PageMiddleware(object):
                     return response
                 # See if we have pages to dispatch to.
                 try:
-                    page = Page.objects.get_homepage()
+                    page = Page.objects.get_by_path(request.path)
                 except Page.DoesNotExist:
                     return response
-                # Get the most exact page match.
-                breadcrumbs = [page]
-                for slug in request.path.strip("/").split("/"):
-                    matched = False
-                    for child in page.children:
-                        if child.url_title == slug:
-                            page = child
-                            matched = True
-                    if not matched:
-                        break
-                    breadcrumbs.append(page)
                 # Handle server errors.
                 if response.status_code == 500:
                     if settings.DEBUG:
