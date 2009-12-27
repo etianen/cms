@@ -8,6 +8,15 @@ from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm
 from django.contrib.auth.models import User, Group
 
 
+class EditDetailsForm(forms.ModelForm):
+    
+    """Form that allows a user to edit their own details."""
+    
+    class Meta:
+        model = User
+        fields = ("username", "first_name", "last_name", "email",)
+
+
 class UserCreationForm(BaseUserCreationForm):
     
     """Extended user creation form."""

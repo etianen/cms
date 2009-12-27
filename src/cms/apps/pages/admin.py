@@ -16,7 +16,6 @@ from django.core.urlresolvers import reverse
 from django.conf.urls.defaults import patterns, url
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.auth.models import User
 from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render_to_response, redirect
@@ -24,7 +23,6 @@ from django.shortcuts import render_to_response, redirect
 from reversion.admin import VersionAdmin
 
 from cms.apps.pages import content
-from cms.apps.pages.forms import EditDetailsForm
 from cms.apps.pages.models import Page
 from cms.apps.pages.models.managers import publication_manager
 
@@ -58,7 +56,6 @@ class AdminSite(admin.AdminSite):
         """Generates custom admin URLS."""
         urls = super(AdminSite, self).get_urls()
         custom_urls = patterns("",
-                               url(r"^edit-details/$", self.admin_view(self.edit_details), name="edit_details"),
                                url(r"^move-page/$", self.admin_view(self.move_page), name="move_page"),
                                url(r"^tinymce-init.js$", self.admin_view(self.tinymce_init), name="tinymce_init"),)
         return custom_urls + urls
@@ -115,40 +112,6 @@ class AdminSite(admin.AdminSite):
             return HttpResponse("Page #%s was moved %s." % (page.id, direction))
         else:
             return redirect("admin:index")
-    
-    @transaction.commit_on_success
-    def edit_details(self, request):
-        """Allows a user to edit their own details."""
-        user = request.user
-        if request.method == "POST":
-            form = EditDetailsForm(request.POST, instance=user)
-            if form.is_valid():
-                form.save()
-                message = "Your details have been updated."
-                request.user.message_set.create(message=message)
-                if "_continue" in request.POST:
-                    return redirect("admin:edit_details")
-                else:
-                    return redirect("admin:index")
-        else:
-            form = EditDetailsForm(instance=user)
-        media = form.media
-        context = {"title": "Edit details",
-                   "form": form,
-                   "is_popup": False,
-                   "add": False,
-                   "change": True,
-                   "has_add_permission": False,
-                   "has_delete_permission": False,
-                   "has_change_permission": True,
-                   "has_file_field": False,
-                   "has_absolute_url": False,
-                   "auto_populated_fields": (),
-                   "opts": User._meta,
-                   "media": media,
-                   "save_as": False,
-                   "app_label": User._meta.app_label,}
-        return render_to_response("admin/edit_details_form.html", context, template.RequestContext(request))
     
     def tinymce_init(self, request):
         """Renders the TinyMCE initialization script."""

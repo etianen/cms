@@ -2,14 +2,16 @@
 
 
 from django import template
+from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from django.shortcuts import render_to_response, redirect
 
 from cms.apps.pages.admin import site
-from cms.apps.staff.forms import UserCreationForm
+from cms.apps.staff.forms import UserCreationForm, EditDetailsForm
 
 
 class UserAdmin(BaseUserAdmin):
@@ -44,6 +46,14 @@ class UserAdmin(BaseUserAdmin):
     
     # Custom admin views.
     
+    def get_urls(self):
+        """Generates custom admin URLS."""
+        urls = super(UserAdmin, self).get_urls()
+        custom_urls = patterns("",
+                               url(r"^edit-details/$", self.admin_site.admin_view(self.edit_details), name="staff_edit_details"),)
+        return custom_urls + urls
+    
+    @transaction.commit_on_success
     def add_view(self, request):
         """Allows new users to be added to the admin interface."""
         if request.method == "POST":
@@ -83,6 +93,40 @@ class UserAdmin(BaseUserAdmin):
                    "save_as": False,
                    "app_label": self.model._meta.app_label,}
         return render_to_response("admin/auth/user/add_form.html", context, template.RequestContext(request))
+    
+    @transaction.commit_on_success
+    def edit_details(self, request):
+        """Allows a user to edit their own details."""
+        user = request.user
+        if request.method == "POST":
+            form = EditDetailsForm(request.POST, instance=user)
+            if form.is_valid():
+                form.save()
+                message = "Your details have been updated."
+                request.user.message_set.create(message=message)
+                if "_continue" in request.POST:
+                    return redirect("admin:staff_edit_details")
+                else:
+                    return redirect("admin:index")
+        else:
+            form = EditDetailsForm(instance=user)
+        media = form.media
+        context = {"title": "Edit details",
+                   "form": form,
+                   "is_popup": False,
+                   "add": False,
+                   "change": True,
+                   "has_add_permission": False,
+                   "has_delete_permission": False,
+                   "has_change_permission": True,
+                   "has_file_field": False,
+                   "has_absolute_url": False,
+                   "auto_populated_fields": (),
+                   "opts": User._meta,
+                   "media": media,
+                   "save_as": False,
+                   "app_label": User._meta.app_label,}
+        return render_to_response("admin/auth/edit_details_form.html", context, template.RequestContext(request))
     
     
 site.register(User, UserAdmin)

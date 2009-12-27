@@ -4,6 +4,7 @@
 {% block breadcrumbs %}
     <div class="breadcrumbs">
          <a href="{% url admin:index %}">Home</a> &rsaquo;
+         <a href="{% url admin:app_list 'auth' %}">Auth</a> &rsaquo;
          {{title}}
     </div>
 {% endblock %}
