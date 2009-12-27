@@ -35,21 +35,17 @@ def expand_permalinks(text):
         try:
             obj = permalinks.resolve(href)
         except permalinks.PermalinkError:
-            pass
+            # Try to match a page permalink.
+            href = Page.objects.get_url(href)
         except ObjectDoesNotExist:
             pass
-        # Try to match a page permalink.
-        if obj is None and slug_re.search(href):
-            try:
-                obj = Page.objects.get_page(href)
-            except Page.DoesNotExist:
-                pass
-        # If an object was found, substitute it's href.
-        if obj is not None:
-            try:
-                href = obj.get_absolute_url()
-            except AttributeError:
-                pass
+        else:
+            # If an object was found, substitute it's href.
+            if obj is not None:
+                try:
+                    href = obj.get_absolute_url()
+                except AttributeError:
+                    pass
         return u"".join((match.group(1), href, match.group(3)))
     return RE_ANCHOR.sub(replacement, text)
 
