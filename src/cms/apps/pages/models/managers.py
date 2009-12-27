@@ -100,8 +100,13 @@ class PageCache(threading.local):
     
     def __init__(self):
         """Initializes the PageCache."""
+        self.clear()
+        
+    def clear(self):
+        """Clears the page cache."""
         self._id_cache = {}
         self._permalink_cache = {}
+        self._homepage_cache = None
         
     def add(self, page):
         """Adds the given page to the cache."""
@@ -125,11 +130,6 @@ class PageCache(threading.local):
             except KeyError:
                 pass
             
-    def clear(self):
-        """Clears the page cache."""
-        self._id_cache.clear()
-        self._permalink_cache.clear()
-        
     def contains_permalink(self, permalink):
         """Checks whether the given permalink is in the cache."""
         return permalink in self._permalink_cache
@@ -153,7 +153,7 @@ class PageCache(threading.local):
         Raises a KeyError if the page does not exist.
         """
         return self._id_cache[id]
-
+    
 
 cache = PageCache()
 
@@ -164,7 +164,9 @@ class PageManager(PageBaseManager):
     
     def get_homepage(self):
         """Returns the site homepage."""
-        return self.get(parent=None)
+        if cache._homepage_cache is None:
+            cache._homepage_cache = self.get(parent=None)
+        return cache._homepage_cache
     
     def get_by_id(self, id):
         """
