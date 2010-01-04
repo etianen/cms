@@ -5,11 +5,6 @@
 
 (function() {
     
-    // File browser callback.
-    function fileBrowser(input, value, type, win) {
-        
-    }
-    
     // Initialize the editors.
     tinyMCE.init({
         mode: "specific_textareas",
@@ -31,8 +26,7 @@
         convert_urls: false,
         button_tile_map : true,  // Client-side optimization.
         entity_encoding: "raw",  // Client-side optimization.
-        verify_html: false,  // Client-side optimization.
-        file_browser_callback: fileBrowser
+        verify_html: false  // Client-side optimization.
     });
     
 }());
