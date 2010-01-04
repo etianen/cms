@@ -3,7 +3,7 @@
 
 from django import template
 from django.conf import settings
-from django.core.mail import send_mass_mail
+from django.core import mail
 from django.shortcuts import redirect
 
 from cms.apps.pages import content
@@ -87,20 +87,21 @@ class ContactForm(DefaultContent):
                                         "email": email,
                                         "data": data}
                 notification_message = template.loader.render_to_string("contact/notification.txt", notification_context, template.RequestContext(request))
-                messages.append((subject, 
-                                 notification_message, 
-                                 settings.DEFAULT_FROM_EMAIL, 
-                                 [recipient]))
+                messages.append(mail.EmailMessage(subject, 
+                                                  notification_message, 
+                                                  settings.DEFAULT_FROM_EMAIL, 
+                                                  [recipient],
+                                                  headers={"Reply-To": sender}))
                 # Compile the confirmation email.
                 confirmation_context = template.RequestContext(request, contact_form.cleaned_data)
                 confirmation_email = template.Template(self.confirmation_message)
                 confirmation_message = confirmation_email.render(confirmation_context)
-                messages.append((subject,
-                                 confirmation_message,
-                                 settings.DEFAULT_FROM_EMAIL,
-                                 [sender]))
+                messages.append(mail.EmailMessage(subject,
+                                                  confirmation_message,
+                                                  settings.DEFAULT_FROM_EMAIL,
+                                                  [sender]))
                 # Send both emails.
-                send_mass_mail(messages)
+                mail.get_connection().send_messages(messages)
                 # Redirect the user.
                 return redirect(self.reverse("message_sent"))
         else:    
