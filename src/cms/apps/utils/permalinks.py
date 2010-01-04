@@ -7,10 +7,9 @@ change it's absolute URL without breaking links.
 
 
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.views import shortcut
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse, resolve as resolve_url, Resolver404
-
-from cms.apps.pages.views import permalink_redirect
 
 
 class PermalinkError(Exception):
@@ -43,14 +42,14 @@ def resolve(url):
     except TypeError:
         raise PermalinkError, "'%s' is not a valid permalink." % url
     # Check if the URL refers to a permalink.
-    if callback != permalink_redirect:
+    if callback != shortcut:
         raise PermalinkError, "'%s' is not a valid permalink." % url
     # Get the permalink attributes.
     try:
         content_type_id = callback_kwargs["content_type_id"]
         object_id = callback_kwargs["object_id"]
     except IndexError:
-        raise ImproperlyConfigured, "The permalink_redirect view should be configured using keywork arguments."
+        raise ImproperlyConfigured, "The permalink_redirect view should be configured using keyword arguments."
     # Resolve the object. 
     content_type = ContentType.objects.get_for_id(content_type_id)
     obj = content_type.get_object_for_this_type(id=object_id)
