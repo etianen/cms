@@ -65,7 +65,7 @@ class Page(PageBase):
         Returns all the children of this page, regardless of their publication
         state.
         """
-        return Page.objects.filter(parent=self).defer("content_data")
+        return Page.objects.filter(parent__id=self.id)
     
     children = property(get_children,
                         doc="All children of this page.")

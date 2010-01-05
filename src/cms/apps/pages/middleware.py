@@ -29,7 +29,7 @@ class PageMiddleware(object):
         simply caught 404 responses, then there would be a lot of wasted
         template rendering.
         """
-        resolver = urlresolvers.get_resolver(urlresolvers.get_urlconf())
+        resolver = urlresolvers.get_resolver(None)
         try:
             # Try to match the given path with the URL conf. If it fails, then
             # attempt to dispatch to a page.
