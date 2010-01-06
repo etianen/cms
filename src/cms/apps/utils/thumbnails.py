@@ -84,13 +84,12 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE,
         return image
     image_path = image.path
     # Calculate image dimensions.
-    original_width = image.width
-    original_height = image.height
+    original_width, original_height = get_image_dimensions(image_path)
     requested_width = min(requested_width, original_width)
     requested_height = min(requested_height, original_height)
     # Don't generate thumbnail if no resizing is to take place.
     if original_width == requested_width and original_height == requested_height:
-        return image
+        return Thumbnail(image.name, image.storage)
     # Generate the thumbnail filename.
     image_folder, image_name = os.path.split(image.name)
     image_folder = image_folder.replace("/", "-")
