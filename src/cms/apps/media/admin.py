@@ -143,14 +143,15 @@ class FileAdmin(MediaAdmin):
     def get_preview(self, obj):
         """Generates a thumbnail of the image."""
         type = get_file_type(obj.file.name)
+        permalink = permalinks.create(obj)
         if type == IMAGE_FILE:
             try:
                 thumbnail = thumbnails.thumbnail(obj.file, 150, 100)
             except IOError:
                 pass
             else:
-                return '<img src="%s" width="%s" height="%s" alt=""/>' % (thumbnail.url, thumbnail.width, thumbnail.height)
-        return '<img src="%s" width="32" height="32" alt="%s"/>' % (type[1], type[0])
+                return '<img cms:permalink="%s" src="%s" width="%s" height="%s" alt="%s" title="%s"/>' % (permalink, thumbnail.url, thumbnail.width, thumbnail.height, obj.title, obj.title)
+        return '<img cms:permalink="%s" src="%s" width="32" height="32" alt="%s" title="%s"/>' % (permalink, type[1], type[0], obj.title)
     get_preview.short_description = "preview"
     get_preview.allow_tags = True
     
