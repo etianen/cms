@@ -88,7 +88,6 @@ class MediaAdmin(VersionAdmin):
         except OSError:
             return "0 bytes"
     get_size.short_description = "size"
-    get_size.admin_order_field = "size"
     
     
 # Convert the tuples into a dict for faster lookup.
@@ -100,6 +99,8 @@ class FileAdmin(MediaAdmin):
     """Admin settings for File models."""
     
     list_display = ("get_title", "get_type", "get_size",)
+    
+    change_list_template = "admin/media/file/change_list.html"
     
     # Custom display routines.
     

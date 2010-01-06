@@ -1,0 +1,13 @@
+{% extends "reversion/change_list.html" %}
+
+
+{% block extrahead %}
+    {{block.super}}
+    {% if is_popup %}
+        <script type="text/javascript" src="{{CMS_MEDIA_URL}}js/jquery/jquery.js"></script>
+        <script type="text/javascript" src="{{CMS_MEDIA_URL}}js/tiny_mce/tiny_mce_popup.js"></script>
+        <script type="text/javascript" src="{{CMS_MEDIA_URL}}js/filebrowser.js"></script>
+    {% endif %}
+{% endblock %}
+
+

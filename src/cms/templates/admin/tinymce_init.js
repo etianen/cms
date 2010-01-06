@@ -25,7 +25,8 @@
             height: 600,
             resizable: "yes",
             inline: "yes",
-            close_previous: "no"
+            close_previous: "no",
+            popup_css : false
         }, {
             window: win,
             input: field_name
