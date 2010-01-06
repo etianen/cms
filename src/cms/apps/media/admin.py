@@ -4,6 +4,7 @@
 import os
 from functools import partial
 
+from django.conf import settings
 from django.conf.urls.defaults import patterns
 from django.contrib import admin
 from django.contrib.admin.views.main import IS_POPUP_VAR
@@ -89,41 +90,66 @@ class MediaAdmin(VersionAdmin):
     get_size.short_description = "size"
     
        
+# Different types of file.
+AUDIO_FILE = ("Audio", settings.CMS_MEDIA_URL + "img/file-types/audio-x-generic.png")
+DOCUMENT_FILE = ("Document", settings.CMS_MEDIA_URL + "img/file-types/x-office-document.png")
+SPREADSHEET_FILE = ("Spreadsheet", settings.CMS_MEDIA_URL + "img/file-types/x-office-spreadsheet.png")
+TEXT_FILE = ("Plain text", settings.CMS_MEDIA_URL + "img/file-types/text-x-generic.png")
+IMAGE_FILE = ("Image", settings.CMS_MEDIA_URL + "img/file-types/image-x-generic.png")
+MOVIE_FILE = ("Movie", settings.CMS_MEDIA_URL + "img/file-types/video-x-generic.png")
+
 # Different types of recognised file extensions.
-FILE_TYPES = {"mp3": "Audio",
-              "wav": "Audio",
-              "doc": "Document",
-              "odt": "Document",
-              "pdf": "Document",
-              "xls": "Spreadsheet",
-              "txt": "Plain text",
-              "png": "Image",
-              "gif": "Image",
-              "jpg": "Image",
-              "jpeg": "Image",
-              "swf": "Movie",
-              "flv": "Movie",
-              "m4a": "Movie",
-              "mov": "Movie",
-              "wmv": "Movie",}
+FILE_TYPES = {"mp3": AUDIO_FILE,
+              "wav": AUDIO_FILE,
+              "doc": DOCUMENT_FILE,
+              "odt": DOCUMENT_FILE,
+              "pdf": DOCUMENT_FILE,
+              "xls": SPREADSHEET_FILE,
+              "txt": TEXT_FILE,
+              "png": IMAGE_FILE,
+              "gif": IMAGE_FILE,
+              "jpg": IMAGE_FILE,
+              "jpeg": IMAGE_FILE,
+              "swf": MOVIE_FILE,
+              "flv": MOVIE_FILE,
+              "m4a": MOVIE_FILE,
+              "mov": MOVIE_FILE,
+              "wmv": MOVIE_FILE,}
+
+UNKNOWN_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/text-x-generic-template.png"
     
+    
+def get_file_type(filename):
+    """Returns the file type tuple for the given filename."""
+    name, extension = os.path.splitext(filename)
+    if not extension:
+        return ("", UNKNOWN_FILE_ICON)
+    extension = extension.lower()[1:]
+    if extension in FILE_TYPES:
+        return FILE_TYPES[extension]
+    return ("%s file" % extension.upper(), UNKNOWN_FILE_ICON)
+        
     
 class FileAdmin(MediaAdmin):
     
     """Admin settings for File models."""
     
-    list_display = ("get_thumbnail", "get_title", "get_type", "get_size",)
+    list_display = ("get_preview", "get_title", "get_type", "get_size",)
     
     change_list_template = "admin/media/file/change_list.html"
     
     # Custom display routines.
     
-    def get_thumbnail(self, obj):
+    def get_preview(self, obj):
         """Generates a thumbnail of the image."""
+        type = get_file_type(obj.file.name)
+        return '<img src="%s" width="32" height="32" alt="%s"/>' % (type[1], type[0])
+        
+        
         thumbnail = thumbnails.thumbnail(obj.file, 150, 100)
         return '<img src="%s" width="%s" height="%s" alt=""/>' % (thumbnail.url, thumbnail.width, thumbnail.height)
-    get_thumbnail.short_description = "thumbnail"
-    get_thumbnail.allow_tags = True
+    get_preview.short_description = "preview"
+    get_preview.allow_tags = True
     
     def get_title(self, obj):
         """Returns a truncated title of the object."""
@@ -132,15 +158,7 @@ class FileAdmin(MediaAdmin):
     
     def get_type(self, obj):
         """Returns a pretty version of the file type."""
-        # Split the extension off the file name.
-        name, extension = os.path.splitext(obj.file.name)
-        if not extension:
-            return ""
-        # Remove the leading dot and standardize to lowercase.
-        extension = extension.lower()[1:]
-        if extension in FILE_TYPES:
-            return FILE_TYPES[extension]
-        return "%s file" % extension.upper()
+        return get_file_type(obj.file.name)[0]
     get_type.short_description = "type"
     
     # Custom views.
