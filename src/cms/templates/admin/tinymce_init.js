@@ -15,17 +15,17 @@
         
         var verboseName = "File";
         if (type == "image") {
-            verboseName = "Image";
-            browserURL = browserURL + '&file__iregex=\.(png|gif|jpg|jpeg)$';
+            verboseName = "image";
+            browserURL = browserURL + '&file__iregex={{settings.FILENAME_IMAGE_PATTERN|escapejs}}';
         }
         if (type == "media") {
-            verboseName = "Media";
-            browserURL = browserURL + '&file__iregex=\.(swf|flv|m4a|mov|wmv)$';
+            verboseName = "media";
+            browserURL = browserURL + '&file__iregex={{settings.FILENAME_MEDIA_PATTERN|escapejs}}';
         }
         
         tinyMCE.activeEditor.windowManager.open({
             file: browserURL,
-            title: "Link to " + verboseName,
+            title: "Select " + verboseName,
             width: 800,
             height: 600,
             resizable: "yes",
@@ -55,7 +55,7 @@
         height: "350px",
         dialog_type: "modal",
         theme_advanced_blockformats: "h2,h3,p",
-        content_css: "{{settings.TINYMCE_CONTENT_CSS}}",
+        content_css: "{{settings.TINYMCE_CONTENT_CSS|escapejs}}",
         extended_valid_elements : "iframe[src|width|height|name|align]",  // Permit embedded iframes.
         convert_urls: false,
         button_tile_map : true,  // Client-side optimization.

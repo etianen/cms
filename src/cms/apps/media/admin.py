@@ -160,19 +160,19 @@ class FileAdmin(VersionAdmin):
         return get_file_type(obj.file.name)[0]
     get_type.short_description = "type"
     
-    # Custom views.
+    # Custom admin views.
     
-    def get_urls(self):
-        """Enables custom admin views."""
-        urls = super(FileAdmin, self).get_urls()
-        custom_urls = patterns("",
-                               url(r"^filebrowser.js$", self.admin_site.admin_view(self.filebrowser), name="media_file_filebrowser"))
-        return custom_urls + urls
-    
-    def filebrowser(self, request):
-        """Renders the javascript for the WYSIWYG file browser."""
+    def changelist_view(self, request, extra_context=None):
+        """Provides the extra functionality for the popup changelist."""
         context = {}
-        return render_to_response("admin/media/file/filebrowser.js", context, template.RequestContext(request), mimetype="text/javascript")
+        filebrowser_pattern = request.GET.get("file__iregex")
+        if filebrowser_pattern == settings.FILENAME_IMAGE_PATTERN:
+            print "FOOOBA"
+            context["title"] = "Select image"
+        elif filebrowser_pattern == settings.FILENAME_MEDIA_PATTERN:
+            context["title"] = "Select media"
+        context.update(extra_context or {})
+        return super(FileAdmin, self).changelist_view(request, context)
     
     
 site.register(File, FileAdmin)
