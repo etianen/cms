@@ -1,0 +1,15 @@
+=============
+CMS Changelog
+=============
+
+
+2.0.2
+-----
+
+  * More efficient thumbnail expansion in template rendering.
+  * More efficient permalink expansion in template rendering.
+  * More efficient page dispatch mechanism.
+  * Removed keywords field from File model.
+  * Removed notes field from File model.
+  * Remove size field from File model.
+  
