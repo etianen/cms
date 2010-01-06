@@ -16,7 +16,7 @@
             <a href="{{delete_url}}" class="deletelink" title="Delete this page">Delete</a>
         {% endif %}
         {% if can_move %}
-            <form method="post" action="{% url admin:move_page %}">
+            <form method="post" action="{% url admin:pages_page_move_page %}">
                 <input type="hidden" name="page" value="{{page.id}}"/>
                 <button type="submit" class="move-up" title="Move this page up" name="direction" value="up"><span>Up</span></button>
                 <button type="submit" class="move-down" title="Move this page down" name="direction" value="down"><span>Down</span></button>
