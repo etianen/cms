@@ -3,10 +3,7 @@
 */
 
 
-/*
-    Styles for the dashboard index page.
-*/
-
+/* Dashboard index page. */
 
 html body.dashboard #content {
     width: 960px;
@@ -151,10 +148,7 @@ body.dashboard div.sitemap-entry button.move-down:hover {
 }
 
 
-/*
-    Styles for the page content type selection page.
-*/
-
+/* Page content type selection page. */
 
 h3.classifier {
     clear: left;
@@ -200,3 +194,14 @@ span.content-type-name {
     text-align: center;
 }
 
+
+/* File browser popup. */
+
+body.popup div#changelist table tr.row1 th,
+body.popup div#changelist table tr.row2 th {
+    width: 500px;
+}
+
+body.popup div#changelist table td {
+    width: 80px;
+}

@@ -35,9 +35,6 @@ class Media(models.Model):
     title = models.CharField(max_length=200,
                              help_text="The title will be used as the default rollover text when this media is embedded in a web page.")
     
-    size = models.PositiveIntegerField(editable=False,
-                                       help_text="The size of this media, in bytes.")
-    
     last_modified = models.DateTimeField(auto_now=True,
                                          help_text="The date and time of when this media was last modified.")
     
@@ -45,11 +42,6 @@ class Media(models.Model):
                                blank=True,
                                null=True,
                                help_text="Folders are used to help organise your media. They are not visible to users on your website.")
-    
-    def save(self, *args, **kwargs):
-        """Adds the associated metadata before saving this media."""
-        self.size = self.file.size
-        super(Media, self).save(*args, **kwargs)
     
     def get_absolute_url(self):
         """Generates the absolute URL of the image."""

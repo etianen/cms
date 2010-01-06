@@ -7,7 +7,9 @@ from functools import partial
 from django.conf import settings
 from django.conf.urls.defaults import patterns
 from django.contrib import admin
+from django.contrib.admin.views.main import IS_POPUP_VAR
 from django.template.defaultfilters import filesizeformat
+from django.utils.text import truncate_words
 
 from reversion.admin import VersionAdmin
 
@@ -32,16 +34,12 @@ class MediaAdmin(VersionAdmin):
     
     """Base admin settings for Media models."""
     
-    date_hierarchy = "last_modified"
-    
     fieldsets = ((None, {"fields": ("title", "file",),},),
                  ("Media management", {"fields": ("folder",),},),)
     
     list_filter = ("folder",)
     
-    list_select_related = True
-    
-    search_fields = ("title", "keywords",)
+    search_fields = ("title",)
     
     # Custom actions.
     
@@ -51,6 +49,8 @@ class MediaAdmin(VersionAdmin):
     
     def get_actions(self, request):
         """Generates the actions for assigning categories."""
+        if IS_POPUP_VAR in request.GET:
+            return []
         opts = self.model._meta
         verbose_name_plural = opts.verbose_name_plural
         actions = super(MediaAdmin, self).get_actions(request)
@@ -83,7 +83,10 @@ class MediaAdmin(VersionAdmin):
     
     def get_size(self, obj):
         """Returns the size of the media in a human-readable format."""
-        return filesizeformat(obj.size)
+        try:
+            return filesizeformat(obj.file.size)
+        except OSError:
+            return "0 bytes"
     get_size.short_description = "size"
     get_size.admin_order_field = "size"
     
@@ -96,9 +99,14 @@ class FileAdmin(MediaAdmin):
     
     """Admin settings for File models."""
     
-    list_display = ("title", "get_type", "get_folder", "get_size", "last_modified",)
+    list_display = ("get_title", "get_type", "get_size",)
     
     # Custom display routines.
+    
+    def get_title(self, obj):
+        """Returns a truncated title of the object."""
+        return truncate_words(obj.title, 8)
+    get_title.short_description = "title"
     
     def get_type(self, obj):
         """Returns a pretty version of the file type."""

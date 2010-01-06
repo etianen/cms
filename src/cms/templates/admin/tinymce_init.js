@@ -7,14 +7,22 @@
     
     // Filebrowser callback.
     function cmsFileBrowser (field_name, url, type, win) {
-        alert(type);
-        var browserURL = "/admin/media/file/?_popup=1";
+        
+        var browserURL = "/admin/media/file/?pop=1";
 
+        var verboseName = "File";
+        if (type == "image") {
+            verboseName = "Image";
+        }
+        if (type == "media") {
+            verboseName = "Media";
+        }
+        
         tinyMCE.activeEditor.windowManager.open({
             file : browserURL,
-            title : "Link to File",
-            width : 420,
-            height : 400,
+            title : "Link to " + verboseName,
+            width : 800,
+            height : 600,
             resizable : "yes",
             inline : "yes",
             close_previous : "no"
