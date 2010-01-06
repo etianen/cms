@@ -19,16 +19,16 @@
         }
         
         tinyMCE.activeEditor.windowManager.open({
-            file : browserURL,
-            title : "Link to " + verboseName,
-            width : 800,
-            height : 600,
-            resizable : "yes",
-            inline : "yes",
-            close_previous : "no"
+            file: browserURL,
+            title: "Link to " + verboseName,
+            width: 800,
+            height: 600,
+            resizable: "yes",
+            inline: "yes",
+            close_previous: "no"
         }, {
-            window : win,
-            input : field_name
+            window: win,
+            input: field_name
         });
         return false;
     }
