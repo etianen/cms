@@ -4,7 +4,6 @@
 import os
 from functools import partial
 
-from django.conf import settings
 from django.conf.urls.defaults import patterns
 from django.contrib import admin
 from django.contrib.admin.views.main import IS_POPUP_VAR
@@ -15,7 +14,7 @@ from reversion.admin import VersionAdmin
 
 from cms.apps.pages.admin import site
 from cms.apps.media.models import Folder, File, Image
-from cms.apps.utils import thumbnails
+from cms.apps.utils import thumbnails, permalinks
 
 
 class FolderAdmin(admin.ModelAdmin):
@@ -89,20 +88,42 @@ class MediaAdmin(VersionAdmin):
             return "0 bytes"
     get_size.short_description = "size"
     
-    
-# Convert the tuples into a dict for faster lookup.
-FILE_TYPES = dict(settings.FILE_TYPES)
+       
+# Different types of recognised file extensions.
+FILE_TYPES = {"mp3": "Audio",
+              "wav": "Audio",
+              "doc": "Document",
+              "odt": "Document",
+              "pdf": "Document",
+              "xls": "Spreadsheet",
+              "txt": "Plain text",
+              "png": "Image",
+              "gif": "Image",
+              "jpg": "Image",
+              "jpeg": "Image",
+              "swf": "Movie",
+              "flv": "Movie",
+              "m4a": "Movie",
+              "mov": "Movie",
+              "wmv": "Movie",}
     
     
 class FileAdmin(MediaAdmin):
     
     """Admin settings for File models."""
     
-    list_display = ("get_title", "get_type", "get_size",)
+    list_display = ("get_thumbnail", "get_title", "get_type", "get_size",)
     
     change_list_template = "admin/media/file/change_list.html"
     
     # Custom display routines.
+    
+    def get_thumbnail(self, obj):
+        """Generates a thumbnail of the image."""
+        thumbnail = thumbnails.thumbnail(obj.file, 150, 100)
+        return '<img src="%s" width="%s" height="%s" alt=""/>' % (thumbnail.url, thumbnail.width, thumbnail.height)
+    get_thumbnail.short_description = "thumbnail"
+    get_thumbnail.allow_tags = True
     
     def get_title(self, obj):
         """Returns a truncated title of the object."""

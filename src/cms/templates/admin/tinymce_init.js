@@ -9,13 +9,18 @@
     function cmsFileBrowser (field_name, url, type, win) {
         
         var browserURL = "/admin/media/file/?pop=1";
-
+        if (browserURL.indexOf("?") < 0) {
+            browserURL = browserURL + "?"
+        }
+        
         var verboseName = "File";
         if (type == "image") {
             verboseName = "Image";
+            browserURL = browserURL + '&file__iregex=\.(png|gif|jpg|jpeg)$';
         }
         if (type == "media") {
             verboseName = "Media";
+            browserURL = browserURL + '&file__iregex=\.(swf|flv|m4a|mov|wmv)$';
         }
         
         tinyMCE.activeEditor.windowManager.open({

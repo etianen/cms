@@ -194,14 +194,3 @@ span.content-type-name {
     text-align: center;
 }
 
-
-/* File browser popup. */
-
-body.popup div#changelist table tr.row1 th,
-body.popup div#changelist table tr.row2 th {
-    width: 500px;
-}
-
-body.popup div#changelist table td {
-    width: 80px;
-}

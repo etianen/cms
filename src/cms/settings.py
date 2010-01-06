@@ -101,25 +101,6 @@ ITEMS_PER_PAGE = 10
 PUBLICATION_PREVIEW_KEY = "preview"
 
 
-# Media settings.
-
-FILE_TYPES = (("mp3", "Audio"),
-              ("wav", "Audio"),
-              ("doc", "Document"),
-              ("odt", "Document"),
-              ("pdf", "Document"),
-              ("png", "Image"),
-              ("gif", "Image"),
-              ("jpg", "Image"),
-              ("jpeg", "Image"),
-              ("flv", "Movie"),
-              ("m4a", "Movie"),
-              ("mov", "Movie"),
-              ("wmv", "Movie"),
-              ("txt", "Plain text"),
-              ("xls", "Spreadsheet"),)
-
-
 # SEO settings.
 
 SEO_PRIORITIES = ((1.0, "Very high"),
