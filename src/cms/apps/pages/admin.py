@@ -12,7 +12,6 @@ import urllib, functools
 
 from django import template
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
 from django.conf.urls.defaults import patterns, url
 from django.conf import settings
 from django.contrib import admin
