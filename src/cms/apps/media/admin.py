@@ -99,7 +99,7 @@ class FileAdmin(VersionAdmin):
             return []
         opts = self.model._meta
         verbose_name_plural = opts.verbose_name_plural
-        actions = super(MediaAdmin, self).get_actions(request)
+        actions = super(FileAdmin, self).get_actions(request)
         # Add the dynamic folders.
         for folder in Folder.objects.all():
             action_function = partial(self.__class__.update_folder_action, folder=folder)
