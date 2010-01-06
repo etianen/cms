@@ -3,7 +3,27 @@
 */
 
 
-(function() {
+(function(tinyMCE) {
+    
+    // Filebrowser callback.
+    function cmsFileBrowser (field_name, url, type, win) {
+        alert(type);
+        var browserURL = "/admin/media/file/?_popup=1";
+
+        tinyMCE.activeEditor.windowManager.open({
+            file : browserURL,
+            title : "Link to File",
+            width : 420,
+            height : 400,
+            resizable : "yes",
+            inline : "yes",
+            close_previous : "no"
+        }, {
+            window : win,
+            input : field_name
+        });
+        return false;
+    }
     
     // Initialize the editors.
     tinyMCE.init({
@@ -26,8 +46,8 @@
         convert_urls: false,
         button_tile_map : true,  // Client-side optimization.
         entity_encoding: "raw",  // Client-side optimization.
-        verify_html: false  // Client-side optimization.
+        verify_html: false,  // Client-side optimization.
+        file_browser_callback: cmsFileBrowser
     });
     
-}());
-
+}(tinyMCE));

@@ -46,13 +46,6 @@ class Media(models.Model):
                                null=True,
                                help_text="Folders are used to help organise your media. They are not visible to users on your website.")
     
-    keywords = models.CharField(max_length=1000,
-                                blank=True,
-                                help_text="Keywords help narrow down results when you are searching for media. They are not visible to users on your website.")
-    
-    notes = models.TextField(blank=True,
-                             help_text="Notes are for your own reference, to help keep track of what this media is used for on your site. They are not visible to users on your website.")
-    
     def save(self, *args, **kwargs):
         """Adds the associated metadata before saving this media."""
         self.size = self.file.size

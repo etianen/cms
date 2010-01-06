@@ -35,7 +35,7 @@ class MediaAdmin(VersionAdmin):
     date_hierarchy = "last_modified"
     
     fieldsets = ((None, {"fields": ("title", "file",),},),
-                 ("Media management", {"fields": ("folder", "keywords", "notes",),},),)
+                 ("Media management", {"fields": ("folder",),},),)
     
     list_filter = ("folder",)
     
