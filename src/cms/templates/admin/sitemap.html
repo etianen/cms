@@ -1,0 +1,20 @@
+{% load pages_admin %}
+<div id="content-related">
+    {% if can_change %}
+        <div id="sitemap-panel">
+            <div id="sitemap-module" class="module">
+                <h2>Sitemap</h2>
+                {% if homepage %}
+                    <ul id="sitemap">
+                        {% sitemap_entry homepage %}
+                    </ul>
+                {% else %}
+                    <p>This site doesn't have a homepage.</p>
+                    {% if can_add %}
+                        <p>It's time to go ahead and <a href="{{create_homepage_url}}">create one</a>!</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>

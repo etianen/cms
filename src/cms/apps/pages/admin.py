@@ -52,21 +52,6 @@ class AdminSite(admin.AdminSite):
                 return view(*args, **kwargs)
         return wrapper
         
-    def index(self, request, extra_context=None):
-        """Displays the admin site dashboard."""
-        # Retrieve the homepage in order to render the sitemap.
-        try:
-            homepage = Page.objects.get_homepage()
-        except Page.DoesNotExist:
-            homepage = None
-        # Generate the context.
-        context = {"title": "Dashboard",
-                   "homepage": homepage,
-                   "page_admin": self._registry[Page],
-                   "create_homepage_url": reverse("admin:pages_page_add") + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE)}
-        context.update(extra_context or {})
-        # Render the index page.
-        return super(AdminSite, self).index(request, context)
     
 # The default instance of the CMS admin site.
 site = AdminSite()
