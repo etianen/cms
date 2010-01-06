@@ -12,4 +12,7 @@ CMS Changelog
   * Removed keywords field from File model.
   * Removed notes field from File model.
   * Remove size field from File model.
+  * Added WYSIWYG file browser.
+  * Framework refactoring and several tiny bug fixes.
+  
   
