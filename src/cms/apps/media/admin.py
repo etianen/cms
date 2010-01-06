@@ -4,17 +4,19 @@
 import os
 from functools import partial
 
+from django import template
 from django.conf import settings
-from django.conf.urls.defaults import patterns
+from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.admin.views.main import IS_POPUP_VAR
+from django.shortcuts import render_to_response
 from django.template.defaultfilters import filesizeformat
 from django.utils.text import truncate_words
 
 from reversion.admin import VersionAdmin
 
 from cms.apps.pages.admin import site
-from cms.apps.media.models import Folder, File, Image
+from cms.apps.media.models import Folder, File
 from cms.apps.utils import thumbnails, permalinks
 
 
@@ -28,11 +30,51 @@ class FolderAdmin(admin.ModelAdmin):
     
     
 site.register(Folder, FolderAdmin)
-
-
-class MediaAdmin(VersionAdmin):
     
-    """Base admin settings for Media models."""
+       
+# Different types of file.
+AUDIO_FILE = ("Audio", settings.CMS_MEDIA_URL + "img/file-types/audio-x-generic.png")
+DOCUMENT_FILE = ("Document", settings.CMS_MEDIA_URL + "img/file-types/x-office-document.png")
+SPREADSHEET_FILE = ("Spreadsheet", settings.CMS_MEDIA_URL + "img/file-types/x-office-spreadsheet.png")
+TEXT_FILE = ("Plain text", settings.CMS_MEDIA_URL + "img/file-types/text-x-generic.png")
+IMAGE_FILE = ("Image", settings.CMS_MEDIA_URL + "img/file-types/image-x-generic.png")
+MOVIE_FILE = ("Movie", settings.CMS_MEDIA_URL + "img/file-types/video-x-generic.png")
+
+# Different types of recognised file extensions.
+FILE_TYPES = {"mp3": AUDIO_FILE,
+              "wav": AUDIO_FILE,
+              "doc": DOCUMENT_FILE,
+              "odt": DOCUMENT_FILE,
+              "pdf": DOCUMENT_FILE,
+              "xls": SPREADSHEET_FILE,
+              "txt": TEXT_FILE,
+              "png": IMAGE_FILE,
+              "gif": IMAGE_FILE,
+              "jpg": IMAGE_FILE,
+              "jpeg": IMAGE_FILE,
+              "swf": MOVIE_FILE,
+              "flv": MOVIE_FILE,
+              "m4a": MOVIE_FILE,
+              "mov": MOVIE_FILE,
+              "wmv": MOVIE_FILE,}
+
+UNKNOWN_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/text-x-generic-template.png"
+    
+    
+def get_file_type(filename):
+    """Returns the file type tuple for the given filename."""
+    name, extension = os.path.splitext(filename)
+    if not extension:
+        return ("", UNKNOWN_FILE_ICON)
+    extension = extension.lower()[1:]
+    if extension in FILE_TYPES:
+        return FILE_TYPES[extension]
+    return ("%s file" % extension.upper(), UNKNOWN_FILE_ICON)
+        
+    
+class FileAdmin(VersionAdmin):
+    
+    """Admin settings for File models."""
     
     fieldsets = ((None, {"fields": ("title", "file",),},),
                  ("Media management", {"fields": ("folder",),},),)
@@ -40,6 +82,10 @@ class MediaAdmin(VersionAdmin):
     list_filter = ("folder",)
     
     search_fields = ("title",)
+    
+    list_display = ("get_preview", "get_title", "get_type", "get_size",)
+    
+    change_list_template = "admin/media/file/change_list.html"
     
     # Custom actions.
     
@@ -89,57 +135,6 @@ class MediaAdmin(VersionAdmin):
             return "0 bytes"
     get_size.short_description = "size"
     
-       
-# Different types of file.
-AUDIO_FILE = ("Audio", settings.CMS_MEDIA_URL + "img/file-types/audio-x-generic.png")
-DOCUMENT_FILE = ("Document", settings.CMS_MEDIA_URL + "img/file-types/x-office-document.png")
-SPREADSHEET_FILE = ("Spreadsheet", settings.CMS_MEDIA_URL + "img/file-types/x-office-spreadsheet.png")
-TEXT_FILE = ("Plain text", settings.CMS_MEDIA_URL + "img/file-types/text-x-generic.png")
-IMAGE_FILE = ("Image", settings.CMS_MEDIA_URL + "img/file-types/image-x-generic.png")
-MOVIE_FILE = ("Movie", settings.CMS_MEDIA_URL + "img/file-types/video-x-generic.png")
-
-# Different types of recognised file extensions.
-FILE_TYPES = {"mp3": AUDIO_FILE,
-              "wav": AUDIO_FILE,
-              "doc": DOCUMENT_FILE,
-              "odt": DOCUMENT_FILE,
-              "pdf": DOCUMENT_FILE,
-              "xls": SPREADSHEET_FILE,
-              "txt": TEXT_FILE,
-              "png": IMAGE_FILE,
-              "gif": IMAGE_FILE,
-              "jpg": IMAGE_FILE,
-              "jpeg": IMAGE_FILE,
-              "swf": MOVIE_FILE,
-              "flv": MOVIE_FILE,
-              "m4a": MOVIE_FILE,
-              "mov": MOVIE_FILE,
-              "wmv": MOVIE_FILE,}
-
-UNKNOWN_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/text-x-generic-template.png"
-    
-    
-def get_file_type(filename):
-    """Returns the file type tuple for the given filename."""
-    name, extension = os.path.splitext(filename)
-    if not extension:
-        return ("", UNKNOWN_FILE_ICON)
-    extension = extension.lower()[1:]
-    if extension in FILE_TYPES:
-        return FILE_TYPES[extension]
-    return ("%s file" % extension.upper(), UNKNOWN_FILE_ICON)
-        
-    
-class FileAdmin(MediaAdmin):
-    
-    """Admin settings for File models."""
-    
-    list_display = ("get_preview", "get_title", "get_type", "get_size",)
-    
-    change_list_template = "admin/media/file/change_list.html"
-    
-    # Custom display routines.
-    
     def get_preview(self, obj):
         """Generates a thumbnail of the image."""
         type = get_file_type(obj.file.name)
@@ -170,36 +165,15 @@ class FileAdmin(MediaAdmin):
     def get_urls(self):
         """Enables custom admin views."""
         urls = super(FileAdmin, self).get_urls()
-        custom_urls = patterns('',)
+        custom_urls = patterns("",
+                               url(r"^filebrowser.js$", self.admin_site.admin_view(self.filebrowser), name="media_file_filebrowser"))
         return custom_urls + urls
+    
+    def filebrowser(self, request):
+        """Renders the javascript for the WYSIWYG file browser."""
+        context = {}
+        return render_to_response("admin/media/file/filebrowser.js", context, template.RequestContext(request), mimetype="text/javascript")
     
     
 site.register(File, FileAdmin)
-
-
-class ImageAdmin(MediaAdmin):
-    
-    """Admin settings for Image models."""
-    
-    list_display = ("get_thumbnail", "title", "get_folder", "width", "height", "get_size", "last_modified",)
-    
-    # Custom display routines.
-    
-    def get_thumbnail(self, obj):
-        """Generates a thumbnail of the image."""
-        thumbnail = thumbnails.thumbnail(obj.file, 150, 100)
-        return '<img src="%s" width="%s" height="%s" alt=""/>' % (thumbnail.url, thumbnail.width, thumbnail.height)
-    get_thumbnail.short_description = "thumbnail"
-    get_thumbnail.allow_tags = True
-    
-    # Custom views.
-    
-    def get_urls(self):
-        """Enables custom admin views."""
-        urls = super(ImageAdmin, self).get_urls()
-        custom_urls = patterns('',)
-        return custom_urls + urls
-    
-    
-site.register(Image, ImageAdmin)
 

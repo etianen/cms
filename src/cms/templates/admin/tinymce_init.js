@@ -8,7 +8,7 @@
     // Filebrowser callback.
     function cmsFileBrowser (field_name, url, type, win) {
         
-        var browserURL = "/admin/media/file/?pop=1";
+        var browserURL = "{% url admin:media_file_changelist %}?pop=1";
         if (browserURL.indexOf("?") < 0) {
             browserURL = browserURL + "?"
         }

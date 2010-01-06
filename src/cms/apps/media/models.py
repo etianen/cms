@@ -21,39 +21,6 @@ class Folder(models.Model):
     
     class Meta:
         ordering = ("name",)
-
-
-class Media(models.Model):
-    
-    """
-    Base class for all static media models.
-    
-    Subclasses must define a field called 'file' which must be a FileField or
-    one of its subclasses.
-    """
-    
-    title = models.CharField(max_length=200,
-                             help_text="The title will be used as the default rollover text when this media is embedded in a web page.")
-    
-    last_modified = models.DateTimeField(auto_now=True,
-                                         help_text="The date and time of when this media was last modified.")
-    
-    folder = models.ForeignKey(Folder,
-                               blank=True,
-                               null=True,
-                               help_text="Folders are used to help organise your media. They are not visible to users on your website.")
-    
-    def get_absolute_url(self):
-        """Generates the absolute URL of the image."""
-        return self.file.url
-    
-    def __unicode__(self):
-        """Returns the title of the media."""
-        return self.title
-    
-    class Meta:
-        abstract = True
-        ordering = ("title",)
     
     
 def get_upload_path(instance, filename):
@@ -72,27 +39,32 @@ def get_upload_path(instance, filename):
         file_version += 1
     
     
-class File(Media):
+class File(models.Model):
     
     """A static file."""
+    
+    title = models.CharField(max_length=200,
+                             help_text="The title will be used as the default rollover text when this media is embedded in a web page.")
+    
+    last_modified = models.DateTimeField(auto_now=True,
+                                         help_text="The date and time of when this media was last modified.")
+    
+    folder = models.ForeignKey(Folder,
+                               blank=True,
+                               null=True,
+                               help_text="Folders are used to help organise your media. They are not visible to users on your website.")
     
     file = models.FileField(upload_to=get_upload_path,
                             max_length=200)
     
+    def get_absolute_url(self):
+        """Generates the absolute URL of the image."""
+        return self.file.url
     
-class Image(Media):
+    def __unicode__(self):
+        """Returns the title of the media."""
+        return self.title
     
-    """A static image."""
-    
-    file = models.ImageField(upload_to=get_upload_path,
-                             max_length=200,
-                             width_field="width",
-                             height_field="height")
-    
-    width = models.PositiveSmallIntegerField(editable=False,
-                                             help_text="The width of this image, in pixels.")
-    
-    height = models.PositiveSmallIntegerField(editable=False,
-                                              help_text="The height of this image, in pixels.")
-    
+    class Meta:
+        ordering = ("title",)
     
