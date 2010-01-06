@@ -3,8 +3,8 @@ CMS Changelog
 =============
 
 
-2.0.2
------
+2.1
+---
 
 The main purpose of this release was to add in a filebrowser for the TinyMCE
 editor. Numerous other improvements and bugfixes made it into the release too.
