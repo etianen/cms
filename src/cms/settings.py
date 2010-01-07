@@ -89,13 +89,6 @@ INSTALLED_APPS = ("django.contrib.auth",
 SITE_ID = 1
 
 
-# Filebrowser settings.
-
-FILENAME_IMAGE_PATTERN = '\.(png|gif|jpg|jpeg)$'
-
-FILENAME_MEDIA_PATTERN = '\.(swf|flv|m4a|mov|wmv)$'
-
-
 # Pagination settings.
 
 PAGINATION_KEY = "page"

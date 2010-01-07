@@ -160,20 +160,6 @@ class FileAdmin(VersionAdmin):
         return get_file_type(obj.file.name)[0]
     get_type.short_description = "type"
     
-    # Custom admin views.
-    
-    def changelist_view(self, request, extra_context=None):
-        """Provides the extra functionality for the popup changelist."""
-        context = {}
-        filebrowser_pattern = request.GET.get("file__iregex")
-        if filebrowser_pattern == settings.FILENAME_IMAGE_PATTERN:
-            print "FOOOBA"
-            context["title"] = "Select image"
-        elif filebrowser_pattern == settings.FILENAME_MEDIA_PATTERN:
-            context["title"] = "Select media"
-        context.update(extra_context or {})
-        return super(FileAdmin, self).changelist_view(request, context)
-    
     
 site.register(File, FileAdmin)
 

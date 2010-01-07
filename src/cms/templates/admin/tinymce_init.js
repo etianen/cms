@@ -13,19 +13,16 @@
             browserURL = browserURL + "?"
         }
         
-        var verboseName = "File";
         if (type == "image") {
-            verboseName = "image";
-            browserURL = browserURL + '&file__iregex={{settings.FILENAME_IMAGE_PATTERN|escapejs}}';
+            browserURL = browserURL + '&file__iregex=\x5C.(png|gif|jpg|jpeg)$';
         }
         if (type == "media") {
-            verboseName = "media";
-            browserURL = browserURL + '&file__iregex={{settings.FILENAME_MEDIA_PATTERN|escapejs}}';
+            browserURL = browserURL + '&file__iregex=\x5C.(swf|flv|m4a|mov|wmv)$';
         }
         
         tinyMCE.activeEditor.windowManager.open({
             file: browserURL,
-            title: "Select " + verboseName,
+            title: "Select file",
             width: 800,
             height: 600,
             resizable: "yes",
