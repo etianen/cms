@@ -5,20 +5,13 @@ from __future__ import with_statement
 
 from django.core.management.base import NoArgsCommand
 from django.core.management import call_command
+from django.core import urlresolvers
 from django.db import transaction, models, connection
 
-from cms.apps.pages import content
+from cms.apps.pages import content, permalinks
 from cms.apps.pages.models import HtmlField, Page
 from cms.apps.pages.models.managers import publication_manager
 from cms.apps.media.models import File
-
-
-def replace_image_permalinks(obj, field_name):
-    """Replaces all image permalinks in the given field."""
-    html = getattr(obj, field_name)
-    
-    
-    setattr(obj, field_name, html)
 
 
 class Command(NoArgsCommand):
@@ -46,6 +39,15 @@ class Command(NoArgsCommand):
             files = {}
             for image_id, image_title, image_last_modified, folder_id, file in images:
                 files[image_id] = File.objects.create(title=image_title, last_modified=image_last_modified, folder_id=folder_id, file=file)
+            # Create a function to update HTML content.
+            image_permalinks = ((urlresolvers.reverse("permalink_redirect", kwargs={"content_type_id": image_content_type_id, "object_id": image_id}), image_id)
+                                for image_id, image_title, image_last_modified, folder_id, file in images)
+            def replace_image_permalinks(obj, field_name):
+                html = getattr(obj, field_name)
+                for old_permalink, image_id in image_permalinks:
+                    new_permalink = permalinks.create(files[image_id])
+                    html = html.replace(old_permalink, new_permalink)
+                setattr(obj, field_name, html)
             # Update all model HTML fields.
             for model in models.get_models():
                 html_fields = []
