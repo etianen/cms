@@ -6,7 +6,7 @@ import urllib, urllib2, BaseHTTPServer
 from django.http import HttpResponse
 from django.utils import simplejson
 
-from cms.apps.utils import iteration
+from cms.core import iteration
 
 
 __all__ = ("RemoteError", "HttpError", "encode", "open", "prefetch", "open_xml",)

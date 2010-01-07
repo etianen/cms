@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import Library
-from cms.apps.utils import permalinks
+from cms.core import permalinks
 
 
 register = Library()

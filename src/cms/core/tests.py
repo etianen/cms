@@ -7,8 +7,8 @@ from django.conf import settings
 from django.core.files.images import ImageFile
 from django.test.testcases import TestCase
 
-from cms.apps.utils import remote, thumbnails
-from cms.apps.utils.optimizations import cached_getter, cached_setter, cached_deleter
+from cms.core import remote, thumbnails
+from cms.core.optimizations import cached_getter, cached_setter, cached_deleter
 
 
 # Test the optimizations library.

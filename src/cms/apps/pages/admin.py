@@ -25,7 +25,7 @@ from reversion.admin import VersionAdmin
 from cms.apps.pages import content
 from cms.apps.pages.models import Page
 from cms.apps.pages.models.managers import publication_manager
-from cms.apps.utils import permalinks
+from cms.core import permalinks
 
 
 # The GET parameter used to indicate where page admin actions originated.
