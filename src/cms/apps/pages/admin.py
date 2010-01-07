@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render_to_response, redirect
+from django.views.generic.simple import direct_to_template
 
 from reversion.admin import VersionAdmin
 
@@ -41,6 +42,13 @@ class AdminSite(admin.AdminSite):
     index_template = "admin/dashboard.html"
     
     # Custom admin views.
+
+    def get_urls(self):
+        """Generates custom admin URLS."""
+        urls = super(AdminSite, self).get_urls()
+        custom_urls = patterns("",
+                               url(r"^tinymce-init.js$", self.admin_view(direct_to_template), kwargs={"template": "admin/tinymce_init.js", "mimetype": "text/javascript"}, name="tinymce_init"),)
+        return custom_urls + urls
     
     def admin_view(self, view, *args, **kwargs):
         """Turns off publication management for admin views."""

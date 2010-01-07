@@ -18,8 +18,6 @@ admin.autodiscover()
 
 
 urlpatterns = patterns("",
-                       # TinyMCE configuration views.
-                       url(r"^admin/tinymce-init.js$", "django.views.generic.simple.direct_to_template", kwargs={"template": "admin/tinymce_init.js", "mimetype": "text/javascript"}, name="tinymce_init"),
                        # Admin views.
                        url(r"^admin/", include(admin_site.urls)),
                        # Permalink redirection service.

@@ -20,6 +20,7 @@ in preparation for a potential open-source release later this year.
   * Upgraded TinyMCE editor.
   * Added WYSIWYG file browser.
   * Contact form module now adds appropriate reply-to headers for notification emails.
+  * More accessible admin sitemap.
   * Framework refactoring and several tiny bug fixes.
   
   
