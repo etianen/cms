@@ -40,18 +40,18 @@ class Command(NoArgsCommand):
             for image_id, image_title, image_last_modified, folder_id, file in images:
                 files[image_id] = File.objects.create(title=image_title, last_modified=image_last_modified, folder_id=folder_id, file=file)
             # Create a function to update HTML content.
-            image_permalinks = ((urlresolvers.reverse("permalink_redirect", kwargs={"content_type_id": image_content_type_id, "object_id": image_id}), image_id)
-                                for image_id, image_title, image_last_modified, folder_id, file in images)
+            image_permalinks = [(urlresolvers.reverse("permalink_redirect", kwargs={"content_type_id": image_content_type_id, "object_id": image_id}), image_id)
+                                for image_id, image_title, image_last_modified, folder_id, file in images]
             def replace_image_permalinks(obj, field_name):
                 html = getattr(obj, field_name)
                 for old_permalink, image_id in image_permalinks:
-                    new_permalink = permalinks.create(files[image_id])
-                    html = html.replace(old_permalink, new_permalink)
+                    new_permalink = unicode(permalinks.create(files[image_id]))
+                    html = html.replace(unicode(old_permalink), new_permalink)
                 setattr(obj, field_name, html)
             # Update all model HTML fields.
             for model in models.get_models():
                 html_fields = []
-                for field in model._meta.get_fields():
+                for field in model._meta.fields:
                     if isinstance(field, HtmlField):
                         html_fields.append(field)
                 if html_fields:
@@ -68,9 +68,11 @@ class Command(NoArgsCommand):
                         html_fields.append(field)
                 if html_fields:
                     for html_field in html_fields:
-                        replace_image_permalinks(obj, html_field.name)
+                        replace_image_permalinks(page_content, html_field.name)
+                    page.content = page_content
                     page.save()
             # Synchronize the content types.
             call_command("syncdb")
+            print "Upgrade complete!"
         
         
