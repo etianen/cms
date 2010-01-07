@@ -6,7 +6,6 @@ from django.contrib.auth.models import Permission
 from django.contrib.sites.models import Site
 from django.contrib.sites.management import create_default_site
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
 from django.db.models.signals import post_syncdb
 
 from cms.apps.pages.models import Page
