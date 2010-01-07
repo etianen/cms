@@ -5,9 +5,6 @@
 
 $(function() {
 
-    // Define the important CSS classes in one place.
-    var SITEMAP_COLLAPSE_CONTROL_CLASS = "sitemap-collapse-control";
-    
     // Global flag for disabling sitemap actions during updates.
     var sitemap_enabled = true;
     
@@ -16,11 +13,8 @@ $(function() {
     // Collapse the sitemap.
     $("li li", sitemap).addClass("closed");
     
-    // Add the sitemap collapse control divs.
-    $("li li:has(li)", sitemap).append($("<div/>").addClass(SITEMAP_COLLAPSE_CONTROL_CLASS));
-    
     // Make the sitemap collapse controls clickable.
-    $("div." + SITEMAP_COLLAPSE_CONTROL_CLASS, sitemap).click(function() {
+    $("div.sitemap-collapse-control", sitemap).click(function() {
         $(this).parent("li").toggleClass("closed");
     });
 
