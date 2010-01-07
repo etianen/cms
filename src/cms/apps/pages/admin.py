@@ -89,8 +89,6 @@ class PageBaseAdmin(VersionAdmin, PublishedModelAdmin):
     
     """Base admin class for ArticleBase models."""
     
-    date_hierarchy = "last_modified"
-    
     base_fieldsets = ((None, {"fields": ("title", "url_title",),},),)
     
     navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
