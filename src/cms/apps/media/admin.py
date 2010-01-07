@@ -33,44 +33,33 @@ site.register(Folder, FolderAdmin)
     
        
 # Different types of file.
-AUDIO_FILE = ("Audio", settings.CMS_MEDIA_URL + "img/file-types/audio-x-generic.png")
-DOCUMENT_FILE = ("Document", settings.CMS_MEDIA_URL + "img/file-types/x-office-document.png")
-SPREADSHEET_FILE = ("Spreadsheet", settings.CMS_MEDIA_URL + "img/file-types/x-office-spreadsheet.png")
-TEXT_FILE = ("Plain text", settings.CMS_MEDIA_URL + "img/file-types/text-x-generic.png")
-IMAGE_FILE = ("Image", settings.CMS_MEDIA_URL + "img/file-types/image-x-generic.png")
-MOVIE_FILE = ("Movie", settings.CMS_MEDIA_URL + "img/file-types/video-x-generic.png")
+AUDIO_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/audio-x-generic.png"
+DOCUMENT_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/x-office-document.png"
+SPREADSHEET_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/x-office-spreadsheet.png"
+TEXT_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/text-x-generic.png"
+IMAGE_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/image-x-generic.png"
+MOVIE_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/video-x-generic.png"
+UNKNOWN_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/text-x-generic-template.png"
 
 # Different types of recognised file extensions.
-FILE_TYPES = {"mp3": AUDIO_FILE,
-              "wav": AUDIO_FILE,
-              "doc": DOCUMENT_FILE,
-              "odt": DOCUMENT_FILE,
-              "pdf": DOCUMENT_FILE,
-              "xls": SPREADSHEET_FILE,
-              "txt": TEXT_FILE,
-              "png": IMAGE_FILE,
-              "gif": IMAGE_FILE,
-              "jpg": IMAGE_FILE,
-              "jpeg": IMAGE_FILE,
-              "swf": MOVIE_FILE,
-              "flv": MOVIE_FILE,
-              "m4a": MOVIE_FILE,
-              "mov": MOVIE_FILE,
-              "wmv": MOVIE_FILE,}
-
-UNKNOWN_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/text-x-generic-template.png"
+FILE_ICONS = {"mp3": AUDIO_FILE_ICON,
+              "m4a": AUDIO_FILE_ICON,
+              "wav": AUDIO_FILE_ICON,
+              "doc": DOCUMENT_FILE_ICON,
+              "odt": DOCUMENT_FILE_ICON,
+              "pdf": DOCUMENT_FILE_ICON,
+              "xls": SPREADSHEET_FILE_ICON,
+              "txt": TEXT_FILE_ICON,
+              "png": IMAGE_FILE_ICON,
+              "gif": IMAGE_FILE_ICON,
+              "jpg": IMAGE_FILE_ICON,
+              "jpeg": IMAGE_FILE_ICON,
+              "swf": MOVIE_FILE_ICON,
+              "flv": MOVIE_FILE_ICON,
+              "mp4": MOVIE_FILE_ICON,
+              "mov": MOVIE_FILE_ICON,
+              "wmv": MOVIE_FILE_ICON,}
     
-    
-def get_file_type(filename):
-    """Returns the file type tuple for the given filename."""
-    name, extension = os.path.splitext(filename)
-    if not extension:
-        return ("", UNKNOWN_FILE_ICON)
-    extension = extension.lower()[1:]
-    if extension in FILE_TYPES:
-        return FILE_TYPES[extension]
-    return ("%s file" % extension.upper(), UNKNOWN_FILE_ICON)
-        
     
 class FileAdmin(VersionAdmin):
     
@@ -137,16 +126,18 @@ class FileAdmin(VersionAdmin):
     
     def get_preview(self, obj):
         """Generates a thumbnail of the image."""
-        type = get_file_type(obj.file.name)
+        name, extension = os.path.splitext(obj.file.name)
+        extension = extension.lower()[1:]
+        icon = FILE_ICONS.get(extension, UNKNOWN_FILE_ICON)
         permalink = permalinks.create(obj)
-        if type == IMAGE_FILE:
+        if icon == IMAGE_FILE_ICON:
             try:
                 thumbnail = thumbnails.thumbnail(obj.file, 100, 66)
             except IOError:
                 pass
             else:
-                return '<img cms:permalink="%s" src="%s" width="%s" height="%s" alt="%s" title="%s"/>' % (permalink, thumbnail.url, thumbnail.width, thumbnail.height, obj.title, obj.title)
-        return '<img cms:permalink="%s" src="%s" width="66" height="66" alt="%s" title="%s"/>' % (permalink, type[1], type[0], obj.title)
+                return '<img cms:permalink="%s" src="%s" width="%s" height="%s" alt="" title="%s"/>' % (permalink, thumbnail.url, thumbnail.width, thumbnail.height, obj.title)
+        return '<img cms:permalink="%s" src="%s" width="66" height="66" alt="" title="%s"/>' % (permalink, icon, obj.title)
     get_preview.short_description = "preview"
     get_preview.allow_tags = True
     
