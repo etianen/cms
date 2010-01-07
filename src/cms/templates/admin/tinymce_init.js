@@ -51,6 +51,7 @@
         width: "700px",
         height: "350px",
         dialog_type: "modal",
+        external_link_list_url: "{% url admin:tinymce_link_list %}",
         theme_advanced_blockformats: "h2,h3,p",
         content_css: "{{settings.TINYMCE_CONTENT_CSS|escapejs}}",
         extended_valid_elements : "iframe[src|width|height|name|align]",  // Permit embedded iframes.

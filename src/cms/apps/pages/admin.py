@@ -8,7 +8,7 @@ standard implementation.
 
 from __future__ import with_statement
 
-import urllib, functools
+import urllib, functools, itertools
 
 from django import template
 from django.core.exceptions import PermissionDenied
@@ -25,6 +25,7 @@ from reversion.admin import VersionAdmin
 from cms.apps.pages import content
 from cms.apps.pages.models import Page
 from cms.apps.pages.models.managers import publication_manager
+from cms.apps.utils import permalinks
 
 
 # The GET parameter used to indicate where page admin actions originated.
@@ -41,13 +42,27 @@ class AdminSite(admin.AdminSite):
     
     index_template = "admin/dashboard.html"
     
+    def __init__(self, *args, **kwargs):
+        """Initializes the admin site."""
+        super(AdminSite, self).__init__(*args, **kwargs)
+        self._link_list_models = set()
+    
+    def register_link_list(self, model):
+        """Registers a model in the admin tinymce link list generator."""
+        self._link_list_models.add(model)
+        
+    def unregister_link_list(self, model):
+        """Removes a model from the admin tinymce link list generator."""
+        self._link_list_models.remove(model)
+    
     # Custom admin views.
-
+    
     def get_urls(self):
         """Generates custom admin URLS."""
         urls = super(AdminSite, self).get_urls()
         custom_urls = patterns("",
-                               url(r"^tinymce-init.js$", self.admin_view(direct_to_template), kwargs={"template": "admin/tinymce_init.js", "mimetype": "text/javascript"}, name="tinymce_init"),)
+                               url(r"^tinymce-init.js$", self.admin_view(direct_to_template), kwargs={"template": "admin/tinymce_init.js", "mimetype": "text/javascript"}, name="tinymce_init"),
+                               url(r"^tinymce-link-list.js$", self.admin_view(self.tinymce_link_list), name="tinymce_link_list"),)
         return custom_urls + urls
     
     def admin_view(self, view, *args, **kwargs):
@@ -58,6 +73,15 @@ class AdminSite(admin.AdminSite):
             with publication_manager.select_published(False):
                 return view(*args, **kwargs)
         return wrapper
+    
+    def tinymce_link_list(self, request):
+        """Generates the tinymce link list."""
+        generators = []
+        for model in self._link_list_models:
+            generators.append((unicode(obj), permalinks.create(obj)) for obj in model._default_manager.all().iterator())
+        links = itertools.chain(*generators)
+        context = {"links": links}
+        return render_to_response("admin/tinymce_link_list.js", context, template.RequestContext(request), mimetype="text/javascript")
         
     
 # The default instance of the CMS admin site.
@@ -339,4 +363,5 @@ class PageAdmin(PageBaseAdmin):
 
 
 site.register(Page, PageAdmin)
+site.register_link_list(Page)
 
