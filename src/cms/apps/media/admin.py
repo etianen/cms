@@ -160,6 +160,16 @@ class FileAdmin(VersionAdmin):
         return get_file_type(obj.file.name)[0]
     get_type.short_description = "type"
     
+    # Custom view logic.
+    
+    def response_add(self, request, obj, *args, **kwargs):
+        """Returns the response for a successful add action."""
+        if "_tinymce" in request.GET:
+            context = {"permalink": permalinks.create(obj),
+                       "title": obj.title}
+            return render_to_response("admin/media/file/filebrowser_add_success.html", context, template.RequestContext(request))
+        return super(FileAdmin, self).response_add(request, obj, *args, **kwargs)
+    
     
 site.register(File, FileAdmin)
 
