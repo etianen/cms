@@ -9,8 +9,8 @@ from django.core.files.storage import default_storage
 from django.contrib.admin.widgets import AdminTextInputWidget, AdminTextareaWidget, AdminFileWidget
 from django.utils.text import capfirst
 
-from cms.core.forms import HtmlWidget
-from cms.core.optimizations import cached_getter
+from cms.apps.pages.forms import HtmlWidget
+from cms.apps.pages.optimizations import cached_getter
 
 
 class Field(object):

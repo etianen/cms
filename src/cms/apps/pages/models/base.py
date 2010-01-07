@@ -7,7 +7,7 @@ from django.db import models
 
 from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager
 from cms.apps.pages.models.fields import NullBooleanField, EnumField
-from cms.core.optimizations import cached_getter
+from cms.apps.pages.optimizations import cached_getter
 
 
 class PublishedModel(models.Model):

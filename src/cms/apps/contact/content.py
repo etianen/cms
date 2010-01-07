@@ -7,7 +7,7 @@ from django.core import mail
 from django.shortcuts import redirect
 
 from cms.apps.pages import content
-from cms.core import loader
+from cms.apps.pages import loader
 
 
 DEFAULT_SUCCESS_MESSAGE = """<p>Thank you for your enquiry. We will be in touch with you shortly.</p>"""

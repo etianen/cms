@@ -17,7 +17,7 @@ from reversion.admin import VersionAdmin
 
 from cms.apps.pages.admin import site
 from cms.apps.media.models import Folder, File
-from cms.core import thumbnails, permalinks
+from cms.apps.pages import thumbnails, permalinks
 
 
 class FolderAdmin(admin.ModelAdmin):

@@ -1,2 +1,0 @@
-"""General utility template tags."""
-

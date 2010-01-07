@@ -6,8 +6,8 @@ from django.utils.safestring import mark_safe
 
 from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import Library
-from cms.core.templatetags.permalinks import expand_permalinks
-from cms.core.templatetags.thumbnails import generate_thumbnails
+from cms.apps.pages.templatetags.permalinks import expand_permalinks
+from cms.apps.pages.templatetags.thumbnails import generate_thumbnails
 
 
 register = Library()

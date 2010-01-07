@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.fields.related import ReverseSingleRelatedObjectDescriptor
 
-from cms.core.forms import HtmlWidget, NullBooleanWidget
+from cms.apps.pages.forms import HtmlWidget, NullBooleanWidget
 
 
 class PageDescriptor(ReverseSingleRelatedObjectDescriptor):

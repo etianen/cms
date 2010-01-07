@@ -8,7 +8,7 @@ from django.db import models
 from django.db.models import Q
 
 from cms.apps.pages import content
-from cms.core.optimizations import cached_getter, cached_setter
+from cms.apps.pages.optimizations import cached_getter, cached_setter
 from cms.apps.pages.models.base import PublishedModel, PageBase
 from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager, PageManager, cache, publication_manager
 from cms.apps.pages.models.fields import PageField, HtmlField, NullBooleanField, EnumField
