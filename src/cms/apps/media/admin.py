@@ -83,8 +83,8 @@ class FileAdmin(VersionAdmin):
     
     search_fields = ("title",)
     
-    list_display = ("get_preview", "get_title", "get_type", "get_size",)
-    
+    list_display = ("get_preview", "get_title", "get_size", "last_modified")
+
     change_list_template = "admin/media/file/change_list.html"
     
     # Custom actions.
@@ -141,12 +141,12 @@ class FileAdmin(VersionAdmin):
         permalink = permalinks.create(obj)
         if type == IMAGE_FILE:
             try:
-                thumbnail = thumbnails.thumbnail(obj.file, 150, 100)
+                thumbnail = thumbnails.thumbnail(obj.file, 100, 66)
             except IOError:
                 pass
             else:
                 return '<img cms:permalink="%s" src="%s" width="%s" height="%s" alt="%s" title="%s"/>' % (permalink, thumbnail.url, thumbnail.width, thumbnail.height, obj.title, obj.title)
-        return '<img cms:permalink="%s" src="%s" width="32" height="32" alt="%s" title="%s"/>' % (permalink, type[1], type[0], obj.title)
+        return '<img cms:permalink="%s" src="%s" width="66" height="66" alt="%s" title="%s"/>' % (permalink, type[1], type[0], obj.title)
     get_preview.short_description = "preview"
     get_preview.allow_tags = True
     
@@ -154,11 +154,6 @@ class FileAdmin(VersionAdmin):
         """Returns a truncated title of the object."""
         return truncate_words(obj.title, 8)
     get_title.short_description = "title"
-    
-    def get_type(self, obj):
-        """Returns a pretty version of the file type."""
-        return get_file_type(obj.file.name)[0]
-    get_type.short_description = "type"
     
     # Custom view logic.
     
