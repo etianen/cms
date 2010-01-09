@@ -55,7 +55,7 @@
                 resizable: "yes",
                 inline: "yes",
                 close_previous: "no",
-                popup_css: false,
+                popup_css: false
             }, {
                 window: win,
                 input: inputId
