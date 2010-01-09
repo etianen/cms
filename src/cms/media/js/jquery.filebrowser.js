@@ -38,8 +38,8 @@
     
     // Initializes the popup file browser.
     $.filebrowser.initBrowser = function() {
-        // Make the changelist links clickable.
-        $("div#changelist tr.row1 a, div#changelist tr.row2 a").click(function() {
+        // Make the changelist links clickable and remove the original inline click listener.
+        $("div#changelist tr.row1 a, div#changelist tr.row2 a").attr("onclick", null).click(function() {
             var img = $("img", this);
             var title = img.attr("title");
             var permalink = img.attr("cms:permalink");
