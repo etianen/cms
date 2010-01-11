@@ -27,7 +27,7 @@ $(function() {
         var button = $(this);
         var li = button.parents("li").slice(0, 1);
         var form = button.parents("form").slice(0, 1);
-        var direction = button.attr("value");
+        var direction = button.val();
         if (direction == "up") {
             var other_li = li.prev();
         } else if (direction == "down") {
