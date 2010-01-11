@@ -19,8 +19,8 @@
         {% if can_move %}
             <form method="post" action="{% url admin:pages_page_move_page %}">
                 <input type="hidden" name="page" value="{{page.id}}"/>
-                <button type="submit" class="move-up" title="Move this page up" name="direction" value="up"><span>Up</span></button>
-                <button type="submit" class="move-down" title="Move this page down" name="direction" value="down"><span>Down</span></button>
+                <input type="submit" class="move-up" title="Move this page up" name="direction" value="up"/>
+                <input type="submit" class="move-down" title="Move this page down" name="direction" value="down"/>
             </form>
         {% endif %}
     </div>

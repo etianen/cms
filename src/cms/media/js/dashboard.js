@@ -19,7 +19,7 @@ $(function() {
     });
 
     // Make the sitemap controls clickable.
-    $("button", sitemap).click(function() {
+    $("input[name=direction]", sitemap).click(function() {
         // Prevent simultanious page moves.
         if (!sitemap_enabled) {
             return;
