@@ -126,6 +126,9 @@ body.dashboard div.sitemap-entry input.move-down {
     color: transparent;
     font-size: 0px;
     line-height: 0px;
+    display: block;
+    text-indent: -999px;
+    outline: none;
 }
 
 body.dashboard div.sitemap-entry input.move-up {
