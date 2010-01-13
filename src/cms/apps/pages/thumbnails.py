@@ -111,18 +111,22 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE,
     # Create an image buffer in memory.
     image_data = Image.open(image.path)
     # Generate a new thumbnail.
-    if generation_method == THUMBNAIL:
-        image_data.thumbnail((requested_width, requested_height), Image.ANTIALIAS)
-    elif generation_method == RESIZE:
-        image_data = image_data.resize((requested_width, requested_height), Image.ANTIALIAS)
-    elif generation_method == CROP:
-        source_width = min(original_width, int(original_height * required_aspect))
-        source_height = min(original_height, int(original_width / required_aspect))
-        source_x = (original_width - source_width) / 2
-        source_y = (original_height - source_height) / 2
-        image_data = image_data.transform((requested_width, requested_height), Image.EXTENT, (source_x, source_y, source_x + source_width, source_y + source_height), Image.BICUBIC)
-    else:
-        raise ValueError, "Unknown thumbnail generation method: %r" % generation_method
+    try:
+        if generation_method == THUMBNAIL:
+            image_data.thumbnail((requested_width, requested_height), Image.ANTIALIAS)
+        elif generation_method == RESIZE:
+            image_data = image_data.resize((requested_width, requested_height), Image.ANTIALIAS)
+        elif generation_method == CROP:
+            source_width = min(original_width, int(original_height * required_aspect))
+            source_height = min(original_height, int(original_width / required_aspect))
+            source_x = (original_width - source_width) / 2
+            source_y = (original_height - source_height) / 2
+            image_data = image_data.transform((requested_width, requested_height), Image.EXTENT, (source_x, source_y, source_x + source_width, source_y + source_height), Image.BICUBIC)
+        else:
+            raise ValueError, "Unknown thumbnail generation method: %r" % generation_method
+    except SyntaxError, ex:
+        # HACK: The PIL will raise a SyntaxError if it encounters a 'broken png'. 
+        raise IOError, str(ex)
     # Save the thumbnail to disk.
     image_data.save(thumbnail_path)
     # Return the new image object.
