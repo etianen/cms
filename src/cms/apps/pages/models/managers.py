@@ -204,9 +204,6 @@ class PageManager(PageBaseManager):
                 break
         return page
     
-    def get_current(self, request):
-        """Returns the current page for the given request."""
-    
     def get_page(self, id):
         """
         Returns the page referenced by the given id.

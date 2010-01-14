@@ -15,6 +15,24 @@ from django.shortcuts import redirect
 from cms.apps.pages.models import Page, cache, publication_manager
 
 
+REQUEST_PAGE_CACHE_ATTRIBUTE = "_page_cache"
+
+
+class LazyPage(object):
+    
+    """Lazily loads the current page."""
+    
+    def __get__(self, request, obj_type=None):
+        """Loads the page on first attribute access."""
+        if not hasattr(request, REQUEST_PAGE_CACHE_ATTRIBUTE):
+            try:
+                page = Page.objects.get_by_path(request.path)
+            except Page.DoesNotExist:
+                page = None
+            setattr(request, REQUEST_PAGE_CACHE_ATTRIBUTE, page)
+        return getattr(request, REQUEST_PAGE_CACHE_ATTRIBUTE)
+
+
 class PageMiddleware(object):
     
     """Serves up pages when no other view is matched."""
@@ -29,6 +47,10 @@ class PageMiddleware(object):
         simply caught 404 responses, then there would be a lot of wasted
         template rendering.
         """
+        # Add the lazy page loader to the request. Modifying the request's class
+        # seems very dodgy to me, but that's how Django's lazy user loading
+        # works, so who am I to argue?
+        request.__class__.page = LazyPage()
         # See if preview mode is requested.
         try:
             preview_mode = int(request.GET.get(settings.PUBLICATION_PREVIEW_KEY, 0))
@@ -37,18 +59,13 @@ class PageMiddleware(object):
         # Only allow preview mode if the user is a logged in administrator.
         preview_mode = preview_mode and request.user.is_authenticated() and request.user.is_staff and request.user.is_active
         with publication_manager.select_published(not preview_mode):
-            try:
-                page = Page.objects.get_by_path(request.path)
-            except Page.DoesNotExist:
-                return
-            else:
-                request.page = page
             resolver = urlresolvers.get_resolver(None)
             try:
                 # Try to match the given path with the URL conf. If it fails, then
                 # attempt to dispatch to a page.
                 resolver.resolve(request.path)
             except urlresolvers.Resolver404:
+                page = request.page
                 path_info = request.path[len(page.url):]
                 # Append a slash to match the page precisely.
                 if not path_info and not request.path.endswith("/") and settings.APPEND_SLASH:
