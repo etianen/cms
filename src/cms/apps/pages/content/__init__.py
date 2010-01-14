@@ -323,7 +323,6 @@ class ContentBase(object):
         if self.page.url == request.path:
             breadcrumbs = breadcrumbs[:-1]
         # Generate the context.
-        context.setdefault("page", page)
         context.setdefault("content", self)
         context.setdefault("short_title", context.get("title") or page.short_title or page.title)
         context.setdefault("browser_title", context.get("title") or page.browser_title or page.title)
@@ -333,10 +332,7 @@ class ContentBase(object):
         context.setdefault("robots_index", robots_index)
         context.setdefault("robots_archive", robots_archive)
         context.setdefault("robots_follow", robots_follow)
-        context.setdefault("homepage", homepage)
         context.setdefault("breadcrumbs", breadcrumbs)
-        context.setdefault("is_homepage", (page == homepage))
-        context.setdefault("site_title", homepage.browser_title or homepage.title)
         context.setdefault("nav_primary", homepage.content.navigation)
         context.setdefault("section", section)
         context.setdefault("nav_secondary", nav_secondary)

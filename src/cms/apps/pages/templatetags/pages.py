@@ -155,8 +155,3 @@ def last(context):
         return "last"
     return ""
 
-
-# Page widget generation.
-
-
-    
