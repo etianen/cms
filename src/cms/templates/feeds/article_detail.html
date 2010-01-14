@@ -5,6 +5,9 @@
 {% block feeds %}{% feed_link article.feed %}{% endblock %}
 
 
+{% block title %}{{article.title}} - {{block.super}}{% endblock %}
+
+
 {% block header %}<span class="date">{{article|date_field|date}}</span> <span class="title">{{article.title}}</span>{% endblock %}
 
 
