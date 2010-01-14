@@ -1,39 +1,57 @@
-{% extends "layout.html" %}
-{% load pages %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    
+    <head>
+    
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-
-{% block browser_title %}{% include "browser_title.html" %}{% endblock %}
-
-
-{% block meta_description %}{% meta_description %}{% endblock %}
-
-
-{% block meta_keywords %}{% meta_keywords %}{% endblock %}
-
-
-{% block meta_robots %}{% meta_robots %}{% endblock %}
-
-
-{% block title %}{% include "title.html" %}{% endblock %}
-
-
-{% block breadcrumbs %}{% include "breadcrumbs.html" %}{% endblock %}
-
-
-{% block nav_primary %}{% nav_primary %}{% endblock %}
-
-
-{% block nav_secondary %}{% nav_secondary %}{% endblock %}
-
-
-{% block nav_tertiary %}{% include "nav_tertiary.html" %}{% endblock %}
-
-
-{% block content_primary %}{% include "content_primary.html" %}{% endblock %}
-
-
-{% block content_secondary %}{% include "content_secondary.html" %}{% endblock %}
-
-
-{% block content_tertiary %}{% include "content_tertiary.html" %}{% endblock %}
+        <meta name="description" content="{% meta_description %}"/>
+        <meta name="keywords" content="{% meta_keywords %}"/>
+        <meta name="robots" content="{% meta_robots %}"/>
+        
+        <title>{% title %}</title>
+        
+        <link rel="stylesheet" href="{{SITE_MEDIA_URL}}css/layout.css"/>
+        <link rel="stylesheet" href="{{SITE_MEDIA_URL}}css/content.css"/>
+        
+        {% block feeds %}{% endblock %}
+        
+    </head>
+    
+    <body>
+        
+        <div id="page">
+        
+            <div id="header">
+                <a id="branding" href="/">Your Company</a>
+                {% nav_primary %}
+            </div>
+            
+            <div id="body">
+            
+                <div id="content-primary">
+                
+                    {% breadcrumbs %}
+                
+                    <h1>{% header %}</h1>
+                    
+                    {% content content_primary %}
+                    
+                </div>
+                
+                <div id="content-secondary">
+                    {% nav_secondary %}
+                </div>
+            
+            </div>
+            
+            <div id="footer">
+                &copy; 2009 Some Company 
+            </div>
+            
+        </div>
+        
+    </body>
+    
+</html>
 

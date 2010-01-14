@@ -155,6 +155,16 @@ def last(context):
 
 # Page widgets.
 
+
+@register.inclusion_tag("title.html", takes_context=True)
+def title(context):
+    """Renders the title of the page."""
+    page = context["page"]
+    homepage = Page.objects.get_homepage()
+    context = {"page": page,
+               "homepage": homepage}
+    return context
+
     
 @register.inclusion_tag("meta_description.html", takes_context=True)
 def meta_description(context):
@@ -237,6 +247,41 @@ def nav_secondary(context):
                "page": page,
                "nav_secondary": nav_secondary,
                "request": request}
+    return context
+    
+
+@register.inclusion_tag("nav_tertiary.html", takes_context=True)
+def nav_tertiary(context):
+    """Renders the tertiary navigation."""
+    request = context["request"]
+    page = context["page"]
+    breadcrumbs = page.breadcrumbs
+    if len(breadcrumbs) >= 3:
+        subsection = breadcrumbs[2]
+        nav_tertiary = subsection.navigation
+    else:
+        section = None
+        nav_tertiary = None
+    context = {"subsection": section,
+               "page": page,
+               "nav_tertiary": nav_tertiary,
+               "request": request}
+    return context
+
+
+@register.inclusion_tag("breadcrumbs.html", takes_context=True)
+def breadcrumbs(context):
+    """Renders the page breadcrumb trail."""
+    page = context["page"]
+    context = {"page": page}
+    return context
+
+
+@register.inclusion_tag("header.html", takes_context=True)
+def header(context):
+    """"Renders the page header."""
+    page = context["page"]
+    context = {"page": page}
     return context
     
     

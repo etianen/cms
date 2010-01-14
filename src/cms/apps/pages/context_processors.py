@@ -28,8 +28,7 @@ def conf(request):
 
 def page(request):
     """Places the current page in the template."""
-    context = {"page": request.page,
-               "homepage": Page.objects.get_homepage()}
+    context = {"page": request.page}
     return context
     
     
