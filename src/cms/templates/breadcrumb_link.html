@@ -1,0 +1,5 @@
+{% ifequal request.path breadcrumb.url %}
+    <span class="breadcrumb">{{breadcrumb}}</span>
+{% else %}
+    <span class="breadcrumb"><a href="{{breadcrumb.url}}">{{breadcrumb}}</a> &rsaquo; </span>
+{% endifequal %}

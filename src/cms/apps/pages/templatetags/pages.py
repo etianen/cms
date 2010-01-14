@@ -274,8 +274,19 @@ def nav_tertiary(context):
 def breadcrumbs(context):
     """Renders the page breadcrumb trail."""
     page = context["page"]
+    request = context["request"]
     context = {"page": page,
+               "request": request,
                "breadcrumbs": page.breadcrumbs}
+    return context
+
+
+@register.inclusion_tag("breadcrumb_link.html", takes_context=True)
+def breadcrumb_link(context, url, title):
+    """Renders a breadcrumb in the breadcrumb trail."""
+    request = context["request"]
+    context = {"request": request,
+               "url": title}
     return context
 
 

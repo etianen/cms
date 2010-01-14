@@ -1,12 +1,6 @@
 {% load pages %}
 {% if page.parent %}
-    <div id="breadcrumbs">
-        {% for breadcrumb in breadcrumbs %}
-            {% if forloop.last %}
-                <span class="breadcrumb {% first %} {% last %}">{{breadcrumb}}</span>
-            {% else %}
-                <span class="breadcrumb {% first %} {% last %}"><a href="{{breadcrumb.url}}">{{breadcrumb}}</a> &rsaquo; </span>
-            {% endif %}
-        {% endfor %}
-    </div>
+    {% for breadcrumb in breadcrumbs %}
+        {% breadcrumb_link breadcrumb %}
+    {% endfor %}
 {% endif %}
