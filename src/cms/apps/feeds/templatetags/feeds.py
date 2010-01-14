@@ -55,13 +55,13 @@ def article_archive(context, page, year):
     available_months = page_content.articles.dates(page_content.date_field, "month")
     # Generate the news archive.
     article_archive = []
-    year = None
+    archive_year = None
     for date in available_months:
         month = date.month
-        if date.year != year:
-            year = date.year
-            article_archive.append({"year": year, "months": [], "url": page_content.reverse("year_archive", year)})
-        article_archive[-1]["months"].append({"month": MONTHS[month], "url": page_content.reverse("month_archive", year, month)})
+        if date.year != archive_year:
+            archive_year = date.year
+            article_archive.append({"year": archive_year, "months": [], "url": page_content.reverse("year_archive", archive_year)})
+        article_archive[-1]["months"].append({"month": MONTHS[month], "url": page_content.reverse("month_archive", archive_year, month)})
     # Generate the context.
     context.push()
     try:
