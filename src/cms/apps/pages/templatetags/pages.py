@@ -45,6 +45,7 @@ class ContentNode(template.Node):
         
     def render(self, context):
         """Renders the node."""
+        content_area = self.content_area.resolve(context)
         try:
             page = context["page"]
             content_obj = page.content
@@ -52,7 +53,7 @@ class ContentNode(template.Node):
             raise template.VariableDoesNotExist, "The context does not contain a page object."
         content = ""
         while not content:
-            content = getattr(content_obj, self.content_area, "")
+            content = getattr(content_obj, content_area, "")
             if not self.inherited:
                 break
             if content_obj.page.parent:
@@ -67,18 +68,18 @@ def content(parser, token):
     
     For example, to render the content area called 'content_primary'::
     
-        {% content content_primary %}
+        {% content "content_primary" %}
         
     If you use the 'inherit' keyword, and the page content area is blank, then
     the parent page content area will be rendered instead::
     
-        {% content content_primary inherit %}
+        {% content "content_primary" inherit %}
     """
     contents = token.split_contents()
     content_length = len(contents)
     tag_name = contents[0]
     if content_length == 2 or (content_length == 3 and contents[2] == CONTENT_INHERIT_KEYWORD):
-        content_area = contents[1]
+        content_area = template.Variable(contents[1])
         inherited = content_length == 3
         return ContentNode(content_area, inherited)
     else:
