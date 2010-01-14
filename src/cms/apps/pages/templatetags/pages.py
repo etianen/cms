@@ -151,3 +151,91 @@ def last(context):
     context = {"is_last": is_last}
     return context
 
+
+# Page widgets.
+
+
+class GetHomepageNode(template.Node):
+    
+    """Renders the get_homepage tag."""
+    
+    def __init__(self, variable_name):
+        """Initializes the GetHomepageNode."""
+        super(GetHomepageNode, self).__init__()
+        self.variable_name = variable_name
+    
+    def render(self, context):
+        """Places the homepage in the context."""
+        context[self.variable_name] = Page.objects.get_homepage()
+        return ""
+
+
+@register.tag
+def get_homepage(parser, token):
+    """
+    Loads the site homepage and sets it as a context variable.
+    
+    Usage::
+    
+        {% get_homepage as variable_name %}
+    """
+    contents = token.split_contents()
+    content_length = len(contents)
+    tag_name = contents[0]
+    if content_length == 3 and contents[1] == "as":
+        variable_name = contents[2]
+        return GetHomepageNode(variable_name)
+    else:
+        raise template.TemplateSyntaxError, "'%(tag_name)s' tags should use the following format: %(tag_name)s as {{variable_name}}" % {"tag_name": tag_name}
+    
+    
+@register.inclusion_tag("meta_description.html", takes_context=True)
+def meta_description(context):
+    """Renders the meta description."""
+    page = context["page"]
+    description = ""
+    while not description and page:
+        description = page.meta_description
+        page = page.parent
+    context = {"description": description}
+    return context
+
+
+@register.inclusion_tag("meta_keywords.html", takes_context=True)
+def meta_keywords(context):
+    """Renders the meta description."""
+    page = context["page"]
+    keywords = ""
+    while not keywords and page:
+        keywords = page.meta_keywords
+        page = page.parent
+    context = {"keywords": keywords}
+    return context
+
+
+@register.inclusion_tag("meta_robots.html", takes_context=True)
+def meta_robots(context):
+    """Renders the meta robots."""
+    page = context["page"]
+    index = None
+    archive = None
+    follow = None
+    while page:
+        if index is None and page.robots_index != None:
+            index = page.robots_index
+        if archive is None and page.robots_archive != None:
+            archive = page.robots_archive
+        if follow is None and page.robots_follow != None:
+            follow = page.robots_follow
+        page = page.parent
+    if index is None:
+        index = True
+    if archive is None:
+        archive = True
+    if follow is None:
+        follow = True
+    context = {"index": index,
+               "archive": archive,
+               "follow": follow}
+    return context
+

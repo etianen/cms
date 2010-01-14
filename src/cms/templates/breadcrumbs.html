@@ -4,6 +4,6 @@
         {% for breadcrumb in breadcrumbs %}
             <span class="breadcrumb {% first %}"><a href="{{breadcrumb.url}}">{{breadcrumb}}</a> &rsaquo; </span>
         {% endfor %}
-        <span class="breadcrumb last">{{short_title}}</span>
+        <span class="breadcrumb last">{{page.short_title|default:page.title}}</span>
     </div>
 {% endif %}

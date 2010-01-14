@@ -1,1 +1,1 @@
-{% if page.parent %}{{page.browser_title|default:page.title}} - {% endif %}{{homepage.browser_title|default:homepage.title}}
+{% load pages %}{% if page.parent %}{{page.browser_title|default:page.title}} - {% endif %}{% get_homepage as homepage %}{{homepage.browser_title|default:homepage.title}}

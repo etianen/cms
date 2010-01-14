@@ -289,21 +289,6 @@ class ContentBase(object):
         """Renders the given page to a HttpResponse."""
         # Generate the breadcrumbs.
         breadcrumbs = self.breadcrumbs
-        # Generate SEO information
-        meta_description = ""
-        meta_keywords = ""
-        robots_index = True
-        robots_archive = True
-        robots_follow = True
-        for breadcrumb in breadcrumbs + [page]:
-            meta_description = breadcrumb.meta_description or meta_description
-            meta_keywords = breadcrumb.meta_keywords or meta_keywords
-            if breadcrumb.robots_index != None:
-                robots_index = bool(breadcrumb.robots_index)
-            if breadcrumb.robots_archive != None:
-                robots_archive = bool(breadcrumb.robots_archive)
-            if breadcrumb.robots_follow != None:
-                robots_follow = bool(breadcrumb.robots_follow)
         # Parse the main section.
         homepage = breadcrumbs[0]
         if len(breadcrumbs) > 1:
@@ -324,14 +309,6 @@ class ContentBase(object):
             breadcrumbs = breadcrumbs[:-1]
         # Generate the context.
         context.setdefault("content", self)
-        context.setdefault("short_title", context.get("title") or page.short_title or page.title)
-        context.setdefault("browser_title", context.get("title") or page.browser_title or page.title)
-        context.setdefault("title", page.title)
-        context.setdefault("meta_description", meta_description)
-        context.setdefault("meta_keywords", meta_keywords)
-        context.setdefault("robots_index", robots_index)
-        context.setdefault("robots_archive", robots_archive)
-        context.setdefault("robots_follow", robots_follow)
         context.setdefault("breadcrumbs", breadcrumbs)
         context.setdefault("nav_primary", homepage.content.navigation)
         context.setdefault("section", section)

@@ -26,11 +26,7 @@ def conf(request):
 
 def page(request):
     """Places the current page in the template."""
-    homepage = page = request.page
-    while homepage.parent:
-        homepage = homepage.parent
-    context = {"page": page,
-               "homepage": homepage}
+    context = {"page": request.page}
     return context
     
     
