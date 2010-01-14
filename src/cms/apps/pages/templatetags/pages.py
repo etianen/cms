@@ -155,40 +155,6 @@ def last(context):
 
 # Page widgets.
 
-
-class GetHomepageNode(template.Node):
-    
-    """Renders the get_homepage tag."""
-    
-    def __init__(self, variable_name):
-        """Initializes the GetHomepageNode."""
-        super(GetHomepageNode, self).__init__()
-        self.variable_name = variable_name
-    
-    def render(self, context):
-        """Places the homepage in the context."""
-        context[self.variable_name] = Page.objects.get_homepage()
-        return ""
-
-
-@register.tag
-def get_homepage(parser, token):
-    """
-    Loads the site homepage and sets it as a context variable.
-    
-    Usage::
-    
-        {% get_homepage as variable_name %}
-    """
-    contents = token.split_contents()
-    content_length = len(contents)
-    tag_name = contents[0]
-    if content_length == 3 and contents[1] == "as":
-        variable_name = contents[2]
-        return GetHomepageNode(variable_name)
-    else:
-        raise template.TemplateSyntaxError, "'%(tag_name)s' tags should use the following format: %(tag_name)s as {{variable_name}}" % {"tag_name": tag_name}
-    
     
 @register.inclusion_tag("meta_description.html", takes_context=True)
 def meta_description(context):

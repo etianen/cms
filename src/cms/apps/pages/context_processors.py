@@ -4,6 +4,8 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 
+from cms.apps.pages.models import Page
+
 
 def site(request):
     """Sets the site name and domain in the template."""
@@ -26,7 +28,8 @@ def conf(request):
 
 def page(request):
     """Places the current page in the template."""
-    context = {"page": request.page}
+    context = {"page": request.page,
+               "homepage": Page.objects.get_homepage()}
     return context
     
     

@@ -146,7 +146,8 @@ class ArticleFeed(Feed):
         
     def title(self, obj=None):
         """Generates the feed title."""
-        context = {"page": obj}
+        context = {"page": obj,
+                   "homepage": Page.objects.get_homepage()}
         return template.loader.render_to_string("browser_title.html", context)
 
     def link(self, obj):
