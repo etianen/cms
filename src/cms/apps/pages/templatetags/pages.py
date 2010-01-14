@@ -5,12 +5,11 @@ from django import template
 from django.utils.safestring import mark_safe
 
 from cms.apps.pages.models import Page
-from cms.apps.pages.templatetags import Library
 from cms.apps.pages.templatetags.permalinks import expand_permalinks
 from cms.apps.pages.templatetags.thumbnails import generate_thumbnails
 
 
-register = Library()
+register = template.Library()
 
 
 # HTML processing.
@@ -115,43 +114,40 @@ def link(context, url, title=None):
 # Dynamic class generation.
 
 
-HERE_CLASS_NAME = "here"
-
-
-@register.context_tag
+@register.inclusion_tag("here.html", takes_context=True)
 def here(context, url):
     """
     Returns 'here' if the url is at the start of the current request path.
     """
     request = context["request"]
-    if request.path.startswith(url):
-        return HERE_CLASS_NAME
-    return ""
+    is_here = request.path.startswith(url)
+    context = {"is_here": is_here}
+    return context
 
 
-@register.context_tag
+@register.inclusion_tag("here.html", takes_context=True)
 def here_exact(context, url):
     """
     Returns 'here' if the url is exactly equal to current request path.
     """
     request = context["request"]
-    if request.path == url:
-        return HERE_CLASS_NAME
-    return ""
+    is_here = request.path == url
+    context = {"is_here": is_here}
+    return context
 
 
-@register.context_tag
+@register.inclusion_tag("first.html", takes_context=True)
 def first(context):
     """Returns 'first' on the first iteration of the parent for loop."""
-    if context["forloop"]["first"]:
-        return "first"
-    return ""
+    is_first = context["forloop"]["first"]
+    context = {"is_first": is_first}
+    return context
 
 
-@register.context_tag
+@register.inclusion_tag("last.html", takes_context=True)
 def last(context):
     """Returns 'last' on the last iteration of the parent for loop."""
-    if context["forloop"]["last"]:
-        return "last"
-    return ""
+    is_last = context["forloop"]["last"]
+    context = {"is_last": is_last}
+    return context
 
