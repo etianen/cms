@@ -308,7 +308,6 @@ class ContentBase(object):
         if self.page.url == request.path:
             breadcrumbs = breadcrumbs[:-1]
         # Generate the context.
-        context.setdefault("content", self)
         context.setdefault("breadcrumbs", breadcrumbs)
         context.setdefault("nav_primary", homepage.content.navigation)
         context.setdefault("section", section)

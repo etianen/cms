@@ -46,9 +46,10 @@ class ContentNode(template.Node):
     def render(self, context):
         """Renders the node."""
         try:
-            content_obj = context["content"]
+            page = context["page"]
+            content_obj = page.content
         except IndexError:
-            raise template.VariableDoesNotExist, "The context does not contain a page content object."
+            raise template.VariableDoesNotExist, "The context does not contain a page object."
         content = ""
         while not content:
             content = getattr(content_obj, self.content_area, "")
