@@ -29,25 +29,26 @@ class PageMiddleware(object):
         simply caught 404 responses, then there would be a lot of wasted
         template rendering.
         """
-        resolver = urlresolvers.get_resolver(None)
+        # See if preview mode is requested.
         try:
-            # Try to match the given path with the URL conf. If it fails, then
-            # attempt to dispatch to a page.
-            resolver.resolve(request.path)
-        except urlresolvers.Resolver404:
-            # See if preview mode is requested.
+            preview_mode = int(request.GET.get(settings.PUBLICATION_PREVIEW_KEY, 0))
+        except ValueError:
+            preview_mode = False
+        # Only allow preview mode if the user is a logged in administrator.
+        preview_mode = preview_mode and request.user.is_authenticated() and request.user.is_staff and request.user.is_active
+        with publication_manager.select_published(not preview_mode):
             try:
-                preview_mode = int(request.GET.get(settings.PUBLICATION_PREVIEW_KEY, 0))
-            except ValueError:
-                preview_mode = False
-            # Only allow preview mode if the user is a logged in administrator.
-            preview_mode = preview_mode and request.user.is_authenticated() and request.user.is_staff and request.user.is_active
-            with publication_manager.select_published(not preview_mode):
-                # See if we have pages to dispatch to.
-                try:
-                    page = Page.objects.get_by_path(request.path)
-                except Page.DoesNotExist:
-                    return
+                page = Page.objects.get_by_path(request.path)
+            except Page.DoesNotExist:
+                return
+            else:
+                request.page = page
+            resolver = urlresolvers.get_resolver(None)
+            try:
+                # Try to match the given path with the URL conf. If it fails, then
+                # attempt to dispatch to a page.
+                resolver.resolve(request.path)
+            except urlresolvers.Resolver404:
                 path_info = request.path[len(page.url):]
                 # Append a slash to match the page precisely.
                 if not path_info and not request.path.endswith("/") and settings.APPEND_SLASH:

@@ -53,7 +53,8 @@ TEMPLATE_CONTEXT_PROCESSORS = ("django.core.context_processors.auth",
                                "django.core.context_processors.media",
                                "cms.apps.pages.context_processors.site",
                                "cms.apps.pages.context_processors.media",
-                               "cms.apps.pages.context_processors.conf",)
+                               "cms.apps.pages.context_processors.conf",
+                               "cms.apps.pages.context_processors.page",)
 
 
 # Dispatch settings.

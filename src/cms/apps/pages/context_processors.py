@@ -20,6 +20,13 @@ def media(request):
 
 def conf(request):
     """Gives the settings object to the template."""
-    context = {"settings" : settings}
+    context = {"settings": settings}
     return context
 
+
+def page(request):
+    """Places the current page in the template."""
+    context = {"page": request.page}
+    return context
+    
+    
