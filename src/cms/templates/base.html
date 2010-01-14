@@ -35,12 +35,13 @@
                 
                     <h1>{% header %}</h1>
                     
-                    {% content content_primary %}
+                    {% block content_primary %}{% endblock %}
                     
                 </div>
                 
                 <div id="content-secondary">
                     {% nav_secondary %}
+                    {% block content_secondary %}{% endblock %}
                 </div>
             
             </div>

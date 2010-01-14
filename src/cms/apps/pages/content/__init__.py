@@ -273,24 +273,6 @@ class ContentBase(object):
     
     def render_page(self, request, template_name, context, page, **kwargs):
         """Renders the given page to a HttpResponse."""
-        # Generate the breadcrumbs.
-        breadcrumbs = self.breadcrumbs
-        if len(breadcrumbs) > 1:
-            section = breadcrumbs[1]
-        else:
-            section = None
-        # Parse the subsection.
-        if len(breadcrumbs) > 2:
-            subsection = breadcrumbs[2]
-        else:
-            subsection = None
-        # Snip off last breadcrumb if the page is at the current URL.
-        if self.page.url == request.path:
-            breadcrumbs = breadcrumbs[:-1]
-        # Generate the context.
-        context.setdefault("breadcrumbs", breadcrumbs)
-        context.setdefault("section", section)
-        context.setdefault("subsection", subsection)
         return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
     
     @view("^$")
@@ -298,7 +280,7 @@ class ContentBase(object):
         """Renders the content as a HTML page."""
         content_name = self.__class__.__name__.lower()
         template_name = ("pages/%s.html" % content_name,
-                         "base.html")
+                         "pages/base.html")
         return self.render_to_response(request, template_name, {})
         
     # Administration methods.
