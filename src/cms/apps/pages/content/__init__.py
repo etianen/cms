@@ -18,7 +18,6 @@ from django.shortcuts import render_to_response, redirect
 from cms.apps.pages.forms import PageForm
 from cms.apps.pages.optimizations import cached_getter
 from cms.apps.pages import loader
-from cms.apps.pages.content.helpers import Breadcrumb, NavEntry
 from cms.apps.pages.content.fields import Field, CharField, TextField, HtmlField, ChoiceField, URLField, EmailField, IntegerField, PositiveIntegerField, FileField, ImageField, ModelField, BooleanField
 
 
@@ -200,17 +199,6 @@ class ContentBase(object):
         
     # Template context generators.
     
-    def get_breadcrumbs(self):
-        """Returns the breadcrumbs leading to this page."""
-        page = self.page
-        breadcrumbs = page.all_parents
-        breadcrumbs.reverse()
-        breadcrumbs.append(page)
-        return breadcrumbs
-    
-    breadcrumbs = property(get_breadcrumbs,
-                           doc="The breadcrumbs leading to this page.")
-        
     def get_page(self, request, models, items_per_page=None, pagination_key=None):
         """Returns an object paginator for the given models."""
         items_per_page = items_per_page or settings.ITEMS_PER_PAGE
