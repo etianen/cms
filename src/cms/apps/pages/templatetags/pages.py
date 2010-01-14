@@ -273,7 +273,8 @@ def nav_tertiary(context):
 def breadcrumbs(context):
     """Renders the page breadcrumb trail."""
     page = context["page"]
-    context = {"page": page}
+    context = {"page": page,
+               "breadcrumbs": page.breadcrumbs}
     return context
 
 
