@@ -1,16 +1,15 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-{% load pages %}
 <html xmlns="http://www.w3.org/1999/xhtml">
     
     <head>
     
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-        <meta name="description" content="{% meta_description %}"/>
-        <meta name="keywords" content="{% meta_keywords %}"/>
-        <meta name="robots" content="{% meta_robots %}"/>
+        <meta name="description" content="{% block meta_description %}}{% endblock %}"/>
+        <meta name="keywords" content="{% block meta_keywords %}{% endblock %}"/>
+        <meta name="robots" content="{% block meta_robots %}{% endblock %}"/>
         
-        <title>{% title %}</title>
+        <title>{% block title %}{% endblock %}</title>
         
         <link rel="stylesheet" href="{{SITE_MEDIA_URL}}css/layout.css"/>
         <link rel="stylesheet" href="{{SITE_MEDIA_URL}}css/content.css"/>
@@ -25,23 +24,23 @@
         
             <div id="header">
                 <a id="branding" href="/">Your Company</a>
-                {% nav_primary %}
+                {% block nav_primary %}{% endblock %}
             </div>
             
             <div id="body">
             
                 <div id="content-primary">
                 
-                    {% breadcrumbs %}
+                    {% block breadcrumbs %}{% endblock %}
                 
-                    <h1>{% header %}</h1>
+                    <h1>{% block header %}{% endblock %}</h1>
                     
                     {% block content_primary %}{% endblock %}
                     
                 </div>
                 
                 <div id="content-secondary">
-                    {% nav_secondary %}
+                    {% block nav_secondary %}{% endblock %}
                     {% block content_secondary %}{% endblock %}
                 </div>
             
