@@ -17,12 +17,16 @@ class NewsFeed(FeedBase):
     
     icon = settings.CMS_MEDIA_URL + "img/content-types/news-feed.png"
     
-    article_list_template = ("news/article_list.html", "feeds/article_list.html",)
+    article_list_template = "news/article_list.html"
     
-    article_detail_template = ("news/article_detail.html", "feeds/article_detail.html",)
+    year_archive_template = "feeds/year_archive.html"
     
-    article_archive_template = ("news/article_archive.html", "feeds/article_archive.html",)
+    month_archive_template = "feeds/month_archive.html"
     
-    latest_articles_template = ("news/latest_articles.html", "feeds/latest_articles.html",)
+    article_detail_template = "news/article_detail.html"
+    
+    article_archive_template = "news/article_archive.html"
+    
+    latest_articles_template = "news/latest_articles.html"
     
     

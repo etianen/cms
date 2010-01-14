@@ -1,18 +1,18 @@
-{% extends "base.html" %}
+{% extends "pages/base.html" %}
 {% load pages feeds %}
 
 
-{% block feeds %}{% feed_link page.feed %}{% endblock %}
+{% block feeds %}{% feed_link article.feed %}{% endblock %}
 
 
-{% block title %}<span class="date">{{page|date_field|date}}</span> <span class="title">{{block.super}}</span>{% endblock %}
+{% block header %}<span class="date">{{article|date_field|date}}</span> <span class="title">{{article.title}}</span>{% endblock %}
 
 
-{% block content_primary %}{{page.content|html}}{% endblock %}
+{% block content_primary %}{{article.content|html}}{% endblock %}
 
 
 {% block content_secondary %}
 
-    {% article_archive page.feed year %}
+    {% article_archive article.feed year %}
 
 {% endblock %}

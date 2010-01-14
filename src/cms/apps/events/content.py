@@ -20,13 +20,17 @@ class EventsFeed(FeedBase):
     
     icon = settings.CMS_MEDIA_URL + "img/content-types/events-feed.png"
     
-    article_list_template = ("events/article_list.html", "feeds/article_list.html",)
+    article_list_template = "events/article_list.html"
     
-    article_detail_template = ("events/article_detail.html", "feeds/article_detail.html",)
+    year_archive_template = "events/year_archive.html"
     
-    article_archive_template = ("events/article_archive.html", "feeds/article_archive.html",)
+    month_archive_template = "events/month_archive.html"
     
-    latest_articles_template = ("events/latest_articles.html", "feeds/latest_articles.html",)
+    article_detail_template = "events/article_detail.html"
+    
+    article_archive_template = "events/article_archive.html"
+    
+    latest_articles_template = "events/latest_articles.html"
     
     def get_latest_articles(self):
         """Returns the list of articles for the latest article feeds."""

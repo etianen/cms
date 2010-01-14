@@ -36,6 +36,10 @@ class FeedBase(DefaultContent):
     
     article_list_template = "feeds/article_list.html"
     
+    year_archive_template = "feeds/year_archive.html"
+    
+    month_archive_template = "feeds/month_archive.html"
+    
     article_detail_template = "feeds/article_detail.html"
     
     article_archive_template = "feeds/article_archive.html"
@@ -87,11 +91,11 @@ class FeedBase(DefaultContent):
         year = int(year)
         all_articles = self.articles.filter(**{"%s__year" % self.date_field: year})
         articles = self.get_page(request, all_articles)
+        date = datetime.date(year, 1, 1)
         context = {"articles": articles,
-                   "title": "Archive for %i" % year,
-                   "short_title": year,
+                   "date": date,
                    "year": year}
-        return self.render_to_response(request, self.article_list_template, context)
+        return self.render_to_response(request, self.year_archive_template, context)
     
     @content.view(r"^(\d{4})/(\d{1,2})/$")
     def month_archive(self, request, year, month):
@@ -101,14 +105,12 @@ class FeedBase(DefaultContent):
         all_articles = self.articles.filter(**{"%s__year" % self.date_field: year,
                                                "%s__month" % self.date_field: month})
         articles = self.get_page(request, all_articles)
-        breadcrumbs = self.breadcrumbs + [content.Breadcrumb(year, self.reverse("year_archive", year))]
+        date = datetime.date(year, month, 1)
         context = {"articles": articles,
-                   "title": u"Archive for %s %i" % (MONTHS[month], year),
-                   "short_title": MONTHS[month],
-                   "breadcrumbs": breadcrumbs,
+                   "date": date,
                    "year": year,
                    "month": month}
-        return self.render_to_response(request, self.article_list_template, context)
+        return self.render_to_response(request, self.month_archive_template, context)
     
     @content.view(r"^(\d{4})/(\d{1,2})/([a-zA-Z0-9_\-]+)/$")
     def article_detail(self, request, year, month, article_slug):
@@ -122,11 +124,9 @@ class FeedBase(DefaultContent):
             article = all_articles.get(url_title=article_slug)
         except self.article_model.DoesNotExist:
             raise Http404, "An article with a URL title of '%s' does not exist." % article_slug
-        breadcrumbs = self.breadcrumbs + [content.Breadcrumb(year, self.reverse("year_archive", year)),
-                                          content.Breadcrumb(MONTHS[month], self.reverse("month_archive", year, month))]
-        context = {"breadcrumbs": breadcrumbs,
-                   "year": getattr(article, self.date_field).year}
-        return self.render_page(request, self.article_detail_template, context, article)
+        context = {"year": getattr(article, self.date_field).year,
+                   "article": article}
+        return self.render_to_response(request, self.article_detail_template, context)
 
 
 ARTICLE_FEED_KEY = "latest"
