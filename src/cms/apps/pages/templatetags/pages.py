@@ -206,3 +206,16 @@ def meta_robots(context):
                "follow": follow}
     return context
 
+
+@register.inclusion_tag("nav_primary.html", takes_context=True)
+def nav_primary(context):
+    """Renders the primary navigation."""
+    homepage = context["homepage"]
+    request = context["request"]
+    nav_primary = homepage.navigation
+    context = {"homepage": homepage,
+               "nav_primary": nav_primary,
+               "request": request}
+    return context
+    
+    

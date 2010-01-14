@@ -84,6 +84,13 @@ class Page(PageBase):
     all_children = property(get_all_children,
                             doc="All the children of this page, cascading down to their children too.")
     
+    def get_navigation(self):
+        """Returns the sub-navigation of this page."""
+        return [child for child in self.children if child.in_navigation]
+    
+    navigation = property(get_navigation,
+                          doc="The sub-navigation of this page.")
+    
     # Publication fields.
     
     publication_date = models.DateTimeField(blank=True,

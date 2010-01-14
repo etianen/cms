@@ -200,20 +200,6 @@ class ContentBase(object):
         
     # Template context generators.
     
-    def get_navigation(self):
-        """
-        Returns the sub-navigation of the page.
-        
-        This can be extended to add additional, programmatic entries to the
-        navigation.  Navigation entries must conform to the interface of
-        NavEntry.  Instances of PageBase already conform to this specification,
-        alowing either to be used by this method.
-        """
-        return [child for child in self.page.children if child.in_navigation]
-    
-    navigation = property(lambda self: self.get_navigation(),
-                          doc="The sub-navigation of the page.")
-        
     def get_breadcrumbs(self):
         """Returns the breadcrumbs leading to this page."""
         page = self.page
@@ -289,31 +275,22 @@ class ContentBase(object):
         """Renders the given page to a HttpResponse."""
         # Generate the breadcrumbs.
         breadcrumbs = self.breadcrumbs
-        # Parse the main section.
-        homepage = breadcrumbs[0]
         if len(breadcrumbs) > 1:
             section = breadcrumbs[1]
-            nav_secondary = section.content.navigation
         else:
             section = None
-            nav_secondary = None
         # Parse the subsection.
         if len(breadcrumbs) > 2:
             subsection = breadcrumbs[2]
-            nav_tertiary = subsection.content.navigation
         else:
             subsection = None
-            nav_tertiary = None
         # Snip off last breadcrumb if the page is at the current URL.
         if self.page.url == request.path:
             breadcrumbs = breadcrumbs[:-1]
         # Generate the context.
         context.setdefault("breadcrumbs", breadcrumbs)
-        context.setdefault("nav_primary", homepage.content.navigation)
         context.setdefault("section", section)
-        context.setdefault("nav_secondary", nav_secondary)
         context.setdefault("subsection", subsection)
-        context.setdefault("nav_tertiary", nav_tertiary)
         return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
     
     @view("^$")
