@@ -210,11 +210,32 @@ def meta_robots(context):
 @register.inclusion_tag("nav_primary.html", takes_context=True)
 def nav_primary(context):
     """Renders the primary navigation."""
-    homepage = context["homepage"]
+    homepage = Page.objects.get_homepage()
+    page = context["page"]
     request = context["request"]
     nav_primary = homepage.navigation
     context = {"homepage": homepage,
+               "page": page,
                "nav_primary": nav_primary,
+               "request": request}
+    return context
+    
+    
+@register.inclusion_tag("nav_secondary.html", takes_context=True)
+def nav_secondary(context):
+    """Renders the secondary navigation."""
+    request = context["request"]
+    page = context["page"]
+    breadcrumbs = page.breadcrumbs
+    if len(breadcrumbs) >= 2:
+        section = breadcrumbs[1]
+        nav_secondary = section.navigation
+    else:
+        section = None
+        nav_secondary = None
+    context = {"section": section,
+               "page": page,
+               "nav_secondary": nav_secondary,
                "request": request}
     return context
     

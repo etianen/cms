@@ -54,6 +54,16 @@ class Page(PageBase):
     all_parents = property(get_all_parents,
                            doc="A list of all parents of this page.")
 
+    def get_breadcrumbs(self):
+        """Returns the breadcrumb trail for this page, including this page."""
+        parents = self.all_parents
+        parents.reverse()
+        parents.append(self)
+        return parents
+    
+    breadcrumbs = property(get_breadcrumbs,
+                           doc="The breadcrumb trail for this page.")
+
     order = models.PositiveIntegerField(unique=True,
                                         editable=False,
                                         blank=True,
