@@ -134,61 +134,6 @@ def page_url(parser, token):
     return PageUrlNode(page, view_func, args, kwargs, varname)
 
 
-@register.inclusion_tag("link.html", takes_context=True)
-def link(context, url, title=None):
-    """
-    Generates a hyperlink to the given url.
-    
-    The link will be marked as 'here' according to the 'here' template tag.
-    """
-    request = context["request"]
-    context = {"request": request,
-               "title": title or url,
-               "url": url}
-    return context
-
-
-# Dynamic class generation.
-
-
-@register.inclusion_tag("here.html", takes_context=True)
-def here(context, url):
-    """
-    Returns 'here' if the url is at the start of the current request path.
-    """
-    request = context["request"]
-    is_here = request.path.startswith(url)
-    context = {"is_here": is_here}
-    return context
-
-
-@register.inclusion_tag("here.html", takes_context=True)
-def here_exact(context, url):
-    """
-    Returns 'here' if the url is exactly equal to current request path.
-    """
-    request = context["request"]
-    is_here = request.path == url
-    context = {"is_here": is_here}
-    return context
-
-
-@register.inclusion_tag("first.html", takes_context=True)
-def first(context):
-    """Returns 'first' on the first iteration of the parent for loop."""
-    is_first = context["forloop"]["first"]
-    context = {"is_first": is_first}
-    return context
-
-
-@register.inclusion_tag("last.html", takes_context=True)
-def last(context):
-    """Returns 'last' on the last iteration of the parent for loop."""
-    is_last = context["forloop"]["last"]
-    context = {"is_last": is_last}
-    return context
-
-
 # Page widgets.
 
 
@@ -327,57 +272,118 @@ def title(parser, token):
             context.pop()
     return PatternNode(parser, token, handler, ("{title}", "",))
 
-    
-@register.inclusion_tag("nav_primary.html", takes_context=True)
-def nav_primary(context):
-    """Renders the primary navigation."""
-    homepage = Page.objects.get_homepage()
-    page = context["page"]
-    request = context["request"]
-    nav_primary = homepage.navigation
-    context = {"homepage": homepage,
-               "page": page,
-               "nav_primary": nav_primary,
-               "request": request}
-    return context
+
+def nav_context(page, request):
+    """
+    Generates a dictionary of variables related to the page, for use in page
+    navigation.
+    """
+    page_url = page.get_absolute_url()
+    return {"title": page.short_title or page.title,
+            "url": page_url,
+            "here": request.path.startswith(page_url),
+            "page": page}
     
     
-@register.inclusion_tag("nav_secondary.html", takes_context=True)
-def nav_secondary(context):
-    """Renders the secondary navigation."""
-    request = context["request"]
-    page = context["page"]
-    breadcrumbs = page.breadcrumbs
-    if len(breadcrumbs) >= 2:
-        section = breadcrumbs[1]
-        nav_secondary = section.navigation
-    else:
-        section = None
-        nav_secondary = None
-    context = {"section": section,
-               "page": page,
-               "nav_secondary": nav_secondary,
-               "request": request}
-    return context
+def nav_context_exact(page, request):
+    """
+    Generates a dictionary of variables related to the page, for use in page
+    navigation.
+    
+    This differs to nav_context in that the page URL is matched exactly to the
+    request path for determining whether the page should be considered 'here'.
+    """
+    page_url = page.get_absolute_url()
+    return {"title": page.short_title or page.title,
+            "url": page_url,
+            "here": request.path == page_url,
+            "page": page}
+
+    
+@register.tag
+def nav_primary(parser, token):
+    """
+    Renders the primary navigation of the current page:::
+    
+        {% nav_primary %}
+        
+    """
+    def handler(context):
+        page = context["page"]
+        request = context["request"]
+        homepage = page.homepage
+        navigation = []
+        if homepage.in_navigation:
+            navigation.append(nav_context_exact(homepage, request))
+        for entry in homepage.navigation:
+            navigation.append(nav_context(entry, request))
+        context.push()
+        try:
+            context.update({"navigation": navigation})
+            return template.loader.render_to_string("nav_primary.html", context)
+        finally:
+            context.pop()
+    return PatternNode(parser, token, handler, ("",))
+    
+    
+@register.tag
+def nav_secondary(parser, token):
+    """
+    Renders the secondary navigation of the current page:::
+    
+        {% nav_secondary %}
+        
+    """
+    def handler(context):
+        page = context["page"]
+        request = context["request"]
+        navigation = []
+        try:
+            section = page.breadcrumbs[1]
+        except IndexError:
+            pass
+        else:
+            if section.in_navigation:
+                navigation.append(nav_context_exact(section, request))
+            for entry in section.navigation:
+                navigation.append(nav_context(entry, request))
+        context.push()
+        try:
+            context.update({"navigation": navigation})
+            return template.loader.render_to_string("nav_secondary.html", context)
+        finally:
+            context.pop()
+    return PatternNode(parser, token, handler, ("",))
     
 
-@register.inclusion_tag("nav_tertiary.html", takes_context=True)
-def nav_tertiary(context):
-    """Renders the tertiary navigation."""
-    request = context["request"]
-    page = context["page"]
-    breadcrumbs = page.breadcrumbs
-    if len(breadcrumbs) >= 3:
-        subsection = breadcrumbs[2]
-        nav_tertiary = subsection.navigation
-    else:
-        section = None
-        nav_tertiary = None
-    context = {"subsection": section,
-               "page": page,
-               "nav_tertiary": nav_tertiary,
-               "request": request}
-    return context
+@register.tag
+def nav_tertiary(parser, token):
+    """
+    Renders the tertiary navigation of the current page:::
+    
+        {% nav_tertiary %}
+        
+    """
+    def handler(context):
+        page = context["page"]
+        request = context["request"]
+        navigation = []
+        try:
+            subsection = page.breadcrumbs[2]
+        except IndexError:
+            pass
+        else:
+            if subsection.in_navigation:
+                navigation.append(nav_context_exact(subsection, request))
+            for entry in subsection.navigation:
+                navigation.append(nav_context(entry, request))
+        context.push()
+        try:
+            context.update({"navigation": navigation})
+            return template.loader.render_to_string("nav_tertiary.html", context)
+        finally:
+            context.pop()
+    return PatternNode(parser, token, handler, ("",))
 
 
 @register.tag

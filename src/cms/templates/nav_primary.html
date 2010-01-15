@@ -1,14 +1,8 @@
-{% load pages %}
-{% if homepage.in_navigation or nav_primary %}
+{% if navigation %}
     <ul id="nav-primary">
-        {% if homepage.in_navigation %}
-            <li class="first">
-                <a class="{% here_exact homepage.url %}" href="{{homepage.url}}">Home</a>
-            </li>
-        {% endif %}
-        {% for entry in nav_primary %}
-            <li class="{% last %}">
-                {% link entry.url entry %}
+        {% for entry in navigation %}
+            <li class="{% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
+                <a class="{% if entry.here %}here{% endif %}" href="{{entry.url}}">{{entry.title}}</a>
             </li>
         {% endfor %}
     </ul>

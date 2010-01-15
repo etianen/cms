@@ -1,9 +1,8 @@
-{% load pages %}
-{% if nav_secondary %}
+{% if navigation %}
     <ul id="nav-secondary">
-        {% for entry in nav_secondary %}
-            <li class="{% first %} {% last %}">
-                {% link entry.url entry %}
+        {% for entry in navigation %}
+            <li class="{% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
+                <a class="{% if entry.here %}here{% endif %}" href="{{entry.url}}">{{entry.title}}</a>
             </li>
         {% endfor %}
     </ul>
