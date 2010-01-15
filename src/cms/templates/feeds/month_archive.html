@@ -7,7 +7,7 @@
 
 {% block breadcrumbs %}
     {% breadcrumbs extended %}
-    {% breadcrumb_link date|date:"Y" "../" %}
+    {% page_url page year_archive date.year as year_archive_url %}{% breadcrumb_link date|date:"Y" year_archive_url %}
     {% breadcrumb_title date|date:"F" %}
 {% endblock %} 
 

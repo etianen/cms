@@ -22,7 +22,8 @@ def html(text):
     Processes HTML text.
     
     The text is checked for permalinks embedded in <a> tags, expanding the
-    permalinks to their referenced URL.
+    permalinks to their referenced URL. Images containing a permalink source
+    are checked for size and thumbnailed as appropriate.
     """
     if not text:
         return ""
@@ -47,14 +48,14 @@ def content(parser, token):
     """
     def handler(context, content_area, inherited=False):
         page = context["page"]
-        content_obj = page.content
         content = ""
         while not content:
+            content_obj = page.content
             content = getattr(content_obj, content_area, "")
             if not inherited:
                 break
-            if content_obj.page.parent:
-                content_obj = content_obj.page.parent.content
+            if page.parent:
+                page = page.parent
         return html(content)
     return PatternNode(parser, token, handler, ("{content_area} [inherited]", "{content_area}"))
 
@@ -62,14 +63,75 @@ def content(parser, token):
 # Page linking.
 
 
-@register.simple_tag
-def page_url(page, view_func="index"):
+class PageUrlNode(template.Node):
+    
+    """Renders the page_url tag."""
+    
+    def __init__(self, page, view_func, args, kwargs, varname):
+        """Initializes the PageUrlNode."""
+        self.page = page
+        self.view_func = view_func
+        self.args = args
+        self.kwargs = kwargs
+        self.varname = varname
+        
+    def render(self, context):
+        """Renders the PageUrlNode."""
+        page = self.page.resolve(context)
+        # Get the page URL.
+        try:
+            page = Page.objects.get_page(page)
+        except Page.DoesNotExist:
+            url = "#"
+        else:
+            args = [arg.resolve(context) for arg in self.args]
+            kwargs = dict((key, value.resolve(context)) for key, value in self.kwargs.items())
+            url = page.content.reverse(self.view_func, *args, **kwargs)
+        # Return the value, or set as a context variable as appropriate.
+        if self.varname:
+            context[self.varname] = url
+            return ""
+        else:
+            return url
+
+
+@register.tag
+def page_url(parser, token):
     """Renders the URL of the given view func in the given page."""
+    contents = token.split_contents()
+    tag_name = contents[0]
+    contents = contents[1:]
+    # Attempt to parse the varname.
     try:
-        page = Page.objects.get_page(page)
-    except Page.DoesNotExist:
-        return "#"
-    return page.content.reverse(view_func)
+        if contents.index("as") == len(contents) - 2:
+            varname = contents[-1]
+            contents = contents[:-2]
+        else:
+            raise template.TemplateSyntaxError, "%s tag expects only one argument after 'as' statement" % tag_name
+    except ValueError:
+        # No varname was specified.
+        varname = None
+    # Attempt to parse the page.
+    try:
+        page = parser.compile_filter(contents[0])
+    except IndexError:
+        raise template.TemplateSyntaxError, "No page specified in %s tag" % tag_name
+    # Attempt to parse the view func.
+    try:
+        view_func = contents[1]
+    except IndexError:
+        view_func = "index"
+    # Parse all remaining token as arguments.
+    args = []
+    kwargs = {}
+    for argument in "".join(contents[2:]).split(","):
+        if "=" in argument:
+            key, value = argument.split("=")
+            kwargs[key.strip()] = parser.compile_filter(value.strip())
+        else:
+            args.append(parser.compile_filter(argument.strip()))
+    # Create the node.
+    return PageUrlNode(page, view_func, args, kwargs, varname)
 
 
 @register.inclusion_tag("link.html", takes_context=True)

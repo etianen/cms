@@ -125,6 +125,7 @@ class FeedBase(DefaultContent):
         except self.article_model.DoesNotExist:
             raise Http404, "An article with a URL title of '%s' does not exist." % article_slug
         context = {"year": getattr(article, self.date_field).year,
+                   "month": getattr(article, self.date_field).month,
                    "article": article}
         return self.render_to_response(request, self.article_detail_template, context)
 
