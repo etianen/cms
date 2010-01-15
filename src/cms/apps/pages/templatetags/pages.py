@@ -1,4 +1,4 @@
-"""Template tags used by the CMS."""
+"""Template tags used to render pages."""
 
 
 from django import template
