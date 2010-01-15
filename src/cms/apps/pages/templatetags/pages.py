@@ -45,6 +45,7 @@ def content(parser, token):
     the parent page content area will be rendered instead::
     
         {% content "content_primary" inherited %}
+        
     """
     def handler(context, content_area, inherited=False):
         page = context["page"]
