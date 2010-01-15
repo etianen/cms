@@ -10,9 +10,9 @@
 
 {% block breadcrumbs %}
     {% breadcrumbs extended %}
-    {% page_url page year_archive year as year_archive_url %}{% breadcrumb_link article|date_field|date:"Y" "../../" %}
-    {% page_url page month_archive year,month as year_archive_url %}{% breadcrumb_link article|date_field|date:"F" "../" %}
-    {% breadcrumb_title article %}
+    <a href="{% page_url page year_archive year %}">{{article|date_field|date:"Y"}}</a> &rsaquo;
+    <a href="{% page_url page month_archive year,month %}">{{article|date_field|date:"F"}}</a> &rsaquo;
+    {{article}}
 {% endblock %} 
 
 

@@ -1,10 +1,8 @@
 {% load pages %}
 {% for breadcrumb in breadcrumbs %}
-    {% if not breadcrumb.final %}
-        {% breadcrumb_link breadcrumb.title breadcrumb.url %}
+    {% if not breadcrumb.last %}
+        <a href="{{breadcrumb.url}}">{{breadcrumb.title}}</a> &rsaquo;
     {% else %}
-        {% if not forloop.first %}
-            {% breadcrumb_title breadcrumb.title %}
-        {% endif %}
+        {{breadcrumb.title}}
     {% endif %}
 {% endfor %}

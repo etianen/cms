@@ -303,7 +303,7 @@ def nav_context_exact(page, request):
 @register.tag
 def nav_primary(parser, token):
     """
-    Renders the primary navigation of the current page:::
+    Renders the primary navigation of the current page::
     
         {% nav_primary %}
         
@@ -329,7 +329,7 @@ def nav_primary(parser, token):
 @register.tag
 def nav_secondary(parser, token):
     """
-    Renders the secondary navigation of the current page:::
+    Renders the secondary navigation of the current page::
     
         {% nav_secondary %}
         
@@ -359,7 +359,7 @@ def nav_secondary(parser, token):
 @register.tag
 def nav_tertiary(parser, token):
     """
-    Renders the tertiary navigation of the current page:::
+    Renders the tertiary navigation of the current page::
     
         {% nav_tertiary %}
         
@@ -388,37 +388,33 @@ def nav_tertiary(parser, token):
 
 @register.tag
 def breadcrumbs(parser, token):
-    """Renders the breadcrumbs trail for the page."""
+    """
+    Renders the breadcrumbs trail for the current page::
+    
+        {% breadcrumbs %}
+        
+    To override and extend the breadcrumb trail within page applications, add
+    the 'extended' flag to the tag and add your own breadcrumbs underneath::
+    
+        {% breadcrumbs extended %}
+        
+    """
     def handler(context, extended=False):
         page = context["page"]
         breadcrumbs = [{"title": breadcrumb.title,
                         "url": breadcrumb.get_absolute_url(),
-                        "final": False}
+                        "last": False,
+                        "page": breadcrumb}
                        for breadcrumb in page.breadcrumbs]
         if not extended:
-            breadcrumbs[-1]["final"] = True
+            if len(breadcrumbs) == 1:
+                # Display no breadcrumbs on the homepage.
+                breadcrumbs = []
+            else:
+                breadcrumbs[-1]["last"] = True
         context = {"breadcrumbs": breadcrumbs,}
         return template.loader.render_to_string("breadcrumbs.html", context)
     return PatternNode(parser, token, handler, ("[extended]", ""))
-
-
-@register.tag
-def breadcrumb_link(parser, token):
-    """Renders a breadcrumb in the breadcrumb trail."""
-    def handler(context, title, url):
-        context = {"title": title,
-                   "url": url}
-        return template.loader.render_to_string("breadcrumb_link.html", context)
-    return PatternNode(parser, token, handler, ("{title} {url}",))
-
-
-@register.tag
-def breadcrumb_title(parser, token):
-    """Renders the final title entry in the breadcrumb trail."""
-    def handler(context, title):
-        context = {"title": title}
-        return template.loader.render_to_string("breadcrumb_title.html", context)
-    return PatternNode(parser, token, handler, ("{title}",))
 
 
 @register.inclusion_tag("header.html", takes_context=True)

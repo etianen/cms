@@ -7,8 +7,8 @@
 
 {% block breadcrumbs %}
     {% breadcrumbs extended %}
-    {% page_url page year_archive date.year as year_archive_url %}{% breadcrumb_link date|date:"Y" year_archive_url %}
-    {% breadcrumb_title date|date:"F" %}
+    <a href="{% page_url page year_archive date.year %}">{{date|date:"Y"}}</a> &rsaquo;
+    {{date|date:"F"}}
 {% endblock %} 
 
 

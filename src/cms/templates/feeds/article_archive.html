@@ -10,13 +10,13 @@
         
         <ul>
             {% for year_archive in article_archive %}
-                <li class="{% first %} {% last %}">
-                    {% link year_archive.url year_archive.year %}
+                <li class="{% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
+                    <a href="{{year_archive.url}}">{{year_archive.year}}</a>
                     {% ifequal year_archive.year year %}
                         <ul>
                             {% for month_archive in year_archive.months %}
-                                <li class="{% first %} {% last %}">
-                                    {% link month_archive.url month_archive.month %}
+                                <li class="{% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
+                                    <a href="{{month_archive.url}}">{{month_archive.month}}</a>
                                 </li>
                             {% endfor %}
                         </ul>

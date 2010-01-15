@@ -15,7 +15,7 @@
     
         <ul class="article-list">
             {% for article in articles.object_list %}
-                <li class="{% if article.is_featured %}featured{% endif %} {% first %} {% last %}">
+                <li class="{% if article.is_featured %}featured{% endif %} {% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
                 
                     <h2>
                         <span class="date">{{article|date_field|date}}</span>
