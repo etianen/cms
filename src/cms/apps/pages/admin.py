@@ -215,7 +215,7 @@ class PageAdmin(PageBaseAdmin):
             parent_choices = []
             for page in [homepage] + homepage.all_children:
                 if not page in invalid_parents:
-                    parent_choices.append((page.id, u" \u203a ".join([unicode(breadcrumb) for breadcrumb in list(reversed(page.all_parents)) + [page]])))
+                    parent_choices.append((page.id, u" \u203a ".join(unicode(breadcrumb) for breadcrumb in page.breadcrumbs)))
         if not parent_choices:
             parent_choices = (("", "---------"),)
         PageForm.base_fields["parent"].choices = parent_choices

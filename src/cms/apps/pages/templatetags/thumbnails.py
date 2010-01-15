@@ -16,67 +16,59 @@ register = template.Library()
 
 @register.simple_tag
 def img(image):
-    """Renders the given Django image file as a HTML image."""
+    """
+    Renders the given Django image file object as a HTML image::
+    
+        {% img image_file %}
+        
+    """
     return '<img src="%s" width="%s" height="%s" alt=""/>' % (image.url, image.width, image.height)
 
 
-THUMBNAIL_TAG_PATTERNS = ("{image} {width} {height} as {alias}",
-                          "{image} {width} {height}",) 
-
-
-@register.pattern_tag(*THUMBNAIL_TAG_PATTERNS)
-def thumbnail(context, image, width, height, alias=None):
+@register.tag
+def thumbnail(parser, token):
     """
-    Generates a thumbnail of the given image, preserving aspect ratio.
+    Generates a HTML image tag containing a thumbnail of the given Django image
+    file::
     
-    This has the syntax:
-    
-        {% thumbnail image width height %}
+        {% thumbnail image_file 150 100 %}
         
-    The output will be a HTML image tag.
+    By default, this will use a proportional resize to generate the thumbnail.
+    Alternative thumbnailing methods are also available.
     
-    Alternatively, you can specify an alias for the image as follows:
-    
-        {% thumbnail image width height as alias %}
+    :proportional:
+        The default method of thumbnail generation. This preserves aspect ratio
+        but may result in an image that is a slightly different size to the
+        dimensions requested.
         
-    This will put an thumbnail variable into the context under the given name.
-    The thumbnail variable will be of type ImageFile, allowing its url, width
-    and height to be accessed.
-    """
-    thumbnail = thumbnails.thumbnail(image, width, height)
-    if alias:
-        context[alias] = thumbnail
-        return ""
-    return img(thumbnail)
+    :resized:
+        The thumbnail will be exactly the size requested, but the aspect ratio
+        may change. This can result in images that look squashed or stretched.
+        
+    :cropped:
+        The thumbnail will be exactly the size requested, cropped to preseve
+        aspect ratio.
+        
+    You specify the thumbnailing method as follows::
     
+        {% thumbnail image_file 150 100 resized %}
     
-@register.pattern_tag(*THUMBNAIL_TAG_PATTERNS)
-def resize(context, image, width, height, alias=None):
-    """
-    Generates a resized thumbnail of the given image, ignoring aspect ratio.
+    You can also insert the generated thumbnail into the context as a variable
+    by specifying an alias::
     
-    See the 'thumbnail' tag for appropriate syntax.
+        {% thumbnail image_file 150 100 as image_thumbnail %}
     """
-    thumbnail = thumbnails.resize(image, width, height)
-    if alias:
-        context[alias] = thumbnail
-        return ""
-    return img(thumbnail)
-
-
-@register.pattern_tag(*THUMBNAIL_TAG_PATTERNS)
-def crop(context, image, width, height, alias=None):
-    """
-    Generates a cropped thumbnail of the given image, preserving aspect ratio.
+    def handler(context, image, width, height, method="thumbnail", alias=None):
+        thumbnail = thumbnails.generate(image, width, height, method)
+        if alias:
+            context[alias] = thumbnail
+            return ""
+        return img(thumbnail)
+    return PatternNode(parser, token, handler, ("{image} {width} {height} [method] as [alias]",
+                                                "{image} {width} {height} [method]",
+                                                "{image} {width} {height} as [alias]",
+                                                "{image} {width} {height}",))
     
-    See the 'thumbnail' tag for appropriate syntax.
-    """
-    thumbnail = thumbnails.crop(image, width, height)
-    if alias:
-        context[alias] = thumbnail
-        return ""
-    return img(thumbnail)
-
 
 RE_IMG = re.compile(ur"<img(.+?)/>", re.IGNORECASE)
 
