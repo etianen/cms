@@ -413,8 +413,13 @@ def breadcrumbs(parser, token):
                 breadcrumbs = []
             else:
                 breadcrumbs[-1]["last"] = True
-        context = {"breadcrumbs": breadcrumbs,}
-        return template.loader.render_to_string("breadcrumbs.html", context)
+        # Render the breadcrumbs.
+        context.push()
+        try:
+            context.update({"breadcrumbs": breadcrumbs,})
+            return template.loader.render_to_string("breadcrumbs.html", context)
+        finally:
+            context.pop()
     return PatternNode(parser, token, handler, ("[extended]", ""))
 
 
