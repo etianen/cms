@@ -194,7 +194,7 @@ def last(context):
 
 @register.tag
 def meta_description(parser, token):
-    """Renders the meta description."""
+    """Renders the meta description for the current page."""
     def handler(context):
         page = context["page"]
         description = ""
@@ -202,6 +202,19 @@ def meta_description(parser, token):
             description = page.meta_description
             page = page.parent
         return description
+    return PatternNode(parser, token, handler, ("",))
+
+
+@register.tag
+def meta_keywords(parser, token):
+    """Renders the meta keywords for the current page."""
+    def handler(context):
+        page = context["page"]
+        keywords = ""
+        while not keywords and page:
+            keywords = page.meta_keywords
+            page = page.parent
+        return keywords
     return PatternNode(parser, token, handler, ("",))
 
 
@@ -215,18 +228,6 @@ def title(context):
     return context
 
     
-@register.inclusion_tag("meta_keywords.html", takes_context=True)
-def meta_keywords(context):
-    """Renders the meta description."""
-    page = context["page"]
-    keywords = ""
-    while not keywords and page:
-        keywords = page.meta_keywords
-        page = page.parent
-    context = {"keywords": keywords}
-    return context
-
-
 @register.inclusion_tag("meta_robots.html", takes_context=True)
 def meta_robots(context):
     """Renders the meta robots."""
