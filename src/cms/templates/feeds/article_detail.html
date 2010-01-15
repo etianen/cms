@@ -8,6 +8,14 @@
 {% block title %}{{article.title}} - {{block.super}}{% endblock %}
 
 
+{% block breadcrumbs %}
+    {% breadcrumbs extended %}
+    {% breadcrumb_link article|date_field|date:"Y" "../../" %}
+    {% breadcrumb_link article|date_field|date:"F" "../" %}
+    {% breadcrumb_title article %}
+{% endblock %} 
+
+
 {% block header %}<span class="date">{{article|date_field|date}}</span> <span class="title">{{article.title}}</span>{% endblock %}
 
 

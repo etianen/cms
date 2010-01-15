@@ -1,6 +1,10 @@
 {% load pages %}
-{% if page.parent %}
-    {% for breadcrumb in breadcrumbs %}
-        {% breadcrumb_link breadcrumb %}
-    {% endfor %}
-{% endif %}
+{% for breadcrumb in breadcrumbs %}
+    {% if not breadcrumb.final %}
+        {% breadcrumb_link breadcrumb.title breadcrumb.url %}
+    {% else %}
+        {% if not forloop.first %}
+            {% breadcrumb_title breadcrumb.title %}
+        {% endif %}
+    {% endif %}
+{% endfor %}

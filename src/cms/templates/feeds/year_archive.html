@@ -5,10 +5,12 @@
 {% block title %}Archive for {{date|date:"Y"}} - {{block.super}}{% endblock %}
 
 
+{% block breadcrumbs %}
+    {% breadcrumbs extended %}
+    {% breadcrumb_title date|date:"Y" %}
+{% endblock %} 
+
+
 {% block header %}Archive for {{date|date:"Y"}}{% endblock %}
 
 
-{% block breadcrumbs %}
-    {{block.super}}
-    {% breadcrumb_link date|date:"Y" %}
-{% endblock %}

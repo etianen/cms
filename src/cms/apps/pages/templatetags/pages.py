@@ -5,6 +5,7 @@ from django import template
 from django.utils.safestring import mark_safe
 
 from cms.apps.pages.models import Page
+from cms.apps.pages.templatetags import PatternNode
 from cms.apps.pages.templatetags.permalinks import expand_permalinks
 from cms.apps.pages.templatetags.thumbnails import generate_thumbnails
 
@@ -28,9 +29,6 @@ def html(text):
     text = expand_permalinks(text)
     text = generate_thumbnails(text)
     return mark_safe(text)
-
-
-CONTENT_INHERIT_KEYWORD = "inherit"
 
 
 class ContentNode(template.Node):
@@ -73,17 +71,17 @@ def content(parser, token):
     If you use the 'inherit' keyword, and the page content area is blank, then
     the parent page content area will be rendered instead::
     
-        {% content "content_primary" inherit %}
+        {% content "content_primary" inherited %}
     """
     contents = token.split_contents()
     content_length = len(contents)
     tag_name = contents[0]
-    if content_length == 2 or (content_length == 3 and contents[2] == CONTENT_INHERIT_KEYWORD):
+    if content_length == 2 or (content_length == 3 and contents[2] == "inherited"):
         content_area = template.Variable(contents[1])
         inherited = content_length == 3
         return ContentNode(content_area, inherited)
     else:
-        raise template.TemplateSyntaxError, "'%(tag_name)s' tags should use the following format: %(tag_name)s {content_area} [inherit]" % {"tag_name": tag_name}
+        raise template.TemplateSyntaxError, "'%(tag_name)s' tags should use the following format: %(tag_name)s {content_area} [inherited]" % {"tag_name": tag_name}
 
 
 # Page linking.
@@ -270,24 +268,39 @@ def nav_tertiary(context):
     return context
 
 
-@register.inclusion_tag("breadcrumbs.html", takes_context=True)
-def breadcrumbs(context):
-    """Renders the page breadcrumb trail."""
-    page = context["page"]
-    request = context["request"]
-    context = {"page": page,
-               "request": request,
-               "breadcrumbs": page.breadcrumbs}
-    return context
+@register.tag
+def breadcrumbs(parser, token):
+    """Renders the breadcrumbs trail for the page."""
+    def handler(context, extended=False):
+        page = context["page"]
+        breadcrumbs = [{"title": breadcrumb.title,
+                        "url": breadcrumb.get_absolute_url(),
+                        "final": False}
+                       for breadcrumb in page.breadcrumbs]
+        if not extended:
+            breadcrumbs[-1]["final"] = True
+        context = {"breadcrumbs": breadcrumbs,}
+        return template.loader.render_to_string("breadcrumbs.html", context)
+    return PatternNode(parser, token, handler, ("[extended]", ""))
 
 
-@register.inclusion_tag("breadcrumb_link.html", takes_context=True)
-def breadcrumb_link(context, url, title):
+@register.tag
+def breadcrumb_link(parser, token):
     """Renders a breadcrumb in the breadcrumb trail."""
-    request = context["request"]
-    context = {"request": request,
-               "url": title}
-    return context
+    def handler(context, title, url):
+        context = {"title": title,
+                   "url": url}
+        return template.loader.render_to_string("breadcrumb_link.html", context)
+    return PatternNode(parser, token, handler, ("{title} {url}",))
+
+
+@register.tag
+def breadcrumb_title(parser, token):
+    """Renders the final title entry in the breadcrumb trail."""
+    def handler(context, title):
+        context = {"title": title}
+        return template.loader.render_to_string("breadcrumb_title.html", context)
+    return PatternNode(parser, token, handler, ("{title}",))
 
 
 @register.inclusion_tag("header.html", takes_context=True)
