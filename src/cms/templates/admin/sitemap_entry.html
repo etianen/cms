@@ -1,9 +1,9 @@
 {% load pages_admin %}
 <li>
-    {% if page.parent and children %}<div class="sitemap-collapse-control"></div>{% endif %}
-    <div class="sitemap-entry{% if not is_online %} offline{% endif %}{% if can_change %} can-change{% endif %}">
+    {% if page.parent and page.children %}<div class="sitemap-collapse-control"></div>{% endif %}
+    <div class="sitemap-entry{% if not page.is_online %} offline{% endif %}{% if can_change %} can-change{% endif %}">
         {% if can_change %}
-            <a href="{{change_url}}" class="title" title="Edit this {{verbose_name}}">{{page}}</a>
+            <a href="{{change_url}}" class="title" title="Edit this page">{{page}}</a>
         {% else %}
             <span class="title">{{page}}</span>
         {% endif %}
@@ -24,9 +24,9 @@
             </form>
         {% endif %}
     </div>
-    {% if children %}
+    {% if page.children %}
         <ul>
-            {% for child in children %}
+            {% for child in page.children %}
                 {% sitemap_entry child %}
             {% endfor %}
         </ul>
