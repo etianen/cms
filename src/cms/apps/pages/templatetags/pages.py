@@ -29,34 +29,6 @@ def html(text):
     text = expand_permalinks(text)
     text = generate_thumbnails(text)
     return mark_safe(text)
-
-
-class ContentNode(template.Node):
-    
-    """Renderer for the 'content' template tag."""
-    
-    def __init__(self, content_area, inherited):
-        """Initializes the ContentNode."""
-        super(ContentNode, self).__init__()
-        self.content_area = content_area
-        self.inherited = inherited
-        
-    def render(self, context):
-        """Renders the node."""
-        content_area = self.content_area.resolve(context)
-        try:
-            page = context["page"]
-            content_obj = page.content
-        except IndexError:
-            raise template.VariableDoesNotExist, "The context does not contain a page object."
-        content = ""
-        while not content:
-            content = getattr(content_obj, content_area, "")
-            if not self.inherited:
-                break
-            if content_obj.page.parent:
-                content_obj = content_obj.page.parent.content
-        return html(content)
     
 
 @register.tag
@@ -73,15 +45,18 @@ def content(parser, token):
     
         {% content "content_primary" inherited %}
     """
-    contents = token.split_contents()
-    content_length = len(contents)
-    tag_name = contents[0]
-    if content_length == 2 or (content_length == 3 and contents[2] == "inherited"):
-        content_area = template.Variable(contents[1])
-        inherited = content_length == 3
-        return ContentNode(content_area, inherited)
-    else:
-        raise template.TemplateSyntaxError, "'%(tag_name)s' tags should use the following format: %(tag_name)s {content_area} [inherited]" % {"tag_name": tag_name}
+    def handler(context, content_area, inherited=False):
+        page = context["page"]
+        content_obj = page.content
+        content = ""
+        while not content:
+            content = getattr(content_obj, content_area, "")
+            if not inherited:
+                break
+            if content_obj.page.parent:
+                content_obj = content_obj.page.parent.content
+        return html(content)
+    return PatternNode(parser, token, handler, ("{content_area} [inherited]", "{content_area}"))
 
 
 # Page linking.

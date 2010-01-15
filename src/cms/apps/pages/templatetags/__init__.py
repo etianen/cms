@@ -53,7 +53,7 @@ class PatternNode(Node):
                 self.variables = variables
                 self.flags = flags
                 return
-        raise TemplateSyntaxError, '%s tag expects the following format: "%s"' % (token.split_contents()[0], "' or '".join(patterns))
+        raise TemplateSyntaxError, '%s tag expects the following format: "%s"' % (token.split_contents()[0], '" or "'.join(patterns))
 
         
     def render(self, context):
