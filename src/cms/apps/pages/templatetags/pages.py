@@ -194,38 +194,87 @@ def last(context):
 
 @register.tag
 def meta_description(parser, token):
-    """Renders the content of the meta description tag for the current page."""
-    def handler(context):
+    """
+    Renders the content of the meta description tag for the current page::
+    
+        {% meta_description %}
+    
+    You can override the meta description by setting a context variable called
+    'meta_description'::
+    
+        {% with "foo" as meta_description %}
+            {% meta_description %}
+        {% endwith %}
+    
+    You can also provide the meta description as an argument to this tag::
+    
+        {% meta_description "foo" %}
+        
+    """
+    def handler(context, description=None):
         page = context["page"]
-        description = ""
+        description = description or context.get("meta_description", "")
         while not description and page:
             description = page.meta_description
             page = page.parent
         return description
-    return PatternNode(parser, token, handler, ("",))
+    return PatternNode(parser, token, handler, ("{description}", "",))
 
 
 @register.tag
 def meta_keywords(parser, token):
-    """Renders the content of the meta keywords tag for the current page."""
-    def handler(context):
+    """
+    Renders the content of the meta keywords tag for the current page::
+    
+        {% meta_keywords %}
+    
+    You can override the meta keywords by setting a context variable called
+    'meta_keywords'::
+    
+        {% with "foo" as meta_keywords %}
+            {% meta_keywords %}
+        {% endwith %}
+    
+    You can also provide the meta keywords as an argument to this tag::
+    
+        {% meta_keywords "foo" %}
+        
+    """
+    def handler(context, keywords=None):
         page = context["page"]
-        keywords = ""
+        keywords = keywords or context.get("meta_keywords", "")
         while not keywords and page:
             keywords = page.meta_keywords
             page = page.parent
         return keywords
-    return PatternNode(parser, token, handler, ("",))
+    return PatternNode(parser, token, handler, ("{keywords}", "",))
 
 
 @register.tag
 def meta_robots(parser, token):
-    """Renders the content of the meta robots tag for the current page."""
-    def handler(context):
+    """
+    Renders the content of the meta robots tag for the current page::
+    
+        {% meta_keywords %}
+    
+    You can override the meta robots by setting boolean context variables called
+    'robots_index', 'robots_archive' and 'robots_follow'::
+    
+        {% with 1 as robots_follow %}
+            {% meta_robots %}
+        {% endwith %}
+    
+    You can also provide the meta robots as three boolean arguments to this
+    tag in the order 'index', 'archive' and 'follow'::
+    
+        {% meta_robots 1 1 1 %}
+        
+    """
+    def handler(context, index=None, archive=None, follow=None):
         page = context["page"]
-        index = None
-        archive = None
-        follow = None
+        index = index or context.get("robots_index", None)
+        archive = archive or context.get("robots_archive", None)
+        follow = index or context.get("robots_follow", None)
         # Follow the page ancestry, looking for robots flags.
         while page:
             if index is None and page.robots_index != None:
@@ -244,17 +293,39 @@ def meta_robots(parser, token):
             follow = True
         # Generate the meta content.
         return ", ".join((index and "INDEX" or "NOINDEX", follow and "FOLLOW" or "NOFOLLOW", archive and "ARCHIVE" or "NOARCHIVE"))
-    return PatternNode(parser, token, handler, ("",))
+    return PatternNode(parser, token, handler, ("{index} {archive} {follow}", "",))
 
 
-@register.inclusion_tag("title.html", takes_context=True)
-def title(context):
-    """Renders the title of the page."""
-    page = context["page"]
-    homepage = Page.objects.get_homepage()
-    context = {"page": page,
-               "homepage": homepage}
-    return context
+@register.tag
+def title(parser, token):
+    """
+    Renders the title of the current page::
+        
+        {% title %}
+    
+    You can override the title by setting a context variable called 'title'::
+    
+        {% with "foo" as title %}
+            {% title %}
+        {% endwith %}
+        
+    You can also provide the title as an argument to this tag::
+        
+        {% title "foo" %}
+    
+    """
+    def handler(context, title=None):
+        page = context["page"]
+        homepage = page.homepage
+        # Render the title template.
+        context.push()
+        try:
+            context.update({"title": title or context.get("title", "") or page.browser_title or page.title,
+                            "site_title": homepage.browser_title or homepage.title})
+            return template.loader.render_to_string("title.html", context)
+        finally:
+            context.pop()
+    return PatternNode(parser, token, handler, ("{title}", "",))
 
     
 @register.inclusion_tag("nav_primary.html", takes_context=True)
