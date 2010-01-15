@@ -192,6 +192,19 @@ def last(context):
 # Page widgets.
 
 
+@register.tag
+def meta_description(parser, token):
+    """Renders the meta description."""
+    def handler(context):
+        page = context["page"]
+        description = ""
+        while not description and page:
+            description = page.meta_description
+            page = page.parent
+        return description
+    return PatternNode(parser, token, handler, ("",))
+
+
 @register.inclusion_tag("title.html", takes_context=True)
 def title(context):
     """Renders the title of the page."""
@@ -202,18 +215,6 @@ def title(context):
     return context
 
     
-@register.inclusion_tag("meta_description.html", takes_context=True)
-def meta_description(context):
-    """Renders the meta description."""
-    page = context["page"]
-    description = ""
-    while not description and page:
-        description = page.meta_description
-        page = page.parent
-    context = {"description": description}
-    return context
-
-
 @register.inclusion_tag("meta_keywords.html", takes_context=True)
 def meta_keywords(context):
     """Renders the meta description."""
