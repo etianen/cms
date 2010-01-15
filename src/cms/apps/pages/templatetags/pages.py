@@ -417,11 +417,34 @@ def breadcrumbs(parser, token):
     return PatternNode(parser, token, handler, ("[extended]", ""))
 
 
-@register.inclusion_tag("header.html", takes_context=True)
-def header(context):
-    """"Renders the page header."""
-    page = context["page"]
-    context = {"page": page}
-    return context
+@register.tag
+def header(parser, token):
+    """
+    Renders the header for the current page::
     
+        {% header %}
+        
+    You can override the page header by providing a 'header' or 'title' context
+    variable. If both are present, then 'header' overrides 'title'::
+    
+        {% with "foo" as header %}
+            {% header %}
+        {% endwith %}
+        
+    You can also provide the header as an argument to this tag::
+    
+        {% header "foo" %}
+        
+    """
+    def handler(context, header=None):
+        page = context["page"]
+        header = header or context.get("header", "") or page.title
+        context.push()
+        try:
+            context.update({"header": header})
+            return template.loader.render_to_string("header.html", context)
+        finally:
+            context.pop()
+    return PatternNode(parser, token, handler, ("{header}", "",))
+
     
