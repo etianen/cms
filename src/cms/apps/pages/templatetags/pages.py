@@ -194,7 +194,7 @@ def last(context):
 
 @register.tag
 def meta_description(parser, token):
-    """Renders the meta description for the current page."""
+    """Renders the content of the meta description tag for the current page."""
     def handler(context):
         page = context["page"]
         description = ""
@@ -207,7 +207,7 @@ def meta_description(parser, token):
 
 @register.tag
 def meta_keywords(parser, token):
-    """Renders the meta keywords for the current page."""
+    """Renders the content of the meta keywords tag for the current page."""
     def handler(context):
         page = context["page"]
         keywords = ""
@@ -215,6 +215,35 @@ def meta_keywords(parser, token):
             keywords = page.meta_keywords
             page = page.parent
         return keywords
+    return PatternNode(parser, token, handler, ("",))
+
+
+@register.tag
+def meta_robots(parser, token):
+    """Renders the content of the meta robots tag for the current page."""
+    def handler(context):
+        page = context["page"]
+        index = None
+        archive = None
+        follow = None
+        # Follow the page ancestry, looking for robots flags.
+        while page:
+            if index is None and page.robots_index != None:
+                index = page.robots_index
+            if archive is None and page.robots_archive != None:
+                archive = page.robots_archive
+            if follow is None and page.robots_follow != None:
+                follow = page.robots_follow
+            page = page.parent
+        # If no page specified robots, then default to True.
+        if index is None:
+            index = True
+        if archive is None:
+            archive = True
+        if follow is None:
+            follow = True
+        # Generate the meta content.
+        return ", ".join((index and "INDEX" or "NOINDEX", follow and "FOLLOW" or "NOFOLLOW", archive and "ARCHIVE" or "NOARCHIVE"))
     return PatternNode(parser, token, handler, ("",))
 
 
@@ -228,33 +257,6 @@ def title(context):
     return context
 
     
-@register.inclusion_tag("meta_robots.html", takes_context=True)
-def meta_robots(context):
-    """Renders the meta robots."""
-    page = context["page"]
-    index = None
-    archive = None
-    follow = None
-    while page:
-        if index is None and page.robots_index != None:
-            index = page.robots_index
-        if archive is None and page.robots_archive != None:
-            archive = page.robots_archive
-        if follow is None and page.robots_follow != None:
-            follow = page.robots_follow
-        page = page.parent
-    if index is None:
-        index = True
-    if archive is None:
-        archive = True
-    if follow is None:
-        follow = True
-    context = {"index": index,
-               "archive": archive,
-               "follow": follow}
-    return context
-
-
 @register.inclusion_tag("nav_primary.html", takes_context=True)
 def nav_primary(context):
     """Renders the primary navigation."""
