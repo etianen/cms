@@ -4,9 +4,9 @@
 from django import template
 from django.utils.safestring import mark_safe
 
+from cms.apps.pages import permalinks
 from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import PatternNode
-from cms.apps.pages.templatetags.permalinks import expand_permalinks
 from cms.apps.pages.templatetags.thumbnails import generate_thumbnails
 
 
@@ -27,8 +27,8 @@ def html(text):
     """
     if not text:
         return ""
-    text = expand_permalinks(text)
     text = generate_thumbnails(text)
+    text = permalinks.expand_links_html(text)
     return mark_safe(text)
     
 
@@ -133,6 +133,17 @@ def page_url(parser, token):
             args.append(parser.compile_filter(argument.strip()))
     # Create the node.
     return PageUrlNode(page, view_func, args, kwargs, varname)
+
+
+@register.filter
+def permalink(obj):
+    """
+    Generates a permalink for the given object::
+    
+        {{obj|permalink}}
+        
+    """
+    return permalinks.create(obj)
 
 
 # Page widgets.

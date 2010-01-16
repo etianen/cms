@@ -6,10 +6,16 @@ change it's absolute URL without breaking links.
 """
 
 
+import re
+
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.views import shortcut
-from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse, resolve as resolve_url, Resolver404
+from django.core import urlresolvers
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
+from django.utils.html import escape
+
+
+__all__ = ("PermalinkError", "create", "resolve", "expand", "expand_links_html",)
 
 
 class PermalinkError(Exception):
@@ -24,26 +30,24 @@ def create(obj):
     object_id = obj.pk
     kwargs = {"content_type_id": content_type_id,
               "object_id": object_id}
-    return reverse("permalink_redirect", kwargs=kwargs)
+    return urlresolvers.reverse("permalink_redirect", kwargs=kwargs)
     
     
-def resolve(url):
+def resolve(permalink):
     """
     Resolves the given permalink into an object.
     
-    Raises a PermalinkError if the URL is not a valid permalink.  Raises an
+    Raises a PermalinkError if the URL is not a valid permalink. Raises an
     ObjectDoesNotExist if the referenced object does not exist.
     """
     # Attempt to resolve the URL.
     try:
-        callback, callback_args, callback_kwargs = resolve_url(url)
-    except Resolver404:
-        raise PermalinkError, "'%s' is not a recognised URL in this site." % url
-    except TypeError:
-        raise PermalinkError, "'%s' is not a valid permalink." % url
+        callback, callback_args, callback_kwargs = urlresolvers.resolve(permalink)  # @UnusedVariable
+    except (urlresolvers.Resolver404, TypeError):
+        raise PermalinkError, "'%s' is not a valid permalink." % permalink
     # Check if the URL refers to a permalink.
     if callback != shortcut:
-        raise PermalinkError, "'%s' is not a valid permalink." % url
+        raise PermalinkError, "'%s' is not a valid permalink." % permalink
     # Get the permalink attributes.
     try:
         content_type_id = callback_kwargs["content_type_id"]
@@ -54,4 +58,39 @@ def resolve(url):
     content_type = ContentType.objects.get_for_id(content_type_id)
     obj = content_type.get_object_for_this_type(id=object_id)
     return obj
+
+
+def expand(permalink):
+    """
+    Expands the given permalink into a full URL.
+    
+    Raises a permalink error if the URL is not a valid permalink. Raises an
+    ObjectDoesNotExist if the referenced object does not exist.
+    """
+    obj = resolve(permalink)
+    return obj.get_absolute_url()
+    
+    
+RE_HREF = re.compile(ur"(href|src)=['\"](.+?)['\"]", re.IGNORECASE)
+
+
+def sub_link(match):
+    """Regex replacement callback for expanding permalinks in HTML links."""
+    attr_value = match.group(2)
+    try:
+        permalink = expand(attr_value)
+    except (PermalinkError, ObjectDoesNotExist):
+        return match.group(0)
+    return '%s="%s"' % (match.group(1), escape(permalink))
+    
+    
+def expand_links_html(html):
+    """
+    Expands all permalinks in the given HTML text.
+    
+    All href and src attributes are checked for permalinks, and expanded as
+    appropriate. If a permalink cannot be expanded due to an object not
+    existing, it is left untouched.
+    """
+    return RE_HREF.sub(sub_link, html)
 
