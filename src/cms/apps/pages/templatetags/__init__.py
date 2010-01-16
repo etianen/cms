@@ -6,6 +6,13 @@ import re
 from django import template
 
 
+RE_PATTERN_VARIABLE = re.compile(r"\{(\w+?)\}")
+RE_PATTERN_FLAG = re.compile(r"\[(\w+?)\]")
+
+# Cached regular expressions used by pattern tags.
+pattern_cache = {}
+
+
 class PatternNode(template.Node):
     
     """
@@ -27,26 +34,31 @@ class PatternNode(template.Node):
         self.handler = handler
         # Compile the pattern.
         for pattern in patterns:
-            variables = {}
-            flags = {}
-            def replace_variables(match):
-                varname = match.group(1)
-                variables[varname] = None
-                return r"(?P<%s>[\S]+?)" % varname
-            regex = re.sub(r"\{(\w+?)\}", replace_variables, pattern)
-            def replace_flags(match):
-                flagname = match.group(1)
-                flags[flagname] = None
-                return r"(?P<%s>[\S]+?)" % flagname
-            regex = re.sub(r"\[(\w+?)\]", replace_flags, regex)
-            regex = r"^\w+%s$" % (" " + regex).rstrip()
+            if not pattern in pattern_cache:
+                varnames = set()
+                flagnames = set()
+                def replace_variables(match):
+                    varname = match.group(1)
+                    varnames.add(varname)
+                    return r"(?P<%s>[\S]+?)" % varname
+                regex = RE_PATTERN_VARIABLE.sub(replace_variables, pattern)
+                def replace_flags(match):
+                    flagname = match.group(1)
+                    flagnames.add(flagname)
+                    return r"(?P<%s>[\S]+?)" % flagname
+                regex = RE_PATTERN_FLAG.sub(replace_flags, regex)
+                regex = r"^\w+%s$" % (" " + regex).rstrip()
+                pattern_cache[pattern] = (re.compile(regex), varnames, flagnames)
             # Attempt to match the token.
-            match = re.match(regex, token.contents)
+            re_pattern, varnames, flagnames = pattern_cache[pattern]
+            match = re_pattern.match(token.contents)
             if match:
+                variables = {}
+                flags = {}
                 for key, value in match.groupdict().items():
-                    if key in variables:
+                    if key in varnames:
                         variables[key] = parser.compile_filter(value)
-                    elif key in flags:
+                    elif key in flagnames:
                         flags[key] = value
                     else:
                         raise ValueError, "Unescaped regular expression in pattern: %s" % pattern
