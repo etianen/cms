@@ -13,7 +13,11 @@ from cms.apps.pages.optimizations import cached_getter
 
 class Thumbnail(object):
     
-    """A generated thumbnail image."""
+    """
+    A generated thumbnail image.
+    
+    This conforms to the Django image file specification.
+    """
     
     def __init__(self, name, storage):
         """Initializes the Thumbnail."""
@@ -65,19 +69,34 @@ class Thumbnail(object):
         
 
 # Resize the image, preserving aspect ratio.
-THUMBNAIL = "proportional"
+PROPORTIONAL = "proportional"
 
 # Resize the image, ignoring aspect ratio.
-RESIZE = "resized"
+RESIZED = "resized"
 
 # Resize the image, cropping as necessary to preserve aspect ratio.
-CROP = "cropped"
+CROPPED = "cropped"
 
 
-def generate(image, requested_width, requested_height, generation_method=RESIZE, storage=default_storage):
+def create(image, width, height, method=PROPORTIONAL):
     """
-    Generated a thumbnail of the given image, returning an image representing
-    the thumbnail.
+    Creates a thumbnail of the given image, returning a Django image file.
+    
+    There are three available methods of thumbnail generation.
+    
+    :proportional:
+        The default method of thumbnail generation. This preserves aspect ratio
+        but may result in an image that is a slightly different size to the
+        dimensions requested.
+        
+    :resized:
+        The thumbnail will be exactly the size requested, but the aspect ratio
+        may change. This can result in images that look squashed or stretched.
+        
+    :cropped:
+        The thumbnail will be exactly the size requested, cropped to preseve
+        aspect ratio.
+        
     """
     # Cannot generate thumbnails for images without a path.
     if not hasattr(image, "path"):
@@ -85,23 +104,22 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE,
     image_path = image.path
     # Calculate image dimensions.
     original_width, original_height = get_image_dimensions(image_path)
-    requested_width = min(requested_width, original_width)
-    requested_height = min(requested_height, original_height)
+    requested_width = min(width, original_width)
+    requested_height = min(height, original_height)
     # Don't generate thumbnail if no resizing is to take place.
     if original_width == requested_width and original_height == requested_height:
         return Thumbnail(image.name, image.storage)
     # Generate the thumbnail filename.
     image_folder, image_name = os.path.split(image.name)
-    image_folder = image_folder.replace("/", "-")
-    thumbnail_name = "thumbnails/%s-%sx%s/%s/%s" % (generation_method, requested_width, requested_height, image_folder, image_name)
-    thumbnail_path = storage.path(thumbnail_name)
+    thumbnail_name = "thumbnails/%s-%sx%s/%s/%s" % (method, requested_width, requested_height, image_folder, image_name)
+    thumbnail_path = default_storage.path(thumbnail_name)
     # See if the thumbnail has already been created.
-    if storage.exists(thumbnail_name):
+    if default_storage.exists(thumbnail_name):
         image_timestamp = os.stat(image_path).st_mtime
         thumbnail_timestamp = os.stat(thumbnail_path).st_mtime
         # If the thumbnail is newer than the file, no more generation needs to take place.
         if thumbnail_timestamp > image_timestamp:
-            return Thumbnail(thumbnail_name, storage)
+            return Thumbnail(thumbnail_name, default_storage)
     else:
         dirname = os.path.dirname(thumbnail_path)
         if not os.path.exists(dirname):
@@ -112,38 +130,23 @@ def generate(image, requested_width, requested_height, generation_method=RESIZE,
     image_data = Image.open(image.path)
     # Generate a new thumbnail.
     try:
-        if generation_method == THUMBNAIL:
+        if method == PROPORTIONAL:
             image_data.thumbnail((requested_width, requested_height), Image.ANTIALIAS)
-        elif generation_method == RESIZE:
+        elif method == RESIZED:
             image_data = image_data.resize((requested_width, requested_height), Image.ANTIALIAS)
-        elif generation_method == CROP:
+        elif method == CROPPED:
             source_width = min(original_width, int(original_height * required_aspect))
             source_height = min(original_height, int(original_width / required_aspect))
             source_x = (original_width - source_width) / 2
             source_y = (original_height - source_height) / 2
             image_data = image_data.transform((requested_width, requested_height), Image.EXTENT, (source_x, source_y, source_x + source_width, source_y + source_height), Image.BICUBIC)
         else:
-            raise ValueError, "Unknown thumbnail generation method: %r" % generation_method
+            raise ValueError, "Unknown thumbnail generation method: %r" % method
     except SyntaxError, ex:
         # HACK: The PIL will raise a SyntaxError if it encounters a 'broken png'. 
         raise IOError, str(ex)
     # Save the thumbnail to disk.
     image_data.save(thumbnail_path)
     # Return the new image object.
-    return Thumbnail(thumbnail_name, storage)
-    
-    
-def thumbnail(image, requested_width, requested_height):
-    """Generates a resized thumbnail, preserving aspect ratio."""
-    return generate(image, requested_width, requested_height, THUMBNAIL)
-    
-    
-def resize(image, requested_width, requested_height):
-    """Generates a rescaled thumbnail, ignoring aspect ratio."""
-    return generate(image, requested_width, requested_height, RESIZE)
-
-
-def crop(image, requested_width, requested_height):
-    """Generates a cropped thumbnail, preserving aspect ratio."""
-    return generate(image, requested_width, requested_height, CROP)
+    return Thumbnail(thumbnail_name, default_storage)
 

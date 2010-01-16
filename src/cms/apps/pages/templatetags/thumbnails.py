@@ -7,23 +7,13 @@ from django import template
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.util import flatatt
 from django.core.files.images import get_image_dimensions
+from django.utils.html import escape
 
 from cms.apps.pages.templatetags import PatternNode
 from cms.apps.pages import permalinks, thumbnails
 
 
 register = template.Library()
-
-
-@register.simple_tag
-def img(image):
-    """
-    Renders the given Django image file object as a HTML image::
-    
-        {% img image_file %}
-        
-    """
-    return '<img src="%s" width="%s" height="%s" alt=""/>' % (image.url, image.width, image.height)
 
 
 @register.tag
@@ -60,11 +50,11 @@ def thumbnail(parser, token):
         {% thumbnail image_file 150 100 as image_thumbnail %}
     """
     def handler(context, image, width, height, method="thumbnail", alias=None):
-        thumbnail = thumbnails.generate(image, width, height, method)
+        thumbnail = thumbnails.create(image, width, height, method)
         if alias:
             context[alias] = thumbnail
             return ""
-        return img(thumbnail)
+        return '<img src="%s" width="%s" height="%s" alt=""/>' % (escape(thumbnail.url), thumbnail.width, thumbnail.height)
     return PatternNode(parser, token, handler, ("{image} {width} {height} [method] as [alias]",
                                                 "{image} {width} {height} [method]",
                                                 "{image} {width} {height} as [alias]",
