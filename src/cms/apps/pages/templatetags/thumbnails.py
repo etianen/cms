@@ -6,6 +6,7 @@ import re
 from django import template
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.util import flatatt
+from django.core.files.images import get_image_dimensions
 
 from cms.apps.pages.templatetags import PatternNode
 from cms.apps.pages import permalinks, thumbnails
@@ -81,11 +82,7 @@ def replace_thumbnail(match):
     attr_dict = dict(RE_ATTR.findall(attrs))
     try:
         src = attr_dict["src"]
-        width = int(attr_dict["width"])
-        height = int(attr_dict["height"])
     except KeyError:
-        pass
-    except ValueError:
         pass
     else:
         try:
@@ -95,14 +92,24 @@ def replace_thumbnail(match):
         except permalinks.PermalinkError:
             pass
         else:
+            file = obj.file
+            attr_dict["src"] = obj.file.url
             try:
-                thumbnail = thumbnails.resize(obj.file, width, height)
-            except IOError:
+                width = int(attr_dict["width"])
+                height = int(attr_dict["height"])
+            except KeyError:
+                attr_dict["width"], attr_dict["height"] = get_image_dimensions(file)
+            except ValueError:
                 pass
             else:
-                attr_dict["src"] = thumbnail.url
-                attr_dict["width"] = thumbnail.width
-                attr_dict["height"] = thumbnail.height
+                try:
+                    thumbnail = thumbnails.resize(file, width, height)
+                except IOError:
+                    pass
+                else:
+                    attr_dict["src"] = thumbnail.url
+                    attr_dict["width"] = thumbnail.width
+                    attr_dict["height"] = thumbnail.height
     return u"<img%s/>" % flatatt(attr_dict)
 
 
@@ -111,7 +118,6 @@ def generate_thumbnails(text):
     """
     Generates thumbnails for all the permalinked images in the given HTML text.
     """
-    
     return RE_IMG.sub(replace_thumbnail, text)
     
     
