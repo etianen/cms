@@ -56,7 +56,6 @@ class TestThumbnails(TestCase):
         self.image.path = self.image.name
         self.original_width = self.image.width
         self.original_height = self.image.height
-        self.original_aspect = self.original_width / self.original_height 
     
     def testProportionalThumbnail(self):
         """Tests the proportional thumbnail resize."""
@@ -68,6 +67,14 @@ class TestThumbnails(TestCase):
         self.assertEqual(thumbnail.height, target_height)
         # Test a resize limited by height.
         thumbnail = thumbnails.create(self.image, 1000000, target_height, thumbnails.PROPORTIONAL)
+        self.assertEqual(thumbnail.width, target_width)
+        self.assertEqual(thumbnail.height, target_height)
+        
+    def testResizedThumbnail(self):
+        """Tests the resizing thumbnail resize."""
+        target_width = int(self.original_width / 2)
+        target_height = int(self.original_height / 4)
+        thumbnail = thumbnails.create(self.image, target_width, target_height, thumbnails.RESIZED)
         self.assertEqual(thumbnail.width, target_width)
         self.assertEqual(thumbnail.height, target_height)
         
