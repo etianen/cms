@@ -135,17 +135,6 @@ def page_url(parser, token):
     return PageUrlNode(page, view_func, args, kwargs, varname)
 
 
-@register.filter
-def permalink(obj):
-    """
-    Generates a permalink for the given object::
-    
-        {{obj|permalink}}
-        
-    """
-    return permalinks.create(obj)
-
-
 # Page widgets.
 
 
