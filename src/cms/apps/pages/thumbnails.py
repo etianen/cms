@@ -1,7 +1,9 @@
 """Thumbnail generation utilities."""
 
 
-import os, re
+from __future__ import with_statement
+
+import os, re, shutil
 
 from PIL import Image  # @UnresolvedImport
 
@@ -127,30 +129,39 @@ def create(image, width, height, method=PROPORTIONAL):
         if not os.path.exists(dirname):
             os.makedirs(dirname)
     # Create an image buffer in memory.
-    image_data = Image.open(image.path)
-    # Generate a new thumbnail.
-    try:
-        if method == PROPORTIONAL:
-            image_data.thumbnail((width, height), Image.ANTIALIAS)
-        elif method == RESIZED:
-            image_data = image_data.resize((width, height), Image.ANTIALIAS)
-        elif method == CROPPED:
-            original_width, original_height = image_data.size
-            required_aspect = float(width) / float(height)
-            source_width = min(original_width, int(original_height * required_aspect))
-            source_height = min(original_height, int(original_width / required_aspect))
-            source_x = (original_width - source_width) / 2
-            source_y = (original_height - source_height) / 2
-            image_data = image_data.transform((width, height), Image.EXTENT, (source_x, source_y, source_x + source_width, source_y + source_height), Image.BICUBIC)
+    with open(image.path, "rb") as src_file:
+        image_data = Image.open(image.path)
+        original_width, original_height = image_data.size
+        width = min(width, original_width)
+        height = min(height, original_height)
+        if width == original_width and height == original_height:
+            # Simply copy the file to the thumbnails directory.
+            with open(thumbnail_path, "wb") as dst_file:
+                shutil.copyfileobj(src_file, dst_file)
         else:
-            raise ValueError, "Unknown thumbnail generation method: %r" % method
-    except SyntaxError, ex:
-        # HACK: The PIL will raise a SyntaxError if it encounters a 'broken png'. 
-        raise IOError, str(ex)
-    # Save the thumbnail to disk.
-    image_data.save(thumbnail_path)
-    # Return the new image object.
-    return Thumbnail(thumbnail_name)
+            # Generate a new thumbnail.
+            try:
+                if method == PROPORTIONAL:
+                    image_data.thumbnail((width, height), Image.ANTIALIAS)
+                elif method == RESIZED:
+                    image_data = image_data.resize((width, height), Image.ANTIALIAS)
+                elif method == CROPPED:
+                    original_width, original_height = image_data.size
+                    required_aspect = float(width) / float(height)
+                    source_width = min(original_width, int(original_height * required_aspect))
+                    source_height = min(original_height, int(original_width / required_aspect))
+                    source_x = (original_width - source_width) / 2
+                    source_y = (original_height - source_height) / 2
+                    image_data = image_data.transform((width, height), Image.EXTENT, (source_x, source_y, source_x + source_width, source_y + source_height), Image.BICUBIC)
+                else:
+                    raise ValueError, "Unknown thumbnail generation method: %r" % method
+            except SyntaxError, ex:
+                # HACK: The PIL will raise a SyntaxError if it encounters a 'broken png'. 
+                raise IOError, str(ex)
+            # Save the thumbnail to disk.
+            image_data.save(thumbnail_path)
+        # Return the new image object.
+        return Thumbnail(thumbnail_name)
 
 
 RE_IMG = re.compile(ur"<img(.+?)/>", re.IGNORECASE)
