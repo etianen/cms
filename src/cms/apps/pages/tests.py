@@ -13,7 +13,7 @@ from django.core import urlresolvers
 from django.core.files.storage import default_storage
 from django.test.testcases import TestCase
 
-from cms.apps.pages import permalinks, thumbnails
+from cms.apps.pages import permalinks, thumbnails, content
 from cms.apps.pages.models import Page
 from cms.apps.media.models import File
 
@@ -149,24 +149,62 @@ class TestPages(TestCase):
     
     """Tests the pages models."""
     
+    def make_page(self, **kwargs):
+        """Creates a page for testing."""
+        page = Page(**kwargs)
+        content_obj = content.get_default_content()(page)
+        for field in content_obj.fields:
+            if isinstance(field, content.HtmlField):
+                setattr(content_obj, field.name, self.test_html)
+            elif isinstance(field, content.CharField):
+                setattr(content_obj, field.name, "foo")
+            elif isinstance(field, content.TextField):
+                setattr(content_obj, field.name, "bar")
+            elif isinstance(field, content.BooleanField):
+                setattr(content_obj, field.name, True)
+            else:
+                setattr(content_obj, field.name, None)
+        page.content = content_obj
+        page.save()
+        return page
+    
     def setUp(self):
         """Sets up the test case."""
+        # Create a test file object.
         with open(os.path.join(settings.CMS_ROOT, "media", "img", "content-types", "content.png")) as src_file:
             with open(os.path.join(settings.MEDIA_ROOT, TEMP_FILE_NAME), "wb") as dst_file:
                 dst_file.write(src_file.read())
         self.file = File.objects.create(title="Test File", file=TEMP_FILE_NAME)
-        self.homepage = Page.objects.create(title="Home", url_title="home", order=1, content_type="content", content_data="")
-        self.section = Page.objects.create(title="Section", url_title="section", parent=self.homepage, order=2, content_type="content", content_data="")
-        self.subsection = Page.objects.create(title="SubSection", url_title="subsection", parent=self.section, order=3, content_type="content", content_data="")
+        # Create some dummy content.
+        file_permalink = permalinks.create(self.file)
+        html = u'<a href="%(link)s"/><img height="16" src="%(src)s" width="32"/>'
+        self.test_html = html % {"link": file_permalink, "src": file_permalink}
+        self.expanded_html = html % {"link": self.file.get_absolute_url(), "src": thumbnails.create(self.file.file, 32, 16, thumbnails.RESIZED).url}
+        # Create some test pages.
+        self.homepage = self.make_page(title="Home", url_title="home", order=1, content_type="content", content_data="")
+        self.section = self.make_page(title="Section", url_title="section", parent=self.homepage, order=2, content_type="content", content_data="")
+        self.subsection = self.make_page(title="SubSection", url_title="subsection", parent=self.section, order=3, content_type="content", content_data="")
     
     def testHtmlFilter(self):
         """Tests the html template filter."""
-        file_permalink = permalinks.create(self.file)
-        html = u'<a href="%(link)s"/><img height="16" src="%(src)s" width="32"/>'
-        before_filter_html = html % {"link": file_permalink, "src": file_permalink}
-        after_filter_html = html % {"link": self.file.get_absolute_url(), "src": thumbnails.create(self.file.file, 32, 16, thumbnails.RESIZED).url}
         template_src = u"{% load pages %}{{content|html}}"
-        self.assertEqual(after_filter_html, template.Template(template_src).render(template.Context({"content": before_filter_html})))
+        self.assertEqual(self.expanded_html, template.Template(template_src).render(template.Context({"content": self.test_html})))
+    
+    def testPageUrlTag(self):
+        """Tests the page_url template tag."""
+        template_src = """{% load pages %}
+        {% page_url home %}
+        {% page_url home index %}
+        {% page_url home as url %}{{url}}
+        {% page_url home index as url2 %}{{url2}}
+        """
+        output_expected = """
+        /
+        /
+        /
+        /
+        """
+        self.assertEqual(output_expected, template.Template(template_src).render(template.Context({"home": self.homepage})))
     
     def tearDown(self):
         """Destroys the test case."""

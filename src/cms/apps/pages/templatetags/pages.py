@@ -124,12 +124,14 @@ def page_url(parser, token):
     # Parse all remaining token as arguments.
     args = []
     kwargs = {}
-    for argument in "".join(contents[2:]).split(","):
-        if "=" in argument:
-            key, value = argument.split("=")
-            kwargs[key.strip()] = parser.compile_filter(value.strip())
-        else:
-            args.append(parser.compile_filter(argument.strip()))
+    argstring = "".join(contents[2:])
+    if argstring:
+        for argument in argstring.split(","):
+            if "=" in argument:
+                key, value = argument.split("=")
+                kwargs[key.strip()] = parser.compile_filter(value.strip())
+            else:
+                args.append(parser.compile_filter(argument.strip()))
     # Create the node.
     return PageUrlNode(page, view_func, args, kwargs, varname)
 

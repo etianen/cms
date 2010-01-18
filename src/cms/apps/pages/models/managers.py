@@ -221,7 +221,7 @@ class PageManager(PageBaseManager):
         # Accept int arguments.
         try:
             id = int(id)
-        except ValueError:
+        except (ValueError, TypeError):
             pass
         else:
             return self.get_by_id(id)
