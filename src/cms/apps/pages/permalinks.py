@@ -71,7 +71,7 @@ def expand(permalink):
     return obj.get_absolute_url()
     
     
-RE_HREF = re.compile(ur"(href|src)=['\"](.+?)['\"]", re.IGNORECASE)
+RE_HREF = re.compile(ur"(href|src)=['\"](.*?)['\"]", re.IGNORECASE)
 
 
 def sub_link(match):

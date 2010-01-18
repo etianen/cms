@@ -48,6 +48,7 @@ def thumbnail(parser, token):
     by specifying an alias::
     
         {% thumbnail image_file 150 100 as image_thumbnail %}
+        
     """
     def handler(context, image, width, height, method="thumbnail", alias=None):
         thumbnail = thumbnails.create(image, width, height, method)

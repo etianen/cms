@@ -1,16 +1,19 @@
 """Unit tests for the various CMS utilities."""
 
 
+from __future__ import with_statement
+
 import os
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
-from django.core.files.images import ImageFile
+from django.core.files.storage import default_storage
 from django.test.testcases import TestCase
 
 from cms.apps.pages import permalinks, thumbnails
+from cms.apps.media.models import File
 
 
 class TestPermalinks(TestCase):
@@ -46,27 +49,33 @@ class TestPermalinks(TestCase):
         self.user.delete()
         
         
+TEMP_FILE_NAME = "temp.png"
+
+
 class TestThumbnails(TestCase):
     
     """Tests the thumbnails module."""
     
+    
     def setUp(self):
         """Sets up the test case."""
-        self.image = ImageFile(open(os.path.join(settings.CMS_ROOT, "media", "img", "content-types", "content.png")))
-        self.image.path = self.image.name
-        self.original_width = self.image.width
-        self.original_height = self.image.height
+        with open(os.path.join(settings.CMS_ROOT, "media", "img", "content-types", "content.png")) as src_file:
+            with open(os.path.join(settings.MEDIA_ROOT, TEMP_FILE_NAME), "wb") as dst_file:
+                dst_file.write(src_file.read())
+        self.file = File.objects.create(title="Test File", file=TEMP_FILE_NAME)
+        self.original_width = 64
+        self.original_height = 64
     
     def testProportionalThumbnail(self):
         """Tests the proportional thumbnail resize."""
         target_width = int(self.original_width / 2)
         target_height = int(self.original_height / 2)
         # Test a resize limited by width.
-        thumbnail = thumbnails.create(self.image, target_width, 100000, thumbnails.PROPORTIONAL)
+        thumbnail = thumbnails.create(self.file.file, target_width, 100000, thumbnails.PROPORTIONAL)
         self.assertEqual(thumbnail.width, target_width)
         self.assertEqual(thumbnail.height, target_height)
         # Test a resize limited by height.
-        thumbnail = thumbnails.create(self.image, 1000000, target_height, thumbnails.PROPORTIONAL)
+        thumbnail = thumbnails.create(self.file.file, 1000000, target_height, thumbnails.PROPORTIONAL)
         self.assertEqual(thumbnail.width, target_width)
         self.assertEqual(thumbnail.height, target_height)
         
@@ -74,7 +83,7 @@ class TestThumbnails(TestCase):
         """Tests the resizing thumbnail resize."""
         target_width = int(self.original_width / 2)
         target_height = int(self.original_height / 4)
-        thumbnail = thumbnails.create(self.image, target_width, target_height, thumbnails.RESIZED)
+        thumbnail = thumbnails.create(self.file.file, target_width, target_height, thumbnails.RESIZED)
         self.assertEqual(thumbnail.width, target_width)
         self.assertEqual(thumbnail.height, target_height)
         
@@ -82,8 +91,22 @@ class TestThumbnails(TestCase):
         """Tests the cropping thumbnail resize."""
         target_width = int(self.original_width / 2)
         target_height = int(self.original_height / 4)
-        thumbnail = thumbnails.create(self.image, target_width, target_height, thumbnails.CROPPED)
+        thumbnail = thumbnails.create(self.file.file, target_width, target_height, thumbnails.CROPPED)
         self.assertEqual(thumbnail.width, target_width)
         self.assertEqual(thumbnail.height, target_height)
+        
+    def testGenerateThumbnailsHtml(self):
+        """Tests the HTML thumbnail replacement."""
+        html = '<img alt="" height="%(height)s" src="%(src)s" width="%(width)s"/>'
+        target_width = int(self.original_width / 2)
+        target_height = int(self.original_height / 4)
+        before_replace_html = html % {"src": permalinks.create(self.file), "width": target_width, "height": target_height}
+        after_replace_html = html % {"src": thumbnails.create(self.file.file, target_width, target_height, thumbnails.RESIZED).url, "width": target_width, "height": target_height}
+        self.assertEqual(after_replace_html, thumbnails.generate_thumbnails_html(before_replace_html))
+        
+    def tearDown(self):
+        """Destroys the test case."""
+        self.file.delete()
+        default_storage.delete(TEMP_FILE_NAME)
         
         

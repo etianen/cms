@@ -1,14 +1,20 @@
 """Thumbnail generation utilities."""
 
 
-import os
+import os, re
 
-from PIL import Image
+from PIL import Image  # @UnresolvedImport
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.files.images import get_image_dimensions
+from django.utils.html import escape
 
+from cms.apps.pages import permalinks
 from cms.apps.pages.optimizations import cached_getter
+
+
+__all__ = ("create", "PROPORTIONAL", "RESIZED", "CROPPED", "generate_thumbnails_html",)
 
 
 class Thumbnail(object):
@@ -145,4 +151,36 @@ def create(image, width, height, method=PROPORTIONAL):
     image_data.save(thumbnail_path)
     # Return the new image object.
     return Thumbnail(thumbnail_name)
+
+
+RE_IMG = re.compile(ur"<img(.+?)/>", re.IGNORECASE)
+
+RE_ATTR = re.compile(ur"""\s(\w+)=(["'].*?["'])""", re.IGNORECASE)
+
+
+def sub_image(match):
+    """Replaces the given image with a thumbnail."""
+    attrs = match.group(1)
+    attr_dict = dict(RE_ATTR.findall(attrs))
+    try:
+        src = attr_dict["src"][1:-1]
+        obj = permalinks.resolve(src)
+        width = int(attr_dict["width"][1:-1])
+        height = int(attr_dict["height"][1:-1])
+        thumbnail = create(obj.file, width, height, RESIZED)
+    except (ObjectDoesNotExist, permalinks.PermalinkError, KeyError, ValueError, IOError):
+        # If not width or height provided, or an IOError occurs, we cannot proceed.
+        return match.group(0)
+    attr_dict["src"] = '"%s"' % escape(thumbnail.url)
+    return u"<img %s/>" % (" ".join(u'%s=%s' % (name, value) for name, value in sorted(attr_dict.iteritems())))
+
+
+def generate_thumbnails_html(html):
+    """
+    Generates thumbnails for all permalinked images in the given HTML text.
+    
+    If an image does not contain a permalink, or an IOError occurs during the
+    thumbnail generation, then the image tag is left untouched.
+    """
+    return RE_IMG.sub(sub_image, html)
 
