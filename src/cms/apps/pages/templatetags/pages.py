@@ -314,7 +314,9 @@ def nav_primary(parser, token):
         homepage = page.homepage
         navigation = []
         if homepage.in_navigation:
-            navigation.append(nav_context_exact(homepage, request))
+            nav_dict = nav_context_exact(homepage, request)
+            nav_dict["title"] = "Home"
+            navigation.append(nav_dict)
         for entry in homepage.navigation:
             navigation.append(nav_context(entry, request))
         context.push()
