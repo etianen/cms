@@ -14,7 +14,7 @@ from cms.apps.pages import permalinks
 from cms.apps.pages.optimizations import cached_getter
 
 
-__all__ = ("create", "PROPORTIONAL", "RESIZED", "CROPPED", "generate_thumbnails_html",)
+__all__ = ("create", "PROPORTIONAL", "RESIZED", "CROPPED", "create_thumbnails_html",)
 
 
 class Thumbnail(object):
@@ -175,7 +175,7 @@ def sub_image(match):
     return u"<img %s/>" % (" ".join(u'%s=%s' % (name, value) for name, value in sorted(attr_dict.iteritems())))
 
 
-def generate_thumbnails_html(html):
+def create_thumbnails_html(html):
     """
     Generates thumbnails for all permalinked images in the given HTML text.
     

@@ -5,6 +5,7 @@ from __future__ import with_statement
 
 import os
 
+from django import template
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -56,7 +57,6 @@ class TestThumbnails(TestCase):
     
     """Tests the thumbnails module."""
     
-    
     def setUp(self):
         """Sets up the test case."""
         with open(os.path.join(settings.CMS_ROOT, "media", "img", "content-types", "content.png")) as src_file:
@@ -95,14 +95,48 @@ class TestThumbnails(TestCase):
         self.assertEqual(thumbnail.width, target_width)
         self.assertEqual(thumbnail.height, target_height)
         
-    def testGenerateThumbnailsHtml(self):
+    def testCreateThumbnailsHtml(self):
         """Tests the HTML thumbnail replacement."""
         html = '<img alt="" height="%(height)s" src="%(src)s" width="%(width)s"/>'
         target_width = int(self.original_width / 2)
         target_height = int(self.original_height / 4)
         before_replace_html = html % {"src": permalinks.create(self.file), "width": target_width, "height": target_height}
         after_replace_html = html % {"src": thumbnails.create(self.file.file, target_width, target_height, thumbnails.RESIZED).url, "width": target_width, "height": target_height}
-        self.assertEqual(after_replace_html, thumbnails.generate_thumbnails_html(before_replace_html))
+        self.assertEqual(after_replace_html, thumbnails.create_thumbnails_html(before_replace_html))
+        
+    def testThumbnailTag(self):
+        """Tests the thumbnail generation tag."""
+        target_width = int(self.original_width / 2)
+        target_height = int(self.original_height / 4)
+        thumbnail_proportional = thumbnails.create(self.file.file, target_width, target_height, thumbnails.PROPORTIONAL)
+        thumbnail_resized = thumbnails.create(self.file.file, target_width, target_height, thumbnails.RESIZED)
+        thumbnail_cropped = thumbnails.create(self.file.file, target_width, target_height, thumbnails.CROPPED)
+        template_src = """{% load thumbnails %}
+        {% thumbnail image width height %}
+        {% thumbnail image width height proportional %}
+        {% thumbnail image width height resized %}
+        {% thumbnail image width height cropped %}
+        {% thumbnail image width height as thumbnail %}<img src="{{thumbnail.url}}" width="{{thumbnail.width}}" height="{{thumbnail.height}}" alt=""/>
+        {% thumbnail image width height proportional as thumbnail %}<img src="{{thumbnail.url}}" width="{{thumbnail.width}}" height="{{thumbnail.height}}" alt=""/>
+        """
+        expected_html = """
+        <img src="%(proportional_src)s" width="%(proportional_width)s" height="%(proportional_height)s" alt=""/>
+        <img src="%(proportional_src)s" width="%(proportional_width)s" height="%(proportional_height)s" alt=""/>
+        <img src="%(resized_src)s" width="%(target_width)s" height="%(target_height)s" alt=""/>
+        <img src="%(cropped_src)s" width="%(target_width)s" height="%(target_height)s" alt=""/>
+        <img src="%(proportional_src)s" width="%(proportional_width)s" height="%(proportional_height)s" alt=""/>
+        <img src="%(proportional_src)s" width="%(proportional_width)s" height="%(proportional_height)s" alt=""/>
+        """ % {"proportional_src": thumbnail_proportional.url,
+               "proportional_width": thumbnail_proportional.width,
+               "proportional_height": thumbnail_proportional.height,
+               "resized_src": thumbnail_resized.url,
+               "cropped_src": thumbnail_cropped.url,
+               "target_width": target_width,
+               "target_height": target_height}
+        context = {"image": self.file.file,
+                   "width": target_width,
+                   "height": target_height}
+        self.assertEqual(expected_html, template.Template(template_src).render(template.Context(context)))
         
     def tearDown(self):
         """Destroys the test case."""
