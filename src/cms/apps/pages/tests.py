@@ -30,7 +30,9 @@ class TestPermalinks(TestCase):
                                                                                        "object_id": self.user.id}))
         # Test that a permalink is resolved correctly.
         user = permalinks.resolve(permalink)
-        self.assertEquals(user, self.user)
+        self.assertEqual(user, self.user)
+        # Tests that a permalink is expanded correctly.
+        self.assertEqual(permalinks.expand(permalink), user.get_absolute_url())
         
     def tearDown(self):
         """Destroys the test case."""
