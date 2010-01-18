@@ -19,7 +19,7 @@ class TestPermalinks(TestCase):
         """Sets up the test case."""
         self.user = User.objects.create(username="foo", password="foo")
     
-    def testCreateAndResolve(self):
+    def testPermalinks(self):
         """
         Tests that a permalink can be created as resolved back to the original
         object.
@@ -33,6 +33,11 @@ class TestPermalinks(TestCase):
         self.assertEqual(user, self.user)
         # Tests that a permalink is expanded correctly.
         self.assertEqual(permalinks.expand(permalink), user.get_absolute_url())
+        # Tests that HTML attribute expansion works correctly.
+        html = '<a href="%(link)s"/><img src="%(link)s"/>'
+        before_expand_html = html % {"link": permalink}
+        after_expand_html = html % {"link": user.get_absolute_url()}
+        self.assertEqual(after_expand_html, permalinks.expand_links_html(before_expand_html))
         
     def tearDown(self):
         """Destroys the test case."""

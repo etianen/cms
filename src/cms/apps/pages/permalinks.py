@@ -81,7 +81,7 @@ def sub_link(match):
         permalink = expand(attr_value)
     except (PermalinkError, ObjectDoesNotExist):
         return match.group(0)
-    return '%s="%s"' % (match.group(1), escape(permalink))
+    return u'%s="%s"' % (match.group(1), escape(permalink))
     
     
 def expand_links_html(html):
