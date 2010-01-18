@@ -127,9 +127,9 @@ def create(image, width, height, method=PROPORTIONAL):
         if method == PROPORTIONAL:
             image_data.thumbnail((width, height), Image.ANTIALIAS)
         elif method == RESIZED:
-            original_width, original_height = image_data.size
             image_data = image_data.resize((width, height), Image.ANTIALIAS)
         elif method == CROPPED:
+            original_width, original_height = image_data.size
             required_aspect = float(width) / float(height)
             source_width = min(original_width, int(original_height * required_aspect))
             source_height = min(original_height, int(original_width / required_aspect))

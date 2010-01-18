@@ -78,4 +78,12 @@ class TestThumbnails(TestCase):
         self.assertEqual(thumbnail.width, target_width)
         self.assertEqual(thumbnail.height, target_height)
         
+    def testCroppedThumbnail(self):
+        """Tests the cropping thumbnail resize."""
+        target_width = int(self.original_width / 2)
+        target_height = int(self.original_height / 4)
+        thumbnail = thumbnails.create(self.image, target_width, target_height, thumbnails.CROPPED)
+        self.assertEqual(thumbnail.width, target_width)
+        self.assertEqual(thumbnail.height, target_height)
+        
         
