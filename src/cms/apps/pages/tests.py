@@ -1,14 +1,16 @@
 """Unit tests for the various CMS utilities."""
 
 
+import os
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
+from django.core.files.images import ImageFile
 from django.test.testcases import TestCase
 
-from cms.apps.pages import permalinks
-from cms.apps.pages.models import Page 
+from cms.apps.pages import permalinks, thumbnails
 
 
 class TestPermalinks(TestCase):
@@ -42,5 +44,31 @@ class TestPermalinks(TestCase):
     def tearDown(self):
         """Destroys the test case."""
         self.user.delete()
+        
+        
+class TestThumbnails(TestCase):
+    
+    """Tests the thumbnails module."""
+    
+    def setUp(self):
+        """Sets up the test case."""
+        self.image = ImageFile(open(os.path.join(settings.CMS_ROOT, "media", "img", "content-types", "content.png")))
+        self.image.path = self.image.name
+        self.original_width = self.image.width
+        self.original_height = self.image.height
+        self.original_aspect = self.original_width / self.original_height 
+    
+    def testProportionalThumbnail(self):
+        """Tests the proportional thumbnail resize."""
+        target_width = int(self.original_width / 2)
+        target_height = int(self.original_height / 2)
+        # Test a resize limited by width.
+        thumbnail = thumbnails.create(self.image, target_width, 100000, thumbnails.PROPORTIONAL)
+        self.assertEqual(thumbnail.width, target_width)
+        self.assertEqual(thumbnail.height, target_height)
+        # Test a resize limited by height.
+        thumbnail = thumbnails.create(self.image, 1000000, target_height, thumbnails.PROPORTIONAL)
+        self.assertEqual(thumbnail.width, target_width)
+        self.assertEqual(thumbnail.height, target_height)
         
         

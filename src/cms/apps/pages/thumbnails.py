@@ -19,28 +19,29 @@ class Thumbnail(object):
     This conforms to the Django image file specification.
     """
     
-    def __init__(self, name, storage):
+    __slots__ = ("name", "_dimensions_cache",)
+    
+    def __init__(self, name):
         """Initializes the Thumbnail."""
         self.name = name
-        self.storage = storage
         
     def get_url(self):
         """Returns the URL of the thumbnail."""
-        return self.storage.url(self.name)
+        return default_storage.url(self.name)
     
     url = property(get_url,
                    doc="The URL of the thumbnail")
     
     def get_path(self):
         """Returns the path of the thumbnail on disk."""
-        return self.storage.path(self.name)
+        return default_storage.path(self.name)
     
     path = property(get_path,
                     doc="The path of the thumbnail on disk.")
     
     def get_size(self):
         """Returns the size of the thumbnail on disk, in bytes."""
-        return self.storage.size(self.name)
+        return default_storage.size(self.name)
         
     size = property(get_size,
                     doc="The size of the thumbnail on disk, in bytes.")
@@ -97,21 +98,16 @@ def create(image, width, height, method=PROPORTIONAL):
         The thumbnail will be exactly the size requested, cropped to preseve
         aspect ratio.
         
+    The default filesystem storage provided by Django will be used to store the
+    created thumbnail under a generated name.
     """
-    # Cannot generate thumbnails for images without a path.
-    if not hasattr(image, "path"):
+    try:
+        image_path = image.path
+    except AttributeError:
+        # Image must provide a path attribute.
         return image
-    image_path = image.path
-    # Calculate image dimensions.
-    original_width, original_height = get_image_dimensions(image_path)
-    requested_width = min(width, original_width)
-    requested_height = min(height, original_height)
-    # Don't generate thumbnail if no resizing is to take place.
-    if original_width == requested_width and original_height == requested_height:
-        return Thumbnail(image.name, image.storage)
     # Generate the thumbnail filename.
-    image_folder, image_name = os.path.split(image.name)
-    thumbnail_name = "thumbnails/%s-%sx%s/%s/%s" % (method, requested_width, requested_height, image_folder, image_name)
+    thumbnail_name = "thumbnails/%s-%sx%s/%s" % (method, width, height, image.name.lstrip("/"))
     thumbnail_path = default_storage.path(thumbnail_name)
     # See if the thumbnail has already been created.
     if default_storage.exists(thumbnail_name):
@@ -119,27 +115,27 @@ def create(image, width, height, method=PROPORTIONAL):
         thumbnail_timestamp = os.stat(thumbnail_path).st_mtime
         # If the thumbnail is newer than the file, no more generation needs to take place.
         if thumbnail_timestamp > image_timestamp:
-            return Thumbnail(thumbnail_name, default_storage)
+            return Thumbnail(thumbnail_name)
     else:
         dirname = os.path.dirname(thumbnail_path)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-    # Calculate aspect ratios.
-    required_aspect = float(requested_width) / float(requested_height)
     # Create an image buffer in memory.
     image_data = Image.open(image.path)
     # Generate a new thumbnail.
     try:
         if method == PROPORTIONAL:
-            image_data.thumbnail((requested_width, requested_height), Image.ANTIALIAS)
+            image_data.thumbnail((width, height), Image.ANTIALIAS)
         elif method == RESIZED:
-            image_data = image_data.resize((requested_width, requested_height), Image.ANTIALIAS)
+            original_width, original_height = image_data.size
+            image_data = image_data.resize((width, height), Image.ANTIALIAS)
         elif method == CROPPED:
+            required_aspect = float(width) / float(height)
             source_width = min(original_width, int(original_height * required_aspect))
             source_height = min(original_height, int(original_width / required_aspect))
             source_x = (original_width - source_width) / 2
             source_y = (original_height - source_height) / 2
-            image_data = image_data.transform((requested_width, requested_height), Image.EXTENT, (source_x, source_y, source_x + source_width, source_y + source_height), Image.BICUBIC)
+            image_data = image_data.transform((width, height), Image.EXTENT, (source_x, source_y, source_x + source_width, source_y + source_height), Image.BICUBIC)
         else:
             raise ValueError, "Unknown thumbnail generation method: %r" % method
     except SyntaxError, ex:
@@ -148,5 +144,5 @@ def create(image, width, height, method=PROPORTIONAL):
     # Save the thumbnail to disk.
     image_data.save(thumbnail_path)
     # Return the new image object.
-    return Thumbnail(thumbnail_name, default_storage)
+    return Thumbnail(thumbnail_name)
 
