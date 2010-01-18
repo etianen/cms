@@ -190,6 +190,20 @@ class TestPages(TestCase):
         template_src = u"{% load pages %}{{content|html}}"
         self.assertEqual(self.expanded_html, template.Template(template_src).render(template.Context({"content": self.test_html})))
     
+    def testContentTag(self):
+        """Tests the content template tag."""
+        # Get the name of a html content area.
+        for field in self.subsection.content.fields:
+            if isinstance(field, content.HtmlField):
+                fieldname = field.name
+        # Test some templates!
+        template_src = u'{%% load pages %%}{%% content "%s" %%}' % fieldname
+        self.assertEqual(self.expanded_html, template.Template(template_src).render(template.Context({"page": self.subsection})))
+        setattr(self.subsection.content, fieldname, "")
+        self.assertEqual(getattr(self.subsection.content, fieldname), "")  # Just make sure that the content area was removed!
+        template_src = u'{%% load pages %%}{%% content "%s" inherited %%}' % fieldname
+        self.assertEqual(self.expanded_html, template.Template(template_src).render(template.Context({"page": self.subsection})))
+    
     def testPageUrlTag(self):
         """Tests the page_url template tag."""
         template_src = """{% load pages %}
