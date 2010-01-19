@@ -410,7 +410,8 @@ def breadcrumbs(parser, token):
     """
     def handler(context, extended=False):
         page = context["page"]
-        breadcrumbs = [{"title": breadcrumb.short_title or breadcrumb.title,
+        breadcrumbs = [{"short_title": breadcrumb.short_title or breadcrumb.title,
+                        "title": breadcrumb.title,
                         "url": breadcrumb.get_absolute_url(),
                         "last": False,
                         "page": breadcrumb}
