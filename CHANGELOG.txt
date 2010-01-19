@@ -11,6 +11,8 @@ editor. Numerous other improvements and bugfixes made it into the release too.
 This was also the change for a refactoring of the applications used by the CMS,
 in preparation for a potential open-source release later this year.
 
+  * Added WYSIWYG file browser.
+  * Contact form module now adds appropriate reply-to headers for notification emails.
   * More efficient thumbnail expansion in template rendering.
   * More efficient permalink expansion in template rendering.
   * More efficient page dispatch mechanism.
@@ -19,8 +21,6 @@ in preparation for a potential open-source release later this year.
   * Remove size field from File model.
   * Upgraded TinyMCE editor.
   * Upgraded jQuery javascript library.
-  * Added WYSIWYG file browser.
-  * Contact form module now adds appropriate reply-to headers for notification emails.
   * More accessible and faster-loading admin sitemap.
   * Added many more unit tests to the framework.
   * Framework refactoring and several tiny bug fixes.
