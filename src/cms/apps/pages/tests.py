@@ -196,29 +196,33 @@ class TestThumbnails(TestCase):
         self.file.delete()
         default_storage.delete(TEMP_FILE_NAME)
         
+        
+def make_test_page(**kwargs):
+    """Creates a page for testing."""
+    content_data = kwargs.pop("content_data", {})
+    page = Page(**kwargs)
+    content_obj = content.lookup(page.content_type)(page)
+    for field in content_obj.fields:
+        if field.name in content_data:
+            setattr(content_obj, field.name, content_data[field.name])
+        elif isinstance(field, content.HtmlField):
+            setattr(content_obj, field.name, "foobar")
+        elif isinstance(field, content.CharField):
+            setattr(content_obj, field.name, "foo")
+        elif isinstance(field, content.TextField):
+            setattr(content_obj, field.name, "bar")
+        elif isinstance(field, content.BooleanField):
+            setattr(content_obj, field.name, True)
+        else:
+            setattr(content_obj, field.name, None)
+    page.content = content_obj
+    page.save()
+    return page
+        
        
 class TestPages(TestCase):
     
     """Tests the pages models."""
-    
-    def make_page(self, **kwargs):
-        """Creates a page for testing."""
-        page = Page(**kwargs)
-        content_obj = content.get_default_content()(page)
-        for field in content_obj.fields:
-            if isinstance(field, content.HtmlField):
-                setattr(content_obj, field.name, self.test_html)
-            elif isinstance(field, content.CharField):
-                setattr(content_obj, field.name, "foo")
-            elif isinstance(field, content.TextField):
-                setattr(content_obj, field.name, "bar")
-            elif isinstance(field, content.BooleanField):
-                setattr(content_obj, field.name, True)
-            else:
-                setattr(content_obj, field.name, None)
-        page.content = content_obj
-        page.save()
-        return page
     
     def setUp(self):
         """Sets up the test case."""
@@ -232,11 +236,15 @@ class TestPages(TestCase):
         html = u'<a href="%(link)s"/><img height="16" src="%(src)s" width="32"/>'
         self.test_html = html % {"link": file_permalink, "src": file_permalink}
         self.expanded_html = html % {"link": self.file.get_absolute_url(), "src": thumbnails.create(self.file.file, 32, 16, thumbnails.RESIZED).url}
+        # Get the name of a html content area.
+        for field in content.lookup("content")(None).fields:
+            if isinstance(field, content.HtmlField):
+                self.fieldname = field.name
         # Create some test pages.
-        self.homepage = self.make_page(title="Home", url_title="home", order=1, content_type="content", content_data="")
-        self.section = self.make_page(title="Section", url_title="section", parent=self.homepage, order=2, content_type="content", content_data="")
-        self.subsection = self.make_page(title="SubSection", url_title="subsection", parent=self.section, order=3, content_type="content", content_data="")
-        self.subsubsection = self.make_page(title="SubSubSection", url_title="subsubsection", parent=self.subsection, order=4, content_type="content", content_data="")
+        self.homepage = make_test_page(title="Home", url_title="home", order=1, content_type="content", content_data={self.fieldname: self.test_html})
+        self.section = make_test_page(title="Section", url_title="section", parent=self.homepage, order=2, content_type="content", content_data={self.fieldname: self.test_html})
+        self.subsection = make_test_page(title="SubSection", url_title="subsection", parent=self.section, order=3, content_type="content", content_data={self.fieldname: self.test_html})
+        self.subsubsection = make_test_page(title="SubSubSection", url_title="subsubsection", parent=self.subsection, order=4, content_type="content", content_data={self.fieldname: self.test_html})
     
     def testHtmlFilter(self):
         """Tests the html template filter."""
@@ -245,16 +253,12 @@ class TestPages(TestCase):
     
     def testContentTag(self):
         """Tests the content template tag."""
-        # Get the name of a html content area.
-        for field in self.subsection.content.fields:
-            if isinstance(field, content.HtmlField):
-                fieldname = field.name
         # Test some templates!
-        template_src = u'{%% load pages %%}{%% content "%s" %%}' % fieldname
+        template_src = u'{%% load pages %%}{%% content "%s" %%}' % self.fieldname
         self.assertEqual(self.expanded_html, template.Template(template_src).render(template.Context({"page": self.subsection})))
-        setattr(self.subsection.content, fieldname, "")
-        self.assertEqual(getattr(self.subsection.content, fieldname), "")  # Just make sure that the content area was removed!
-        template_src = u'{%% load pages %%}{%% content "%s" inherited %%}' % fieldname
+        setattr(self.subsection.content, self.fieldname, "")
+        self.assertEqual(getattr(self.subsection.content, self.fieldname), "")  # Just make sure that the content area was removed!
+        template_src = u'{%% load pages %%}{%% content "%s" inherited %%}' % self.fieldname
         self.assertEqual(self.expanded_html, template.Template(template_src).render(template.Context({"page": self.subsection})))
     
     def testPageUrlTag(self):
