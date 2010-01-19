@@ -449,13 +449,7 @@ def header(parser, token):
     """
     def handler(context, header=None):
         page = context["page"]
-        header = header or context.get("header", "") or page.title
-        context.push()
-        try:
-            context.update({"header": header})
-            return template.loader.render_to_string("header.html", context)
-        finally:
-            context.pop()
+        return header or context.get("header", None) or context.get("title", "") or page.title
     return PatternNode(parser, token, handler, ("{header}", "",))
 
     

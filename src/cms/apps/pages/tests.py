@@ -359,6 +359,18 @@ class TestPages(TestCase):
         self.assertContainsPageLink(nav_tertiary_html, self.subsection, False)
         self.assertContainsPageLink(nav_tertiary_html, self.subsubsection, True)
     
+    def testHeaderTag(self):
+        """Tests the header template tag."""
+        template_src = u"{% load pages %}{% header %}"
+        template_obj = template.Template(template_src)
+        # Test that the page header is rendered.
+        self.assertEqual(u"Section", template_obj.render(template.Context({"page": self.section})))
+        # Test that a context variable can override the page header.
+        self.assertEqual(u"Foo", template_obj.render(template.Context({"page": self.section, "title": "Foo"})))
+        self.assertEqual(u"Bar", template_obj.render(template.Context({"page": self.section, "title": "Foo", "header": "Bar"})))
+        # Test that the title can be explicitly given.
+        self.assertEqual(u"Baz", template.Template("{% load pages %}{% header 'Baz' %}").render(template.Context({"page": self.section})))
+    
     def tearDown(self):
         """Destroys the test case."""
         self.file.delete()
