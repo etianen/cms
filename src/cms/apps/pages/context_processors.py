@@ -4,8 +4,6 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 
-from cms.apps.pages.models import Page
-
 
 def site(request):
     """Sets the site name and domain in the template."""

@@ -6,9 +6,9 @@ using the django-admin.py utility.
 """
 
 
-import os
+import os  # @UnusedImport
 
-from debug import *
+from debug import *  # @UnusedWildImport
 
 
 # Save media files to the uploads directory in the user's home folder.

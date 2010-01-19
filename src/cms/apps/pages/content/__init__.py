@@ -92,7 +92,7 @@ class ContentMetaClass(type):
         self.fields.sort(lambda a, b: cmp(a.creation_order, b.creation_order))
         # Generate the urlconf.
         views.sort(lambda a, b: cmp(a[0], b[0]))
-        view_funcs = [""] + [view_func for view_id, view_func in views]
+        view_funcs = [""] + [view_func for view_id, view_func in views]  # @UnusedVariable
         self.urlpatterns = patterns(*view_funcs)
         # Generate a verbose name, if required.
         if not "verbose_name" in attrs:

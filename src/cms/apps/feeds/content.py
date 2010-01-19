@@ -7,7 +7,6 @@ from django import template
 from django.contrib.syndication.feeds import Feed
 from django.core.urlresolvers import reverse
 from django.http import Http404
-from django.utils.dates import MONTHS
 
 from cms.apps.feeds import registered_feeds
 from cms.apps.pages.models import Page

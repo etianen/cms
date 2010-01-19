@@ -10,9 +10,9 @@ for the site, database, media and email sections below.
 """
 
 
-import hashlib, os
+import hashlib, os  # @UnusedImport
 
-from cms.settings import *
+from cms.settings import *  # @UnusedWildImport
 
 
 # The name of this site.  Used for branding in the online admin area.
