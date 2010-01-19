@@ -3,30 +3,24 @@
 
 from django.conf import settings
 
-from cms.apps.news.models import Article
-from cms.apps.feeds.content import FeedBase
+from cms.apps.pages import content
 
 
-class NewsFeed(FeedBase):
+DefaultContent = content.get_default_content()
+
+
+class NewsFeed(DefaultContent):
     
     """An archive of published news articles."""
     
-    article_model = Article
-    
-    date_field = "publication_date"
-    
     icon = settings.CMS_MEDIA_URL + "img/content-types/news-feed.png"
     
-    article_list_template = "news/article_list.html"
+    articles_per_page = content.PositiveIntegerField(default=10)
     
-    year_archive_template = "feeds/year_archive.html"
+    urlconf = "cms.apps.news.urls"
     
-    month_archive_template = "feeds/month_archive.html"
-    
-    article_detail_template = "news/article_detail.html"
-    
-    article_archive_template = "news/article_archive.html"
-    
-    latest_articles_template = "news/latest_articles.html"
+    def get_fieldsets(self):
+        """Returns the fieldsets used to lay out the admin form."""
+        return super(NewsFeed, self).get_fieldsets() + (("Feed details", {"fields": ("articles_per_page",),}),)
     
     
