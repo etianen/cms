@@ -22,7 +22,7 @@ class PageSitemap(Sitemap):
         for model in models.get_models():
             if issubclass(model, PublishedModel) and hasattr(model, "get_absolute_url"):
                 for obj in model.objects.all():
-                    # PublishedModel instances might be not be published, due to an
+                    # HACK: PublishedModel instances might be not be published, due to an
                     # unpublished parent. This checks to see if they can provide a URL
                     # before passing them on to the renderer.
                     try:
