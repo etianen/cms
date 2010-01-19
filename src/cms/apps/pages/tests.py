@@ -3,7 +3,7 @@
 
 from __future__ import with_statement
 
-import os
+import os, re
 
 from django import template
 from django.conf import settings
@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
 from django.core.files.storage import default_storage
+from django.http import HttpRequest
 from django.test.testcases import TestCase
 
 from cms.apps.pages import permalinks, thumbnails, content
@@ -290,6 +291,38 @@ class TestPages(TestCase):
         # Test that the title can be explicitly given.
         self.assertEqual(template.loader.render_to_string("title.html", {"title": "Bar", "site_title": "HomeBrowser"}),
                          template.Template("{% load pages %}{% title 'Bar' %}").render(template.Context({"page": self.subsection})))
+    
+    def assertContainsPageLink(self, html, page, is_here, short_title_override=None):
+        """Tests that the given html contains a link to the given page."""
+        links = re.findall(ur"<a(.+?)>(.+?)</a>", html, re.IGNORECASE)
+        for attrs, short_title in links:
+            attr_dict = dict(re.findall(ur"\s(\w+)=[\"'](.*?)[\"']", attrs, re.IGNORECASE))
+            if attr_dict["href"] == page.get_absolute_url():
+                self.assertEqual(short_title, short_title_override or page.short_title)
+                self.assertEqual(attr_dict["title"], page.title)
+                if is_here:
+                    self.assertTrue("here" in attr_dict["class"])
+                else:
+                    self.assertFalse("here" in attr_dict["class"])
+                return
+        self.assertTrue(False, "No page link for page '%s' found" % page)
+    
+    def testNavPrimaryTag(self):
+        """Tests the nav_primary template tag."""
+        template_src = u"{% load pages %}{% nav_primary %}"
+        template_obj = template.Template(template_src)
+        self.homepage.short_title = "HomeShort"
+        self.homepage.save()
+        self.section.short_title = "SectionShort"
+        self.section.save()
+        # Test that the homepage is highlighted.
+        nav_primary_html = template_obj.render(template.Context({"page": self.homepage}))
+        self.assertContainsPageLink(nav_primary_html, self.homepage, True, "Home")
+        self.assertContainsPageLink(nav_primary_html, self.section, False)
+        # Test that sections are highlighted.
+        nav_primary_html = template_obj.render(template.Context({"page": self.subsection}))
+        self.assertContainsPageLink(nav_primary_html, self.homepage, False, "Home")
+        self.assertContainsPageLink(nav_primary_html, self.section, True)
     
     def tearDown(self):
         """Destroys the test case."""

@@ -278,7 +278,7 @@ def title(parser, token):
     return PatternNode(parser, token, handler, ("{title}", "",))
 
 
-def nav_context(page, request):
+def nav_context(page, current_page):
     """
     Generates a dictionary of variables related to the page, for use in page
     navigation.
@@ -287,11 +287,11 @@ def nav_context(page, request):
     return {"short_title": page.short_title or page.title,
             "title": page.title,
             "url": page_url,
-            "here": request.path.startswith(page_url),
+            "here": page in current_page.all_parents,
             "page": page}
     
     
-def nav_context_exact(page, request):
+def nav_context_exact(page, current_page):
     """
     Generates a dictionary of variables related to the page, for use in page
     navigation.
@@ -303,7 +303,7 @@ def nav_context_exact(page, request):
     return {"short_title": page.short_title or page.title,
             "title": page.title,
             "url": page_url,
-            "here": request.path == page_url,
+            "here": page == current_page,
             "page": page}
 
     
@@ -317,15 +317,14 @@ def nav_primary(parser, token):
     """
     def handler(context):
         page = context["page"]
-        request = context["request"]
         homepage = page.homepage
         navigation = []
         if homepage.in_navigation:
-            nav_dict = nav_context_exact(homepage, request)
+            nav_dict = nav_context_exact(homepage, page)
             nav_dict["short_title"] = "Home"
             navigation.append(nav_dict)
         for entry in homepage.navigation:
-            navigation.append(nav_context(entry, request))
+            navigation.append(nav_context(entry, page))
         context.push()
         try:
             context.update({"navigation": navigation})
@@ -345,7 +344,6 @@ def nav_secondary(parser, token):
     """
     def handler(context):
         page = context["page"]
-        request = context["request"]
         navigation = []
         try:
             section = page.breadcrumbs[1]
@@ -353,9 +351,9 @@ def nav_secondary(parser, token):
             pass
         else:
             if section.in_navigation:
-                navigation.append(nav_context_exact(section, request))
+                navigation.append(nav_context_exact(section, page))
             for entry in section.navigation:
-                navigation.append(nav_context(entry, request))
+                navigation.append(nav_context(entry, page))
         context.push()
         try:
             context.update({"navigation": navigation})
@@ -375,7 +373,6 @@ def nav_tertiary(parser, token):
     """
     def handler(context):
         page = context["page"]
-        request = context["request"]
         navigation = []
         try:
             subsection = page.breadcrumbs[2]
@@ -383,9 +380,9 @@ def nav_tertiary(parser, token):
             pass
         else:
             if subsection.in_navigation:
-                navigation.append(nav_context_exact(subsection, request))
+                navigation.append(nav_context_exact(subsection, page))
             for entry in subsection.navigation:
-                navigation.append(nav_context(entry, request))
+                navigation.append(nav_context(entry, page))
         context.push()
         try:
             context.update({"navigation": navigation})
