@@ -185,6 +185,7 @@ class TestPages(TestCase):
         self.homepage = self.make_page(title="Home", url_title="home", order=1, content_type="content", content_data="")
         self.section = self.make_page(title="Section", url_title="section", parent=self.homepage, order=2, content_type="content", content_data="")
         self.subsection = self.make_page(title="SubSection", url_title="subsection", parent=self.section, order=3, content_type="content", content_data="")
+        self.subsubsection = self.make_page(title="SubSubSection", url_title="subsubsection", parent=self.subsection, order=4, content_type="content", content_data="")
     
     def testHtmlFilter(self):
         """Tests the html template filter."""
@@ -340,6 +341,23 @@ class TestPages(TestCase):
         nav_secondary_html = template_obj.render(template.Context({"page": self.subsection}))
         self.assertContainsPageLink(nav_secondary_html, self.section, False)
         self.assertContainsPageLink(nav_secondary_html, self.subsection, True)
+        
+    def testNavTertiaryTag(self):
+        """Tests the nav_tertiary template tag."""
+        template_src = u"{% load pages %}{% nav_tertiary %}"
+        template_obj = template.Template(template_src)
+        self.subsection.short_title = "SubSectionShort"
+        self.subsection.save()
+        self.subsubsection.short_title = "SubSubSectionShort"
+        self.subsubsection.save()
+        # Test that the subsection is highlighted.
+        nav_tertiary_html = template_obj.render(template.Context({"page": self.subsection}))
+        self.assertContainsPageLink(nav_tertiary_html, self.subsection, True)
+        self.assertContainsPageLink(nav_tertiary_html, self.subsubsection, False)
+        # Test that subsubsections are highlighted.
+        nav_tertiary_html = template_obj.render(template.Context({"page": self.subsubsection}))
+        self.assertContainsPageLink(nav_tertiary_html, self.subsection, False)
+        self.assertContainsPageLink(nav_tertiary_html, self.subsubsection, True)
     
     def tearDown(self):
         """Destroys the test case."""
