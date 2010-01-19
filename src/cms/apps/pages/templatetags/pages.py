@@ -284,7 +284,8 @@ def nav_context(page, request):
     navigation.
     """
     page_url = page.get_absolute_url()
-    return {"title": page.short_title or page.title,
+    return {"short_title": page.short_title or page.title,
+            "title": page.title,
             "url": page_url,
             "here": request.path.startswith(page_url),
             "page": page}
@@ -299,7 +300,8 @@ def nav_context_exact(page, request):
     request path for determining whether the page should be considered 'here'.
     """
     page_url = page.get_absolute_url()
-    return {"title": page.short_title or page.title,
+    return {"short_title": page.short_title or page.title,
+            "title": page.title,
             "url": page_url,
             "here": request.path == page_url,
             "page": page}
@@ -320,7 +322,7 @@ def nav_primary(parser, token):
         navigation = []
         if homepage.in_navigation:
             nav_dict = nav_context_exact(homepage, request)
-            nav_dict["title"] = "Home"
+            nav_dict["short_title"] = "Home"
             navigation.append(nav_dict)
         for entry in homepage.navigation:
             navigation.append(nav_context(entry, request))

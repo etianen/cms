@@ -2,7 +2,7 @@
     <ul id="nav-secondary">
         {% for entry in navigation %}
             <li class="{% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
-                <a class="{% if entry.here %}here{% endif %}" href="{{entry.url}}">{{entry.title}}</a>
+                <a title="{{entry.title}}" class="{% if entry.here %}here{% endif %}" href="{{entry.url}}">{{entry.short_title}}</a>
             </li>
         {% endfor %}
     </ul>
