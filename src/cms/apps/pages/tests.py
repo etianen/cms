@@ -11,13 +11,64 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
 from django.core.files.storage import default_storage
-from django.http import HttpRequest
 from django.test.testcases import TestCase
 
-from cms.apps.pages import permalinks, thumbnails, content
+from cms.apps.pages import permalinks, thumbnails, content, optimizations
 from cms.apps.pages.models import Page
 from cms.apps.media.models import File
 
+
+class TestCachedPropertyDummy(object):
+    
+    """Dummy object for testing the cached property optimization."""
+    
+    def __init__(self):
+        self.getter_calls = 0
+        self._attr = "Foo"
+    
+    @optimizations.cached_getter
+    def get_attr(self):
+        self.getter_calls += 1
+        return self._attr
+    
+    @optimizations.cached_setter(get_attr)
+    def set_attr(self, value):
+        self._attr = value
+        
+    @optimizations.cached_deleter(get_attr)
+    def del_attr(self):
+        del self._attr
+
+    attr = property(get_attr,
+                    set_attr,
+                    del_attr)
+
+
+class TestOptimizations(TestCase):
+    
+    """Tests that the CMS optimizations module works."""
+    
+    def testCachedProperty(self):
+        """Tests the cached property decorators."""
+        dummy = TestCachedPropertyDummy()
+        # Test that the cache initializes.
+        self.assertEqual(dummy.attr, "Foo")
+        self.assertEqual(dummy.getter_calls, 1)
+        self.assertEqual(dummy.attr, "Foo")
+        self.assertEqual(dummy.getter_calls, 1)
+        # Test that the cache is updated.
+        dummy.attr = "Bar"
+        self.assertEqual(dummy.attr, "Bar")
+        self.assertEqual(dummy.getter_calls, 1)
+        # Test that the cache is deleted.
+        del dummy.attr
+        self.assertRaises(AttributeError, lambda: dummy.attr)
+        self.assertEqual(dummy.getter_calls, 2)
+        # Test that the property can be re-set.
+        dummy.attr = "Baz"
+        self.assertEqual(dummy.attr, "Baz")
+        self.assertEqual(dummy.getter_calls, 2)
+        
 
 class TestPermalinks(TestCase):
     
