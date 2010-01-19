@@ -220,6 +220,36 @@ class TestPages(TestCase):
         """
         self.assertEqual(output_expected, template.Template(template_src).render(template.Context({"home": self.homepage})))
     
+    def testMetaDescriptionTag(self):
+        """Tests the meta_description template tag."""
+        template_src = "{% load pages %}{% meta_description %}"
+        template_obj = template.Template(template_src)
+        # Test that page meta description is rendered.
+        self.assertEqual(u"", template_obj.render(template.Context({"page": self.subsection})))
+        self.section.meta_description = u"foo"
+        self.assertEqual(u"foo", template_obj.render(template.Context({"page": self.subsection})))
+        self.subsection.meta_description = u"bar"
+        self.assertEqual(u"bar", template_obj.render(template.Context({"page": self.subsection})))
+        # Test that the meta description can be overridden by a context variable.
+        self.assertEqual(u"foobar", template_obj.render(template.Context({"meta_description": "foobar", "page": self.subsection})))
+        # Test that the meta description can be set explicitly.
+        self.assertEqual(u"foobaz", template.Template("{% load pages %}{% meta_description 'foo' %}{% meta_description baz %}").render(template.Context({"baz": "baz", "page": self.subsection})))
+    
+    def testMetaKeywordsTag(self):
+        """Tests the meta_keywords template tag."""
+        template_src = "{% load pages %}{% meta_keywords %}"
+        template_obj = template.Template(template_src)
+        # Test that page meta keywords is rendered.
+        self.assertEqual(u"", template_obj.render(template.Context({"page": self.subsection})))
+        self.section.meta_keywords = u"foo"
+        self.assertEqual(u"foo", template_obj.render(template.Context({"page": self.subsection})))
+        self.subsection.meta_keywords = u"bar"
+        self.assertEqual(u"bar", template_obj.render(template.Context({"page": self.subsection})))
+        # Test that the meta keywords can be overridden by a context variable.
+        self.assertEqual(u"foobar", template_obj.render(template.Context({"meta_keywords": "foobar", "page": self.subsection})))
+        # Test that the meta keywords can be set explicitly.
+        self.assertEqual(u"foobaz", template.Template("{% load pages %}{% meta_keywords 'foo' %}{% meta_keywords baz %}").render(template.Context({"baz": "baz", "page": self.subsection})))
+    
     def tearDown(self):
         """Destroys the test case."""
         self.file.delete()
