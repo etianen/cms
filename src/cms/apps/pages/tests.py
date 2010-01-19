@@ -271,6 +271,26 @@ class TestPages(TestCase):
         # Test that robots can be set explicitly.
         self.assertEqual(u"NOINDEX, FOLLOW, NOARCHIVE", template.Template("{% load pages %}{% meta_robots 0 1 0 %}").render(template.Context({"page": self.subsection})))
     
+    def testTitleTag(self):
+        """Tests the title template tag."""
+        template_src = "{% load pages %}{% title %}"
+        template_obj = template.Template(template_src)
+        # Test that page titles are rendered.
+        self.assertEqual(template.loader.render_to_string("title.html", {"title": "SubSection", "site_title": "Home"}),
+                         template_obj.render(template.Context({"page": self.subsection})))
+        # Test the browser titles are rendered.
+        self.subsection.browser_title = "SubSectionBrowser"
+        self.homepage.browser_title = "HomeBrowser"
+        self.assertEqual(template.loader.render_to_string("title.html", {"title": "SubSectionBrowser", "site_title": "HomeBrowser"}),
+                         template_obj.render(template.Context({"page": self.subsection})))
+        # Test that the title can be overidden by a context variable.
+        self.assertEqual(template.loader.render_to_string("title.html", {"title": "Foo", "site_title": "HomeBrowser"}),
+                         template_obj.render(template.Context({"page": self.subsection,
+                                                               "title": "Foo"})))
+        # Test that the title can be explicitly given.
+        self.assertEqual(template.loader.render_to_string("title.html", {"title": "Bar", "site_title": "HomeBrowser"}),
+                         template.Template("{% load pages %}{% title 'Bar' %}").render(template.Context({"page": self.subsection})))
+    
     def tearDown(self):
         """Destroys the test case."""
         self.file.delete()
