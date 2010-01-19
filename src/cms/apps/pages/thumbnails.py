@@ -10,6 +10,7 @@ from PIL import Image  # @UnresolvedImport
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.files.images import get_image_dimensions
+from django.db import models
 from django.utils.html import escape
 
 from cms.apps.pages import permalinks
@@ -178,7 +179,16 @@ def sub_image(match):
         obj = permalinks.resolve(src)
         width = int(attr_dict["width"][1:-1])
         height = int(attr_dict["height"][1:-1])
-        thumbnail = create(obj.file, width, height, RESIZED)
+        # Automagically detect a FileField.
+        fieldname = None
+        for field in obj._meta.fields:
+            if isinstance(field, models.FileField):
+                fieldname = field.name
+        if fieldname:
+            thumbnail = create(getattr(obj, "file"), width, height, RESIZED)
+        else:
+            # No file field was found, bail out gracefully.
+            raise ValueError
     except (ObjectDoesNotExist, permalinks.PermalinkError, KeyError, ValueError, IOError):
         # If not width or height provided, or an IOError occurs, we cannot proceed.
         return match.group(0)
