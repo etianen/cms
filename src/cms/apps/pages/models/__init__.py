@@ -170,7 +170,7 @@ class Page(PageBase):
     def get_absolute_url(self):
         """Generates the absolute url of the page."""
         if self.parent:
-            return self.parent.url + self.url_title + "/"
+            return self.parent.get_absolute_url() + self.url_title + "/"
         return "/"
     
     def save(self, *args, **kwargs):

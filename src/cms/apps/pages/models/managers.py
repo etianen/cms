@@ -248,6 +248,6 @@ class PageManager(PageBaseManager):
         except self.model.DoesNotExist:
             return slug
         else:
-            return page.url
+            return page.get_absolute_url()
         
         

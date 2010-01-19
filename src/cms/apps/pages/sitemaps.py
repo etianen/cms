@@ -26,7 +26,7 @@ class PageSitemap(Sitemap):
                     # unpublished parent. This checks to see if they can provide a URL
                     # before passing them on to the renderer.
                     try:
-                        obj.url
+                        obj.get_absolute_url()
                     except ObjectDoesNotExist:
                         pass
                     else:

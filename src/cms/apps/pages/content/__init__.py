@@ -229,7 +229,7 @@ class ContentBase(object):
     
     def reverse(self, view_func, *args, **kwargs):
         """Performs a reverse URL lookup."""
-        return self.page.url + self.url_resolver.reverse(view_func, *args, **kwargs)
+        return self.page.get_absolute_url() + self.url_resolver.reverse(view_func, *args, **kwargs)
     
     def dispatch(self, request, path_info):
         """Generates a HttpResponse for this context."""

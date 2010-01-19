@@ -7,7 +7,6 @@ from django.db import models
 
 from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager
 from cms.apps.pages.models.fields import NullBooleanField, EnumField
-from cms.apps.pages.optimizations import cached_getter
 
 
 class PublishedModel(models.Model):
@@ -34,16 +33,6 @@ class PublishedModel(models.Model):
     is_online = models.BooleanField("online",
                                     default=True,
                                     help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by clicking the 'view on site' button.")
-    
-    # Nicer alias for URL generation.
-    
-    @cached_getter
-    def get_url(self):
-        """Caching proxy method for the absolute URL of the object."""
-        return self.get_absolute_url()
-    
-    url = property(get_url,
-                   doc="The absolute URL of the page.")
     
     # Default class properties for sitemap generation.
     

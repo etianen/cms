@@ -66,7 +66,7 @@ class PageMiddleware(object):
                 resolver.resolve(request.path)
             except urlresolvers.Resolver404:
                 page = request.page
-                path_info = request.path[len(page.url):]
+                path_info = request.path[len(page.get_absolute_url()):]
                 # Append a slash to match the page precisely.
                 if not path_info and not request.path.endswith("/") and settings.APPEND_SLASH:
                     return redirect(request.path + "/")
