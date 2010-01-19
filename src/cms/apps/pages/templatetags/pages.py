@@ -287,7 +287,7 @@ def nav_context(page, current_page):
     return {"short_title": page.short_title or page.title,
             "title": page.title,
             "url": page_url,
-            "here": page in current_page.all_parents,
+            "here": page in current_page.breadcrumbs,
             "page": page}
     
     

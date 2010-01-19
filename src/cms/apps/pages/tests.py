@@ -324,6 +324,23 @@ class TestPages(TestCase):
         self.assertContainsPageLink(nav_primary_html, self.homepage, False, "Home")
         self.assertContainsPageLink(nav_primary_html, self.section, True)
     
+    def testNavSecondaryTag(self):
+        """Tests the nav_secondary template tag."""
+        template_src = u"{% load pages %}{% nav_secondary %}"
+        template_obj = template.Template(template_src)
+        self.section.short_title = "SectionShort"
+        self.section.save()
+        self.subsection.short_title = "SubSectionShort"
+        self.subsection.save()
+        # Test that the section is highlighted.
+        nav_secondary_html = template_obj.render(template.Context({"page": self.section}))
+        self.assertContainsPageLink(nav_secondary_html, self.section, True)
+        self.assertContainsPageLink(nav_secondary_html, self.subsection, False)
+        # Test that subsections are highlighted.
+        nav_secondary_html = template_obj.render(template.Context({"page": self.subsection}))
+        self.assertContainsPageLink(nav_secondary_html, self.section, False)
+        self.assertContainsPageLink(nav_secondary_html, self.subsection, True)
+    
     def tearDown(self):
         """Destroys the test case."""
         self.file.delete()
