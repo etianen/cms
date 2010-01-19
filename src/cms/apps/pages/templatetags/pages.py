@@ -202,7 +202,7 @@ def meta_robots(parser, token):
     """
     Renders the content of the meta robots tag for the current page::
     
-        {% meta_keywords %}
+        {% meta_robots %}
     
     You can override the meta robots by setting boolean context variables called
     'robots_index', 'robots_archive' and 'robots_follow'::
