@@ -250,6 +250,23 @@ class TestPages(TestCase):
         # Test that the meta keywords can be set explicitly.
         self.assertEqual(u"foobaz", template.Template("{% load pages %}{% meta_keywords 'foo' %}{% meta_keywords baz %}").render(template.Context({"baz": "baz", "page": self.subsection})))
     
+    def testMetaRobotsTag(self):
+        """Tests the meta_robots template tag."""
+        template_src = "{% load pages %}{% meta_robots %}"
+        template_obj = template.Template(template_src)
+        # Test that the default is permissive.
+        self.assertEqual(u"INDEX, FOLLOW, ARCHIVE", template_obj.render(template.Context({"page": self.subsection})))
+        # Test that None can be overridden with False.
+        self.homepage.robots_index = False
+        self.assertEqual(u"NOINDEX, FOLLOW, ARCHIVE", template_obj.render(template.Context({"page": self.subsection})))
+        # Test that False can be overridden with True and None can be overridden with True.
+        self.section.robots_index = True
+        self.section.robots_follow = True
+        self.assertEqual(u"INDEX, FOLLOW, ARCHIVE", template_obj.render(template.Context({"page": self.subsection})))
+        # Test that True can be overridden with Fals.
+        self.subsection.robots_index = False
+        self.assertEqual(u"NOINDEX, FOLLOW, ARCHIVE", template_obj.render(template.Context({"page": self.subsection})))
+    
     def tearDown(self):
         """Destroys the test case."""
         self.file.delete()
