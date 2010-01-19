@@ -212,16 +212,19 @@ def meta_robots(parser, token):
         {% endwith %}
     
     You can also provide the meta robots as three boolean arguments to this
-    tag in the order 'index', 'archive' and 'follow'::
+    tag in the order 'index', 'follow' and 'archive'::
     
         {% meta_robots 1 1 1 %}
         
     """
-    def handler(context, index=None, archive=None, follow=None):
+    def handler(context, index=None, follow=None, archive=None):
         page = context["page"]
-        index = index or context.get("robots_index", None)
-        archive = archive or context.get("robots_archive", None)
-        follow = index or context.get("robots_follow", None)
+        if index is None:
+            index = context.get("robots_index", None)
+        if archive is None:
+            archive = context.get("robots_archive", None)
+        if follow is None:
+            follow = context.get("robots_follow", None)
         # Follow the page ancestry, looking for robots flags.
         while page:
             if index is None and page.robots_index != None:
@@ -240,7 +243,7 @@ def meta_robots(parser, token):
             follow = True
         # Generate the meta content.
         return ", ".join((index and "INDEX" or "NOINDEX", follow and "FOLLOW" or "NOFOLLOW", archive and "ARCHIVE" or "NOARCHIVE"))
-    return PatternNode(parser, token, handler, ("{index} {archive} {follow}", "",))
+    return PatternNode(parser, token, handler, ("{index} {follow} {archive}", "",))
 
 
 @register.tag

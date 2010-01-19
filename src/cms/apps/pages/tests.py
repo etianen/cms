@@ -263,9 +263,13 @@ class TestPages(TestCase):
         self.section.robots_index = True
         self.section.robots_follow = True
         self.assertEqual(u"INDEX, FOLLOW, ARCHIVE", template_obj.render(template.Context({"page": self.subsection})))
-        # Test that True can be overridden with Fals.
+        # Test that True can be overridden with False.
         self.subsection.robots_index = False
         self.assertEqual(u"NOINDEX, FOLLOW, ARCHIVE", template_obj.render(template.Context({"page": self.subsection})))
+        # Test that template variables can override pages.
+        self.assertEqual(u"INDEX, FOLLOW, NOARCHIVE", template_obj.render(template.Context({"page": self.subsection, "robots_index": True, "robots_archive": False})))
+        # Test that robots can be set explicitly.
+        self.assertEqual(u"NOINDEX, FOLLOW, NOARCHIVE", template.Template("{% load pages %}{% meta_robots 0 1 0 %}").render(template.Context({"page": self.subsection})))
     
     def tearDown(self):
         """Destroys the test case."""
