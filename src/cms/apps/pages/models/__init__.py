@@ -31,9 +31,6 @@ class Page(PageBase):
     
     # Base fields.
     
-    url_title = models.SlugField("URL title",
-                                 db_index=False)
-
     def __init__(self, *args, **kwargs):
         """"Initializes the Page."""
         super(Page, self).__init__(*args, **kwargs)

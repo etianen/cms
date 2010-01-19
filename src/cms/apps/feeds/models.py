@@ -19,9 +19,6 @@ class ArticleBase(PageBase):
     'url_title' columns.
     """
     
-    url_title = models.SlugField("URL title",
-                                 db_index=False)
-    
     content = HtmlField(blank=True)
     
     summary = HtmlField(blank=True,

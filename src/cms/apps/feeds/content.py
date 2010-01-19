@@ -1,10 +1,10 @@
 """Base content classes for feed-based content."""
 
 
-import datetime
-
 from django import template
 from django.contrib.syndication.feeds import Feed
+from django.conf import settings
+from django.core.paginator import EmptyPage, Paginator
 from django.core.urlresolvers import reverse
 from django.http import Http404
 
@@ -23,6 +23,8 @@ class FeedBase(DefaultContent):
     abstract = True
 
     classifier = "feeds"
+    
+    urlconf = "cms.apps.feeds.urls"
 
     # Set this to the subclass of ArticleBase that is rendered by this feed.
     article_model = None
@@ -44,6 +46,22 @@ class FeedBase(DefaultContent):
     article_archive_template = "feeds/article_archive.html"
     
     latest_articles_template = "feeds/latest_articles.html"
+    
+    def get_page(self, request, models, items_per_page=None, pagination_key=None):
+        """Returns an object paginator for the given models."""
+        items_per_page = items_per_page or settings.ITEMS_PER_PAGE
+        pagination_key = pagination_key or settings.PAGINATION_KEY
+        page = request.GET.get(pagination_key, 1)
+        try:
+            page = int(page)
+        except ValueError:
+            raise Http404, "'%s' is not a valid page number." % page 
+        paginator = Paginator(models, items_per_page)
+        try:
+            page = paginator.page(page)
+        except EmptyPage:
+            raise Http404, "There are no models on this page."
+        return page
     
     def render_page(self, request, template_name, context, page, **kwargs):
         """Renders this feed to the response."""
@@ -74,60 +92,6 @@ class FeedBase(DefaultContent):
     latest_articles = property(lambda self: self.get_latest_articles(),
                                doc="The list of articles for the latest article feeds.")
     
-    #@content.view(r"^$")
-    def index(self, request):
-        """Generates a page of the latest news articles."""
-        now = datetime.datetime.now()
-        all_articles = self.latest_articles
-        articles = self.get_page(request, all_articles)
-        context = {"articles": articles,
-                   "year": now.year}
-        return self.render_to_response(request, self.article_list_template, context)
-    
-    #@content.view(r"^(\d{4})/$")
-    def year_archive(self, request, year):
-        """Generates a page showing the articles in a given year."""
-        year = int(year)
-        all_articles = self.articles.filter(**{"%s__year" % self.date_field: year})
-        articles = self.get_page(request, all_articles)
-        date = datetime.date(year, 1, 1)
-        context = {"articles": articles,
-                   "date": date,
-                   "year": year}
-        return self.render_to_response(request, self.year_archive_template, context)
-    
-    #@content.view(r"^(\d{4})/(\d{1,2})/$")
-    def month_archive(self, request, year, month):
-        """Generates a page showing the articles in a given year."""
-        year = int(year)
-        month = int(month)
-        all_articles = self.articles.filter(**{"%s__year" % self.date_field: year,
-                                               "%s__month" % self.date_field: month})
-        articles = self.get_page(request, all_articles)
-        date = datetime.date(year, month, 1)
-        context = {"articles": articles,
-                   "date": date,
-                   "year": year,
-                   "month": month}
-        return self.render_to_response(request, self.month_archive_template, context)
-    
-    #@content.view(r"^(\d{4})/(\d{1,2})/([a-zA-Z0-9_\-]+)/$")
-    def article_detail(self, request, year, month, article_slug):
-        """Dispatches to the article detail page."""
-        year = int(year)
-        month = int(month)
-        all_articles = self.article_model.objects.filter(**{"feed": self.page,
-                                                            "%s__year" % self.date_field: year,
-                                                            "%s__month" % self.date_field: month})
-        try:
-            article = all_articles.get(url_title=article_slug)
-        except self.article_model.DoesNotExist:
-            raise Http404, "An article with a URL title of '%s' does not exist." % article_slug
-        context = {"year": getattr(article, self.date_field).year,
-                   "month": getattr(article, self.date_field).month,
-                   "article": article}
-        return self.render_to_response(request, self.article_detail_template, context)
-
 
 ARTICLE_FEED_KEY = "latest"
 

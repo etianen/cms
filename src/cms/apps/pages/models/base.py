@@ -64,6 +64,9 @@ class PageBase(PublishedModel):
                              editable=False,
                              default=Site.objects.get_current)
     
+    url_title = models.SlugField("URL title",
+                                 db_index=False)
+    
     title = models.CharField(max_length=1000)
     
     # Navigation fields.
