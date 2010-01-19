@@ -15,9 +15,9 @@ class NewsFeed(DefaultContent):
     
     icon = settings.CMS_MEDIA_URL + "img/content-types/news-feed.png"
     
-    articles_per_page = content.PositiveIntegerField(default=10)
-    
     urlconf = "cms.apps.news.urls"
+    
+    articles_per_page = content.PositiveIntegerField(default=10)
     
     def get_fieldsets(self):
         """Returns the fieldsets used to lay out the admin form."""
