@@ -357,9 +357,9 @@ class TestPages(TestCase):
                 self.assertEqual(short_title, short_title_override or page.short_title)
                 self.assertEqual(attr_dict["title"], page.title)
                 if is_here:
-                    self.assertTrue("here" in attr_dict["class"])
+                    self.assertTrue("here" in attr_dict.get("class", ""))
                 else:
-                    self.assertFalse("here" in attr_dict["class"])
+                    self.assertFalse("here" in attr_dict.get("class", ""))
                 return
         self.assertTrue(False, "No page link for page '%s' found" % page)
     
@@ -413,6 +413,24 @@ class TestPages(TestCase):
         nav_tertiary_html = template_obj.render(template.Context({"page": self.subsubsection}))
         self.assertContainsPageLink(nav_tertiary_html, self.subsection, False)
         self.assertContainsPageLink(nav_tertiary_html, self.subsubsection, True)
+    
+    def testBreadcrumbsTag(self):
+        """Tests the breadcrumbs template tag."""
+        self.homepage.short_title = "HomeShort"
+        self.homepage.save()
+        self.section.short_title = "SectionShort"
+        self.section.save()
+        self.subsection.short_title = "SubSectionShort"
+        self.subsection.save()
+        # Test that the unextended breadcrumbs are rendered.
+        breadcrumbs_html = template.Template(u"{% load pages %}{% breadcrumbs %}").render(template.Context({"page": self.subsection}))
+        self.assertContainsPageLink(breadcrumbs_html, self.homepage, False)
+        self.assertContainsPageLink(breadcrumbs_html, self.section, False)
+        # Test that the extended breadcrumbs are rendered.
+        breadcrumbs_html = template.Template(u"{% load pages %}{% breadcrumbs extended %}").render(template.Context({"page": self.subsection}))
+        self.assertContainsPageLink(breadcrumbs_html, self.homepage, False)
+        self.assertContainsPageLink(breadcrumbs_html, self.section, False)
+        self.assertContainsPageLink(breadcrumbs_html, self.subsection, False)
     
     def testHeaderTag(self):
         """Tests the header template tag."""
