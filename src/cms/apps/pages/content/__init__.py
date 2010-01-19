@@ -10,7 +10,7 @@ from django.conf import settings
 from django.conf.urls.defaults import url, patterns
 from django.core.paginator import Paginator, EmptyPage
 from django.core.serializers.xml_serializer import getInnerText
-from django.core.urlresolvers import RegexURLResolver, Resolver404, Http404
+from django.core.urlresolvers import RegexURLResolver, Resolver404, Http404, reverse
 from django.db.models.options import get_verbose_name
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, redirect
@@ -19,32 +19,6 @@ from cms.apps.pages.forms import PageForm
 from cms.apps.pages.optimizations import cached_getter
 from cms.apps.pages import loader
 from cms.apps.pages.content.fields import Field, CharField, TextField, HtmlField, ChoiceField, URLField, EmailField, IntegerField, PositiveIntegerField, FileField, ImageField, ModelField, BooleanField
-
-
-view_id_counter = 0
-    
-    
-def view(url):
-    """
-    Decorator used to mark up Content methods as view functions.
-    
-    Priority is an integer used to provide coarse ordering of the view
-    functions.  By default, views are checked in the order that they are
-    declared.  By setting the priority to positive, you can make a view be
-    checked earlier in the URL resolution process.  By setting the priority to
-    negative, you can ensure that a view is evaluated last.
-    
-    By convention, the priority of -100 is reserved for the dispatch_to_child
-    view of content objects.  This ensures that all declared views are evaluated
-    before it.
-    """
-    def decorator(func):
-        global view_id_counter
-        func.url = url
-        view_id_counter += 1
-        func.view_id = view_id_counter
-        return func
-    return decorator
     
     
 registered_content = {}
@@ -76,7 +50,6 @@ class ContentMetaClass(type):
         """Initializes the ContentMetaClass."""
         super(ContentMetaClass, self).__init__(name, bases, attrs)
         self.fields = []
-        views = []
         for attr_name in dir(self):
             value = getattr(self, attr_name)
             # Perform metaclass programming.
@@ -85,15 +58,8 @@ class ContentMetaClass(type):
             # Register fields.
             if isinstance(value, Field):
                 self.fields.append(value)
-            # Register view functions.
-            if callable(value) and hasattr(value, "view_id"):
-                views.append((value.view_id, url(value.url, value, name=value.__name__)))
         # Sort fields by creation order.
         self.fields.sort(lambda a, b: cmp(a.creation_order, b.creation_order))
-        # Generate the urlconf.
-        views.sort(lambda a, b: cmp(a[0], b[0]))
-        view_funcs = [""] + [view_func for view_id, view_func in views]  # @UnusedVariable
-        self.urlpatterns = patterns(*view_funcs)
         # Generate a verbose name, if required.
         if not "verbose_name" in attrs:
             verbose_name = get_verbose_name(name)
@@ -136,6 +102,9 @@ class ContentBase(object):
     verbose_name = None
     verbose_name_plural = None
     
+    # The urlconf used to power this content's views.
+    urlconf = "cms.apps.pages.urls"
+    
     def __init__(self, page):
         """
         Initializes the page content.
@@ -146,13 +115,13 @@ class ContentBase(object):
         """
         self.page = page
         if page and page.content_data:
-            self.serialized_data = page.content_data
+            self._set_serialized_data(page.content_data)
         else:
             self.data = {}
         
     # Content serialization methods.
         
-    def get_serialized_data(self):
+    def _get_serialized_data(self):
         """Returns the content data, serialized to XML."""
         # Start the XML document.
         out = cStringIO.StringIO()
@@ -175,7 +144,7 @@ class ContentBase(object):
         generator.endDocument()
         return out.getvalue()
     
-    def set_serialized_data(self, serialized_data):
+    def _set_serialized_data(self, serialized_data):
         """Deserializes the given data into a dictionary."""
         # Generate a dictionary of serialized data.
         raw_data = {}
@@ -193,83 +162,11 @@ class ContentBase(object):
             data[key] = value
         self.data = data
         
-    serialized_data = property(get_serialized_data,
-                               set_serialized_data,
-                               doc="The serialized content data, as XML.")
-        
-    # Template context generators.
-    
-    def get_page(self, request, models, items_per_page=None, pagination_key=None):
-        """Returns an object paginator for the given models."""
-        items_per_page = items_per_page or settings.ITEMS_PER_PAGE
-        pagination_key = pagination_key or settings.PAGINATION_KEY
-        page = request.GET.get(pagination_key, 1)
-        try:
-            page = int(page)
-        except ValueError:
-            raise Http404, "'%s' is not a valid page number." % page 
-        paginator = Paginator(models, items_per_page)
-        try:
-            page = paginator.page(page)
-        except EmptyPage:
-            raise Http404, "There are no models on this page."
-        return page
-        
-    # Content view methods.
-    
-    @cached_getter
-    def get_url_resolver(self):
-        """Returns the URL resolver for this content."""
-        resolver = RegexURLResolver(r"^", "cms.apps.pages.content.%s.urlpatterns" % self.__class__.__name__)
-        resolver._urlconf_module = self
-        return resolver
-    
-    url_resolver = property(get_url_resolver,
-                            doc="The URL resolver for this content.")
+    # View methods.
     
     def reverse(self, view_func, *args, **kwargs):
         """Performs a reverse URL lookup."""
-        return self.page.get_absolute_url() + self.url_resolver.reverse(view_func, *args, **kwargs)
-    
-    def dispatch(self, request, path_info):
-        """Generates a HttpResponse for this context."""
-        page = self.page
-        # Dispatch to the appropriate view.
-        resolver = self.url_resolver
-        try:
-            callback, callback_args, callback_kwargs = resolver.resolve(path_info)
-        except Resolver404:
-            # First of all see if adding a slash will help matters.
-            if settings.APPEND_SLASH:
-                new_path_info = path_info + "/"
-                try:
-                    resolver.resolve(new_path_info)
-                except Resolver404:
-                    pass
-                else:
-                    return redirect(page.get_absolute_url() + new_path_info)
-            raise Http404, "No match for the current path '%s' found in the url conf of %s." % (path_info, self.__class__.__name__)
-        response = callback(self, request, *callback_args, **callback_kwargs)
-        # Validate the response.
-        if not isinstance(response, HttpResponse):
-            raise ValueError, "The view %s.%s didn't return an HttpResponse object." % (self.__class__.__name__, callback.__name__)
-        return response
-    
-    def render_to_response(self, request, template_name, context, **kwargs):
-        """Renders this content to the response."""
-        return self.render_page(request, template_name, context, self.page, **kwargs)
-    
-    def render_page(self, request, template_name, context, page, **kwargs):
-        """Renders the given page to a HttpResponse."""
-        return render_to_response(template_name, context, template.RequestContext(request), **kwargs)
-    
-    @view("^$")
-    def index(self, request):
-        """Renders the content as a HTML page."""
-        content_name = self.__class__.__name__.lower()
-        template_name = ("pages/%s.html" % content_name,
-                         "pages/base.html")
-        return self.render_to_response(request, template_name, {})
+        return self.page.get_absolute_url() + reverse(view_func, args=args, kwargs=kwargs, urlconf=self.urlconf, prefix="")
         
     # Administration methods.
         

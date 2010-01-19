@@ -84,9 +84,12 @@ class PageUrlNode(template.Node):
         except Page.DoesNotExist:
             url = "#"
         else:
-            args = [arg.resolve(context) for arg in self.args]
-            kwargs = dict((key, value.resolve(context)) for key, value in self.kwargs.items())
-            url = page.content.reverse(self.view_func, *args, **kwargs)
+            if self.view_func is None:
+                url = page.get_absolute_url()
+            else:
+                args = [arg.resolve(context) for arg in self.args]
+                kwargs = dict((key, value.resolve(context)) for key, value in self.kwargs.items())
+                url = page.content.reverse(self.view_func, *args, **kwargs)
         # Return the value, or set as a context variable as appropriate.
         if self.varname:
             context[self.varname] = url
@@ -120,7 +123,7 @@ def page_url(parser, token):
     try:
         view_func = contents[1]
     except IndexError:
-        view_func = "index"
+        view_func = None
     # Parse all remaining token as arguments.
     args = []
     kwargs = {}

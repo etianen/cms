@@ -1,9 +1,11 @@
 """Abstract base models used by the page management application."""
 
 
+from django.template import RequestContext
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
+from django.shortcuts import render_to_response
 
 from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager
 from cms.apps.pages.models.fields import NullBooleanField, EnumField
@@ -110,15 +112,32 @@ class PageBase(PublishedModel):
                                     default=None,
                                     help_text="Use this to prevent search engines from indexing this page. Disable this only if the page contains information which you do not wish to show up in search results. Leave blank to use the setting from the parent page.")
 
+    robots_follow = NullBooleanField("follow links",
+                                     blank=True,
+                                     default=None,
+                                     help_text="Use this to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise. Leave blank to use the setting from the parent page.")
+
     robots_archive = NullBooleanField("allow archiving",
                                       blank=True,
                                       default=None,
                                       help_text="Use this to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis. Leave blank to use the setting from the parent page.")
 
-    robots_follow = NullBooleanField("follow links",
-                                     blank=True,
-                                     default=None,
-                                     help_text="Use this to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise. Leave blank to use the setting from the parent page.")
+    def render_to_response(self, request, template, context=None, **kwargs):
+        """
+        Renders a template as a HttpResponse using the context of this page.
+        
+        The template should extend the "pages/base.html" template for everything
+        to work correctly.
+        """
+        page_context = {"meta_description": self.meta_description,
+                        "meta_keywords": self.meta_keywords,
+                        "robots_index": self.robots_index,
+                        "robots_archive": self.robots_archive,
+                        "robots_follow": self.robots_follow,
+                        "title": self.browser_title or self.title,
+                        "header": self.title}
+        page_context.update(context or {})
+        return render_to_response(template, context, RequestContext(request), **kwargs)
     
     # Base model methods.
     

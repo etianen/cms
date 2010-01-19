@@ -19,7 +19,7 @@ class Redirect(content.ContentBase):
     redirect_url = content.CharField("redirect URL",
                                      help_text="The URL where the user will be redirected.  You can also enter a page permalink to create a dynamic link to a page.")
     
-    @content.view(r"^$")
+    #@content.view(r"^$")
     def index(self, request):
         """Redirects to the redirect URL."""
         redirect_url = self.redirect_url

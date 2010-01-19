@@ -159,7 +159,7 @@ class Page(PageBase):
     @cached_setter(get_content)
     def set_content(self, content):
         """Sets the content object for this page."""
-        self.content_data = content.serialized_data
+        self.content_data = content._get_serialized_data()
 
     content = property(get_content,
                        set_content,

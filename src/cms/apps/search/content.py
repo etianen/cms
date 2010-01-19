@@ -23,7 +23,7 @@ class SiteSearch(DefaultContent):
         """Returns the fieldsets used to lay out the content form."""
         return super(SiteSearch, self).get_fieldsets() + (("Search engine configuration", {"fields": ("search_engine_id",),}),)
     
-    @content.view(r"^$")
+    #@content.view(r"^$")
     def index(self, request):
         """Renders the search results."""
         return self.render_to_response(request, "search/results.html", {})

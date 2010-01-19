@@ -74,7 +74,7 @@ class FeedBase(DefaultContent):
     latest_articles = property(lambda self: self.get_latest_articles(),
                                doc="The list of articles for the latest article feeds.")
     
-    @content.view(r"^$")
+    #@content.view(r"^$")
     def index(self, request):
         """Generates a page of the latest news articles."""
         now = datetime.datetime.now()
@@ -84,7 +84,7 @@ class FeedBase(DefaultContent):
                    "year": now.year}
         return self.render_to_response(request, self.article_list_template, context)
     
-    @content.view(r"^(\d{4})/$")
+    #@content.view(r"^(\d{4})/$")
     def year_archive(self, request, year):
         """Generates a page showing the articles in a given year."""
         year = int(year)
@@ -96,7 +96,7 @@ class FeedBase(DefaultContent):
                    "year": year}
         return self.render_to_response(request, self.year_archive_template, context)
     
-    @content.view(r"^(\d{4})/(\d{1,2})/$")
+    #@content.view(r"^(\d{4})/(\d{1,2})/$")
     def month_archive(self, request, year, month):
         """Generates a page showing the articles in a given year."""
         year = int(year)
@@ -111,7 +111,7 @@ class FeedBase(DefaultContent):
                    "month": month}
         return self.render_to_response(request, self.month_archive_template, context)
     
-    @content.view(r"^(\d{4})/(\d{1,2})/([a-zA-Z0-9_\-]+)/$")
+    #@content.view(r"^(\d{4})/(\d{1,2})/([a-zA-Z0-9_\-]+)/$")
     def article_detail(self, request, year, month, article_slug):
         """Dispatches to the article detail page."""
         year = int(year)

@@ -66,7 +66,7 @@ class ContactForm(DefaultContent):
         return super(ContactForm, self).get_fieldsets() + (("Form details", {"fields": ("form_type", "send_to", "success_message"),}),
                                                            ("Confirmation email", {"fields": ("confirmation_subject", "confirmation_message",),}),)
     
-    @content.view(r"^$")
+    #@content.view(r"^$")
     def index(self, request):
         """Renders the contact form."""
         ContactForm = CONTACT_FORMS[self.form_type]
@@ -109,7 +109,7 @@ class ContactForm(DefaultContent):
         context = {"contact_form": contact_form}
         return self.render_to_response(request, "contact/contact_form.html", context)
     
-    @content.view(r"^message-sent/$")
+    #@content.view(r"^message-sent/$")
     def message_sent(self, request):
         """Renders a success message to the user."""
         context = {"title": "Message Sent"}
