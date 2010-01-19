@@ -18,9 +18,11 @@ in preparation for a potential open-source release later this year.
   * Removed notes field from File model.
   * Remove size field from File model.
   * Upgraded TinyMCE editor.
+  * Upgraded jQuery javascript library.
   * Added WYSIWYG file browser.
   * Contact form module now adds appropriate reply-to headers for notification emails.
   * More accessible and faster-loading admin sitemap.
+  * Added many more unit tests to the framework.
   * Framework refactoring and several tiny bug fixes.
   
   
