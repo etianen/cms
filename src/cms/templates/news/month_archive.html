@@ -1,0 +1,9 @@
+{% extends "news/index.html" %}
+{% load pages %}
+
+
+{% block breadcrumbs %}
+    {% breadcrumbs extended %}
+    <a title="Archive for {{date|date:'Y'}}" href="{% page_url page year_archive date.year %}">{{date|date:"Y"}}</a> &rsaquo;
+    {{date|date:"F"}}
+{% endblock %}

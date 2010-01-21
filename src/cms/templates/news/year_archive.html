@@ -1,0 +1,8 @@
+{% extends "news/index.html" %}
+{% load pages %}
+
+
+{% block breadcrumbs %}
+    {% breadcrumbs extended %}
+    {{date|date:"Y"}}
+{% endblock %}

@@ -140,7 +140,7 @@ class PageBase(PublishedModel):
                         "title": self.browser_title or self.title,
                         "header": self.title}
         page_context.update(context or {})
-        return render_to_response(template, context, RequestContext(request), **kwargs)
+        return render_to_response(template, page_context, RequestContext(request), **kwargs)
     
     # Base model methods.
     

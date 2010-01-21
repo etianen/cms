@@ -1,8 +1,11 @@
 """Views used by the feeds application."""
 
 
+import datetime
+
 from django.http import Http404
 from django.core import paginator
+from django.shortcuts import get_object_or_404
 
 
 def index(request, page_number="1"):
@@ -10,12 +13,15 @@ def index(request, page_number="1"):
     page = request.page
     content = page.content
     # Paginate the articles.
+    all_articles = page.article_set.all()
     try:
-        articles = paginator.Paginator(page.article_set.all(), content.articles_per_page).page(page_number)
+        articles = paginator.Paginator(all_articles, content.articles_per_page).page(page_number)
     except paginator.InvalidPage:
         raise Http404, "There are no articles to display."
     # Render the template.
-    context = {"articles": articles}
+    date = datetime.datetime.now()
+    context = {"articles": articles,
+               "date": date}
     return page.render_to_response(request, "news/index.html", context)
 
 
@@ -24,13 +30,17 @@ def year_archive(request, year, page_number="1"):
     page = request.page
     content = page.content
     year = int(year)
-    all_articles = content.articles.filter(**{"%s__year" % content.date_field: year})
-    articles = content.get_page(request, all_articles)
+    # Paginate the articles.
+    all_articles = page.article_set.filter(publication_date__year=year)
+    try:
+        articles = paginator.Paginator(all_articles, content.articles_per_page, allow_empty_first_page=False).page(page_number)
+    except paginator.InvalidPage:
+        raise Http404, "There are no articles to display."
+    # Render the template.
     date = datetime.date(year, 1, 1)
     context = {"articles": articles,
-               "date": date,
-               "year": year}
-    return page.render_to_response(request, content.year_archive_template, context)
+               "date": date}
+    return page.render_to_response(request, "news/year_archive.html", context)
 
 
 def month_archive(request, year, month, page_number="1"):
@@ -39,32 +49,31 @@ def month_archive(request, year, month, page_number="1"):
     content = page.content
     year = int(year)
     month = int(month)
-    all_articles = content.articles.filter(**{"%s__year" % content.date_field: year,
-                                           "%s__month" % content.date_field: month})
-    articles = content.get_page(request, all_articles)
+    # Paginate the articles.
+    all_articles = page.article_set.filter(publication_date__year=year,
+                                           publication_date__month=month)
+    try:
+        articles = paginator.Paginator(all_articles, content.articles_per_page, allow_empty_first_page=False).page(page_number)
+    except paginator.InvalidPage:
+        raise Http404, "There are no articles to display."
+    # Render the template.
     date = datetime.date(year, month, 1)
     context = {"articles": articles,
-               "date": date,
-               "year": year,
-               "month": month}
-    return page.render_to_response(request, content.month_archive_template, context)
+               "date": date}
+    return page.render_to_response(request, "news/month_archive.html", context)
 
 
 def article_detail(request, year, month, article_slug):
     """Dispatches to the article detail page."""
     page = request.page
-    content = page.content
     year = int(year)
     month = int(month)
-    all_articles = content.article_model.objects.filter(**{"feed": content.page,
-                                                        "%s__year" % content.date_field: year,
-                                                        "%s__month" % content.date_field: month})
-    try:
-        article = all_articles.get(url_title=article_slug)
-    except content.article_model.DoesNotExist:
-        raise Http404, "An article with a URL title of '%s' does not exist." % article_slug
-    context = {"year": getattr(article, content.date_field).year,
-               "month": getattr(article, content.date_field).month,
-               "article": article}
-    return article.render_to_response(request, content.article_detail_template, context)
+    # Get the article.
+    article = page.article_set.get(publication_date__year=year,
+                                   publication_date__month=month,
+                                   url_title=article_slug)
+    # Render the template.
+    context = {"article": article,
+               "date": article.publication_date}
+    return article.render_to_response(request, "news/article_detail.html", context)
 
