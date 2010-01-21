@@ -5,7 +5,13 @@
 {% block title %}{% title "Server Error" %}{% endblock %}
 
 
-{% block header %}{% header "Server Error" %}{% endblock %} 
+{% block header %}{% header "Server Error" %}{% endblock %}
+
+
+{% block breadcrumbs %}
+    {% breadcrumbs extended %}
+    Server Error
+{% endblock %}
 
 
 {% block content_primary %}

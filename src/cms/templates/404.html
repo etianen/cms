@@ -5,7 +5,13 @@
 {% block title %}{% title "Page Not Found" %}{% endblock %}
 
 
-{% block header %}{% header "Page Not Found" %}{% endblock %} 
+{% block header %}{% header "Page Not Found" %}{% endblock %}
+
+
+{% block breadcrumbs %}
+    {% breadcrumbs extended %}
+    Page Not Found
+{% endblock %}
 
 
 {% block content_primary %}
