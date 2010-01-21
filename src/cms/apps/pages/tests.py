@@ -12,6 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
 from django.core.files.storage import default_storage
 from django.test.testcases import TestCase
+from django.test.client import Client
 
 from cms.apps.pages import permalinks, thumbnails, content, optimizations
 from cms.apps.pages.models import Page
@@ -245,6 +246,16 @@ class TestPages(TestCase):
         self.section = make_test_page(title="Section", url_title="section", parent=self.homepage, order=2, content_type="content", content_data={self.fieldname: self.test_html})
         self.subsection = make_test_page(title="SubSection", url_title="subsection", parent=self.section, order=3, content_type="content", content_data={self.fieldname: self.test_html})
         self.subsubsection = make_test_page(title="SubSubSection", url_title="subsubsection", parent=self.subsection, order=4, content_type="content", content_data={self.fieldname: self.test_html})
+    
+    def testIndexView(self):
+        """Tests the default content index view."""
+        c = Client()
+        # Test the homepage.
+        response = c.get(self.homepage.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        # Test the subsection.
+        response = c.get(self.subsection.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
     
     def testHtmlFilter(self):
         """Tests the html template filter."""

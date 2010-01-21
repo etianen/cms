@@ -19,7 +19,7 @@ class TestRedirectContent(TestCase):
         """Initializes the test case."""
         self.page = make_test_page(title="Test", url_title="test", order=1, content_type=Redirect.registration_key, content_data={"redirect_url": TEST_REDIRECT_URL})
     
-    def testIndex(self):
+    def testIndexView(self):
         """Tests the index page."""
         c = Client()
         response = c.get(self.page.get_absolute_url())
