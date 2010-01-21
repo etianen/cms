@@ -80,20 +80,12 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "reversion",
                   "cms.apps.pages",
                   "cms.apps.staff",
-                  "cms.apps.feeds",
                   "cms.apps.media",)
 
 
 # Multi-site settings.
 
 SITE_ID = 1
-
-
-# Pagination settings.
-
-PAGINATION_KEY = "page"
-
-ITEMS_PER_PAGE = 10
 
 
 # Publication settings.

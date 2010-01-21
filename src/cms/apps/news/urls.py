@@ -15,5 +15,7 @@ urlpatterns = patterns("cms.apps.news.views",
                        url(r"^(\d{4})/(\d{1,2})/$", "month_archive", name="month_archive"),
                        url(r"^(\d{4})/(\d{1,2})/page/(\d+)/$", "month_archive", name="month_archive_paginated"),
                        
-                       url(r"^(\d{4})/(\d{1,2})/([a-zA-Z0-9_\-]+)/$", "article_detail", name="article_detail",),)
+                       url(r"^(\d{4})/(\d{1,2})/([a-zA-Z0-9_\-]+)/$", "article_detail", name="article_detail",),
+                       
+                       url(r"^rss/$", "rss", name="rss"),)
 

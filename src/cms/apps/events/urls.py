@@ -30,6 +30,9 @@ ARTICLE_DETAIL_KWARGS = {"article_set_attr": ARTICLE_SET_ATTR,
                          "article_name": "event",
                          "template_name": "events/event_detail.html"}
 
+RSS_KWARGS = {"article_set_attr": ARTICLE_SET_ATTR,
+              "article_date_attr": ARTICLE_DATE_ATTR}
+
 
 urlpatterns += patterns("cms.apps.news.views",
                        
@@ -39,5 +42,7 @@ urlpatterns += patterns("cms.apps.news.views",
                         url(r"^(\d{4})/(\d{1,2})/$", "month_archive", MONTH_ARCHIVE_KWARGS, name="month_archive"),
                         url(r"^(\d{4})/(\d{1,2})/page/(\d+)/$", "month_archive", MONTH_ARCHIVE_KWARGS, name="month_archive_paginated"),
                        
-                        url(r"^(\d{4})/(\d{1,2})/([a-zA-Z0-9_\-]+)/$", "article_detail", ARTICLE_DETAIL_KWARGS, name="event_detail",),)
+                        url(r"^(\d{4})/(\d{1,2})/([a-zA-Z0-9_\-]+)/$", "article_detail", ARTICLE_DETAIL_KWARGS, name="event_detail",),
+                        
+                        url(r"^rss/$", "rss", RSS_KWARGS, name="rss"),)
 

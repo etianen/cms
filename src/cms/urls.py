@@ -6,7 +6,6 @@ from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 from django.views.static import serve
 
-from cms.apps.feeds import registered_feeds
 from cms.apps.pages.admin import site as admin_site
 from cms.apps.pages.sitemaps import registered_sitemaps
 
@@ -25,8 +24,6 @@ urlpatterns = patterns("",
                        # Google sitemap service.
                        url(r"^sitemap.xml$", "django.contrib.sitemaps.views.index", {"sitemaps": registered_sitemaps}, name="sitemap"),
                        url(r"^sitemap-(?P<section>.+)\.xml$", "django.contrib.sitemaps.views.sitemap", {"sitemaps": registered_sitemaps}),
-                       # RSS feed service.
-                       url(r"^feeds/(?P<url>.*)/$", "django.contrib.syndication.views.feed", {"feed_dict": registered_feeds}, name="feeds"),
                        # Basic robots.txt.
                        url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}, name="robots_txt"),)
 
