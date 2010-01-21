@@ -2,6 +2,9 @@
 {% load pages %}
 
 
+{% block feeds %}<link rel="alternate" type="application/rss+xml" title="{{page.title}}" href="{% page_url page rss %}" />{% endblock %}
+
+
 {% block content_primary %}
     {{block.super}}
     {% if events.object_list %}
