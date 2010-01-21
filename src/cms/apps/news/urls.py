@@ -1,4 +1,4 @@
-"""URLs used by the feeds application."""
+"""URLs used by the news application."""
 
 
 from django.conf.urls.defaults import patterns, url
