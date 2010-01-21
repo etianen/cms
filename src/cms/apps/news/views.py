@@ -5,7 +5,6 @@ import datetime
 
 from django.http import Http404
 from django.core import paginator
-from django.shortcuts import get_object_or_404
 
 
 def index(request, page_number="1"):
@@ -17,7 +16,7 @@ def index(request, page_number="1"):
     try:
         articles = paginator.Paginator(all_articles, content.articles_per_page).page(page_number)
     except paginator.InvalidPage:
-        raise Http404, "There are no articles to display."
+        raise Http404, "There are no articles to display"
     # Render the template.
     date = datetime.datetime.now()
     context = {"articles": articles,
@@ -55,7 +54,7 @@ def month_archive(request, year, month, page_number="1"):
     try:
         articles = paginator.Paginator(all_articles, content.articles_per_page, allow_empty_first_page=False).page(page_number)
     except paginator.InvalidPage:
-        raise Http404, "There are no articles to display."
+        raise Http404, "There are no articles to display"
     # Render the template.
     date = datetime.date(year, month, 1)
     context = {"articles": articles,
@@ -69,9 +68,12 @@ def article_detail(request, year, month, article_slug):
     year = int(year)
     month = int(month)
     # Get the article.
-    article = page.article_set.get(publication_date__year=year,
-                                   publication_date__month=month,
-                                   url_title=article_slug)
+    try:
+        article = page.article_set.get(publication_date__year=year,
+                                       publication_date__month=month,
+                                       url_title=article_slug)
+    except page.article_set.model.DoesNotExist:
+        raise Http404, "That article does not exist"
     # Render the template.
     context = {"article": article,
                "date": article.publication_date}
