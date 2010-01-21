@@ -109,7 +109,7 @@ def rss(request, article_set_attr=ARTICLE_SET_ATTR, article_date_attr=ARTICLE_DA
     site = page.site
     fullpath = "http://%s%%s" % site.domain 
     homepage = page.homepage
-    article_set = getattr(page, article_set_attr)
+    article_set = getattr(page, article_set_attr).order_by("-" + article_date_attr)
     # Generate the feed title.
     title_context = {"title": page.browser_title or page.title,
                      "site_title": homepage.browser_title or homepage.title}
