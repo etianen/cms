@@ -19,8 +19,10 @@ def index(request, page_number="1"):
         raise Http404, "There are no articles to display"
     # Render the template.
     date = datetime.datetime.now()
+    dates = page.article_set.dates("publication_date", "month")
     context = {"articles": articles,
-               "date": date}
+               "date": date,
+               "dates": dates}
     return page.render_to_response(request, "news/index.html", context)
 
 
@@ -37,8 +39,10 @@ def year_archive(request, year, page_number="1"):
         raise Http404, "There are no articles to display."
     # Render the template.
     date = datetime.date(year, 1, 1)
+    dates = page.article_set.dates("publication_date", "month")
     context = {"articles": articles,
-               "date": date}
+               "date": date,
+               "dates": dates}
     return page.render_to_response(request, "news/year_archive.html", context)
 
 
@@ -57,8 +61,10 @@ def month_archive(request, year, month, page_number="1"):
         raise Http404, "There are no articles to display"
     # Render the template.
     date = datetime.date(year, month, 1)
+    dates = page.article_set.dates("publication_date", "month")
     context = {"articles": articles,
-               "date": date}
+               "date": date,
+               "dates": dates}
     return page.render_to_response(request, "news/month_archive.html", context)
 
 
@@ -75,7 +81,9 @@ def article_detail(request, year, month, article_slug):
     except page.article_set.model.DoesNotExist:
         raise Http404, "That article does not exist"
     # Render the template.
+    dates = page.article_set.dates("publication_date", "month")
     context = {"article": article,
-               "date": article.publication_date}
+               "date": article.publication_date,
+               "dates": dates}
     return article.render_to_response(request, "news/article_detail.html", context)
 

@@ -1,1 +1,50 @@
 {% extends "pages/base.html" %}
+{% load pages %}
+
+
+{% block content_primary %}
+    {{block.super}}
+    {% if articles.object_list %}
+        <ul class="article-list">
+            {% for article in articles.object_list %}
+                <li class="{% if article.is_featured %}featured{% endif %} {% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
+                    <h2>
+                        <span class="date">{{article.publication_date|date}}</span>
+                        <a class="title" href="{{article.get_absolute_url}}">{{article.title}}</a>
+                    </h2>
+                    {% if article.summary %}
+                        {{article.summary|html}}
+                    {% else %}
+                        {{article.content|truncatewords_html:100|html}}
+                    {% endif %}
+                    <p class="read-more"><a href="{{article.get_absolute_url}}">Read more</a></p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
+
+
+{% block content_secondary %}
+    {{block.super}}
+    <div class="article-archive">
+        <h2>Browse Archive</h2>
+        {% regroup dates by year as year_archives %}
+        <ul>
+            {% for year_archive in year_archives %}
+                <li class="{% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
+                    <a title="Archive for {{year_archive.grouper}}" class="{% ifequal year_archive.grouper date.year %}here{% endifequal %}" href="{% page_url page year_archive year_archive.grouper %}">{{year_archive.grouper}}</a>
+                    {% ifequal year_archive.grouper date.year %}
+                        <ul>
+                            {% for month_archive in year_archive.list %}
+                                <li class="{% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
+                                    <a title="Archive for {{month_archive|date:'F Y'}}" class="{% ifequal month_archive.month date.month %}here{% endifequal %}" href="{% page_url page month_archive year_archive.grouper, month_archive.month %}">{{month_archive|date:"F"}}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endifequal %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
