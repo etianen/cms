@@ -40,7 +40,7 @@ class PatternNode(template.Node):
                 def replace_variables(match):
                     varname = match.group(1)
                     varnames.add(varname)
-                    return r"(?P<%s>[\S]+?)" % varname
+                    return r"(?P<%s>[\w]+?|'.*?'|\".*?\")" % varname
                 regex = RE_PATTERN_VARIABLE.sub(replace_variables, pattern)
                 def replace_flags(match):
                     flagname = match.group(1)

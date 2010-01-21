@@ -66,6 +66,8 @@ class PageMiddleware(object):
                 resolver.resolve(request.path)
             except urlresolvers.Resolver404:
                 page = request.page
+                if page is None:
+                    return None
                 script_name = page.get_absolute_url()[:-1]
                 path_info = request.path[len(script_name):]
                 # Append a slash to match the page precisely.

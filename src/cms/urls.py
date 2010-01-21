@@ -2,7 +2,7 @@
 
 
 from django.conf import settings
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls.defaults import patterns, url, include, handler404  # @UnusedImport
 from django.contrib import admin
 from django.views.static import serve
 
@@ -34,9 +34,6 @@ if settings.SERVE_STATIC_MEDIA:
     for media_url, media_root in settings.STATIC_MEDIA:
         media_regex = r"^%s(.*)" % media_url.lstrip("/")
         urlpatterns += patterns("", url(media_regex, serve, {"document_root": media_root}))
-
-
-handler404 = "cms.apps.pages.views.handler404"
 
 
 handler500 = "cms.apps.pages.views.handler500"

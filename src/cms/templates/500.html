@@ -1,4 +1,11 @@
-{% extends "base.html" %}
+{% extends "pages/base.html" %}
+{% load pages %}
+
+
+{% block title %}{% title "Server Error" %}{% endblock %}
+
+
+{% block header %}{% header "Server Error" %}{% endblock %} 
 
 
 {% block content_primary %}

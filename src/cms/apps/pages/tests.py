@@ -16,6 +16,7 @@ from django.test.client import Client
 
 from cms.apps.pages import permalinks, thumbnails, content, optimizations
 from cms.apps.pages.models import Page
+from cms.apps.pages.models.managers import publication_manager
 from cms.apps.media.models import File
 
 
@@ -246,6 +247,9 @@ class TestPages(TestCase):
         self.section = make_test_page(title="Section", url_title="section", parent=self.homepage, order=2, content_type="content", content_data={self.fieldname: self.test_html})
         self.subsection = make_test_page(title="SubSection", url_title="subsection", parent=self.section, order=3, content_type="content", content_data={self.fieldname: self.test_html})
         self.subsubsection = make_test_page(title="SubSubSection", url_title="subsubsection", parent=self.subsection, order=4, content_type="content", content_data={self.fieldname: self.test_html})
+        # Make an admin user.
+        self.non_admin_user = User.objects.create_user(username="non_admin", email="foo@bar.com", password="password")
+        self.admin_user = User.objects.create_superuser(username="admin", email="bar@foo.com", password="password")
     
     def testIndexView(self):
         """Tests the default content index view."""
@@ -256,6 +260,43 @@ class TestPages(TestCase):
         # Test the subsection.
         response = c.get(self.subsection.get_absolute_url())
         self.assertEqual(response.status_code, 200)
+        
+    def testPreviewMode(self):
+        """Tests that page preview mode works."""
+        section_url = self.section.get_absolute_url()
+        subsection_url = self.subsection.get_absolute_url()
+        # Put the section offline.
+        self.section.is_online = False
+        self.section.save()
+        # Make sure that the homepage and section are not published.
+        c = Client()
+        response = c.get(section_url)
+        self.assertEqual(response.status_code, 404)
+        response = c.get(subsection_url)
+        self.assertEqual(response.status_code, 404)
+        # Make sure that preview mode does not work if not logged in!
+        response = c.get(section_url + "?preview=1")
+        self.assertEqual(response.status_code, 404)
+        response = c.get(subsection_url + "?preview=1")
+        self.assertEqual(response.status_code, 404)
+        # Log in a non-admin user then try to access preview mode.
+        self.assertTrue(c.login(username="non_admin", password="password"))
+        response = c.get(section_url + "?preview=1")
+        self.assertEqual(response.status_code, 404)
+        response = c.get(subsection_url + "?preview=1")
+        self.assertEqual(response.status_code, 404)
+        # Log in an admin user then try to access preview mode.
+        self.assertTrue(c.login(username="admin", password="password"))
+        response = c.get(section_url + "?preview=1")
+        self.assertEqual(response.status_code, 200)
+        response = c.get(subsection_url + "?preview=1")
+        self.assertEqual(response.status_code, 200)
+        # Make sure that preview mode requires the GET parameter!
+        self.assertTrue(c.login(username="admin", password="password"))
+        response = c.get(section_url)
+        self.assertEqual(response.status_code, 404)
+        response = c.get(subsection_url)
+        self.assertEqual(response.status_code, 404)
     
     def testHtmlFilter(self):
         """Tests the html template filter."""
@@ -459,6 +500,9 @@ class TestPages(TestCase):
         """Destroys the test case."""
         self.file.delete()
         default_storage.delete(TEMP_FILE_NAME)
-        self.homepage.delete()
+        with publication_manager.select_published(False):
+            self.homepage.delete()
+        self.non_admin_user.delete()
+        self.admin_user.delete()
         
         
