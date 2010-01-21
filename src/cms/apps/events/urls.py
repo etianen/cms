@@ -30,6 +30,7 @@ ARTICLE_DETAIL_KWARGS = {"article_set_attr": ARTICLE_SET_ATTR,
                          "article_name": "event",
                          "template_name": "events/event_detail.html"}
 
+
 urlpatterns += patterns("cms.apps.news.views",
                        
                         url(r"^(\d{4})/$", "year_archive", YEAR_ARCHIVE_KWARGS, name="year_archive"),
