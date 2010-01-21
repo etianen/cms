@@ -2,6 +2,9 @@
 {% load pages %}
 
 
+{% block header %}Archive for {{date|date:"Y"}}{% endblock %}
+
+
 {% block breadcrumbs %}
     {% breadcrumbs extended %}
     {{date|date:"Y"}}

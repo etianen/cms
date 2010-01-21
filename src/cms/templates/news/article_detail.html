@@ -8,3 +8,6 @@
     <a title="Archive for {{date|date:'F Y'}}" href="{% page_url page month_archive date.year, date.month %}">{{date|date:"Y"}}</a> &rsaquo;
     {{article}}
 {% endblock %}
+
+
+{% block content_primary %}{{article.content|html}}{% endblock %}
