@@ -108,15 +108,17 @@ def article_detail(request, year, month, article_slug):
 
 def rss(request):
     """Generates the RSS feed for this news feed."""
-    feed_helper = FeedHelper(request, **kwargs)
-    all_articles = feed_helper.all_articles.order_by("-" + feed_helper.publication_date_field)
-    page = feed_helper.page
+    # Get the model information.
+    page = request.page
+    content = page.content
     fullpath = "http://%s%%s" % page.site.domain 
     homepage = page.homepage
     # Generate the feed title.
     title_context = {"title": page.browser_title or page.title,
                      "site_title": homepage.browser_title or homepage.title}
     title = template.loader.render_to_string("title.html", title_context, template.RequestContext(request))
+    # Get the list of articles.
+    all_articles = content.get_articles().order_by("-%s" % content.publication_date_field)
     # Generate the head.
     feed = DefaultFeed(title=title,
                        link=fullpath % page.get_absolute_url(),
