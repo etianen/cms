@@ -28,10 +28,6 @@ class Article(ArticleBase):
                                         db_index=True,
                                         help_text="The date that this article will appear on the website.")
     
-    def get_absolute_url(self):
-        """Returns the absolute URL of the article."""
-        return self.feed.content.reverse("object_detail", self.publication_date.year, self.publication_date.month, self.url_title)
-    
     class Meta:
         verbose_name = "news article"
         ordering = ("-is_featured", "-publication_date", "-id")

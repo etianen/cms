@@ -20,6 +20,10 @@ class ArticleBase(PageBase):
                                       db_index=True,
                                       help_text="Featured articles will remain at the top of any news feeds.")
     
+    def get_absolute_url(self):
+        """Returns the absolute URL of the article."""
+        return self.feed.content.reverse("article_detail", self.publication_date.year, self.publication_date.month, self.url_title)
+    
     class Meta:
         abstract = True
         unique_together = (("feed", "url_title",),)
