@@ -1,1 +1,8 @@
 {% extends "feeds/base.html" %}
+{% load feeds %}
+
+
+{% block content_primary %}
+    {{block.super}}
+    {% article_list %}
+{% endblock %}

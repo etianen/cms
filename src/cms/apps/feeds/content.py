@@ -33,7 +33,7 @@ class FeedBase(DefaultContent):
         """Returns all the associated articles."""
         return self.article_model.objects.filter(feed=self.page)
     
-    def get_latest(self):
+    def get_latest_articles(self):
         """Returns the latest articles."""
         return self.get_articles()
 

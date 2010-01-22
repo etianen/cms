@@ -1,1 +1,0 @@
-"""Template tags used by the news application."""

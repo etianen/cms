@@ -4,12 +4,12 @@
         <ul>
             {% for article in articles %}
                 <li class="{% if article.is_featured %}featured{% endif %} {% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
-                    <a title="{{article.title}}" href="{{article.get_absolute_url}}">
+                    <a title="{{article.title}}" href="{{article.url}}">
                         <span class="heading">
-                            <span class="date">{{article.publication_date|date}}</span>
-                            <span class="title">{{article}}</span>
+                            <span class="date">{{article.date|date}}</span>
+                            <span class="title">{{article.short_title}}</span>
                         </span>
-                        <span class="summary">{{article.summary|default:article.content|striptags|truncatewords:5|safe}}</span>
+                        <span class="summary">{{article.summary}}</span>
                     </a>
                 </li>
             {% endfor %}

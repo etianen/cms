@@ -1,5 +1,5 @@
 {% extends "feeds/base.html" %}
-{% load pages %}
+{% load pages feeds %}
 
 
 {% block header %}Archive for {{date|date:"F Y"}}{% endblock %}
@@ -9,4 +9,10 @@
     {% breadcrumbs extended %}
     <a title="Archive for {{date|date:'Y'}}" href="{% page_url page year_archive date.year %}">{{date|date:"Y"}}</a> &rsaquo;
     {{date|date:"F"}}
+{% endblock %}
+
+
+{% block content_primary %}
+    {{block.super}}
+    {% article_list %}
 {% endblock %}

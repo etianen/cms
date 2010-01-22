@@ -2,13 +2,27 @@
 
 
 from django import template
-from django.utils.text import truncate_html_words
+from django.utils.html import strip_tags
+from django.utils.safestring import mark_safe
+from django.utils.text import truncate_html_words, truncate_words
 
+from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import PatternNode
 from cms.apps.pages.templatetags.pages import html
 
 
 register = template.Library()
+
+
+def article_context(content, article, summary):
+    """Generates a dictionary of article properties."""
+    return {"short_title": article.short_title or article.title,
+            "title": article.title,
+            "url": article.get_absolute_url(),
+            "is_featured": article.is_featured,
+            "date": getattr(article, content.publication_date_field),
+            "summary": summary,
+            "article": article}
 
 
 @register.tag
@@ -23,13 +37,7 @@ def article_list(parser, token):
         article_list = []
         for article in articles:
             summary = html(article.summary or truncate_html_words(article.content, summary_length))
-            article_list.append({"short_title": article.short_title or article.title,
-                                 "title": article.title,
-                                 "url": article.get_absolute_url(),
-                                 "is_featured": article.is_featured,
-                                 "date": getattr(article, content.publication_date_field),
-                                 "summary": summary,
-                                 "article": article})
+            article_list.append(article_context(content, article, summary))
         # Render the template.
         context.push()
         try:
@@ -61,4 +69,31 @@ def date_archive(parser, token):
         finally:
             context.pop()
     return PatternNode(parser, token, handler, ("",))
+
+
+@register.tag
+def latest_articles(parser, token):
+    """Renders a list of the latest news articles."""
+    def handler(context, feed, count=5, summary_length=5):
+        # Get the page reference.
+        try:
+            feed = Page.objects.get_page(feed)
+        except Page.DoesNotExist:
+            return ""
+        content = feed.content
+        # Get the articles.
+        articles = content.get_latest_articles()[:count]
+        article_list = []
+        for article in articles:
+            summary = mark_safe(truncate_words(strip_tags(article.summary or article.content), summary_length))
+            article_list.append(article_context(content, article, summary))
+        # Render the template.
+        context.push()
+        try:
+            context.update({"articles": articles,
+                            "feed": feed})
+            return template.loader.render_to_string("news/latest_articles.html", context)
+        finally:
+            context.pop()
+    return PatternNode(parser, token, handler, ("{feed} {count} {summary_length}", "{feed} {count}", "{feed}",))
 

@@ -20,7 +20,7 @@ def index(request, page_number="1"):
     content = page.content
     article_model = content.article_model
     # Get the list of articles.
-    all_articles = content.get_latest()
+    all_articles = content.get_latest_articles()
     try:
         articles = paginator.Paginator(all_articles, content.articles_per_page)
     except paginator.InvalidPage:
