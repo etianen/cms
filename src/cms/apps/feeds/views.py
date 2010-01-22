@@ -13,144 +13,123 @@ from django.utils.feedgenerator import DefaultFeed
 from cms.apps.pages.templatetags.pages import html
 
 
-PAGE_FIELD = "feed"
-PUBLICATION_DATE_FIELD = "publication_date"
-EXPIRY_DATE_FIELD = "expiry_date"
+class FeedHelper(object):
+    
+    """Helper for generating item feeds."""
+    
+    def __init__(self, request, page_number=None, queryset=None, page_field=None, publication_date_field=None, expiry_date_field=None, num_articles_field=None, template_object_name=None, template_name=None):
+        """Initializes the FeedHelper."""
+        # Introspect the page details.
+        self.request = request
+        self.page = request.page
+        self.content = self.page.content
+        # Generate the querysets.
+        self.page_field = page_field or "feed"
+        self.queryset = queryset.filter(**{self.page_field: self.page})
+        self.all_articles = self.queryset.all()
+        # Introspect the model.
+        self.model = self.queryset.model
+        self.model_name = self.model.__name__.lower()
+        # Flesh out the arguments.
+        self.page_number = page_number
+        self.num_articles_field = num_articles_field or "%ss_per_page" % self.model_name
+        self.publication_date_field = publication_date_field or "publication_date"
+        self.expiry_date_field = expiry_date_field or "expiry_date"
+        self.template_object_name = template_object_name or "%s_list" % self.model_name
+        self.dates = self.queryset.dates(self.publication_date_field, "month")
+        self.template_name = template_name
+        
+    def filter(self, *args, **kwargs):
+        """Filters the articles to display."""
+        self.all_articles = self.all_articles.filter(*args, **kwargs)
+        
+    def render(self, default_template_name, extra_context, allow_empty_first_page=False):
+        """Renders the feed."""
+        # Paginate the articles.
+        try:
+            articles = paginator.Paginator(self.all_articles, getattr(self.content, self.num_articles_field), allow_empty_first_page=allow_empty_first_page).page(self.page_number)
+        except paginator.InvalidPage:
+            raise Http404, u"There are no %s to display" % self.model._meta.verbose_name_plural
+        # Generate the context.
+        template_object_name = self.template_object_name
+        context = {template_object_name: articles,
+                   "dates": self.dates}
+        context.update(extra_context)
+        # Render the template.
+        template_name = self.template_name or default_template_name % (self.model._meta.app_label, self.model_name)
+        return self.page.render_to_response(self.request, template_name, context)
 
 
-def upcoming_index(request, page_number="1", queryset=None, page_field=PAGE_FIELD, publication_date_field=PUBLICATION_DATE_FIELD, expiry_date_field=EXPIRY_DATE_FIELD, num_articles_field=None, template_object_name=None, template_name=None):
+def upcoming_index(request, page_number="1", **kwargs):
     """Generates a page of the upcoming events."""
-    page = request.page
-    content = page.content
-    article_set = queryset.filter(**{PAGE_FIELD: page})
-    model = article_set.model
-    model_name = model.__name__.lower()
-    num_articles_field = num_articles_field or "%ss_per_page" % model_name
-    # Paginate the events.
+    feed_helper = FeedHelper(request, page_number, **kwargs)
+    # Filter the articles.
     now = datetime.datetime.now()
-    all_articles = article_set.filter(Q(**{"%s__gte" % publication_date_field: now}) | Q(**{"%s__gte" % expiry_date_field: now}))
-    try:
-        articles = paginator.Paginator(all_articles, getattr(content, num_articles_field), allow_empty_first_page=True).page(page_number)
-    except paginator.InvalidPage:
-        raise Http404, u"There are no events to display"
-    # Render the template.
-    date = datetime.datetime.now()
-    dates = article_set.dates("start_date", "month")
-    template_object_name = template_object_name or "%s_list" % model_name
-    context = {template_object_name: articles,
-               "date": date,
-               "dates": dates}
-    template_name = template_name or "%s/%s_upcoming.html" % (model._meta.app_label, model_name)
-    return page.render_to_response(request, template_name, context)
+    feed_helper.filter(Q(**{"%s__gte" % feed_helper.publication_date_field: now}) | Q(**{"%s__gte" % feed_helper.expiry_date_field: now}))
+    # Render the articles.
+    context = {"date": now,}
+    return feed_helper.render("%s/%s_upcoming.html", context, True)
 
 
-def archive_index(request, page_number="1", queryset=None, page_field=PAGE_FIELD, publication_date_field=PUBLICATION_DATE_FIELD, expiry_date_field=EXPIRY_DATE_FIELD, num_articles_field=None, template_object_name=None, template_name=None):
+def archive_index(request, page_number="1", **kwargs):
     """Generates a page of the latest articles."""
-    page = request.page
-    content = page.content
-    article_set = queryset.filter(**{PAGE_FIELD: page})
-    model = article_set.model
-    model_name = model.__name__.lower()
-    num_articles_field = num_articles_field or "%ss_per_page" % model_name
-    # Paginate the articles.
-    all_articles = article_set.all()
-    try:
-        articles = paginator.Paginator(all_articles, getattr(content, num_articles_field), allow_empty_first_page=True).page(page_number)
-    except paginator.InvalidPage:
-        raise Http404, u"There are no %s to display" % model._meta.verbose_name_plural
-    # Render the template.
-    date = datetime.datetime.now()
-    dates = article_set.dates(publication_date_field, "month")
-    template_object_name = template_object_name or "%s_list" % model_name
-    context = {template_object_name: articles,
-               "date": date,
-               "dates": dates}
-    template_name = template_name or "%s/%s_archive.html" % (model._meta.app_label, model_name)
-    return page.render_to_response(request, template_name, context)
+    feed_helper = FeedHelper(request, page_number, **kwargs)
+    # Filter the articles.
+    now = datetime.datetime.now()
+    feed_helper.filter()
+    # Render the articles.
+    context = {"date": now,}
+    return feed_helper.render("%s/%s_archive.html", context, True)
+    
 
-
-def archive_year(request, year, page_number="1", queryset=None, page_field=PAGE_FIELD, publication_date_field=PUBLICATION_DATE_FIELD, expiry_date_field=EXPIRY_DATE_FIELD, num_articles_field=None, template_object_name=None, template_name=None):
+def archive_year(request, year, page_number="1", **kwargs):
     """Generates a page showing the articles in a given year."""
-    page = request.page
-    content = page.content
-    article_set = queryset.filter(**{PAGE_FIELD: page})
-    model = article_set.model
-    model_name = model.__name__.lower()
-    num_articles_field = num_articles_field or "%ss_per_page" % model_name
     year = int(year)
-    # Paginate the articles.
-    all_articles = article_set.filter(**{"%s__year" % publication_date_field: year})
-    try:
-        articles = paginator.Paginator(all_articles, getattr(content, num_articles_field), allow_empty_first_page=False).page(page_number)
-    except paginator.InvalidPage:
-        raise Http404, u"There are no %s to display" % model._meta.verbose_name_plural
-    # Render the template.
-    date = datetime.date(year, 1, 1)
-    dates = article_set.dates(publication_date_field, "month")
-    template_object_name = template_object_name or "%s_list" % model_name
-    context = {template_object_name: articles,
-               "date": date,
-               "dates": dates}
-    template_name = template_name or "%s/%s_archive_year.html" % (model._meta.app_label, model_name)
-    return page.render_to_response(request, template_name, context)
+    feed_helper = FeedHelper(request, page_number, **kwargs)
+    # Filter the articles.
+    feed_helper.filter(**{"%s__year" % feed_helper.publication_date_field: year})
+    # Render the articles.
+    context = {"date": datetime.date(year, 1, 1),}
+    return feed_helper.render("%s/%s_archive_year.html", context, True)
 
 
-def archive_month(request, year, month, page_number="1", queryset=None, page_field=PAGE_FIELD, publication_date_field=PUBLICATION_DATE_FIELD, expiry_date_field=EXPIRY_DATE_FIELD, num_articles_field=None, template_object_name=None, template_name=None):
+def archive_month(request, year, month, page_number="1", **kwargs):
     """Generates a page showing the articles in a given year."""
-    page = request.page
-    content = page.content
-    article_set = queryset.filter(**{PAGE_FIELD: page})
-    model = article_set.model
-    model_name = model.__name__.lower()
-    num_articles_field = num_articles_field or "%ss_per_page" % model_name
     year = int(year)
     month = int(month)
-    # Paginate the articles.
-    all_articles = article_set.filter(**{"%s__year" % publication_date_field: year,
-                                         "%s__month" % publication_date_field: month})
-    try:
-        articles = paginator.Paginator(all_articles, getattr(content, num_articles_field), allow_empty_first_page=False).page(page_number)
-    except paginator.InvalidPage:
-        raise Http404, u"There are no %s to display" % model._meta.verbose_name_plural
-    # Render the template.
-    date = datetime.date(year, month, 1)
-    dates = article_set.dates(publication_date_field, "month")
-    template_object_name = template_object_name or "%s_list" % model_name
-    context = {template_object_name: articles,
-               "date": date,
-               "dates": dates}
-    template_name = template_name or "%s/%s_archive_month.html" % (model._meta.app_label, model_name)
-    return page.render_to_response(request, template_name, context)
+    feed_helper = FeedHelper(request, page_number, **kwargs)
+    # Filter the articles.
+    feed_helper.filter(**{"%s__year" % feed_helper.publication_date_field: year,
+                          "%s__month" % feed_helper.publication_date_field: month})
+    # Render the articles.
+    context = {"date": datetime.date(year, 1, 1),}
+    return feed_helper.render("%s/%s_archive_month.html", context, True)
 
 
-def object_detail(request, year, month, article_slug, page_number="1", queryset=None, page_field=PAGE_FIELD, publication_date_field=PUBLICATION_DATE_FIELD, expiry_date_field=EXPIRY_DATE_FIELD, num_articles_field=None, template_object_name=None, template_name=None):
+def object_detail(request, year, month, article_slug, template_object_name=None, **kwargs):
     """Dispatches to the article detail page."""
-    page = request.page
-    article_set = queryset.filter(**{PAGE_FIELD: page})
-    model = article_set.model
-    model_name = model.__name__.lower()
-    month = int(month)
+    feed_helper = FeedHelper(request, **kwargs)
     # Get the article.
     try:
-        article = article_set.get(**{"%s__year" % publication_date_field: year,
-                                     "%s__month" % publication_date_field: month,
-                                     "url_title": article_slug})
-    except model.DoesNotExist:
-        raise Http404, u"That %s does not exist" % model_name
+        article = feed_helper.all_articles.get(**{"%s__year" % feed_helper.publication_date_field: year,
+                                                  "%s__month" % feed_helper.publication_date_field: month,
+                                                  "url_title": article_slug})
+    except feed_helper.model.DoesNotExist:
+        raise Http404, u"That %s does not exist" % feed_helper.model_name
     # Render the template.
-    dates = article_set.dates(publication_date_field, "month")
-    template_object_name = template_object_name or model_name
+    template_object_name = template_object_name or feed_helper.model_name
     context = {template_object_name: article,
-               "date": getattr(article, publication_date_field),
-               "dates": dates}
-    template_name = template_name or "%s/%s_detail.html" % (model._meta.app_label, model_name)
+               "date": getattr(article, feed_helper.publication_date_field),
+               "dates": feed_helper.dates}
+    template_name = feed_helper.template_name or "%s/%s_detail.html" % (feed_helper.model._meta.app_label, feed_helper.model_name)
     return article.render_to_response(request, template_name, context)
 
 
-def rss(request, queryset=None, page_field=PAGE_FIELD, publication_date_field=PUBLICATION_DATE_FIELD, expiry_date_field=EXPIRY_DATE_FIELD, num_articles_field=None, template_object_name=None, template_name=None):
+def rss(request, **kwargs):
     """Generates the RSS feed for this news feed."""
-    page = request.page
-    article_set = queryset.filter(**{PAGE_FIELD: page}).order_by("-" + publication_date_field)
+    feed_helper = FeedHelper(request, **kwargs)
+    all_articles = feed_helper.all_articles.order_by("-" + feed_helper.publication_date_field)
+    page = feed_helper.page
     fullpath = "http://%s%%s" % page.site.domain 
     homepage = page.homepage
     # Generate the feed title.
@@ -163,7 +142,7 @@ def rss(request, queryset=None, page_field=PAGE_FIELD, publication_date_field=PU
                        description=page.meta_description or homepage.meta_description,
                        language=settings.LANGUAGE_CODE)
     # Generate the feed body.
-    for article in article_set.all()[:30]:
+    for article in all_articles[:30]:
         feed.add_item(title=article.title,
                       link=fullpath % article.get_absolute_url(),
                       description=html(article.summary or article.content))
