@@ -20,7 +20,7 @@ class EventsFeed(FeedBase):
     
     publication_date_field = "start_date"
     
-    def get_latest(self):
+    def get_latest_articles(self):
         """Returns the latest events."""
         now = datetime.datetime.now()
         return self.get_articles().filter(Q(start_date__gte=now) | Q(end_date__gte=now))
