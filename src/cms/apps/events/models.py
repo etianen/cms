@@ -16,8 +16,6 @@ class Event(ArticleBase):
     feed = PageField("eventsfeed",
                      verbose_name="events feed")
     
-    # Publication fields.
-    
     start_date = models.DateField(default=lambda: datetime.datetime.now().date(),
                                   db_index=True,
                                   help_text="The date that this event is due to start.")
