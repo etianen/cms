@@ -5,10 +5,11 @@ import datetime
 
 from django.db import models
 
-from cms.apps.pages.models import PageBase, PageField, HtmlField
+from cms.apps.pages.models import PageField
+from cms.apps.feeds.models import ArticleBase
 
 
-class Article(PageBase):
+class Article(ArticleBase):
     
     """A news article."""
     
@@ -22,16 +23,6 @@ class Article(PageBase):
     
     feed = PageField("newsfeed",
                      verbose_name="news feed")
-    
-    content = HtmlField(blank=True)
-    
-    summary = HtmlField(blank=True,
-                        help_text="A short summary of this article.  If not specified, then a summarized version of the content will be used.")
-    
-    is_featured = models.BooleanField("featured",
-                                      default=False,
-                                      db_index=True,
-                                      help_text="Featured articles will remain at the top of any news feeds.")
     
     publication_date = models.DateField(default=lambda: datetime.datetime.now().date(),
                                         db_index=True,
