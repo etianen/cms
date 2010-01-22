@@ -38,7 +38,7 @@ class Event(PageBase):
     
     def get_absolute_url(self):
         """Returns the absolute URL of the article."""
-        return self.feed.content.reverse("event_detail", self.start_date.year, self.start_date.month, self.url_title)
+        return self.feed.content.reverse("object_detail", self.start_date.year, self.start_date.month, self.url_title)
     
     class Meta:
         unique_together = (("feed", "url_title",),)

@@ -80,7 +80,8 @@ INSTALLED_APPS = ("django.contrib.auth",
                   "reversion",
                   "cms.apps.pages",
                   "cms.apps.staff",
-                  "cms.apps.media",)
+                  "cms.apps.media",
+                  "cms.apps.feeds",)
 
 
 # Multi-site settings.

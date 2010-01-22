@@ -3,19 +3,24 @@
 
 from django.conf.urls.defaults import patterns, url
 
+from cms.apps.news.models import Article
 
-urlpatterns = patterns("cms.apps.news.views",
+
+FEED_KWARGS = {"queryset": Article.objects.all()}
+
+
+urlpatterns = patterns("cms.apps.feeds.views",
                        
-                       url(r"^$", "index", name="index"),
-                       url(r"^page/(\d+)/$", "index", name="index_paginated"),
+                       url(r"^$", "archive_index", FEED_KWARGS, name="archive_index"),
+                       url(r"^page/(\d+)/$", "archive_index", FEED_KWARGS, name="archive_index_paginated"),
                        
-                       url(r"^(\d{4})/$", "year_archive", name="year_archive"),
-                       url(r"^(\d{4})/page/(\d+)/$", "year_archive", name="year_archive_paginated"),
+                       url(r"^(\d{4})/$", "archive_year", FEED_KWARGS, name="archive_year"),
+                       url(r"^(\d{4})/page/(\d+)/$", "archive_year", FEED_KWARGS, name="archive_year_paginated"),
                        
-                       url(r"^(\d{4})/(\d{1,2})/$", "month_archive", name="month_archive"),
-                       url(r"^(\d{4})/(\d{1,2})/page/(\d+)/$", "month_archive", name="month_archive_paginated"),
+                       url(r"^(\d{4})/(\d{1,2})/$", "archive_month", FEED_KWARGS, name="archive_month"),
+                       url(r"^(\d{4})/(\d{1,2})/page/(\d+)/$", "archive_month", FEED_KWARGS, name="archive_month_paginated"),
                        
-                       url(r"^(\d{4})/(\d{1,2})/([a-zA-Z0-9_\-]+)/$", "article_detail", name="article_detail",),
+                       url(r"^(\d{4})/(\d{1,2})/([a-zA-Z0-9_\-]+)/$", "object_detail", FEED_KWARGS, name="object_detail",),
                        
-                       url(r"^rss/$", "rss", name="rss"),)
+                       url(r"^rss/$", "rss", FEED_KWARGS, name="rss"),)
 

@@ -7,9 +7,9 @@
 
 {% block content_primary %}
     {{block.super}}
-    {% if events.object_list %}
+    {% if event_list.object_list %}
         <ul class="article-list">
-            {% for event in events.object_list %}
+            {% for event in event_list.object_list %}
                 <li class="{% if event.is_featured %}featured{% endif %} {% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
                     <h2>
                         <span class="date">{{event.start_date|date}}</span>
@@ -30,5 +30,5 @@
 
 {% block content_secondary %}
     {{block.super}}
-    {% include "news/date_archive.html" %}
+    {% include "feeds/date_archive.html" %}
 {% endblock %}
