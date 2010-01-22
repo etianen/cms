@@ -3,24 +3,16 @@
 
 from django.conf import settings
 
-from cms.apps.pages import content
+from cms.apps.feeds.content import FeedBase
+from cms.apps.news.models import Article
 
 
-DefaultContent = content.get_default_content()
-
-
-class NewsFeed(DefaultContent):
+class NewsFeed(FeedBase):
     
     """An archive of published news articles."""
     
     icon = settings.CMS_MEDIA_URL + "img/content-types/news-feed.png"
     
-    urlconf = "cms.apps.news.urls"
-    
-    articles_per_page = content.PositiveIntegerField(default=10)
-    
-    def get_fieldsets(self):
-        """Returns the fieldsets used to lay out the admin form."""
-        return super(NewsFeed, self).get_fieldsets() + (("Feed details", {"fields": ("articles_per_page",),}),)
+    article_model = Article
     
     

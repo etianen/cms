@@ -1,26 +1,28 @@
 """Content types used by the events application."""
 
 
+import datetime
+
 from django.conf import settings
+from django.db.models import Q
 
-from cms.apps.pages import content
+from cms.apps.feeds.content import FeedBase
+from cms.apps.events.models import Event
 
 
-DefaultContent = content.get_default_content()
-
-
-class EventsFeed(DefaultContent):
+class EventsFeed(FeedBase):
     
     """An archive of published events."""
     
     icon = settings.CMS_MEDIA_URL + "img/content-types/events-feed.png"
     
-    urlconf = "cms.apps.events.urls"
+    article_model = Event
     
-    events_per_page = content.PositiveIntegerField(default=10)
+    publication_date_field = "start_date"
     
-    def get_fieldsets(self):
-        """Returns the fieldsets used to lay out the admin form."""
-        return super(EventsFeed, self).get_fieldsets() + (("Feed details", {"fields": ("events_per_page",),}),)
+    def get_latest(self):
+        """Returns the latest events."""
+        now = datetime.datetime.now()
+        return self.get_articles().filter(Q(start_date__gte=now) | Q(end_date__gte=now))
     
     

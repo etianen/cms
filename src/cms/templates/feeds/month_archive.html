@@ -1,4 +1,4 @@
-{% extends "news/base.html" %}
+{% extends "feeds/base.html" %}
 {% load pages %}
 
 
@@ -7,6 +7,6 @@
 
 {% block breadcrumbs %}
     {% breadcrumbs extended %}
-    <a title="Archive for {{date|date:'Y'}}" href="{% page_url page archive_year date.year %}">{{date|date:"Y"}}</a> &rsaquo;
+    <a title="Archive for {{date|date:'Y'}}" href="{% page_url page year_archive date.year %}">{{date|date:"Y"}}</a> &rsaquo;
     {{date|date:"F"}}
 {% endblock %}

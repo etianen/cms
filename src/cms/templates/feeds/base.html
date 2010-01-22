@@ -1,5 +1,5 @@
 {% extends "pages/base.html" %}
-{% load pages %}
+{% load pages feeds %}
 
 
 {% block feeds %}<link rel="alternate" type="application/rss+xml" title="{{page.title}}" href="{% page_url page rss %}" />{% endblock %}
@@ -7,9 +7,9 @@
 
 {% block content_primary %}
     {{block.super}}
-    {% if article_list.object_list %}
+    {% if articles.object_list %}
         <ul class="article-list">
-            {% for article in article_list.object_list %}
+            {% for article in articles.object_list %}
                 <li class="{% if article.is_featured %}featured{% endif %} {% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
                     <h2>
                         <span class="date">{{article.publication_date|date}}</span>
@@ -30,5 +30,5 @@
 
 {% block content_secondary %}
     {{block.super}}
-    {% include "feeds/date_archive.html" %}
+    {% date_archive %}
 {% endblock %}

@@ -20,4 +20,8 @@ class ArticleBase(PageBase):
                                       db_index=True,
                                       help_text="Featured articles will remain at the top of any news feeds.")
     
-    
+    class Meta:
+        abstract = True
+        unique_together = (("feed", "url_title",),)
+        
+        

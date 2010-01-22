@@ -30,6 +30,5 @@ class Event(ArticleBase):
         return self.feed.content.reverse("object_detail", self.start_date.year, self.start_date.month, self.url_title)
     
     class Meta:
-        unique_together = (("feed", "url_title",),)
         ordering = ("-is_featured", "start_date", "id")
 
