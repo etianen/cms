@@ -82,23 +82,28 @@ def month_archive(request, year, month, page_number="1"):
     return page.render_to_response(request, template_names, context)
 
 
-def article_detail(request, year, month, article_slug, template_object_name=None):
+def article_detail(request, year, month, article_slug):
     """Dispatches to the article detail page."""
-    feed_helper = FeedHelper(request, **kwargs)
+    year = int(year)
+    month = int(month)
+    # Get the model information.
+    page = request.page
+    content = page.content
+    article_model = content.article_model
     # Get the article.
     try:
-        article = feed_helper.all_articles.get(**{"%s__year" % feed_helper.publication_date_field: year,
-                                                  "%s__month" % feed_helper.publication_date_field: month,
-                                                  "url_title": article_slug})
-    except feed_helper.model.DoesNotExist:
-        raise Http404, u"That %s does not exist" % feed_helper.model_name
+        article = content.get_articles().get(**{"%s__year" % content.publication_date_field: year,
+                                                "%s__month" % content.publication_date_field: month,
+                                                "url_title": article_slug})
+    except article_model.DoesNotExist:
+        raise Http404, "That article does not exist"
+    # Generate the context.
+    context = {"article": article,
+               "date": getattr(article, content.publication_date_field)}
     # Render the template.
-    template_object_name = template_object_name or feed_helper.model_name
-    context = {template_object_name: article,
-               "date": getattr(article, feed_helper.publication_date_field),
-               "dates": feed_helper.dates}
-    template_name = feed_helper.template_name or "%s/%s_detail.html" % (feed_helper.model._meta.app_label, feed_helper.model_name)
-    return article.render_to_response(request, template_name, context)
+    template_names = ("%s/article_detail.html" % article_model._meta.app_label,
+                      "feeds/article_detail.html")
+    return article.render_to_response(request, template_names, context)
 
 
 def rss(request):

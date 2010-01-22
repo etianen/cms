@@ -81,6 +81,7 @@ def latest_articles(parser, token):
         except Page.DoesNotExist:
             return ""
         content = feed.content
+        article_model = content.article_model
         # Get the articles.
         articles = content.get_latest_articles()[:count]
         article_list = []
@@ -90,9 +91,11 @@ def latest_articles(parser, token):
         # Render the template.
         context.push()
         try:
-            context.update({"articles": articles,
+            context.update({"articles": article_list,
                             "feed": feed})
-            return template.loader.render_to_string("news/latest_articles.html", context)
+            template_names = ("%s/latest_articles.html" % article_model._meta.app_label,
+                              "feeds/latest_articles.html")
+            return template.loader.render_to_string(template_names, context)
         finally:
             context.pop()
     return PatternNode(parser, token, handler, ("{feed} {count} {summary_length}", "{feed} {count}", "{feed}",))
