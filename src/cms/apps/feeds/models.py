@@ -3,6 +3,7 @@
 
 from django.db import models
 
+from cms.apps.pages import content
 from cms.apps.pages.models import PageBase, HtmlField
 
 
@@ -19,6 +20,15 @@ class ArticleBase(PageBase):
                                       default=False,
                                       db_index=True,
                                       help_text="Featured articles will remain at the top of any news feeds.")
+    
+    date_field_name = "publication_date"
+    
+    def get_date_field(self):
+        """Returns the primary date field for the article."""
+        return getattr(self, self.date_field_name)
+        
+    date_field = property(get_date_field,
+                          doc="The primary date field for the article.")
     
     def get_absolute_url(self):
         """Returns the absolute URL of the article."""

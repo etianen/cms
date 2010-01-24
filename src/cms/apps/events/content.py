@@ -18,8 +18,6 @@ class EventsFeed(FeedBase):
     
     article_model = Event
     
-    publication_date_field = "start_date"
-    
     def get_latest_articles(self):
         """Returns the latest events."""
         now = datetime.datetime.now()

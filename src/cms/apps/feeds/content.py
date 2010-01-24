@@ -19,8 +19,6 @@ class FeedBase(DefaultContent):
     
     article_model = None
     
-    publication_date_field = "publication_date"
-    
     # Article retrieval methods.
     
     def get_articles(self):

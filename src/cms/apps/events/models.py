@@ -25,6 +25,8 @@ class Event(ArticleBase):
                                 db_index=True,
                                 help_text="The date that this event is due to end.  Leave blank for a single-day event.")
     
+    date_field_name = "start_date"
+    
     def get_absolute_url(self):
         """Returns the absolute URL of the article."""
         return self.feed.content.reverse("article_detail", self.start_date.year, self.start_date.month, self.url_title)

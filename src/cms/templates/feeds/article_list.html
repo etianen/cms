@@ -6,7 +6,7 @@
         {% for article in article_page.object_list %}
             <li class="{% if article.is_featured %}featured{% endif %} {% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
                 <h2>
-                    <span class="date">{{article.date|date}}</span>
+                    <span class="date">{{article.date_field|date}}</span>
                     <a title="{{article.title}}" class="title" href="{{article.get_absolute_url}}">{{article.title}}</a>
                 </h2>
                 {% if article.summary %}

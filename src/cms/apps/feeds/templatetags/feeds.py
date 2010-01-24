@@ -19,7 +19,7 @@ def article_context(content, article, summary):
             "title": article.title,
             "url": article.get_absolute_url(),
             "is_featured": article.is_featured,
-            "date": getattr(article, content.publication_date_field),
+            "date": article.date_field,
             "summary": summary,
             "article": article}
 
@@ -52,7 +52,7 @@ def date_archive(parser, token):
         content = page.content
         article_model = content.article_model
         articles = content.get_articles()
-        dates = articles.dates(content.publication_date_field, "month")
+        dates = articles.dates(article_model.date_field_name, "month")
         # Render the template.
         context.push()
         try:

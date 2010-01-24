@@ -32,6 +32,7 @@ class PageField(models.ForeignKey):
     
     def __init__(self, content_type=None, limit_choices_to=None, **kwargs):
         """Initializes the Page Field."""
+        self.content_type = content_type
         # Generate the page filter.
         if content_type is not None:
             limit_choices_to = limit_choices_to or {}

@@ -36,7 +36,7 @@ def year_archive(request, year):
     content = page.content
     article_model = content.article_model
     # Get the list of articles.
-    articles = content.get_articles().filter(**{"%s__year" % content.publication_date_field: year})
+    articles = content.get_articles().filter(**{"%s__year" % article_model.date_field_name: year})
     # Generate the context.
     context = {"articles": articles,
                "date": datetime.datetime(year, 1, 1)}
@@ -55,8 +55,8 @@ def month_archive(request, year, month):
     content = page.content
     article_model = content.article_model
     # Get the list of articles.
-    articles = content.get_articles().filter(**{"%s__year" % content.publication_date_field: year,
-                                                "%s__month" % content.publication_date_field: month})
+    articles = content.get_articles().filter(**{"%s__year" % article_model.date_field_name: year,
+                                                "%s__month" % article_model.date_field_name: month})
     # Generate the context.
     context = {"articles": articles,
                "date": datetime.datetime(year, month, 1)}
@@ -76,14 +76,14 @@ def article_detail(request, year, month, article_slug):
     article_model = content.article_model
     # Get the article.
     try:
-        article = content.get_articles().get(**{"%s__year" % content.publication_date_field: year,
-                                                "%s__month" % content.publication_date_field: month,
+        article = content.get_articles().get(**{"%s__year" % article_model.date_field_name: year,
+                                                "%s__month" % article_model.date_field_name: month,
                                                 "url_title": article_slug})
     except article_model.DoesNotExist:
         raise Http404, "That article does not exist"
     # Generate the context.
     context = {"article": article,
-               "date": getattr(article, content.publication_date_field)}
+               "date": getattr(article, article_model.date_field_name)}
     # Render the template.
     template_names = ("%s/article_detail.html" % article_model._meta.app_label,
                       "feeds/article_detail.html")
@@ -95,6 +95,7 @@ def rss(request):
     # Get the model information.
     page = request.page
     content = page.content
+    article_model = content.article_model
     fullpath = "http://%s%%s" % page.site.domain 
     homepage = page.homepage
     # Generate the feed title.
@@ -102,7 +103,7 @@ def rss(request):
                      "site_title": homepage.browser_title or homepage.title}
     title = template.loader.render_to_string("title.html", title_context, template.RequestContext(request))
     # Get the list of articles.
-    all_articles = content.get_articles().order_by("-%s" % content.publication_date_field)
+    all_articles = content.get_articles().order_by("-%s" % article_model.date_field_name)
     # Generate the head.
     feed = DefaultFeed(title=title,
                        link=fullpath % page.get_absolute_url(),
