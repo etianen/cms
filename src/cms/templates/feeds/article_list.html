@@ -1,6 +1,7 @@
 {% load pages pagination %}
 {% paginate articles as article_page %}
 {% if article_page.object_list %}
+    {% pagination article_page %}
     <ul class="article-list">
         {% for article in article_page.object_list %}
             <li class="{% if article.is_featured %}featured{% endif %} {% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
@@ -17,6 +18,7 @@
             </li>
         {% endfor %}
     </ul>
+    {% pagination article_page %}
 {% else %}
     <p>There are no {{verbose_name_plural}} to display.</p>
 {% endif %}

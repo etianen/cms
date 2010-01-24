@@ -1,7 +1,0 @@
-{% if page.has_other_pages %}
-    <p class="pagination">
-        {% if page.has_previous %}<a class="previous" href="/news/?page=2">Previous</a>{% endif %}
-        <span class="current">Page {{page.number}} of {{page.paginator.num_pages}}</span>
-        {% if page.has_next %}<a class="next" href="/news/?page=2">Next</a>{% endif %}
-    </p>
-{% endif %}
