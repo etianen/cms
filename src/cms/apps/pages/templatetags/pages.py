@@ -4,7 +4,7 @@
 from django import template
 from django.utils.safestring import mark_safe
 
-from cms.apps.pages import permalinks, thumbnails
+from cms.apps.pages.html import process_html
 from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import PatternNode
 
@@ -26,8 +26,7 @@ def html(text):
     """
     if not text:
         return ""
-    text = thumbnails.create_thumbnails_html(text)
-    text = permalinks.expand_links_html(text)
+    text = process_html(text)
     return mark_safe(text)
     
 

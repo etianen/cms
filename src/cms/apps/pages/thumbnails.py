@@ -3,17 +3,13 @@
 
 from __future__ import with_statement
 
-import os, re, shutil
+import os, shutil
 
 from PIL import Image  # @UnresolvedImport
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.files.images import get_image_dimensions
-from django.db import models
-from django.utils.html import escape
 
-from cms.apps.pages import permalinks
 from cms.apps.pages.optimizations import cached_getter
 
 
@@ -123,7 +119,7 @@ def create(image, width, height, method=PROPORTIONAL):
         image_timestamp = os.stat(image_path).st_mtime
         thumbnail_timestamp = os.stat(thumbnail_path).st_mtime
         # If the thumbnail is newer than the file, no more generation needs to take place.
-        if thumbnail_timestamp > image_timestamp:
+        if thumbnail_timestamp >= image_timestamp:
             return Thumbnail(thumbnail_name)
     else:
         dirname = os.path.dirname(thumbnail_path)
@@ -163,45 +159,4 @@ def create(image, width, height, method=PROPORTIONAL):
             image_data.save(thumbnail_path)
         # Return the new image object.
         return Thumbnail(thumbnail_name)
-
-
-RE_IMG = re.compile(ur"<img(.+?)/>", re.IGNORECASE)
-
-RE_ATTR = re.compile(ur"""\s(\w+)=(["'].*?["'])""", re.IGNORECASE)
-
-
-def sub_image(match):
-    """Replaces the given image with a thumbnail."""
-    attrs = match.group(1)
-    attr_dict = dict(RE_ATTR.findall(attrs))
-    try:
-        src = attr_dict["src"][1:-1]
-        obj = permalinks.resolve(src)
-        width = int(attr_dict["width"][1:-1])
-        height = int(attr_dict["height"][1:-1])
-        # Automagically detect a FileField.
-        fieldname = None
-        for field in obj._meta.fields:
-            if isinstance(field, models.FileField):
-                fieldname = field.name
-        if fieldname:
-            thumbnail = create(getattr(obj, "file"), width, height, RESIZED)
-        else:
-            # No file field was found, bail out gracefully.
-            raise ValueError
-    except (ObjectDoesNotExist, permalinks.PermalinkError, KeyError, ValueError, IOError):
-        # If not width or height provided, or an IOError occurs, we cannot proceed.
-        return match.group(0)
-    attr_dict["src"] = '"%s"' % escape(thumbnail.url)
-    return u"<img %s/>" % (" ".join(u'%s=%s' % (name, value) for name, value in sorted(attr_dict.iteritems())))
-
-
-def create_thumbnails_html(html):
-    """
-    Generates thumbnails for all permalinked images in the given HTML text.
-    
-    If an image does not contain a permalink, or an IOError occurs during the
-    thumbnail generation, then the image tag is left untouched.
-    """
-    return RE_IMG.sub(sub_image, html)
 

@@ -14,7 +14,7 @@ from django.core.files.storage import default_storage
 from django.test.testcases import TestCase
 from django.test.client import Client
 
-from cms.apps.pages import permalinks, thumbnails, content, optimizations
+from cms.apps.pages import permalinks, thumbnails, content, optimizations, html
 from cms.apps.pages.models import Page
 from cms.apps.pages.models.managers import publication_manager
 from cms.apps.media.models import File
@@ -94,11 +94,6 @@ class TestPermalinks(TestCase):
         self.assertEqual(user, self.user)
         # Tests that a permalink is expanded correctly.
         self.assertEqual(permalinks.expand(permalink), user.get_absolute_url())
-        # Tests that HTML attribute expansion works correctly.
-        html = '<a href="%(link)s"/><img src="%(link)s"/>'
-        before_expand_html = html % {"link": permalink}
-        after_expand_html = html % {"link": user.get_absolute_url()}
-        self.assertEqual(after_expand_html, permalinks.expand_links_html(before_expand_html))
         
     def tearDown(self):
         """Destroys the test case."""
@@ -149,15 +144,6 @@ class TestThumbnails(TestCase):
         thumbnail = thumbnails.create(self.file.file, target_width, target_height, thumbnails.CROPPED)
         self.assertEqual(thumbnail.width, target_width)
         self.assertEqual(thumbnail.height, target_height)
-        
-    def testCreateThumbnailsHtml(self):
-        """Tests the HTML thumbnail replacement."""
-        html = '<img alt="" height="%(height)s" src="%(src)s" width="%(width)s"/>'
-        target_width = int(self.original_width / 2)
-        target_height = int(self.original_height / 4)
-        before_replace_html = html % {"src": permalinks.create(self.file), "width": target_width, "height": target_height}
-        after_replace_html = html % {"src": thumbnails.create(self.file.file, target_width, target_height, thumbnails.RESIZED).url, "width": target_width, "height": target_height}
-        self.assertEqual(after_replace_html, thumbnails.create_thumbnails_html(before_replace_html))
         
     def testThumbnailTag(self):
         """Tests the thumbnail generation tag."""
@@ -235,7 +221,7 @@ class TestPages(TestCase):
         self.file = File.objects.create(title="Test File", file=TEMP_FILE_NAME)
         # Create some dummy content.
         file_permalink = permalinks.create(self.file)
-        html = u'<a href="%(link)s"/><img height="16" src="%(src)s" width="32"/>'
+        html = u'<a href="%(link)s"></a><img height="16" src="%(src)s" width="32"/>'
         self.test_html = html % {"link": file_permalink, "src": file_permalink}
         self.expanded_html = html % {"link": self.file.get_absolute_url(), "src": thumbnails.create(self.file.file, 32, 16, thumbnails.RESIZED).url}
         # Get the name of a html content area.
@@ -297,6 +283,10 @@ class TestPages(TestCase):
         self.assertEqual(response.status_code, 404)
         response = c.get(subsection_url)
         self.assertEqual(response.status_code, 404)
+    
+    def testHtmlProcessing(self):
+        """Tests that HTML processing works correctly."""
+        self.assertEqual(self.expanded_html, html.process_html(self.test_html))
     
     def testHtmlFilter(self):
         """Tests the html template filter."""

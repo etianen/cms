@@ -6,13 +6,10 @@ change it's absolute URL without breaking links.
 """
 
 
-import re
-
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.views import shortcut
 from django.core import urlresolvers
-from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
-from django.utils.html import escape
+from django.core.exceptions import ImproperlyConfigured
 
 
 __all__ = ("PermalinkError", "create", "resolve", "expand", "expand_links_html",)
@@ -71,26 +68,3 @@ def expand(permalink):
     return obj.get_absolute_url()
     
     
-RE_HREF = re.compile(ur"(href|src)=['\"](.*?)['\"]", re.IGNORECASE)
-
-
-def sub_link(match):
-    """Regex replacement callback for expanding permalinks in HTML links."""
-    attr_value = match.group(2)
-    try:
-        permalink = expand(attr_value)
-    except (PermalinkError, ObjectDoesNotExist):
-        return match.group(0)
-    return u'%s="%s"' % (match.group(1), escape(permalink))
-    
-    
-def expand_links_html(html):
-    """
-    Expands all permalinks in the given HTML text.
-    
-    All href and src attributes are checked for permalinks, and expanded as
-    appropriate. If a permalink cannot be expanded due to an object not
-    existing, it is left untouched.
-    """
-    return RE_HREF.sub(sub_link, html)
-

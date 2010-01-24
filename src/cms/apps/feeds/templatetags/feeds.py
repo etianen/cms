@@ -6,9 +6,9 @@ from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 from django.utils.text import truncate_html_words, truncate_words
 
+from cms.apps.pages import html
 from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import PatternNode
-from cms.apps.pages.templatetags.pages import html
 
 
 register = template.Library()
@@ -36,7 +36,7 @@ def article_list(parser, token):
         # Generate the article list.
         article_list = []
         for article in articles:
-            summary = html(article.summary or truncate_html_words(article.content, summary_length))
+            summary = mark_safe(html.process_html(article.summary or truncate_html_words(article.content, summary_length)))
             article_list.append(article_context(content, article, summary))
         # Render the template.
         context.push()
