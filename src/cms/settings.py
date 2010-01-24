@@ -89,6 +89,11 @@ INSTALLED_APPS = ("django.contrib.auth",
 SITE_ID = 1
 
 
+# Pagination settings.
+
+PAGINATION_KEY = "page"
+
+
 # Publication settings.
 
 PUBLICATION_PREVIEW_KEY = "preview"

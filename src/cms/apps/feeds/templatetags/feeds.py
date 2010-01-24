@@ -4,9 +4,8 @@
 from django import template
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
-from django.utils.text import truncate_html_words, truncate_words
+from django.utils.text import truncate_words
 
-from cms.apps.pages import html
 from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import PatternNode
 
@@ -32,17 +31,10 @@ def article_list(parser, token):
         page = context["page"]
         content = page.content
         article_model = content.article_model
-        articles = context["articles"].object_list
-        # Generate the article list.
-        article_list = []
-        for article in articles:
-            summary = mark_safe(html.process_html(article.summary or truncate_html_words(article.content, summary_length)))
-            article_list.append(article_context(content, article, summary))
         # Render the template.
         context.push()
         try:
-            context.update({"articles": article_list,
-                            "verbose_name": article_model._meta.verbose_name,
+            context.update({"verbose_name": article_model._meta.verbose_name,
                             "verbose_name_plural": article_model._meta.verbose_name_plural})
             template_names = ("%s/article_list.html" % article_model._meta.app_label,
                               "feeds/article_list.html")

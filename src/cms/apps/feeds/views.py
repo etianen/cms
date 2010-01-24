@@ -5,26 +5,20 @@ import datetime
 
 from django import template
 from django.http import Http404, HttpResponse
-from django.core import paginator
 from django.conf import settings
 from django.utils.feedgenerator import DefaultFeed
 
 from cms.apps.pages.templatetags.pages import html
 
 
-def index(request, page_number="1"):
+def index(request):
     """Generates a page of the latest articles."""
-    page_number = int(page_number)
     # Get the model information.
     page = request.page
     content = page.content
     article_model = content.article_model
     # Get the list of articles.
-    all_articles = content.get_latest_articles()
-    try:
-        articles = paginator.Paginator(all_articles, content.articles_per_page)
-    except paginator.InvalidPage:
-        raise Http404, "There are no articles to display"
+    articles = content.get_latest_articles()
     # Generate the context.
     context = {"articles": articles,
                "date": datetime.datetime.now()}
@@ -34,20 +28,15 @@ def index(request, page_number="1"):
     return page.render_to_response(request, template_names, context)
     
 
-def year_archive(request, year, page_number="1"):
+def year_archive(request, year):
     """Generates a page showing the articles in a given year."""
-    page_number = int(page_number)
     year = int(year)
     # Get the model information.
     page = request.page
     content = page.content
     article_model = content.article_model
     # Get the list of articles.
-    all_articles = content.get_articles().filter(**{"%s__year" % content.publication_date_field: year})
-    try:
-        articles = paginator.Paginator(all_articles, content.articles_per_page, allow_empty_first_page=False)
-    except paginator.InvalidPage:
-        raise Http404, "There are no articles to display"
+    articles = content.get_articles().filter(**{"%s__year" % content.publication_date_field: year})
     # Generate the context.
     context = {"articles": articles,
                "date": datetime.datetime(year, 1, 1)}
@@ -57,9 +46,8 @@ def year_archive(request, year, page_number="1"):
     return page.render_to_response(request, template_names, context)
 
 
-def month_archive(request, year, month, page_number="1"):
+def month_archive(request, year, month):
     """Generates a page showing the articles in a given month."""
-    page_number = int(page_number)
     year = int(year)
     month = int(month)
     # Get the model information.
@@ -67,12 +55,8 @@ def month_archive(request, year, month, page_number="1"):
     content = page.content
     article_model = content.article_model
     # Get the list of articles.
-    all_articles = content.get_articles().filter(**{"%s__year" % content.publication_date_field: year,
-                                                    "%s__month" % content.publication_date_field: month})
-    try:
-        articles = paginator.Paginator(all_articles, content.articles_per_page, allow_empty_first_page=False)
-    except paginator.InvalidPage:
-        raise Http404, "There are no articles to display"
+    articles = content.get_articles().filter(**{"%s__year" % content.publication_date_field: year,
+                                                "%s__month" % content.publication_date_field: month})
     # Generate the context.
     context = {"articles": articles,
                "date": datetime.datetime(year, month, 1)}
