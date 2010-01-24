@@ -41,7 +41,9 @@ def article_list(parser, token):
         # Render the template.
         context.push()
         try:
-            context.update({"articles": article_list})
+            context.update({"articles": article_list,
+                            "verbose_name": article_model._meta.verbose_name,
+                            "verbose_name_plural": article_model._meta.verbose_name_plural})
             template_names = ("%s/article_list.html" % article_model._meta.app_label,
                               "feeds/article_list.html")
             return template.loader.render_to_string(template_names, context)
@@ -62,7 +64,9 @@ def date_archive(parser, token):
         # Render the template.
         context.push()
         try:
-            context.update({"dates": dates})
+            context.update({"dates": dates,
+                            "verbose_name": article_model._meta.verbose_name,
+                            "verbose_name_plural": article_model._meta.verbose_name_plural})
             template_names = ("%s/date_archive.html" % article_model._meta.app_label,
                               "feeds/date_archive.html")
             return template.loader.render_to_string(template_names, context)

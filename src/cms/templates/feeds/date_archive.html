@@ -1,6 +1,7 @@
 {% load pages %}
 <div class="article-archive">
     <h2>Browse Archive</h2>
+    <p>View older {{verbose_name_plural}} below.</p>
     {% regroup dates by year as year_archives %}
     <ul>
         {% for year_archive in year_archives %}
