@@ -75,7 +75,7 @@ def month_archive(request, year, month, page_number="1"):
         raise Http404, "There are no articles to display"
     # Generate the context.
     context = {"articles": articles,
-               "date": datetime.datetime(year, 1, 1)}
+               "date": datetime.datetime(year, month, 1)}
     # Render the template.
     template_names = ("%s/month_archive.html" % article_model._meta.app_label,
                       "feeds/month_archive.html")
