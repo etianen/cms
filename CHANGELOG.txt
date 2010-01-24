@@ -22,6 +22,7 @@ in preparation for a potential open-source release later this year.
   * Upgraded TinyMCE editor.
   * Upgraded jQuery javascript library.
   * More accessible and faster-loading admin sitemap.
+  * Removed ability to link to pages using permalinks in HTML content.
   * Added many more unit tests to the framework.
   * Framework refactoring and several tiny bug fixes.
   
