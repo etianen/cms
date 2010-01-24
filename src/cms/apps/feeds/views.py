@@ -37,6 +37,8 @@ def year_archive(request, year):
     article_model = content.article_model
     # Get the list of articles.
     articles = content.get_articles().filter(**{"%s__year" % article_model.date_field_name: year})
+    if articles.count() == 0:
+        raise Http404, "There are no articles to display."
     # Generate the context.
     context = {"articles": articles,
                "date": datetime.datetime(year, 1, 1)}
@@ -57,6 +59,8 @@ def month_archive(request, year, month):
     # Get the list of articles.
     articles = content.get_articles().filter(**{"%s__year" % article_model.date_field_name: year,
                                                 "%s__month" % article_model.date_field_name: month})
+    if articles.count() == 0:
+        raise Http404, "There are no articles to display."
     # Generate the context.
     context = {"articles": articles,
                "date": datetime.datetime(year, month, 1)}
