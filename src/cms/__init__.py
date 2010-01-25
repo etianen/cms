@@ -1,7 +1,7 @@
 """
 The Etianen.com Content Management System.
 
-Version 2.0.1
+Version 2.1 RC1
 
 Enlightened Website Development.
 
