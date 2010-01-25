@@ -5,6 +5,7 @@ import datetime
 
 from django.db import models
 
+from cms.apps.pages import sitemaps
 from cms.apps.pages.models import PageField
 from cms.apps.feeds.models import ArticleBase
 
@@ -33,4 +34,14 @@ class Event(ArticleBase):
     
     class Meta:
         ordering = ("-is_featured", "start_date", "id")
+
+
+class EventSitemap(sitemaps.PageBaseSitemap):
+    
+    """Sitemap for event models."""
+    
+    model = Event
+    
+    
+sitemaps.registered_sitemaps["events"] = EventSitemap
 

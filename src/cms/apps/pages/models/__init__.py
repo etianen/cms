@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
-from cms.apps.pages import content
+from cms.apps.pages import content, sitemaps
 from cms.apps.pages.optimizations import cached_getter, cached_setter
 from cms.apps.pages.models.base import PublishedModel, PageBase
 from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager, PageManager, cache, publication_manager
@@ -183,4 +183,14 @@ class Page(PageBase):
     class Meta:
         unique_together = (("parent", "url_title",),)
         ordering = ("order",)
+
+
+class PageSitemap(sitemaps.PageBaseSitemap):
+    
+    """Sitemap for page models."""
+    
+    model = Page
+    
+    
+sitemaps.registered_sitemaps["pages"] = PageSitemap
 

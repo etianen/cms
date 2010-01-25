@@ -5,6 +5,7 @@ import datetime
 
 from django.db import models
 
+from cms.apps.pages import sitemaps
 from cms.apps.pages.models import PageField
 from cms.apps.feeds.models import ArticleBase
 
@@ -31,4 +32,14 @@ class Article(ArticleBase):
     class Meta:
         verbose_name = "news article"
         ordering = ("-is_featured", "-publication_date", "-id")
+
+
+class ArticleSitemap(sitemaps.PageBaseSitemap):
+    
+    """Sitemap for article models."""
+    
+    model = Article
+    
+    
+sitemaps.registered_sitemaps["articles"] = ArticleSitemap
 
