@@ -6,7 +6,6 @@ enquiry are shown below.
 {% for key, value in data %}{{key}}:
 {{value|wordwrap:65|safe}}
 
-{% endfor %}
-Best wishes,
+{% endfor %}Best wishes,
 
 The {{site.name}} notification system.{% endautoescape %}

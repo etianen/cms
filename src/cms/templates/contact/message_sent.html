@@ -1,5 +1,11 @@
-{% extends "base.html" %}
+{% extends "contact/base.html" %}
 {% load pages %}
+
+
+{% block title %}{% title "Message Sent" %}{% endblock %}
+
+
+{% block header %}{% header "Message Sent" %}{% endblock %}
 
 
 {% block content_primary %}{% content "success_message" %}{% endblock %}

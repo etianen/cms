@@ -8,7 +8,7 @@ from django.http import Http404, HttpResponse
 from django.conf import settings
 from django.utils.feedgenerator import DefaultFeed
 
-from cms.apps.pages.templatetags.pages import html
+from cms.apps.pages import html
 
 
 def index(request):
@@ -117,7 +117,7 @@ def rss(request):
     for article in all_articles[:30]:
         feed.add_item(title=article.title,
                       link=fullpath % article.get_absolute_url(),
-                      description=html(article.summary or article.content))
+                      description=html.process_html(article.summary or article.content))
     # Generate the response.
     response = HttpResponse(mimetype=feed.mime_type)
     feed.write(response, settings.DEFAULT_CHARSET) 
