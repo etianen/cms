@@ -3,8 +3,7 @@
 
 from django.conf import settings
 
-from cms.apps.pages import content
-from cms.apps.pages import loader
+from cms.apps.pages import content, loader
 
 
 DEFAULT_SUCCESS_MESSAGE = """<p>Thank you for your enquiry. We will be in touch with you shortly.</p>"""
