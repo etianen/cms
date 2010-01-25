@@ -430,13 +430,11 @@ class TestPages(TestCase):
         self.section.save()
         self.subsection.short_title = "SubSectionShort"
         self.subsection.save()
-        # Test that the section is highlighted.
+        # Test that subsections are not highlighted.
         nav_secondary_html = template_obj.render(template.Context({"page": self.section}))
-        self.assertContainsPageLink(nav_secondary_html, self.section, True)
         self.assertContainsPageLink(nav_secondary_html, self.subsection, False)
         # Test that subsections are highlighted.
         nav_secondary_html = template_obj.render(template.Context({"page": self.subsection}))
-        self.assertContainsPageLink(nav_secondary_html, self.section, False)
         self.assertContainsPageLink(nav_secondary_html, self.subsection, True)
         
     def testNavTertiaryTag(self):
@@ -447,13 +445,11 @@ class TestPages(TestCase):
         self.subsection.save()
         self.subsubsection.short_title = "SubSubSectionShort"
         self.subsubsection.save()
-        # Test that the subsection is highlighted.
+        # Test that subsubsections are not highlighted.
         nav_tertiary_html = template_obj.render(template.Context({"page": self.subsection}))
-        self.assertContainsPageLink(nav_tertiary_html, self.subsection, True)
         self.assertContainsPageLink(nav_tertiary_html, self.subsubsection, False)
         # Test that subsubsections are highlighted.
         nav_tertiary_html = template_obj.render(template.Context({"page": self.subsubsection}))
-        self.assertContainsPageLink(nav_tertiary_html, self.subsection, False)
         self.assertContainsPageLink(nav_tertiary_html, self.subsubsection, True)
     
     def testBreadcrumbsTag(self):

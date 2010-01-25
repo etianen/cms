@@ -293,22 +293,6 @@ def nav_context(page, current_page):
             "page": page}
     
     
-def nav_context_exact(page, current_page):
-    """
-    Generates a dictionary of variables related to the page, for use in page
-    navigation.
-    
-    This differs to nav_context in that the page URL is matched exactly to the
-    request path for determining whether the page should be considered 'here'.
-    """
-    page_url = page.get_absolute_url()
-    return {"short_title": page.short_title or page.title,
-            "title": page.title,
-            "url": page_url,
-            "here": page == current_page,
-            "page": page}
-
-    
 @register.tag
 def nav_primary(parser, token):
     """
@@ -322,14 +306,16 @@ def nav_primary(parser, token):
         homepage = page.homepage
         navigation = []
         if homepage.in_navigation:
-            nav_dict = nav_context_exact(homepage, page)
+            nav_dict = nav_context(homepage, page)
             nav_dict["short_title"] = "Home"
+            nav_dict["here"] = homepage == page
             navigation.append(nav_dict)
         for entry in homepage.navigation:
             navigation.append(nav_context(entry, page))
         context.push()
         try:
-            context.update({"navigation": navigation})
+            context.update({"homepage": homepage,
+                            "navigation": navigation})
             return template.loader.render_to_string("nav_primary.html", context)
         finally:
             context.pop()
@@ -346,19 +332,17 @@ def nav_secondary(parser, token):
     """
     def handler(context):
         page = context["page"]
-        navigation = []
         try:
             section = page.breadcrumbs[1]
         except IndexError:
-            pass
+            section = None
+            navigation = []
         else:
-            if section.in_navigation:
-                navigation.append(nav_context_exact(section, page))
-            for entry in section.navigation:
-                navigation.append(nav_context(entry, page))
+            navigation = [nav_context(entry, page) for entry in section.navigation]
         context.push()
         try:
-            context.update({"navigation": navigation})
+            context.update({"section": section,
+                            "navigation": navigation})
             return template.loader.render_to_string("nav_secondary.html", context)
         finally:
             context.pop()
@@ -375,19 +359,17 @@ def nav_tertiary(parser, token):
     """
     def handler(context):
         page = context["page"]
-        navigation = []
         try:
             subsection = page.breadcrumbs[2]
         except IndexError:
-            pass
+            subsection = None
+            navigation = []
         else:
-            if subsection.in_navigation:
-                navigation.append(nav_context_exact(subsection, page))
-            for entry in subsection.navigation:
-                navigation.append(nav_context(entry, page))
+            navigation = [nav_context(entry, page) for entry in subsection.navigation]
         context.push()
         try:
-            context.update({"navigation": navigation})
+            context.update({"subsection": subsection,
+                            "navigation": navigation})
             return template.loader.render_to_string("nav_tertiary.html", context)
         finally:
             context.pop()
