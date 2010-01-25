@@ -2,9 +2,6 @@
 
 
 from django import template
-from django.utils.html import strip_tags
-from django.utils.safestring import mark_safe
-from django.utils.text import truncate_words
 
 from cms.apps.pages.models import Page
 from cms.apps.pages.templatetags import PatternNode
