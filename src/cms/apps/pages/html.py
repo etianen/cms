@@ -59,10 +59,14 @@ def process_html(text):
                             fieldname = field.name
                     # Generate the thumbnail.
                     if fieldname:
-                        thumbnail = thumbnails.create(getattr(obj, fieldname), width, height, thumbnails.RESIZED)
-                        attrs["src"] = '"%s"' % escape(thumbnail.url)
-                        attrs["width"] = '"%s"' % thumbnail.width
-                        attrs["height"] = '"%s"' % thumbnail.height
+                        try:
+                            thumbnail = thumbnails.create(getattr(obj, fieldname), width, height, thumbnails.RESIZED)
+                        except IOError:
+                            pass
+                        else:
+                            attrs["src"] = '"%s"' % escape(thumbnail.url)
+                            attrs["width"] = '"%s"' % thumbnail.width
+                            attrs["height"] = '"%s"' % thumbnail.height
         else:
             assert False
         # Regenerate the html tag.
