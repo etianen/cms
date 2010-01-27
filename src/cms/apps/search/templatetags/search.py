@@ -15,8 +15,11 @@ def search_form(parser, token):
     """Renders the Google Custom Search Engine search form."""
     def handler(context, search_page, form_id="cse-search-box"):
         request = context["request"]
+        try:
+            search_page = Page.objects.get_page(search_page)
+        except Page.DoesNotExist:
+            return ""
         search_term = request.GET.get("q", "")
-        search_page = Page.objects.get_page(search_page)
         context.push()
         try:
             context.update({"search_page": search_page,
