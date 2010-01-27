@@ -126,7 +126,7 @@ def create(image, width, height, method=PROPORTIONAL):
         if not os.path.exists(dirname):
             os.makedirs(dirname)
     # Create an image buffer in memory.
-    with open(image.path, "rb") as src_file:
+    with open(image_path, "rb") as src_file:
         image_data = Image.open(image.path)
         original_width, original_height = image_data.size
         width = min(width, original_width)

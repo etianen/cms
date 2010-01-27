@@ -47,9 +47,9 @@ def process_html(text):
             obj = get_obj("src")
             if obj:
                 try:
-                    width = attrs["width"][1:-1]
-                    height = attrs["height"][1:-1]
-                except KeyError:
+                    width = int(attrs["width"][1:-1])
+                    height = int(attrs["height"][1:-1])
+                except (ValueError, KeyError, TypeError):
                     pass
                 else:
                     # Automagically detect a FileField.
