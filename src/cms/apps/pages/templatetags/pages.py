@@ -294,6 +294,23 @@ def nav_context(page, current_page):
     
     
 @register.tag
+def get_navigation(parser, token):
+    """
+    Gets the navigation for the given page, and sets it as a context variable::
+    
+        {% get_navigation page as page_navigation %}
+        
+    """
+    def handler(context, page, varname):
+        current_page = context["page"]
+        page = Page.objects.get_page(page)
+        navigation = [nav_context(entry, current_page) for entry in page.navigation]
+        context[varname] = navigation
+        return ""
+    return PatternNode(parser, token, handler, ("{page} as [varname]",),)
+    
+    
+@register.tag
 def nav_primary(parser, token):
     """
     Renders the primary navigation of the current page::

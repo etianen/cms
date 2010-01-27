@@ -1,4 +1,4 @@
-<form action="{{search_page.url}}" id="{{form_id}}">
+<form action="{{search_page.get_absolute_url}}" id="{{form_id}}">
     <div>
         <input type="hidden" name="cx" value="{{search_page.content.search_engine_id}}" />
         <input type="hidden" name="cof" value="FORID:11" />
@@ -10,7 +10,7 @@
 
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript">google.load("elements", "1", {packages: "transliteration"});</script>
-<script type="text/javascript" src="http://www.google.com/coop/cse/t13n?form={{form_id}}&t13n_langs=en"></script>
+<script type="text/javascript" src="http://www.google.com/coop/cse/t13n?form={{form_id}}&amp;t13n_langs=en"></script>
 
-<script type="text/javascript" src="http://www.google.com/coop/cse/brand?form={{form_id}}&lang=en"></script>
+<script type="text/javascript" src="http://www.google.com/coop/cse/brand?form={{form_id}}&amp;lang=en"></script>
 
