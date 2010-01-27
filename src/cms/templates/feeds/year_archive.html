@@ -1,5 +1,5 @@
 {% extends "feeds/base.html" %}
-{% load pages feeds %}
+{% load pages %}
 
 
 {% block header %}Archive for {{date|date:"Y"}}{% endblock %}
@@ -8,10 +8,4 @@
 {% block breadcrumbs %}
     {% breadcrumbs extended %}
     {{date|date:"Y"}}
-{% endblock %}
-
-
-{% block content_primary %}
-    {{block.super}}
-    {% article_list %}
 {% endblock %}

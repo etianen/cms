@@ -5,6 +5,12 @@
 {% block feeds %}<link rel="alternate" type="application/rss+xml" title="{{page.title}}" href="{% page_url page rss %}" />{% endblock %}
 
 
+{% block content_primary %}
+    {{block.super}}
+    {% article_list %}
+{% endblock %}
+
+
 {% block content_secondary %}
     {{block.super}}
     {% date_archive %}
