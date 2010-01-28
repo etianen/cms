@@ -79,7 +79,7 @@ class AdminSite(admin.AdminSite):
         generators = []
         for model in self._link_list_models:
             generators.append((unicode(obj), permalinks.create(obj)) for obj in model._default_manager.all().iterator())
-        links = itertools.chain(*generators)
+        links = sorted(itertools.chain(*generators))
         context = {"links": links}
         return render_to_response("admin/tinymce_link_list.js", context, template.RequestContext(request), mimetype="text/javascript")
         
