@@ -13,7 +13,7 @@ from django.core.files.images import get_image_dimensions
 from cms.apps.pages.optimizations import cached_getter
 
 
-__all__ = ("create", "PROPORTIONAL", "RESIZED", "CROPPED", "create_thumbnails_html",)
+__all__ = ("create", "PROPORTIONAL", "RESIZED", "CROPPED",)
 
 
 class Thumbnail(object):

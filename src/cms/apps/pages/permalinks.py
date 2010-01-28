@@ -12,7 +12,7 @@ from django.core import urlresolvers
 from django.core.exceptions import ImproperlyConfigured
 
 
-__all__ = ("PermalinkError", "create", "resolve", "expand", "expand_links_html",)
+__all__ = ("PermalinkError", "create", "resolve", "expand",)
 
 
 class PermalinkError(Exception):
