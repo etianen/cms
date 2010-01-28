@@ -3,14 +3,11 @@
 
 from __future__ import with_statement
 
-import os, shutil
+import os
 
 from PIL import Image  # @UnresolvedImport
 
 from django.core.files.storage import default_storage
-from django.core.files.images import get_image_dimensions
-
-from cms.apps.pages.optimizations import cached_getter
 
 
 __all__ = ("create", "PROPORTIONAL", "RESIZED", "CROPPED",)
@@ -24,54 +21,15 @@ class Thumbnail(object):
     This conforms to the Django image file specification.
     """
     
-    __slots__ = ("name", "_dimensions_cache",)
+    __slots__ = ("name", "url", "path", "width", "height",)
     
-    def __init__(self, name):
+    def __init__(self, name, url, path, width, height):
         """Initializes the Thumbnail."""
         self.name = name
-        
-    def get_url(self):
-        """Returns the URL of the thumbnail."""
-        return default_storage.url(self.name)
-    
-    url = property(get_url,
-                   doc="The URL of the thumbnail")
-    
-    def get_path(self):
-        """Returns the path of the thumbnail on disk."""
-        return default_storage.path(self.name)
-    
-    path = property(get_path,
-                    doc="The path of the thumbnail on disk.")
-    
-    def get_size(self):
-        """Returns the size of the thumbnail on disk, in bytes."""
-        return default_storage.size(self.name)
-        
-    size = property(get_size,
-                    doc="The size of the thumbnail on disk, in bytes.")
-    
-    @cached_getter
-    def get_dimensions(self):
-        """Returns a tuple of the dimensions of the image, in pixels."""
-        return get_image_dimensions(self.path)
-    
-    dimensions = property(get_dimensions,
-                          doc="A tuple of the dimensions of the image, in pixels.")
-    
-    def get_width(self):
-        """Returns the width of the image, in pixels."""
-        return self.dimensions[0]
-    
-    width = property(get_width,
-                     doc="The width of the image, in pixels.")
-    
-    def get_height(self):
-        """Returns the height of the image in pixels."""
-        return self.dimensions[1]
-    
-    height = property(get_height,
-                      doc="The height of the image, in pixels.")
+        self.url = url
+        self.path = path
+        self.width = width
+        self.height = height
         
 
 # Resize the image, preserving aspect ratio.
@@ -106,57 +64,63 @@ def create(image, width, height, method=PROPORTIONAL):
     The default filesystem storage provided by Django will be used to store the
     created thumbnail under a generated name.
     """
+    # Get the path to the image.
     try:
         image_path = image.path
+        image_url = image.url
     except AttributeError:
-        # Image must provide a path attribute.
+        # Image must provide a path and url attribute.
         return image
-    # Generate the thumbnail filename.
-    thumbnail_name = "thumbnails/%s-%sx%s/%s" % (method, width, height, image.name.lstrip("/"))
-    thumbnail_path = default_storage.path(thumbnail_name)
-    # See if the thumbnail has already been created.
-    if default_storage.exists(thumbnail_name):
-        image_timestamp = os.stat(image_path).st_mtime
-        thumbnail_timestamp = os.stat(thumbnail_path).st_mtime
-        # If the thumbnail is newer than the file, no more generation needs to take place.
-        if thumbnail_timestamp >= image_timestamp:
-            return Thumbnail(thumbnail_name)
-    else:
-        dirname = os.path.dirname(thumbnail_path)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-    # Create an image buffer in memory.
+    # Open up the image file.
     with open(image_path, "rb") as src_file:
-        image_data = Image.open(image.path)
+        image_data = Image.open(src_file)
+        # Calculate required image size.
         original_width, original_height = image_data.size
         width = min(width, original_width)
         height = min(height, original_height)
+        original_aspect = float(original_width) / float(original_height)
+        required_aspect = float(width) / float(height)
+        # Adjust for aspect ratio if using proportional resize.
+        if method == PROPORTIONAL:
+            if original_aspect > required_aspect:  # Too wide.
+                height = int(round(width / original_aspect))
+            elif original_aspect < required_aspect:  # Too narrow.
+                width = int(round(height * original_aspect))
+        # If no resizing has to take place, return the original image.
         if width == original_width and height == original_height:
-            # Simply copy the file to the thumbnails directory.
-            with open(thumbnail_path, "wb") as dst_file:
-                shutil.copyfileobj(src_file, dst_file)
+            return Thumbnail(image.name, image_url, image_path, width, height)
+        # Generate the thumbnail filename.
+        thumbnail_name = "thumbnails/%s-%sx%s/%s" % (method, width, height, image.name.lstrip("/"))
+        thumbnail_path = default_storage.path(thumbnail_name)
+        thumbnail_url = default_storage.url(thumbnail_name)
+        # See if the thumbnail has already been created.
+        if default_storage.exists(thumbnail_name):
+            image_timestamp = os.stat(image_path).st_mtime
+            thumbnail_timestamp = os.stat(thumbnail_path).st_mtime
+            # If the thumbnail is newer than the file, no more generation needs to take place.
+            if thumbnail_timestamp >= image_timestamp:
+                return Thumbnail(thumbnail_name, thumbnail_url, thumbnail_path, width, height)
         else:
-            # Generate a new thumbnail.
-            try:
-                if method == PROPORTIONAL:
-                    image_data.thumbnail((width, height), Image.ANTIALIAS)
-                elif method == RESIZED:
-                    image_data = image_data.resize((width, height), Image.ANTIALIAS)
-                elif method == CROPPED:
-                    original_width, original_height = image_data.size
-                    required_aspect = float(width) / float(height)
-                    source_width = min(original_width, int(original_height * required_aspect))
-                    source_height = min(original_height, int(original_width / required_aspect))
-                    source_x = (original_width - source_width) / 2
-                    source_y = (original_height - source_height) / 2
-                    image_data = image_data.transform((width, height), Image.EXTENT, (source_x, source_y, source_x + source_width, source_y + source_height), Image.BICUBIC)
-                else:
-                    raise ValueError, "Unknown thumbnail generation method: %r" % method
-            except SyntaxError, ex:
-                # HACK: The PIL will raise a SyntaxError if it encounters a 'broken png'. 
-                raise IOError, str(ex)
-            # Save the thumbnail to disk.
-            image_data.save(thumbnail_path)
-        # Return the new image object.
-        return Thumbnail(thumbnail_name)
+            dirname = os.path.dirname(thumbnail_path)
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+        # Generate a new thumbnail.
+        try:
+            if method == RESIZED or method == PROPORTIONAL:
+                image_data = image_data.resize((width, height), Image.ANTIALIAS)
+            elif method == CROPPED:
+                source_width = min(original_width, int(original_height * required_aspect))
+                source_height = min(original_height, int(original_width / required_aspect))
+                source_x = (original_width - source_width) / 2
+                source_y = (original_height - source_height) / 2
+                image_data = image_data.transform((width, height), Image.EXTENT, (source_x, source_y, source_x + source_width, source_y + source_height), Image.BICUBIC)
+            else:
+                raise ValueError, "Unknown thumbnail generation method: %r" % method
+        except SyntaxError, ex:
+            # HACK: The PIL will raise a SyntaxError if it encounters a 'broken png'. 
+            raise IOError, str(ex)
+        # Save the thumbnail to disk.
+        image_data.save(thumbnail_path)
+        # Return the newly created thumbnail.
+        return Thumbnail(thumbnail_name, thumbnail_url, thumbnail_path, width, height)
 

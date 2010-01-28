@@ -130,7 +130,6 @@ class FileAdmin(VersionAdmin):
         icon = FILE_ICONS.get(extension, UNKNOWN_FILE_ICON)
         permalink = permalinks.create(obj)
         if icon == IMAGE_FILE_ICON:
-            print obj
             try:
                 thumbnail = thumbnails.create(obj.file, 100, 66)
             except IOError:
