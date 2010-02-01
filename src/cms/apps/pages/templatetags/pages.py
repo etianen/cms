@@ -48,13 +48,12 @@ def content(parser, token):
     def handler(context, content_area, inherited=False):
         page = context["page"]
         content = ""
-        while not content:
+        while not content and page:
             content_obj = page.content
             content = getattr(content_obj, content_area, "")
             if not inherited:
                 break
-            if page.parent:
-                page = page.parent
+            page = page.parent
         return html(content)
     return PatternNode(parser, token, handler, ("{content_area} [inherited]", "{content_area}"))
 
