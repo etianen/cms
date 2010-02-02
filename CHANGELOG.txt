@@ -3,6 +3,12 @@ CMS Changelog
 =============
 
 
+Working
+-------
+
+  * Upgraded jQuery to version 1.4.1. 
+
+
 2.1 - 01/02/2010
 ----------------
 
@@ -20,7 +26,7 @@ in preparation for a potential open-source release later this year.
   * Removed notes field from File model.
   * Remove size field from File model.
   * Upgraded TinyMCE editor.
-  * Upgraded jQuery javascript library.
+  * Upgraded jQuery to version 1.4.
   * More accessible and faster-loading admin sitemap.
   * Removed ability to link to pages using permalinks in HTML content.
   * Added many more unit tests to the framework.
