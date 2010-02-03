@@ -56,7 +56,7 @@
         content_css: "{{settings.TINYMCE_CONTENT_CSS|escapejs}}",
         extended_valid_elements : "iframe[src|width|height|name|align]",  // Permit embedded iframes.
         convert_urls: false,
-        button_tile_map : true,  // Client-side optimization.
+        button_tile_map: true,  // Client-side optimization.
         entity_encoding: "raw",  // Client-side optimization.
         verify_html: false,  // Client-side optimization.
         file_browser_callback: cmsFileBrowser
