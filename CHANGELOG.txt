@@ -6,7 +6,8 @@ CMS Changelog
 Working
 -------
 
-  * Upgraded jQuery to version 1.4.1. 
+  * Upgraded jQuery to version 1.4.1.
+  * Several tiny bug fixes.
 
 
 2.1 - 01/02/2010
