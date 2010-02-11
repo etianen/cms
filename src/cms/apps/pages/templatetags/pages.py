@@ -166,7 +166,7 @@ def meta_description(parser, token):
         while not description and page:
             description = page.meta_description
             page = page.parent
-        return description
+        return conditional_escape(description)
     return PatternNode(parser, token, handler, ("{description}", "",))
 
 
