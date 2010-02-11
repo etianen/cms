@@ -3,7 +3,7 @@
 
 from django import template
 from django.utils.safestring import mark_safe
-from django.utils.html import escape
+from django.utils.html import escape, conditional_escape
 
 from cms.apps.pages.html import process_html
 from cms.apps.pages.models import Page
@@ -195,7 +195,7 @@ def meta_keywords(parser, token):
         while not keywords and page:
             keywords = page.meta_keywords
             page = page.parent
-        return escape(keywords)
+        return conditional_escape(keywords)
     return PatternNode(parser, token, handler, ("{keywords}", "",))
 
 
@@ -453,7 +453,7 @@ def header(parser, token):
     def handler(context, header=None):
         page = context["page"]
         header = header or context.get("header", None) or context.get("title", "") or page.title
-        return escape(header)
+        return conditional_escape(header)
     return PatternNode(parser, token, handler, ("{header}", "",))
 
     
