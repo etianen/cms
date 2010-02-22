@@ -3,7 +3,6 @@
 
 from django.db import models
 
-from cms.apps.pages import content
 from cms.apps.pages.models import PageBase, HtmlField
 
 
