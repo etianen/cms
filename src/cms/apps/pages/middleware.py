@@ -88,7 +88,7 @@ class PageMiddleware(object):
                                 pass
                             else:
                                 return redirect(script_name + new_path_info)
-                        raise Http404, "No match for the current path '%s' found in the url conf of %s." % (path_info, content.__class__.__name__)
+                        return
                     response = callback(request, *callback_args, **callback_kwargs)
                     # Validate the response.
                     if not isinstance(response, HttpResponse):
