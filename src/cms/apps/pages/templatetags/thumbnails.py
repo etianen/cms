@@ -46,7 +46,10 @@ def thumbnail(parser, token):
         
     """
     def handler(context, image, width, height, method=thumbnails.PROPORTIONAL, alias=None):
-        thumbnail = thumbnails.create(image, width, height, method)
+        try:
+            thumbnail = thumbnails.create(image, width, height, method)
+        except IOError:
+            thumbnail = thumbnails.Thumbnail(image.name, image.url, image.path, width, height)
         if alias:
             context[alias] = thumbnail
             return ""
