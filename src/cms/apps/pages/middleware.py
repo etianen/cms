@@ -92,7 +92,7 @@ class PageMiddleware(object):
                     response = callback(request, *callback_args, **callback_kwargs)
                     # Validate the response.
                     if not isinstance(response, HttpResponse):
-                        raise ValueError, "The view %s.%s didn't return an HttpResponse object." % (self.__class__.__name__, callback.__name__)
+                        raise ValueError, "The view %s.%s didn't return an HttpResponse object." % (content.__class__.__name__, callback.__name__)
                     return response
                 except Http404, ex:
                     if settings.DEBUG:
