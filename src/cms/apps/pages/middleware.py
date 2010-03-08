@@ -8,6 +8,7 @@ import sys
 from django.conf import settings
 from django.core import urlresolvers
 from django.core.handlers.base import BaseHandler
+from django.db.transaction import commit_on_success
 from django.http import Http404, HttpResponse
 from django.views.debug import technical_404_response
 from django.shortcuts import redirect
@@ -89,7 +90,7 @@ class PageMiddleware(object):
                             else:
                                 return redirect(script_name + new_path_info)
                         return
-                    response = callback(request, *callback_args, **callback_kwargs)
+                    response = commit_on_success(callback)(request, *callback_args, **callback_kwargs)
                     # Validate the response.
                     if not isinstance(response, HttpResponse):
                         raise ValueError, "The view %s.%s didn't return an HttpResponse object." % (content.__class__.__name__, callback.__name__)
