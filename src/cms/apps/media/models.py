@@ -1,6 +1,8 @@
 """Models used by the static media management application."""
 
 
+import re
+
 from django.core.files.storage import default_storage
 from django.db import models
 
@@ -23,6 +25,9 @@ class Folder(models.Model):
         ordering = ("name",)
     
     
+RE_WHITESPACE = re.compile("\s+")
+    
+    
 def get_upload_path(instance, filename):
     """
     Generates the upload path for static media files.
@@ -30,6 +35,7 @@ def get_upload_path(instance, filename):
     This will attempt to prevent filename mangling by prefixing the filename
     with a folder representing the version of the file that was uploaded.
     """
+    filename = RE_WHITESPACE.sub("-", filename)
     folder_name = instance._meta.verbose_name_plural.replace(" ", "-")
     file_version = 1
     while True:
