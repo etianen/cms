@@ -103,7 +103,7 @@ def rss(request):
     fullpath = "http://%s%%s" % page.site.domain 
     homepage = page.homepage
     # Generate the feed title.
-    page_title = page.browser_title or page.title,
+    page_title = page.browser_title or page.title
     site_title = homepage.browser_title or homepage.title
     title = "%s - %s" % (page_title, site_title)
     # Get the list of articles.
