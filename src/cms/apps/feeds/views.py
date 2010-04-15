@@ -103,9 +103,9 @@ def rss(request):
     fullpath = "http://%s%%s" % page.site.domain 
     homepage = page.homepage
     # Generate the feed title.
-    title_context = {"title": page.browser_title or page.title,
-                     "site_title": homepage.browser_title or homepage.title}
-    title = template.loader.render_to_string("title.html", title_context, template.RequestContext(request))
+    page_title = page.browser_title or page.title,
+    site_title = homepage.browser_title or homepage.title
+    title = "%s - %s" % (page_title, site_title)
     # Get the list of articles.
     all_articles = content.get_articles().order_by("-%s" % article_model.date_field_name)
     # Generate the head.
