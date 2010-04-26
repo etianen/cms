@@ -1,126 +1,200 @@
-"""Thumbnail generation utilities."""
+"""Thumbnail generation routines."""
 
-
-from __future__ import with_statement
 
 import os
 
-from PIL import Image  # @UnresolvedImport
+from PIL import Image  #@UnresolvedImport
 
 from django.core.files.storage import default_storage
+from django.utils import html
 
 
-__all__ = ("create", "PROPORTIONAL", "RESIZED", "CROPPED",)
+class Size(tuple):
+
+    """Represents the size of an image."""
+    
+    __slots__ = ()
+    
+    def __new__(cls, width, height):
+        """Creats a new Size."""
+        return tuple.__new__(cls, (int(width), int(height)))
+    
+    @property
+    def width(self):
+        return self[0]
+    
+    @property
+    def height(self):
+        return self[1]
+    
+    @property
+    def aspect(self):
+        """Returns the aspect ratio of this size."""
+        return float(self.width) / float(self.height)
+    
+    def intersect(self, size):
+        """
+        Returns a Size that represents the intersection of this and another
+        Size.
+        """
+        return Size(min(self.width, size.width), min(self.height, size.height))
+    
+    def constrain(self, reference):
+        """
+        Returns a new Size that is this Size shrunk to fit inside.
+        """
+        reference_aspect = reference.aspect
+        width = min(round(self.height * reference_aspect), self.width)
+        height = min(round(self.width / reference_aspect), self.height)
+        return Size(width, height)
+    
+    def scale(self, x_scale, y_scale):
+        """Returns a new Size with it's width and height scaled."""
+        return Size(float(self.width) * x_scale, float(self.height) * y_scale)
+    
+    def __str__(self):
+        """Returns a string representation of this Size."""
+        return "%ix%i" % (self.width, self.height)
+
+
+# Size adjustment callbacks. These are used to determine the display and data size of the thumbnail.
+
+def _size(reference, size):
+    """Ignores the reference size, and just returns the desired size."""
+    return size
+
+def _size_proportional(reference, size):
+    """Adjusts the desired size to match the aspect ratio of the reference."""
+    return size.constrain(reference)
+
+
+# Resize callbacks. These are used to actually resize the image data.
+
+def _resize(image, image_size, thumbnail_display_size, thumbnail_image_size):
+    """
+    Resizes the image to exactly match the desired data size, ignoring aspect
+    ratio.
+    """
+    return image.resize((thumbnail_image_size), Image.ANTIALIAS)
+
+def _resize_cropped(image, image_size, thumbnail_display_size, thumbnail_image_size):
+    """
+    Resizes the image to fit the desired size, preserving aspect ratio by
+    cropping, if required.
+    """
+    source_size = image_size.constrain(thumbnail_display_size)
+    source_x = (image_size.width - source_size.width) / 2
+    source_y = (image_size.height - source_size.height) / 2
+    return image.transform(thumbnail_image_size, Image.EXTENT, (source_x, source_y, source_x + source_size.width, source_y + source_size.height), Image.BICUBIC)
+
+
+# Methods of generating thumbnails.
+
+PROPORTIONAL = "proportional"
+RESIZED = "resized"
+CROPPED = "cropped"
+
+_methods = {PROPORTIONAL: (_size_proportional, _size, _resize, "resized"),
+            RESIZED: (_size, _size, _resize, "resized"),
+            CROPPED: (_size, _size_proportional, _resize_cropped, "cropped")}
 
 
 class Thumbnail(object):
     
-    """
-    A generated thumbnail image.
+    """Efficient data structure for holding generated thumbnail data."""
     
-    This conforms to the Django image file specification.
-    """
+    __slots__ = ("name", "path", "url", "display_size", "image_size",)
     
-    __slots__ = ("name", "url", "path", "width", "height",)
-    
-    def __init__(self, name, url, path, width, height):
+    def __init__(self, name, path, url, display_size, image_size=None):
         """Initializes the Thumbnail."""
         self.name = name
-        self.url = url
         self.path = path
-        self.width = width
-        self.height = height
+        self.url = url
+        self.display_size = display_size
+        self.image_size = image_size or display_size
         
-
-# Resize the image, preserving aspect ratio.
-PROPORTIONAL = "proportional"
-
-# Resize the image, ignoring aspect ratio.
-RESIZED = "resized"
-
-# Resize the image, cropping as necessary to preserve aspect ratio.
-CROPPED = "cropped"
-
-
-def create(image, width, height, method=PROPORTIONAL):
-    """
-    Creates a thumbnail of the given image, returning a Django image file.
+    @property
+    def width(self):
+        """Returns the width of the thumbnail."""
+        return self.display_size.width
     
-    There are three available methods of thumbnail generation.
+    @property
+    def height(self):
+        """Returns the height of the thumbnail."""
+        return self.display_size.height
     
-    :proportional:
-        The default method of thumbnail generation. This preserves aspect ratio
-        but may result in an image that is a slightly different size to the
-        dimensions requested.
-        
-    :resized:
-        The thumbnail will be exactly the size requested, but the aspect ratio
-        may change. This can result in images that look squashed or stretched.
-        
-    :cropped:
-        The thumbnail will be exactly the size requested, cropped to preseve
-        aspect ratio.
-        
-    The default filesystem storage provided by Django will be used to store the
-    created thumbnail under a generated name.
+    def __unicode__(self):
+        """Returns the thumbnail as a XHTML image tag."""
+        return u'<img src="%s" width="%i" height="%i" alt=""/>' % (html.escape(self.url), self.width, self.height)
+    
+    def __str__(self):
+        """Returns the thumbnail as a XHTML image tag."""
+        return str(unicode(self))
+    
+
+def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
     """
-    # Get the path to the image.
+    Creates a thumbnail from the given image.
+    
+    If the image file is missing or corrupted, then an IOError is raised.
+    """
+    # Load the image data.
+    image_data = Image.open(image.path)
+    # Get the desired generation method.
     try:
-        image_path = image.path
-        image_url = image.url
-    except AttributeError:
-        # Image must provide a path and url attribute.
-        return image
-    # Open up the image file.
-    with open(image_path, "rb") as src_file:
-        image_data = Image.open(src_file)
-        # Calculate required image size.
-        original_width, original_height = image_data.size
-        width = min(width, original_width)
-        height = min(height, original_height)
-        original_aspect = float(original_width) / float(original_height)
-        required_aspect = float(width) / float(height)
-        # Adjust for aspect ratio if using proportional resize.
-        if method == PROPORTIONAL:
-            if original_aspect > required_aspect:  # Too wide.
-                height = int(round(width / original_aspect))
-            elif original_aspect < required_aspect:  # Too narrow.
-                width = int(round(height * original_aspect))
-        # If no resizing has to take place, return the original image.
-        if width == original_width and height == original_height:
-            return Thumbnail(image.name, image_url, image_path, width, height)
-        # Generate the thumbnail filename.
-        thumbnail_name = "thumbnails/%s-%sx%s/%s" % (method, width, height, image.name.lstrip("/"))
-        thumbnail_path = default_storage.path(thumbnail_name)
-        thumbnail_url = default_storage.url(thumbnail_name)
-        # See if the thumbnail has already been created.
-        if default_storage.exists(thumbnail_name):
-            image_timestamp = os.stat(image_path).st_mtime
-            thumbnail_timestamp = os.stat(thumbnail_path).st_mtime
-            # If the thumbnail is newer than the file, no more generation needs to take place.
-            if thumbnail_timestamp >= image_timestamp:
-                return Thumbnail(thumbnail_name, thumbnail_url, thumbnail_path, width, height)
-        else:
-            dirname = os.path.dirname(thumbnail_path)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-        # Generate a new thumbnail.
+        display_size_callback, image_size_callback, resize_callback, folder = _methods[method]
+    except KeyError:
+        raise ValueError, "'%' is not a valid thumbnail generation method. Accepted methods are: %s" % (method, ", ".join(_methods.iterkeys()))
+    # Calculate the final width and height of the thumbnail.
+    image_size = Size(*image_data.size)
+    thumbnail_display_size = display_size_callback(image_size, Size(width, height))
+    thumbnail_image_size = image_size_callback(thumbnail_display_size, thumbnail_display_size.intersect(image_size))
+    # If the file data and thumbnail data are identical, don't bother making a thumbnail.
+    if image_size == thumbnail_image_size:
+        thumbnail_name = image.name
+        thumbnail_path = image.path
+    else:
+        # Calculate the various file paths.
+        thumbnail_name = "thumbnails/%s/%s/%s" % (folder, thumbnail_image_size, image.name)
+        thumbnail_path = storage.path(thumbnail_name)
+        # Make any intermediate directories.
         try:
-            if method == RESIZED or method == PROPORTIONAL:
-                image_data = image_data.resize((width, height), Image.ANTIALIAS)
-            elif method == CROPPED:
-                source_width = min(original_width, int(original_height * required_aspect))
-                source_height = min(original_height, int(original_width / required_aspect))
-                source_x = (original_width - source_width) / 2
-                source_y = (original_height - source_height) / 2
-                image_data = image_data.transform((width, height), Image.EXTENT, (source_x, source_y, source_x + source_width, source_y + source_height), Image.BICUBIC)
-            else:
-                raise ValueError, "Unknown thumbnail generation method: %r" % method
-        except SyntaxError, ex:
-            # HACK: The PIL will raise a SyntaxError if it encounters a 'broken png'. 
-            raise IOError, str(ex)
-        # Save the thumbnail to disk.
-        image_data.save(thumbnail_path)
-        # Return the newly created thumbnail.
-        return Thumbnail(thumbnail_name, thumbnail_url, thumbnail_path, width, height)
+            os.makedirs(os.path.dirname(thumbnail_path))
+        except OSError:
+            pass
+        # Check whether the thumbnail exists, and is more recent than the image.
+        image_timestamp = os.stat(image.path).st_mtime 
+        try:
+            thumbnail_timestamp = os.stat(thumbnail_path).st_mtime
+        except OSError:
+            # The thumbnail does not exist, so we need to generate it.
+            generation_required = True
+        else:
+            generation_required = image_timestamp > thumbnail_timestamp
+        # If we need to generate the thumbnail, then generate it!
+        if generation_required:
+            # Use efficient image loading if this would be sensible.
+            if image_size.width < thumbnail_image_size.width and image_size.height < thumbnail_image_size.height:
+                image_data.draft(None, thumbnail_image_size)
+                image_size = Size(*image_data.size)
+            # Resize the image data.
+            try:
+                thumbnail_image = resize_callback(image_data, image_size, thumbnail_display_size, thumbnail_image_size)
+            except SyntaxError, ex:
+                # HACK: The PIL will raise a SyntaxError if it encounters a 'broken png'. 
+                raise IOError, str(ex)
+            # Save the thumbnail.
+            try:
+                thumbnail_image.save(thumbnail_path)
+            except:
+                # Remove an incomplete file, if present.
+                try:
+                    os.unlink(thumbnail_path)
+                except OSError:
+                    pass
+                # Re-raise the original exception.
+                raise
+    # Return the thumbnail object.
+    thumbnail_url = storage.url(thumbnail_name)
+    return Thumbnail(thumbnail_name, thumbnail_path, thumbnail_url, thumbnail_display_size, thumbnail_image_size)
 
