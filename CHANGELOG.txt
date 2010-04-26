@@ -7,7 +7,7 @@ Working
 -------
 
   * Greatly improved efficiency of thumbnail generation routines.
-  * Upgraded jQuery to version 1.4.1.
+  * Upgraded jQuery to version 1.4.2.
   * Several tiny bug fixes.
 
 
