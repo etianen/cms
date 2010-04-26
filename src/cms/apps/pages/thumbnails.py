@@ -9,6 +9,9 @@ from django.core.files.storage import default_storage
 from django.utils import html
 
 
+__all__ = ("create", "PROPORTIONAL", "RESIZED", "CROPPED",)
+
+
 class Size(tuple):
 
     """Represents the size of an image."""
