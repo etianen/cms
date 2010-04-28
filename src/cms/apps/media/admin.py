@@ -14,7 +14,7 @@ from django.utils.text import truncate_words
 
 from reversion.admin import VersionAdmin
 
-from cms.apps.pages.admin import site
+from cms.apps.pages.admin import site, get_date_modified
 from cms.apps.media.models import Folder, File
 from cms.apps.pages import thumbnails, permalinks
 
@@ -23,9 +23,11 @@ class FolderAdmin(admin.ModelAdmin):
     
     """Admin settings for Folder models."""
     
-    list_display = ("name", "date_modified",)
+    list_display = ("name", "get_date_modified",)
     
     search_fields = ("name",)
+    
+    get_date_modified = get_date_modified
     
     
 site.register(Folder, FolderAdmin)
@@ -71,7 +73,7 @@ class FileAdmin(VersionAdmin):
     
     search_fields = ("title",)
     
-    list_display = ("get_preview", "get_title", "get_size", "date_modified")
+    list_display = ("get_preview", "get_title", "get_size", "get_date_modified")
 
     change_list_template = "admin/media/file/change_list.html"
     
@@ -106,6 +108,8 @@ class FileAdmin(VersionAdmin):
         queryset.update(folder=None)
     
     # Custom display routines.
+    
+    get_date_modified = get_date_modified
     
     def get_folder(self, obj):
         """Returns a pretty version of the folder."""

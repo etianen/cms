@@ -13,7 +13,7 @@ class ArticleAdmin(PageBaseAdmin):
     
     date_hierarchy = "publication_date"
     
-    list_display = ("title", "publication_date", "is_online", "is_featured",)
+    list_display = ("title", "publication_date", "is_online", "is_featured", "get_date_modified",)
     
     list_filter = ("is_online", "is_featured",)
     

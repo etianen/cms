@@ -13,7 +13,7 @@ class EventAdmin(PageBaseAdmin):
     
     date_hierarchy = "start_date"
     
-    list_display = ("title", "start_date", "is_online", "is_featured",)
+    list_display = ("title", "start_date", "is_online", "is_featured", "get_date_modified",)
     
     list_filter = ("is_online", "is_featured",)
     
