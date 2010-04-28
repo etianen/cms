@@ -131,7 +131,7 @@ class PageBaseAdmin(VersionAdmin, PublishedModelAdmin):
     
     fieldsets = base_fieldsets + PublishedModelAdmin.publication_fieldsets + navigation_fieldsets + seo_fieldsets
 
-    list_display = ("title", "last_modified", "is_online",)
+    list_display = ("title", "date_modified", "is_online",)
     
     prepopulated_fields = {"url_title": ("title",),}
     

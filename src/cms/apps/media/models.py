@@ -17,6 +17,11 @@ class Folder(models.Model):
     
     name = models.CharField(max_length=200)
     
+    date_created = models.DateTimeField(auto_now_add=True)
+    
+    date_modified = models.DateTimeField("last modified",
+                                         auto_now=True,)
+    
     def __unicode__(self):
         """Returns the name of the folder."""
         return self.name
@@ -52,8 +57,10 @@ class File(models.Model):
     title = models.CharField(max_length=200,
                              help_text="The title will be used as the default rollover text when this media is embedded in a web page.")
     
-    last_modified = models.DateTimeField(auto_now=True,
-                                         help_text="The date and time of when this media was last modified.")
+    date_created = models.DateTimeField(auto_now_add=True)
+    
+    date_modified = models.DateTimeField("last modified",
+                                         auto_now=True,)
     
     folder = models.ForeignKey(Folder,
                                blank=True,

@@ -43,5 +43,5 @@ class PageBaseSitemap(Sitemap):
         return obj.sitemap_priority
 
     def lastmod(self, obj):
-        return obj.last_modified
+        return obj.date_modified
     

@@ -30,7 +30,10 @@ class PublishedModel(models.Model):
         """
         return queryset.filter(is_online=True)
     
-    last_modified = models.DateTimeField(auto_now=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    
+    date_modified = models.DateTimeField("last modified",
+                                         auto_now=True)
     
     is_online = models.BooleanField("online",
                                     default=True,
