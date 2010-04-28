@@ -4,7 +4,6 @@
 from django.conf import settings
 from django.conf.urls.defaults import patterns, url, include, handler404  # @UnusedImport
 from django.contrib import admin
-from django.views.static import serve
 
 from cms.apps.pages.admin import site as admin_site
 from cms.apps.pages.sitemaps import registered_sitemaps
@@ -30,11 +29,13 @@ urlpatterns = patterns("",
 
 # Set up static media serving.
 
-if settings.SERVE_STATIC_MEDIA:
-    for media_url, media_root in settings.STATIC_MEDIA:
-        media_regex = r"^%s(.*)" % media_url.lstrip("/")
-        urlpatterns += patterns("", url(media_regex, serve, {"document_root": media_root}))
+if settings.MEDIA_DEBUG:
+    def media_regex(media_url):
+        return r"^%s(.*)" % media_url.lstrip("/")
+    urlpatterns += patterns("django.views.static",
+                            url(media_regex(settings.CMS_MEDIA_URL), "serve", {"document_root": settings.CMS_MEDIA_ROOT}),
+                            url(media_regex(settings.SITE_MEDIA_URL), "serve", {"document_root": settings.SITE_MEDIA_ROOT}),
+                            url(media_regex(settings.MEDIA_URL), "serve", {"document_root": settings.MEDIA_ROOT}))
 
 
 handler500 = "cms.apps.pages.views.handler500"
-

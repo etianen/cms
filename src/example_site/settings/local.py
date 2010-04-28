@@ -17,6 +17,8 @@ DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
 
+MEDIA_DEBUG = DEBUG
+
 
 # Save media files to the uploads directory in the user's home folder.
 
@@ -26,13 +28,6 @@ MEDIA_ROOT = os.path.expanduser("~/Sites/%s/media" % SITE_DOMAIN)
 # Use local server.
 
 SITE_DOMAIN = "localhost:8000"
-
-
-# Static media serving
-
-STATIC_MEDIA += ((SITE_MEDIA_URL, SITE_MEDIA_ROOT),
-                 (CMS_MEDIA_URL, CMS_MEDIA_ROOT),
-                 (MEDIA_URL, MEDIA_ROOT))
 
 
 # Enable serving of static media files (slow, not for production).

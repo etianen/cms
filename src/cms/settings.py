@@ -31,9 +31,7 @@ CMS_MEDIA_ROOT = os.path.join(CMS_ROOT, "media")
 
 # Static media serving.
 
-STATIC_MEDIA = ()
-
-SERVE_STATIC_MEDIA = False
+MEDIA_DEBUG = False
 
 
 # Database settings.
