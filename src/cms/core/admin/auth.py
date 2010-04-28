@@ -5,13 +5,12 @@ from django import template
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.shortcuts import render_to_response, redirect
 
-from cms.core.admin import site
-from cms.apps.staff.forms import UserCreationForm, EditDetailsForm
+from cms.core.forms.auth import UserCreationForm, EditDetailsForm
 
 
 class UserAdmin(BaseUserAdmin):
@@ -122,14 +121,11 @@ class UserAdmin(BaseUserAdmin):
                    "has_file_field": False,
                    "has_absolute_url": False,
                    "auto_populated_fields": (),
-                   "opts": User._meta,
+                   "opts": self.model._meta,
                    "media": media,
                    "save_as": False,
-                   "app_label": User._meta.app_label,}
+                   "app_label": self.model._meta.app_label,}
         return render_to_response("admin/auth/edit_details_form.html", context, template.RequestContext(request))
-    
-    
-site.register(User, UserAdmin)
 
 
 class GroupAdmin(admin.ModelAdmin):
@@ -153,7 +149,3 @@ class GroupAdmin(admin.ModelAdmin):
             permissions = permissions.order_by("content_type__app_label", "content_type__model", "name")
             kwargs["queryset"] = permissions
         return super(GroupAdmin, self).formfield_for_dbfield(db_field, **kwargs)
-
-    
-site.register(Group, GroupAdmin)
-
