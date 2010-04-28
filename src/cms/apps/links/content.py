@@ -6,7 +6,7 @@ from django.conf import settings
 from cms.apps.pages import content
 
 
-class Redirect(content.ContentBase):
+class Link(content.ContentBase):
     
     """A redirect to another URL."""
     
@@ -16,6 +16,6 @@ class Redirect(content.ContentBase):
     
     urlconf = "cms.apps.links.urls"
     
-    redirect_url = content.CharField("redirect URL",
-                                     help_text="The URL where the user will be redirected.  You can also enter a page permalink to create a dynamic link to a page.")
+    link_url = content.CharField("link URL",
+                                 help_text="The URL where the user will be redirected.")
     

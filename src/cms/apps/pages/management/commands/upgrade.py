@@ -3,18 +3,15 @@
 
 from __future__ import with_statement
 
-import re
+from xml.dom import minidom
 
 from django.core.management.base import NoArgsCommand
 from django.core.management import call_command
-from django.core import urlresolvers
-from django.db import transaction, models, connection
-from django.utils.html import escape
+from django.core.serializers.xml_serializer import getInnerText
+from django.db import transaction
 
-from cms.apps.pages import content, permalinks
-from cms.apps.pages.models import HtmlField, Page
+from cms.apps.pages.models import Page
 from cms.apps.pages.models.managers import publication_manager
-from cms.apps.media.models import File
 
 
 class Command(NoArgsCommand):
@@ -25,65 +22,20 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         """Upgrades the application from version 2.0.1 to 2.1."""
         with publication_manager.select_published(False):
-            print "Upgrading CMS data from 2.0.1 to 2.1"
-            cursor = connection.cursor()
-            # Get the old image content type id.
-            cursor.execute("SELECT id FROM django_content_type WHERE app_label='media' AND model='image';")
-            image_content_type_id, = cursor.fetchone()
-            # Get all old image data.
-            cursor.execute("SELECT id, title, last_modified, folder_id, file FROM media_image;")
-            images = cursor.fetchall()
-            # Delete old file fields.
-            cursor.execute("ALTER TABLE media_file DROP COLUMN size;")
-            cursor.execute("ALTER TABLE media_file DROP COLUMN keywords;")
-            cursor.execute("ALTER TABLE media_file DROP COLUMN notes;")
-            transaction.set_dirty()
-            # Create new files.
-            files = {}
-            for image_id, image_title, image_last_modified, folder_id, file in images:
-                files[image_id] = File.objects.create(title=image_title, last_modified=image_last_modified, folder_id=folder_id, file=file)
-            # Create a function to update HTML content.
-            image_permalinks = [(urlresolvers.reverse("permalink_redirect", kwargs={"content_type_id": image_content_type_id, "object_id": image_id}), image_id)
-                                for image_id, image_title, image_last_modified, folder_id, file in images]
-            def update_html_field(obj, field_name):
-                html = getattr(obj, field_name)
-                # Update image permalinks.
-                for old_permalink, image_id in image_permalinks:
-                    new_permalink = unicode(permalinks.create(files[image_id]))
-                    html = html.replace(unicode(old_permalink), new_permalink)
-                # Update page permalinks.
-                def replace_page_permalink(match):
-                    try:
-                        page = Page.objects.get_by_permalink(match.group(1))
-                    except Page.DoesNotExist:
-                        return match.group(0)
-                    return u'href="%s"' % escape(permalinks.create(page))
-                html = re.sub(ur'href="([^"]+)"', replace_page_permalink, html)
-                html = re.sub(ur"href='([^']+)'", replace_page_permalink, html)
-                setattr(obj, field_name, html)
-            # Update all model HTML fields.
-            for model in models.get_models():
-                html_fields = []
-                for field in model._meta.fields:
-                    if isinstance(field, HtmlField):
-                        html_fields.append(field)
-                if html_fields:
-                    for obj in model._default_manager.iterator():
-                        for html_field in html_fields:
-                            update_html_field(obj, html_field.attname)
-                        obj.save()
-            # Update all page content HTML fields.
-            for page in Page.objects.iterator():
-                page_content = page.content
-                html_fields = []
-                for field in page_content.fields:
-                    if isinstance(field, content.HtmlField):
-                        html_fields.append(field)
-                if html_fields:
-                    for html_field in html_fields:
-                        update_html_field(page_content, html_field.name)
-                    page.content = page_content
-                    page.save()
+            print "Upgrading CMS data from 2.1 to 2.2"
+            # Rename all redirects content to links.
+            for page in Page.objects.filter(content_type="redirect"):
+                page.content_type = "link"
+                raw_data = {}
+                xml_data = minidom.parseString(page.content_data.encode("utf8")).documentElement
+                for element in xml_data.getElementsByTagName("attribute"):
+                    key = element.attributes["name"].nodeValue
+                    value = getInnerText(element)
+                raw_data[key] = value
+                content = page.content
+                content.link_url = raw_data["redirect_url"]
+                page.content = content
+                page.save()
             # Synchronize the content types.
             call_command("syncdb")
             print "Upgrade complete!"
