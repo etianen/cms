@@ -30,12 +30,12 @@ urlpatterns = patterns("",
 # Set up static media serving.
 
 if settings.MEDIA_DEBUG:
-    def media_regex(media_url):
-        return r"^%s(.*)" % media_url.lstrip("/")
+    def media_url(media_url, media_root):
+        return url(r"^%s(.*)" % media_url.lstrip("/"), "serve", {"document_root": media_root})
     urlpatterns += patterns("django.views.static",
-                            url(media_regex(settings.CMS_MEDIA_URL), "serve", {"document_root": settings.CMS_MEDIA_ROOT}),
-                            url(media_regex(settings.SITE_MEDIA_URL), "serve", {"document_root": settings.SITE_MEDIA_ROOT}),
-                            url(media_regex(settings.MEDIA_URL), "serve", {"document_root": settings.MEDIA_ROOT}))
+                            media_url(settings.CMS_MEDIA_URL, settings.CMS_MEDIA_ROOT),
+                            media_url(settings.SITE_MEDIA_URL, settings.SITE_MEDIA_ROOT),
+                            media_url(settings.MEDIA_URL, settings.MEDIA_ROOT),)
 
 
 handler500 = "cms.apps.pages.views.handler500"
