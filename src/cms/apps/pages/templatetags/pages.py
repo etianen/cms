@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from django.utils.html import escape, conditional_escape
 
 from cms.core.html import process as process_html
+from cms.core.optimizations import cached_getter
 from cms.core.templatetags import PatternNode
 from cms.apps.pages.models import Page
 
@@ -281,34 +282,22 @@ def title(parser, token):
     return PatternNode(parser, token, handler, ("{title}", "",))
 
 
-def nav_context(page, current_page):
-    """
-    Generates a dictionary of variables related to the page, for use in page
-    navigation.
-    """
-    page_url = page.get_absolute_url()
-    return {"short_title": page.short_title or page.title,
-            "title": page.title,
-            "url": page_url,
-            "here": page in current_page.breadcrumbs,
-            "page": page}
+class NavEntry(object):
     
+    """Helper object used to display site navigation."""
     
-@register.tag
-def get_navigation(parser, token):
-    """
-    Gets the navigation for the given page, and sets it as a context variable::
-    
-        {% get_navigation page as page_navigation %}
+    def __init__(self, page, current_page):
+        """Initializes the NavigationHelper."""
+        self.page = page
+        self.here = page in current_page.breadcrumbs
+        self.url = page.get_absolute_url()
+        self.title = page.title
+        self.short_title = page.short_title or page.title
         
-    """
-    def handler(context, page, varname):
-        current_page = context["page"]
-        page = Page.objects.get_page(page)
-        navigation = [nav_context(entry, current_page) for entry in page.navigation]
-        context[varname] = navigation
-        return ""
-    return PatternNode(parser, token, handler, ("{page} as [varname]",),)
+    @property
+    @cached_getter
+    def navigation(self):
+        return [NavEntry(entry, self.current_page) for entry in self.page.navigation]
     
     
 @register.tag
@@ -324,12 +313,12 @@ def nav_primary(parser, token):
         homepage = page.homepage
         navigation = []
         if homepage.in_navigation:
-            nav_dict = nav_context(homepage, page)
+            nav_dict = NavEntry(homepage, page)
             nav_dict["short_title"] = "Home"
             nav_dict["here"] = homepage == page
             navigation.append(nav_dict)
         for entry in homepage.navigation:
-            navigation.append(nav_context(entry, page))
+            navigation.append(NavEntry(entry, page))
         context.push()
         try:
             context.update({"homepage": homepage,
@@ -356,7 +345,7 @@ def nav_secondary(parser, token):
             section = None
             navigation = []
         else:
-            navigation = [nav_context(entry, page) for entry in section.navigation]
+            navigation = [NavEntry(entry, page) for entry in section.navigation]
         context.push()
         try:
             context.update({"section": section,
@@ -383,7 +372,7 @@ def nav_tertiary(parser, token):
             subsection = None
             navigation = []
         else:
-            navigation = [nav_context(entry, page) for entry in subsection.navigation]
+            navigation = [NavEntry(entry, page) for entry in subsection.navigation]
         context.push()
         try:
             context.update({"subsection": subsection,
@@ -455,5 +444,3 @@ def header(parser, token):
         header = header or context.get("header", None) or context.get("title", "") or page.title
         return conditional_escape(header)
     return PatternNode(parser, token, handler, ("{header}", "",))
-
-    
