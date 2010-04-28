@@ -159,15 +159,12 @@ class PageAdmin(PageBaseAdmin):
                 # Impossible to move pag up or down because it already is at the top or bottom!
                 pass
             else:
-                # To prevent duplicating the order key, we need to do a little dance here.
                 page_order = page.order
                 other_order = other.order
-                page.order = None
-                page.save()
-                other.order = page_order
-                other.save()
                 page.order = other_order
+                other.order = page_order
                 page.save()
+                other.save()
         # Return a response appropriate to whether this was an AJAX request or not.
         if request.is_ajax():
             return HttpResponse("Page #%s was moved %s." % (page.id, direction))

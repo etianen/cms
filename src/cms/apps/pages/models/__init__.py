@@ -62,8 +62,7 @@ class Page(PageBase):
     breadcrumbs = property(get_breadcrumbs,
                            doc="The breadcrumb trail for this page.")
 
-    order = models.PositiveIntegerField(unique=True,
-                                        editable=False,
+    order = models.PositiveIntegerField(editable=False,
                                         blank=True,
                                         null=True)
 
