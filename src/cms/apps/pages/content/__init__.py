@@ -162,12 +162,6 @@ class ContentBase(object):
             data[key] = value
         self.data = data
         
-    # View methods.
-    
-    def reverse(self, view_func, *args, **kwargs):
-        """Performs a reverse URL lookup."""
-        return self.page.get_absolute_url() + reverse(view_func, args=args, kwargs=kwargs, urlconf=self.urlconf, prefix="")
-        
     # Administration methods.
         
     def get_form(self):

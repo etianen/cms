@@ -3,6 +3,7 @@
 
 import datetime
 
+from django.core import urlresolvers
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -169,6 +170,11 @@ class Page(PageBase):
         if self.parent:
             return self.parent.get_absolute_url() + self.url_title + "/"
         return "/"
+    
+    def reverse(self, view_func, *args, **kwargs):
+        """Performs a reverse URL lookup."""
+        urlconf = content.lookup(self.content_type).urlconf
+        return self.get_absolute_url() + urlresolvers.reverse(view_func, args=args, kwargs=kwargs, urlconf=urlconf, prefix="")
     
     def save(self, *args, **kwargs):
         """Saves the page."""

@@ -31,7 +31,7 @@ class ArticleBase(PageBase):
     
     def get_absolute_url(self):
         """Returns the absolute URL of the article."""
-        return self.feed.content.reverse("article_detail", self.publication_date.year, self.publication_date.month, self.url_title)
+        return self.feed.reverse("article_detail", self.publication_date.year, self.publication_date.month, self.url_title)
     
     class Meta:
         abstract = True

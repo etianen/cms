@@ -30,7 +30,7 @@ class Event(ArticleBase):
     
     def get_absolute_url(self):
         """Returns the absolute URL of the article."""
-        return self.feed.content.reverse("article_detail", self.start_date.year, self.start_date.month, self.url_title)
+        return self.feed.reverse("article_detail", self.start_date.year, self.start_date.month, self.url_title)
     
     class Meta:
         ordering = ("-is_featured", "start_date", "id")

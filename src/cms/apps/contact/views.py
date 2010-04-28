@@ -48,7 +48,7 @@ def index(request):
             connection = mail.SMTPConnection()
             connection.send_messages(messages)
             # Redirect the user.
-            return redirect(content.reverse("message_sent"))
+            return redirect(page.reverse("message_sent"))
     else:    
         contact_form = ContactForm()
     context = {"contact_form": contact_form}
