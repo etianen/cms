@@ -293,6 +293,7 @@ class NavEntry(object):
         self.url = page.get_absolute_url()
         self.title = page.title
         self.short_title = page.short_title or page.title
+        self.current_page = current_page
         
     @property
     @cached_getter
