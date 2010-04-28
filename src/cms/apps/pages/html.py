@@ -15,7 +15,7 @@ RE_TAG = re.compile(ur"<(img|a)(.*?)(/?)>", re.IGNORECASE)
 RE_ATTR = re.compile(ur"\s(\w+)=(\".*?\"|'.*?')", re.IGNORECASE)
 
 
-def process_html(text):
+def process(text):
     """
     Expands permalinks in <a/> and <img/> tags.
     

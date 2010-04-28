@@ -366,7 +366,7 @@ class TestPages(TestCase):
     
     def testHtmlProcessing(self):
         """Tests that HTML processing works correctly."""
-        self.assertEqual(self.expanded_html, html.process_html(self.test_html))
+        self.assertEqual(self.expanded_html, html.process(self.test_html))
     
     def testHtmlFilter(self):
         """Tests the html template filter."""
