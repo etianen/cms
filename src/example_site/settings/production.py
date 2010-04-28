@@ -95,12 +95,12 @@ CONTACT_FORMS = (("contact", "cms.apps.contact.forms.ContactForm"),)
 
 # Absolute path to the directory containing this project.
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 
 # Absolute path to the directory where site-specific media files are stored.
 
-SITE_MEDIA_ROOT = os.path.join(PROJECT_ROOT, "media")
+SITE_MEDIA_ROOT = os.path.join(SITE_ROOT, "media")
 
 SITE_MEDIA_URL = MEDIA_URL + "site/"
 
@@ -119,7 +119,7 @@ CMS_MEDIA_URL = MEDIA_URL + "cms/"
 
 # Absolute path to the directory where templates are stored.
 
-TEMPLATE_ROOT = os.path.join(PROJECT_ROOT, "templates")
+TEMPLATE_ROOT = os.path.join(SITE_ROOT, "templates")
 
 TEMPLATE_DIRS = (TEMPLATE_ROOT,) + TEMPLATE_DIRS
 
