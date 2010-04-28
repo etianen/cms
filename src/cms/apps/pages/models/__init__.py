@@ -62,9 +62,7 @@ class Page(PageBase):
     breadcrumbs = property(get_breadcrumbs,
                            doc="The breadcrumb trail for this page.")
 
-    order = models.PositiveIntegerField(editable=False,
-                                        blank=True,
-                                        null=True)
+    order = models.PositiveIntegerField(editable=False)
 
     def get_homepage(self):
         """Returns the homepage for this page."""
