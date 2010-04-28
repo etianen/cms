@@ -4,14 +4,11 @@
 import datetime
 
 from django.core import urlresolvers
-from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
 from cms.core import sitemaps
-from cms.core.models.base import PublishedModel, PageBase
-from cms.core.models.managers import PublishedModelManager, PageBaseManager, publication_manager
-from cms.core.models.fields import HtmlField, NullBooleanField, EnumField
+from cms.core.models.base import PageBase
 from cms.core.optimizations import cached_getter, cached_setter
 from cms.apps.pages import content
 from cms.apps.pages.models.managers import PageManager, cache
@@ -202,4 +199,3 @@ class PageSitemap(sitemaps.PageBaseSitemap):
     
     
 sitemaps.registered_sitemaps["pages"] = PageSitemap
-
