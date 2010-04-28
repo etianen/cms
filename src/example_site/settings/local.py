@@ -8,7 +8,14 @@ using the django-admin.py utility.
 
 import os  # @UnusedImport
 
-from debug import *  # @UnusedWildImport
+from production import *  # @UnusedWildImport
+
+
+# Run in debug mode.
+
+DEBUG = True
+
+TEMPLATE_DEBUG = DEBUG
 
 
 # Save media files to the uploads directory in the user's home folder.
