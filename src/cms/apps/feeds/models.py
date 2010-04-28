@@ -3,7 +3,8 @@
 
 from django.db import models
 
-from cms.apps.pages.models import PageBase, HtmlField
+from cms.core.models import HtmlField
+from cms.apps.pages.models import PageBase
 
 
 class ArticleBase(PageBase):

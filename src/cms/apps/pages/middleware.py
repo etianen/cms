@@ -13,7 +13,8 @@ from django.http import Http404, HttpResponse
 from django.views.debug import technical_404_response
 from django.shortcuts import redirect
 
-from cms.apps.pages.models import Page, cache, publication_manager
+from cms.core.models import publication_manager
+from cms.apps.pages.models import Page, cache
 
 
 REQUEST_PAGE_CACHE_ATTRIBUTE = "_page_cache"

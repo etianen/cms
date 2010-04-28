@@ -313,10 +313,10 @@ def nav_primary(parser, token):
         homepage = page.homepage
         navigation = []
         if homepage.in_navigation:
-            nav_dict = NavEntry(homepage, page)
-            nav_dict["short_title"] = "Home"
-            nav_dict["here"] = homepage == page
-            navigation.append(nav_dict)
+            nav_entry = NavEntry(homepage, page)
+            nav_entry.short_title = "Home"
+            nav_entry.here = homepage == page
+            navigation.append(nav_entry)
         for entry in homepage.navigation:
             navigation.append(NavEntry(entry, page))
         context.push()

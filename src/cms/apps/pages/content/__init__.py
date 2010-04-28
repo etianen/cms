@@ -1,24 +1,17 @@
 """Pluggable page content, serialized to XML."""
 
 
-import cStringIO, datetime, imp
+import cStringIO, imp
 from xml.dom import minidom
 from xml.sax.saxutils import XMLGenerator
 
-from django import template
 from django.conf import settings
-from django.conf.urls.defaults import url, patterns
-from django.core.paginator import Paginator, EmptyPage
 from django.core.serializers.xml_serializer import getInnerText
-from django.core.urlresolvers import RegexURLResolver, Resolver404, Http404, reverse
 from django.db.models.options import get_verbose_name
-from django.http import HttpResponse
-from django.shortcuts import render_to_response, redirect
 
 from cms.core import loader
-from cms.core.optimizations import cached_getter
 from cms.apps.pages.forms import PageForm
-from cms.apps.pages.content.fields import Field, CharField, TextField, HtmlField, ChoiceField, URLField, EmailField, IntegerField, PositiveIntegerField, FileField, ImageField, ModelField, BooleanField
+from cms.apps.pages.content.fields import Field, CharField, TextField, HtmlField, ChoiceField, URLField, EmailField, IntegerField, PositiveIntegerField, FileField, ImageField, ModelField, BooleanField  # @UnusedImport
     
     
 registered_content = {}
