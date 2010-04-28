@@ -10,7 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.shortcuts import render_to_response, redirect
 
-from cms.apps.pages.admin import site
+from cms.core.admin import site
 from cms.apps.staff.forms import UserCreationForm, EditDetailsForm
 
 

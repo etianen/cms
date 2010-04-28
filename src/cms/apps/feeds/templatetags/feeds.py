@@ -3,8 +3,8 @@
 
 from django import template
 
+from cms.core.templatetags import PatternNode
 from cms.apps.pages.models import Page
-from cms.apps.pages.templatetags import PatternNode
 
 
 register = template.Library()

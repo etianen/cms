@@ -4,8 +4,8 @@
 from django import template
 from django.utils.html import escape
 
-from cms.apps.pages.templatetags import PatternNode
-from cms.apps.pages import thumbnails
+from cms.core import thumbnails
+from cms.core.templatetags import PatternNode
 
 
 register = template.Library()

@@ -3,7 +3,7 @@
 
 from django import template
 
-from cms.apps.pages import permalinks
+from cms.core import permalinks
 
 
 register = template.Library()

@@ -3,7 +3,7 @@
 
 from django import template
 
-from cms.apps.pages.templatetags import PatternNode
+from cms.core.templatetags import PatternNode
 from cms.apps.pages.models import Page
 
 

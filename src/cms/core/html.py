@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.html import escape
 
-from cms.apps.pages import permalinks, thumbnails
+from cms.core import permalinks, thumbnails
 
 
 RE_TAG = re.compile(ur"<(img|a)(.*?)(/?)>", re.IGNORECASE)

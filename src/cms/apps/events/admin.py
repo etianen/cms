@@ -3,7 +3,7 @@
 
 from django.contrib import admin
 
-from cms.apps.pages.admin import site, PageBaseAdmin
+from cms.core.admin import site, PageBaseAdmin
 from cms.apps.events.models import Event
 
 

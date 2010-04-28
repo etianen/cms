@@ -3,12 +3,11 @@
 
 import datetime
 
-from django import template
 from django.http import Http404, HttpResponse
 from django.conf import settings
 from django.utils.feedgenerator import DefaultFeed
 
-from cms.apps.pages import html
+from cms.core import html
 
 
 def index(request):

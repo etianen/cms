@@ -14,9 +14,9 @@ from django.utils.text import truncate_words
 
 from reversion.admin import VersionAdmin
 
-from cms.apps.pages.admin import site, get_date_modified
+from cms.core import thumbnails, permalinks
+from cms.core.admin import get_date_modified, site
 from cms.apps.media.models import Folder, File
-from cms.apps.pages import thumbnails, permalinks
 
 
 class FolderAdmin(admin.ModelAdmin):

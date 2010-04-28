@@ -4,9 +4,10 @@
 from django import template
 from django.core.urlresolvers import reverse
 
-from cms.apps.pages.admin import site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
+from cms.core.templatetags import PatternNode
+from cms.core.admin import site
+from cms.apps.pages.admin import PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.apps.pages.models import Page
-from cms.apps.pages.templatetags import PatternNode
 
 
 register = template.Library()

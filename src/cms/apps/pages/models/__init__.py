@@ -8,11 +8,14 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
-from cms.apps.pages import content, sitemaps
-from cms.apps.pages.optimizations import cached_getter, cached_setter
-from cms.apps.pages.models.base import PublishedModel, PageBase
-from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager, PageManager, cache, publication_manager
-from cms.apps.pages.models.fields import PageField, HtmlField, NullBooleanField, EnumField
+from cms.core import sitemaps
+from cms.core.models.base import PublishedModel, PageBase
+from cms.core.models.managers import PublishedModelManager, PageBaseManager, publication_manager
+from cms.core.models.fields import HtmlField, NullBooleanField, EnumField
+from cms.core.optimizations import cached_getter, cached_setter
+from cms.apps.pages import content
+from cms.apps.pages.models.managers import PageManager, cache
+from cms.apps.pages.models.fields import PageField
 
 
 class Page(PageBase):

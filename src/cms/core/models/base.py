@@ -7,8 +7,8 @@ from django.contrib.sites.models import Site
 from django.db import models
 from django.shortcuts import render_to_response
 
-from cms.apps.pages.models.managers import PublishedModelManager, PageBaseManager
-from cms.apps.pages.models.fields import NullBooleanField, EnumField
+from cms.core.models.managers import PublishedModelManager, PageBaseManager
+from cms.core.models.fields import NullBooleanField, EnumField
 
 
 class PublishedModel(models.Model):

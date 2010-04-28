@@ -8,7 +8,7 @@ from django.http import Http404
 from django.utils.html import escape
 from django.utils.http import urlencode
 
-from cms.apps.pages.templatetags import PatternNode
+from cms.core.templatetags import PatternNode
 
 
 register = template.Library()

@@ -5,9 +5,9 @@ from django import template
 from django.utils.safestring import mark_safe
 from django.utils.html import escape, conditional_escape
 
-from cms.apps.pages.html import process as process_html
+from cms.core.html import process as process_html
+from cms.core.templatetags import PatternNode
 from cms.apps.pages.models import Page
-from cms.apps.pages.templatetags import PatternNode
 
 
 register = template.Library()

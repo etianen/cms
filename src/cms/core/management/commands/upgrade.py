@@ -10,8 +10,8 @@ from django.core.management import call_command
 from django.core.serializers.xml_serializer import getInnerText
 from django.db import transaction, connection
 
+from cms.core.models.managers import publication_manager
 from cms.apps.pages.models import Page
-from cms.apps.pages.models.managers import publication_manager
 
 
 class Command(NoArgsCommand):

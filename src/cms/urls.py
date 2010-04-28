@@ -5,8 +5,8 @@ from django.conf import settings
 from django.conf.urls.defaults import patterns, url, include, handler404  # @UnusedImport
 from django.contrib import admin
 
-from cms.apps.pages.admin import site as admin_site
-from cms.apps.pages.sitemaps import registered_sitemaps
+from cms.core.admin import site as admin_site
+from cms.core.sitemaps import registered_sitemaps
 
 
 __all__ = ("patterns", "url", "include", "urlpatterns", "handler404", "handler500",)
