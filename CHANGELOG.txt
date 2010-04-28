@@ -6,6 +6,9 @@ CMS Changelog
 Working
 -------
 
+  * Added author to CMS admin 'last modified' column.
+  * Created a CMS 'core' application that contains all base functionality.
+  * Merged 'staff' application with 'core' application.
   * Greatly improved efficiency of thumbnail generation routines.
   * Upgraded jQuery to version 1.4.2.
   * Several tiny bug fixes.
