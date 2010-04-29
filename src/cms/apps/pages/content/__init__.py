@@ -1,7 +1,7 @@
 """Pluggable page content, serialized to XML."""
 
 
-import cStringIO, imp
+import cStringIO, imp, weakref
 from xml.dom import minidom
 from xml.sax.saxutils import XMLGenerator
 
@@ -15,13 +15,7 @@ from cms.apps.pages.content.fields import Field, CharField, TextField, HtmlField
     
 
 # Known content classes.
-registered_content = {}
-
-# The default content type that will be used as the default content for newly-created pages.
-BaseContent = None
-
-# The base content type used by builtin cms apps.
-DefaultContent = None
+registered_content = weakref.WeakValueDictionary()
 
 
 class ContentRegistrationError(Exception):
@@ -86,14 +80,10 @@ class ContentMetaClass(type):
             # Check if content is default.
             if self.use_as_default:
                 global DefaultContent
-                if DefaultContent is not None:
-                    raise ContentRegistrationError, "The content class %s is specified as default, but the content class %s has already been registered as default" % (name, DefaultContent.__name__)
                 DefaultContent = self
             # Check if content is base.
             if self.use_as_base:
                 global BaseContent
-                if BaseContent is not None:
-                    raise ContentRegistrationError, "The content class %s is specified as base, but the content class %s has already been registered as base" % (name, BaseContent.__name__)
                 BaseContent = self
         
         
@@ -123,6 +113,12 @@ class Content(object):
     # Use to override the auto-generated verbose names.
     verbose_name = None
     verbose_name_plural = None
+    
+    # If true, then this will be used as the base class for all built-in CMS apps.
+    use_as_base = False
+    
+    # If true, then this will be the default content for newly-created pages.
+    use_as_default = False  
     
     # The urlconf used to power this content's views.
     urlconf = "cms.apps.pages.urls"
@@ -202,7 +198,33 @@ class Content(object):
         """Returns the fieldsets used to lay out the content form."""
         field_names = self.get_field_names()
         return (("Page content", {"fields": field_names}),)
-  
+
+
+class BaseContent(Content):
+    
+    """
+    Base class for all built-in CMS apps.
+    
+    This default implementation may be dynamically replaced by another by
+    setting the use_as_base flag to True on a content class.
+    """
+    
+    abstract = True
+    
+    content_primary = HtmlField("primary content",
+                                required=False)
+    
+    
+class DefaultContent(BaseContent):
+    
+    """
+    Default class used for
+    """
+    
+    verbose_name = "content"
+    
+    verbose_name_plural = "content"
+    
 
 # Permissions control.
 
@@ -230,8 +252,3 @@ def autoregister():
         except ImportError:
             continue
         __import__("%s.content" % app)
-    # Check the base content.
-    if BaseContent is None:
-        raise ContentRegistrationError, "No content class is marked as the base content"
-    if DefaultContent is None:
-        raise ContentRegistrationError, "No content class is marked as the default content."
