@@ -74,6 +74,8 @@ class ContentMetaClass(type):
         if not "abstract" in attrs:
             self.abstract = False
         if not self.abstract:
+            if self.registration_key in registered_content:
+                raise ContentRegistrationError, "A content class has already been registered under the key %s" % self.registration_key
             registered_content[self.registration_key] = self
         
         
