@@ -4,7 +4,6 @@
 from django.conf import settings
 
 from cms.apps.feeds.content import FeedBase
-from cms.apps.news.models import Article
 
 
 class NewsFeed(FeedBase):
@@ -13,6 +12,7 @@ class NewsFeed(FeedBase):
     
     icon = settings.CMS_MEDIA_URL + "img/content-types/news-feed.png"
     
-    article_model = Article
-    
-    
+    @property
+    def article_model(self):
+        from cms.apps.news.models import Article
+        return Article

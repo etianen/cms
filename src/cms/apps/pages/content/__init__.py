@@ -65,7 +65,7 @@ class ContentMetaClass(type):
                 raise ImproperlyConfigured, "The content class '%s' was not located in the content.py file of your application. Please specify an app_label for '%s'" % (name, name)
         # Auto-register the content.
         if not "registration_key" in attrs:
-            self.registration_key = "%s.%s" % (self.app_label, name.lower())
+            self.registration_key = "%s.%s" % (self.app_label, name)
         if not "abstract" in attrs:
             self.abstract = False
         if not "use_as_default" in attrs:
@@ -232,7 +232,7 @@ def get_add_permission(slug):
     """Generates the add permission codename for the given slug."""
     if slug == DefaultContent.registration_key:
         raise ValueError, "Base content model does not have an add permission."
-    return u"add_%s_page" % slug.replace(".", "_")
+    return u"add_%s_page" % slug.lower().replace(".", "_")
 
 
 # Content registration methods.

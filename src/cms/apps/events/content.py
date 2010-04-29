@@ -7,7 +7,6 @@ from django.conf import settings
 from django.db.models import Q
 
 from cms.apps.feeds.content import FeedBase
-from cms.apps.events.models import Event
 
 
 class EventsFeed(FeedBase):
@@ -16,7 +15,10 @@ class EventsFeed(FeedBase):
     
     icon = settings.CMS_MEDIA_URL + "img/content-types/events-feed.png"
     
-    article_model = Event
+    @property
+    def article_model(self):
+        from cms.apps.events.models import Event
+        return Event
     
     def get_latest_articles(self):
         """Returns the latest events."""

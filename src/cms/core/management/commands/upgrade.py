@@ -51,7 +51,7 @@ class Command(NoArgsCommand):
             connection.cursor().execute("UPDATE media_folder SET date_modified = NOW()")
             # Rename all redirects content to links.
             for page in Page.objects.filter(content_type="redirect"):
-                page.content_type = "links.link"
+                page.content_type = "links.Link"
                 raw_data = {}
                 xml_data = minidom.parseString(page.content_data.encode("utf8")).documentElement
                 for element in xml_data.getElementsByTagName("attribute"):

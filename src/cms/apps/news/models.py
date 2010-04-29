@@ -8,6 +8,7 @@ from django.db import models
 from cms.core import sitemaps
 from cms.apps.pages.models import PageField
 from cms.apps.feeds.models import ArticleBase
+from cms.apps.news.content import NewsFeed
 
 
 class Article(ArticleBase):
@@ -22,7 +23,7 @@ class Article(ArticleBase):
         queryset = queryset.filter(publication_date__lte=now)
         return queryset
     
-    feed = PageField("newsfeed",
+    feed = PageField(NewsFeed,
                      verbose_name="news feed")
     
     publication_date = models.DateField(default=lambda: datetime.datetime.now().date(),

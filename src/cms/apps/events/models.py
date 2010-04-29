@@ -8,13 +8,14 @@ from django.db import models
 from cms.core import sitemaps
 from cms.apps.pages.models import PageField
 from cms.apps.feeds.models import ArticleBase
+from cms.apps.events.content import EventsFeed
 
 
 class Event(ArticleBase):
     
     """A news article."""
     
-    feed = PageField("eventsfeed",
+    feed = PageField(EventsFeed,
                      verbose_name="events feed")
     
     start_date = models.DateField(default=lambda: datetime.datetime.now().date(),
