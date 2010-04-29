@@ -10,7 +10,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.serializers.xml_serializer import getInnerText
 from django.db.models.options import get_verbose_name
 
-from cms.core import loader
 from cms.apps.pages.forms import PageForm
 from cms.apps.pages.content.fields import Field, CharField, TextField, HtmlField, ChoiceField, URLField, EmailField, IntegerField, PositiveIntegerField, FileField, ImageField, ModelField, BooleanField  # @UnusedImport
     
@@ -19,7 +18,10 @@ from cms.apps.pages.content.fields import Field, CharField, TextField, HtmlField
 registered_content = {}
 
 # The default content type that will be used as the default content for newly-created pages.
-default_content = None
+BaseContent = None
+
+# The base content type used by builtin cms apps.
+DefaultContent = None
 
 
 class ContentRegistrationError(Exception):
@@ -33,11 +35,6 @@ def lookup(slug):
         return registered_content[slug]
     except KeyError:
         raise ContentRegistrationError, "No content type is registered under '%s'." % slug
-    
-    
-def get_default_content():
-    """Looks up the default content class from the settings."""
-    return loader.load_object(settings.DEFAULT_CONTENT)
     
     
 class ContentMetaClass(type):
@@ -79,6 +76,8 @@ class ContentMetaClass(type):
             self.abstract = False
         if not "use_as_default" in attrs:
             self.use_as_default = False
+        if not "use_as_base" in attrs:
+            self.use_as_base = False
         if not self.abstract:
             # Add to registration dictionary.
             if self.registration_key in registered_content:
@@ -86,10 +85,16 @@ class ContentMetaClass(type):
             registered_content[self.registration_key] = self
             # Check if content is default.
             if self.use_as_default:
-                global default_content
-                if default_content is not None:
-                    raise ContentRegistrationError, "The content class %s is specified as default, but the content class %s has already been registered as default" % (name, default_content.__name__)
-                default_content = self
+                global DefaultContent
+                if DefaultContent is not None:
+                    raise ContentRegistrationError, "The content class %s is specified as default, but the content class %s has already been registered as default" % (name, DefaultContent.__name__)
+                DefaultContent = self
+            # Check if content is base.
+            if self.use_as_base:
+                global BaseContent
+                if BaseContent is not None:
+                    raise ContentRegistrationError, "The content class %s is specified as base, but the content class %s has already been registered as base" % (name, BaseContent.__name__)
+                BaseContent = self
         
         
 class Content(object):
@@ -203,13 +208,12 @@ class Content(object):
 
 def get_add_permission(slug):
     """Generates the add permission codename for the given slug."""
-    if default_content and slug == default_content.registration_key:
+    if slug == DefaultContent.registration_key:
         raise ValueError, "Base content model does not have an add permission."
     return u"add_%s_page" % slug.replace(".", "_")
 
 
 # Content registration methods.
-
 
 def autoregister():
     """
@@ -226,3 +230,8 @@ def autoregister():
         except ImportError:
             continue
         __import__("%s.content" % app)
+    # Check the base content.
+    if BaseContent is None:
+        raise ContentRegistrationError, "No content class is marked as the base content"
+    if DefaultContent is None:
+        raise ContentRegistrationError, "No content class is marked as the default content."

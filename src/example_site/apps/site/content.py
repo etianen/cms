@@ -10,10 +10,10 @@ class Content(content.Content):
     
     # Class meta information.
     
-    # If True, this will be used as the default content for newly-created pages.
-    # Only one content class may be used as default.
+    # You must mark one, and only one content class as default. This will be the default option for newly-created pages.
     use_as_default = True  
     
+    # You must mark one, and only one content class base base. This will be used as the base class for built-in CMS content classes.
     use_as_base = True
     
     verbose_name_plural = "content"

@@ -13,7 +13,7 @@ def create_content_permissions(**kwargs):
     """Creates all permissions for registered content models."""
     content_type = ContentType.objects.get_for_model(Page)
     for slug, content_cls in content.registered_content.items():
-        if content_cls == content.default_content:
+        if content_cls == content.DefaultContent:
             continue
         name = u"Can add %s page" % content_cls.verbose_name
         codename = content.get_add_permission(slug)

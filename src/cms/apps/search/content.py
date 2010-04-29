@@ -6,10 +6,7 @@ from django.conf import settings
 from cms.apps.pages import content
 
 
-DefaultContent = content.get_default_content()
-
-
-class SiteSearch(DefaultContent):
+class SiteSearch(content.BaseContent):
     
     """A search results page."""
     

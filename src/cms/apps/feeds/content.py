@@ -4,10 +4,7 @@
 from cms.apps.pages import content
 
 
-DefaultContent = content.get_default_content()
-
-
-class FeedBase(DefaultContent):
+class FeedBase(content.BaseContent):
     
     """Base class for feed-based content."""
     
@@ -28,4 +25,3 @@ class FeedBase(DefaultContent):
     def get_latest_articles(self):
         """Returns the latest articles."""
         return self.get_articles()
-

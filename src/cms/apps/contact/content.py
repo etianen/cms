@@ -30,10 +30,7 @@ CONTACT_FORM_CHOICES_DEFAULT = CONTACT_FORM_CHOICES[0][0]
 CONTACT_FORMS = dict(CONTACT_FORMS)
     
     
-DefaultContent = content.get_default_content()
-    
-    
-class ContactForm(DefaultContent):
+class ContactForm(content.BaseContent):
     
     """A standard method of creating contact forms."""
     
@@ -64,5 +61,3 @@ class ContactForm(DefaultContent):
         """Returns the fieldsets used to lay out the content form."""
         return super(ContactForm, self).get_fieldsets() + (("Form details", {"fields": ("form_type", "send_to", "success_message"),}),
                                                            ("Confirmation email", {"fields": ("confirmation_subject", "confirmation_message",),}),)
-    
-        

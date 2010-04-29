@@ -78,24 +78,23 @@ TIME_ZONE = "Europe/London"
 LANGUAGE_CODE = "en-gb"
 
 
+# Auto-discovery of project location.
+
+SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+SITE_MODULE = os.path.splitext(os.path.basename(SITE_ROOT))[0]
+
+
 # A list of additional installed applications.
 
-INSTALLED_APPS += ("cms.apps.news",)
-
-
-# The base content type to use for all CMS apps.
-
-DEFAULT_CONTENT = "cms.apps.pages.content.Content"
+INSTALLED_APPS += ("%s.site" % SITE_MODULE,
+                   "cms.apps.feeds",
+                   "cms.apps.news",)
 
 
 # A list of registered contact form types.
 
 CONTACT_FORMS = (("contact", "cms.apps.contact.forms.ContactForm"),)
-
-
-# Absolute path to the directory containing this project.
-
-SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 
 # Absolute path to the directory where site-specific media files are stored.
