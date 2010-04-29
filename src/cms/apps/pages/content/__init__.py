@@ -6,6 +6,7 @@ from xml.dom import minidom
 from xml.sax.saxutils import XMLGenerator
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.serializers.xml_serializer import getInnerText
 from django.db.models.options import get_verbose_name
 
@@ -59,9 +60,17 @@ class ContentMetaClass(type):
             self.verbose_name = verbose_name
         if not "verbose_name_plural" in attrs:
             self.verbose_name_plural = self.verbose_name + "s"
+        # Find the app_label of the content.
+        if not "app_label" in attrs:
+            module_name = attrs.get("__module__", "")
+            module_parts = module_name.rsplit(".", 2)
+            if len(module_parts) == 3 and module_parts[2] == "content":
+                self.app_label = module_parts[1]
+            else:
+                raise ImproperlyConfigured, "The content class '%s' was not located in the content.py file of your application. Please specify an app_label for '%s'" % (name, name)
         # Auto-register the content.
         if not "registration_key" in attrs:
-            self.registration_key = name.lower()
+            self.registration_key = "%s.%s" % (self.app_label, name.lower())
         if not "abstract" in attrs:
             self.abstract = False
         if not self.abstract:

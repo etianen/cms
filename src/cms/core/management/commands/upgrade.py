@@ -11,6 +11,7 @@ from django.core.serializers.xml_serializer import getInnerText
 from django.db import transaction, connection
 
 from cms.core.models.managers import publication_manager
+from cms.apps.pages.content import registered_content
 from cms.apps.pages.models import Page
 
 
@@ -48,7 +49,7 @@ class Command(NoArgsCommand):
             connection.cursor().execute("UPDATE media_folder SET date_modified = NOW()")
             # Rename all redirects content to links.
             for page in Page.objects.filter(content_type="redirect"):
-                page.content_type = "link"
+                page.content_type = "links.link"
                 raw_data = {}
                 xml_data = minidom.parseString(page.content_data.encode("utf8")).documentElement
                 for element in xml_data.getElementsByTagName("attribute"):
@@ -58,6 +59,12 @@ class Command(NoArgsCommand):
                 content = page.content
                 content.link_url = raw_data["redirect_url"]
                 page.content = content
+                page.save()
+            # Add the app_label to content registration keys.
+            for page in Page.objects.all():
+                for content_type in registered_content.values():
+                    if content_type.__name__.lower() == page.content_type:
+                        page.content_type = content_type.registration_key
                 page.save()
             # Synchronize the content types.
             call_command("syncdb")
