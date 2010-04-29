@@ -8,10 +8,12 @@ from xml.dom import minidom
 from django.core.management.base import NoArgsCommand
 from django.core.management import call_command
 from django.core.serializers.xml_serializer import getInnerText
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction, connection
 
 from cms.core.models.managers import publication_manager
-from cms.apps.pages.content import registered_content
+from cms.apps.pages.content import registered_content, get_add_permission
 from cms.apps.pages.models import Page
 
 
@@ -66,6 +68,20 @@ class Command(NoArgsCommand):
                     if content_type.__name__.lower() == page.content_type:
                         page.content_type = content_type.registration_key
                 page.save()
+            # Migrate old permissions to new.
+            for content_type in registered_content.values():
+                old_slug = content_type.__name__.lower()
+                try:
+                    permission_name = get_add_permission(old_slug)
+                except ValueError:
+                    continue
+                try:
+                    perm = Permission.objects.get(codename=permission_name, content_type=ContentType.objects.get_for_model(Page))
+                except Permission.DoesNotExist:
+                    continue
+                new_perm_name = get_add_permission(content_type.registration_key)
+                perm.codename = new_perm_name
+                perm.save()
             # Synchronize the content types.
             call_command("syncdb")
             print "Upgrade complete!"

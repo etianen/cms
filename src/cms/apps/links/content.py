@@ -6,7 +6,7 @@ from django.conf import settings
 from cms.apps.pages import content
 
 
-class Link(content.ContentBase):
+class Link(content.Content):
     
     """A redirect to another URL."""
     

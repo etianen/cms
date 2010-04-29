@@ -13,7 +13,6 @@ import urllib
 from django import template
 from django.core.exceptions import PermissionDenied
 from django.conf.urls.defaults import patterns, url
-from django.conf import settings
 from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render_to_response, redirect
@@ -191,7 +190,7 @@ class PageAdmin(PageBaseAdmin):
         model = self.model
         opts = model._meta
         # The default page add permission implicitly allows editing of the default content type.
-        if slug == settings.DEFAULT_CONTENT_REGISTRATION_KEY:
+        if content.default_content and slug == content.default_content.registration_key:
             return True
         # Check user has correct permission.
         add_permission = "%s.%s" % (opts.app_label, content.get_add_permission(slug))

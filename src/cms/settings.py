@@ -113,9 +113,3 @@ USE_I18N = False
 # Staff management settings.
 
 DEFAULT_GROUP_IDS = (1,)
-
-
-# Content settings.
-
-DEFAULT_CONTENT_REGISTRATION_KEY = "content"
-
