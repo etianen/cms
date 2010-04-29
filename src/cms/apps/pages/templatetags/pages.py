@@ -286,7 +286,7 @@ class NavEntry(object):
     
     """Helper object used to display site navigation."""
     
-    def __init__(self, page, current_page):
+    def __init__(self, page, current_page, nav_override=None):
         """Initializes the NavigationHelper."""
         self.page = page
         self.here = page in current_page.breadcrumbs
@@ -294,10 +294,13 @@ class NavEntry(object):
         self.title = page.title
         self.short_title = page.short_title or page.title
         self.current_page = current_page
-        
+        self.nav_override = nav_override
+
     @property
     @cached_getter
     def navigation(self):
+        if self.nav_override is not None:
+            return self.nav_override
         return [NavEntry(entry, self.current_page) for entry in self.page.navigation]
     
     
@@ -314,7 +317,7 @@ def nav_primary(parser, token):
         homepage = page.homepage
         navigation = []
         if homepage.in_navigation:
-            nav_entry = NavEntry(homepage, page)
+            nav_entry = NavEntry(homepage, page, [])
             nav_entry.short_title = "Home"
             nav_entry.here = homepage == page
             navigation.append(nav_entry)
