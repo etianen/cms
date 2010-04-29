@@ -6,11 +6,13 @@ CMS Changelog
 Working
 -------
 
+  * Improved scalability of pages content framework.
   * Added author to CMS admin 'last modified' column.
   * Created a CMS 'core' application that contains all base functionality.
   * Merged 'staff' application with 'core' application.
   * Greatly improved efficiency of thumbnail generation routines.
   * Upgraded jQuery to version 1.4.2.
+  * Upgraded TinyMCE to version 3.3.4.
   * Several tiny bug fixes.
 
 

@@ -1,8 +1,11 @@
 /**
- * $Id: editor_plugin_src.js 923 2008-09-09 16:45:29Z spocke $
+ * editor_plugin_src.js
  *
- * @author Moxiecode
- * @copyright Copyright © 2004-2008, Moxiecode Systems AB, All rights reserved.
+ * Copyright 2009, Moxiecode Systems AB
+ * Released under LGPL License.
+ *
+ * License: http://tinymce.moxiecode.com/license
+ * Contributing: http://tinymce.moxiecode.com/contributing
  */
 
 (function() {
@@ -27,7 +30,7 @@
 							tinyMCE.get(ed.getParam('fullscreen_editor_id')).setContent(ed.getContent({format : 'raw'}), {format : 'raw'});
 							tinyMCE.remove(ed);
 							DOM.remove('mce_fullscreen_container');
-							de.style.overflow = ed.getParam('fullscreen_html_overflow');
+							ed.style.overflow = ed.getParam('fullscreen_html_overflow');
 							DOM.setStyle(DOM.doc.body, 'overflow', ed.getParam('fullscreen_overflow'));
 							DOM.win.scrollTo(ed.getParam('fullscreen_scrollx'), ed.getParam('fullscreen_scrolly'));
 							tinyMCE.settings = tinyMCE.oldSettings; // Restore old settings
@@ -107,7 +110,6 @@
 					});
 
 					t.fullscreenEditor.render();
-					tinyMCE.add(t.fullscreenEditor);
 
 					t.fullscreenElement = new tinymce.dom.Element('mce_fullscreen_container');
 					t.fullscreenElement.update();

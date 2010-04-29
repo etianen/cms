@@ -82,13 +82,10 @@ LANGUAGE_CODE = "en-gb"
 
 SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
-SITE_MODULE = os.path.splitext(os.path.basename(SITE_ROOT))[0]
-
 
 # A list of additional installed applications.
 
-INSTALLED_APPS += ("%s.site" % SITE_MODULE,
-                   "cms.apps.feeds",
+INSTALLED_APPS += ("cms.apps.feeds",
                    "cms.apps.news",)
 
 
