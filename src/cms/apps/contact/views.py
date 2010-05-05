@@ -4,7 +4,8 @@
 from django import template
 from django.conf import settings
 from django.core import mail
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render_to_response
+from django.template import RequestContext
 
 from cms.apps.contact.content import CONTACT_FORMS
 
@@ -52,12 +53,4 @@ def index(request):
     else:    
         contact_form = ContactForm()
     context = {"contact_form": contact_form}
-    return page.render_to_response(request, "contact/index.html", context)
-
-
-def message_sent(request):
-    """Renders a success message to the user."""
-    page = request.page
-    return page.render_to_response(request, "contact/message_sent.html")
-
-    
+    return render_to_response("contact/index.html", context, RequestContext(request))    

@@ -6,6 +6,8 @@ import datetime
 from django.http import Http404, HttpResponse
 from django.conf import settings
 from django.utils.feedgenerator import DefaultFeed
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 
 from cms.core import html
 
@@ -24,7 +26,7 @@ def index(request):
     # Render the template.
     template_names = ("%s/index.html" % article_model._meta.app_label,
                       "feeds/index.html")
-    return page.render_to_response(request, template_names, context)
+    return render_to_response(template_names, context, RequestContext(request))
     
 
 def year_archive(request, year):
@@ -44,7 +46,7 @@ def year_archive(request, year):
     # Render the template.
     template_names = ("%s/year_archive.html" % article_model._meta.app_label,
                       "feeds/year_archive.html")
-    return page.render_to_response(request, template_names, context)
+    return render_to_response(template_names, context, RequestContext(request))
 
 
 def month_archive(request, year, month):
@@ -66,7 +68,7 @@ def month_archive(request, year, month):
     # Render the template.
     template_names = ("%s/month_archive.html" % article_model._meta.app_label,
                       "feeds/month_archive.html")
-    return page.render_to_response(request, template_names, context)
+    return render_to_response(template_names, context, RequestContext(request))
 
 
 def article_detail(request, year, month, article_slug):
