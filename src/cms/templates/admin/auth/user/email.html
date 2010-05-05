@@ -1,0 +1,58 @@
+{% extends "admin/base_site.html" %}
+{% load adminmedia %}
+
+
+{% block extrahead %}
+    {{block.super}}
+    {{contact_form.media}}
+    <link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/forms.css"/>
+{% endblock %}
+
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url admin:index %}">Home</a> &rsaquo;
+        <a href="{% url admin:app_list 'auth' %}">{{app_label|capfirst|escape}}</a> &rsaquo; 
+        {% if has_change_permission %}<a href="{% url admin:auth_user_changelist %}">{{opts.verbose_name_plural|capfirst}}</a>{% else %}{{opts.verbose_name_plural|capfirst}}{% endif %} &rsaquo; 
+        {{title}}
+    </div>
+{% endblock %}
+
+
+{% block content %}
+    <p>You are about to send an email to {{users|length}} user{{users|pluralize}}, listed below.</p>
+    <form method="post" action="">
+        <fieldset class="module aligned">
+    
+            <div class="form-row">
+                <label class="required">To:</label>
+                {% for user in users %}
+                    {% if user.email %}
+                        {% if user.first_name and user.last_name %}
+                            {{user.first_name}} {{user.last_name}}
+                        {% else %}
+                            {{user.username}}
+                        {% endif %}
+                        {% if not forloop.last %},{% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+    
+            <div class="form-row">
+                {{contact_form.subject.errors}}
+                <label for="id_subject" class="required">Subject:</label> {{contact_form.subject}}
+            </div>
+            
+            <div class="form-row">
+                {{contact_form.content.errors}}
+                <label for="id_content" class="required">Content:</label> {{contact_form.content}}
+            </div>
+            
+        </fieldset>
+        
+        <div class="submit-row">
+            <input type="submit" value="Send" class="default"/>
+        </div>
+        
+    </form>
+{% endblock %}

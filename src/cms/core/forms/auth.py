@@ -3,7 +3,7 @@
 
 from django import forms
 from django.conf import settings
-from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.contrib.admin.widgets import FilteredSelectMultiple, AdminTextareaWidget, AdminTextInputWidget
 from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm
 from django.contrib.auth.models import User, Group
 
@@ -43,3 +43,9 @@ class UserCreationForm(BaseUserCreationForm):
         fields = ("username", "is_staff", "first_name", "last_name", "email", "groups",)
         
         
+class UserContactForm(forms.Form):
+    
+    subject = forms.CharField(max_length=1000,
+                              widget=AdminTextInputWidget)
+    
+    content = forms.CharField(widget=AdminTextareaWidget)

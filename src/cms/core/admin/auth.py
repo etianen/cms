@@ -2,6 +2,8 @@
 
 
 from django import template
+from django.core import urlresolvers, mail
+from django.conf import settings
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -10,14 +12,14 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.shortcuts import render_to_response, redirect
 
-from cms.core.forms.auth import UserCreationForm, EditDetailsForm
+from cms.core.forms.auth import UserCreationForm, EditDetailsForm, UserContactForm
 
 
 class UserAdmin(BaseUserAdmin):
     
     """Admin settings for User models."""
     
-    actions = ("activate_selected", "deactivate_selected",)
+    actions = ("activate_selected", "deactivate_selected", "email_selected",)
     
     add_form = UserCreationForm
     
@@ -43,14 +45,49 @@ class UserAdmin(BaseUserAdmin):
         queryset.update(is_active=False)
     deactivate_selected.short_description = "Deactivate selected users"
     
+    def email_selected(self, request, queryset):
+        """Sends an email to the selected user accounts."""
+        return redirect(urlresolvers.reverse("admin:staff_email_users") + "?users=%s" % ",".join(unicode(v) for v in queryset.values_list("pk", flat=True).iterator()))
+    email_selected.short_description = "Email selected users"
+    
     # Custom admin views.
     
     def get_urls(self):
         """Generates custom admin URLS."""
         urls = super(UserAdmin, self).get_urls()
         custom_urls = patterns("",
-                               url(r"^edit-details/$", self.admin_site.admin_view(self.edit_details), name="staff_edit_details"),)
+                               url(r"^edit-details/$", self.admin_site.admin_view(self.edit_details), name="staff_edit_details"),
+                               url(r"^email/$", self.admin_site.admin_view(self.email_users), name="staff_email_users"),)
         return custom_urls + urls
+    
+    def email_users(self, request):
+        """Sends an email to the given list of users."""
+        users = self.model._default_manager.in_bulk(request.GET["users"].split(",")).values()
+        if request.method == "POST":
+            form = UserContactForm(request.POST)
+            if form.is_valid():
+                def make_addr(user):
+                    if user.first_name and user.last_name:
+                        return "%s %s <%s>" % (user.first_name, user.last_name, user.email)
+                    return user.email
+                user = request.user
+                content = form.cleaned_data["content"]
+                subject = "".join((settings.EMAIL_SUBJECT_PREFIX, form.cleaned_data["subject"]))
+                from_email = make_addr(request.user)
+                mail.send_mass_mail((subject, content, from_email, (make_addr(user),))
+                                    for user in users
+                                    if user.email)
+                self.message_user(request, "Your email was successfully sent.")
+                return redirect("admin:auth_user_changelist")
+        else:
+            form = UserContactForm()
+        context = {"title": "Email users",
+                   "app_label": "auth",
+                   "users": users,
+                   "contact_form": form,
+                   "has_change_permission": self.has_change_permission(request),
+                   "opts": self.model._meta}
+        return render_to_response("admin/auth/user/email.html", context, template.RequestContext(request))
     
     @transaction.commit_on_success
     def add_view(self, request):

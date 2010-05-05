@@ -6,6 +6,7 @@ CMS Changelog
 Working
 -------
 
+  * Email other users from within admin.
   * WYSIWYG editors are now resizeable.
   * Added 'using' clause to pagination tag.
   * Improved scalability of pages content framework.
