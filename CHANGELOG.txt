@@ -3,7 +3,7 @@ CMS Changelog
 =============
 
 
-Working
+2.2 - 05/05/2010
 -------
 
   * Email other users from within admin.
