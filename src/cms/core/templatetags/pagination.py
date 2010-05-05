@@ -2,7 +2,6 @@
 
 
 from django import template
-from django.conf import settings
 from django.core.paginator import Paginator, InvalidPage
 from django.http import Http404
 from django.utils.html import escape
@@ -17,11 +16,11 @@ register = template.Library()
 @register.tag
 def paginate(parser, token):
     """Paginates the given queryset as sets it in the context as a variable."""
-    def handler(context, queryset, varname, page_size=10):
+    def handler(context, queryset, varname, page_size=10, pagination_key="page"):
         request = context["request"]
         # Parse the page number.
         try:
-            page_number = int(request.GET[settings.PAGINATION_KEY])
+            page_number = int(request.GET[pagination_key])
         except (KeyError, TypeError, ValueError):
             page_number = 1
         # Create the paginator.
@@ -29,10 +28,14 @@ def paginate(parser, token):
             page = Paginator(queryset, page_size).page(page_number)
         except InvalidPage:
             raise Http404, "There are no items on page %s." % page_number
+        page._pagination_key = pagination_key
         # Set the context variable.
         context[varname] = page
         return ""
-    return PatternNode(parser, token, handler, ("{queryset} into {page_size} as [varname]", "{queryset} as [varname]",))
+    return PatternNode(parser, token, handler, ("{queryset} into {page_size} as [varname] using [pagination_key]",
+                                                "{queryset} into {page_size} as [varname]",
+                                                "{queryset} as [varname] using [pagination_key]",
+                                                "{queryset} as [varname]"))
 
 
 @register.tag
@@ -51,7 +54,8 @@ def pagination(parser, token):
                             "next_page_number": item_page.next_page_number(),
                             "previous_page_number": item_page.previous_page_number(),
                             "start_index": item_page.start_index(),
-                            "end_index": item_page.end_index()})
+                            "end_index": item_page.end_index(),
+                            "pagination_key": item_page._pagination_key})
             return template.loader.render_to_string("pagination.html", context)
         finally:
             context.pop()
@@ -64,7 +68,7 @@ def pagination_url(parser, token):
     def handler(context, page_number):
         request = context["request"]
         params = request.GET.copy()
-        params[settings.PAGINATION_KEY] = page_number
+        params[context["pagination_key"]] = page_number
         url = "?%s" % urlencode(params)
         return escape(url)
     return PatternNode(parser, token, handler, ("{page_number}",))
