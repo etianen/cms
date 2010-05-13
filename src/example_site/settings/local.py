@@ -30,11 +30,6 @@ MEDIA_ROOT = os.path.expanduser("~/Sites/%s/media" % SITE_DOMAIN)
 SITE_DOMAIN = "localhost:8000"
 
 
-# Enable serving of static media files (slow, not for production).
-
-SERVE_STATIC_MEDIA = True
-
-
 # Disable prepending www, as local servers run from localhost.
 
 PREPEND_WWW = False
