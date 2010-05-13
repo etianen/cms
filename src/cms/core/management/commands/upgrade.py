@@ -33,9 +33,12 @@ class Command(NoArgsCommand):
             connection.cursor().execute("ALTER TABLE pages_page DROP INDEX `order`")
             connection.cursor().execute("ALTER TABLE pages_page MODIFY COLUMN `order` INTEGER UNSIGNED")
             
-            connection.cursor().execute("ALTER TABLE news_article ADD COLUMN date_created DATETIME NOT NULL")
-            connection.cursor().execute("UPDATE news_article SET date_created = NOW()")
-            connection.cursor().execute("ALTER TABLE news_article CHANGE COLUMN last_modified date_modified DATETIME NOT NULL")
+            try:
+                connection.cursor().execute("ALTER TABLE news_article ADD COLUMN date_created DATETIME NOT NULL")
+                connection.cursor().execute("UPDATE news_article SET date_created = NOW()")
+                connection.cursor().execute("ALTER TABLE news_article CHANGE COLUMN last_modified date_modified DATETIME NOT NULL")
+            except:
+                pass
             
             try:
                 connection.cursor().execute("ALTER TABLE events_event ADD COLUMN date_created DATETIME NOT NULL")
