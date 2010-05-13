@@ -82,11 +82,12 @@ LANGUAGE_CODE = "en-gb"
 
 SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
+SITE_PACKAGE = os.path.split(SITE_ROOT)[-1]
+
 
 # A list of additional installed applications.
 
-INSTALLED_APPS += ("cms.apps.feeds",
-                   "cms.apps.news",)
+INSTALLED_APPS += ("%s.apps.site" % SITE_PACKAGE,)
 
 
 # A list of registered contact form types.

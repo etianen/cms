@@ -200,20 +200,7 @@ class Content(object):
         return (("Page content", {"fields": field_names}),)
 
 
-class BaseContent(Content):
-    
-    """
-    Base class for all built-in CMS apps.
-    
-    This default implementation may be dynamically replaced by another by
-    setting the use_as_base flag to True on a content class.
-    """
-    
-    abstract = True
-    
-    content_primary = HtmlField("primary content",
-                                required=False)
-    
+BaseContent = None
     
 DefaultContent = None
     
