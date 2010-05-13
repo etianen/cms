@@ -215,15 +215,7 @@ class BaseContent(Content):
                                 required=False)
     
     
-class DefaultContent(BaseContent):
-    
-    """
-    Default class used for
-    """
-    
-    verbose_name = "content"
-    
-    verbose_name_plural = "content"
+DefaultContent = None
     
 
 # Permissions control.
