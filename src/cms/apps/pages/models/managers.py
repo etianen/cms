@@ -5,8 +5,6 @@ from __future__ import with_statement
 
 import threading
 
-from django.forms.fields import slug_re
-
 from cms.core.models.managers import PageBaseManager
     
     
@@ -148,22 +146,3 @@ class PageManager(PageBaseManager):
             return self.get_by_permalink(id)
         # Complain about an unrecognised argument type.
         raise TypeError, "Expected Page, int or basestring.  Found %s." % type(id).__name__
-    
-    def expand_page_url(self, slug):
-        """
-        Attempts to convert a page shortcut into a full URL.
-        
-        If the slug contains a forward slash, then it is returned unchanged.
-        
-        Otherwise, a page is looked up using the URL as a page permalink for a
-        page id.  If successful, the page URL is returned.  Otherwise, the slug
-        is returned unchanged.
-        """
-        if not slug_re.search(slug):
-            return slug
-        try:
-            page = self.get_page(slug)
-        except self.model.DoesNotExist:
-            return slug
-        else:
-            return page.get_absolute_url()
