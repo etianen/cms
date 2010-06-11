@@ -61,7 +61,7 @@ class PageMiddleware(object):
         # Only allow preview mode if the user is a logged in administrator.
         preview_mode = preview_mode and request.user.is_authenticated() and request.user.is_staff and request.user.is_active
         with publication_manager.select_published(not preview_mode):
-            resolver = urlresolvers.get_resolver(None)
+            resolver = urlresolvers.get_resolver(urlresolvers.get_urlconf())
             try:
                 # Try to match the given path with the URL conf. If it fails, then
                 # attempt to dispatch to a page.
