@@ -18,6 +18,7 @@
         {% endif %}
         {% if can_move %}
             <form method="post" action="{% url admin:pages_page_move_page %}">
+                {% csrf_token %}
                 <input type="hidden" name="page" value="{{page.id}}"/>
                 <input type="submit" class="move-up" title="Move this page up" name="direction" value="up"/>
                 <input type="submit" class="move-down" title="Move this page down" name="direction" value="down"/>
