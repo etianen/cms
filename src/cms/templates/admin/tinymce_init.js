@@ -3,38 +3,7 @@
 */
 
 
-(function(tinyMCE) {
-    
-    // Filebrowser callback.
-    function cmsFileBrowser (field_name, url, type, win) {
-        
-        var browserURL = "{% url admin:media_file_changelist %}?pop=1";
-        if (browserURL.indexOf("?") < 0) {
-            browserURL = browserURL + "?"
-        }
-        
-        if (type == "image") {
-            browserURL = browserURL + '&file__iregex=\x5C.(png|gif|jpg|jpeg)$';
-        }
-        if (type == "media") {
-            browserURL = browserURL + '&file__iregex=\x5C.(swf|flv|m4a|mov|wmv)$';
-        }
-        
-        tinyMCE.activeEditor.windowManager.open({
-            file: browserURL,
-            title: "Select file",
-            width: 800,
-            height: 600,
-            resizable: "yes",
-            inline: "yes",
-            close_previous: "no",
-            popup_css: false
-        }, {
-            window: win,
-            input: field_name
-        });
-        return false;
-    }
+(function($, tinyMCE) {
     
     // Initialize the editors.
     tinyMCE.init({
@@ -60,7 +29,7 @@
         extended_valid_elements : "iframe[src|width|height|name|align]",  // Permit embedded iframes.
         convert_urls: false,
         button_tile_map: true,  // Client-side optimization.
-        file_browser_callback: cmsFileBrowser
+        file_browser_callback: $.filebrowser.createCallback("{% url admin:media_file_changelist %}?pop=1")
     });
     
-}(tinyMCE));
+}(django.jQuery, tinyMCE));

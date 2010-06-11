@@ -1,12 +1,11 @@
 {% extends "admin/index.html" %}
-
-
-{% load pages_admin %}
+{% load pages_admin adminmedia %}
 
 
 {% block extrahead %}
     {{block.super}}
-    <script type="text/javascript" src="{{CMS_MEDIA_URL}}js/jquery/jquery.js"></script>
+    <script type="text/javascript" src="{% admin_media_prefix %}js/jquery.min.js"></script>
+    <script type="text/javascript" src="{% admin_media_prefix %}js/jquery.init.js"></script>
     <script type="text/javascript" src="{{CMS_MEDIA_URL}}js/dashboard.js"></script>
 {% endblock %}
 

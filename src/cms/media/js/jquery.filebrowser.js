@@ -5,18 +5,45 @@
 
 (function($, tinyMCE) {
     
-    // Get the important values from TinyMCE.
-    var win = tinyMCEPopup.getWindowArg("window");
-    var inputId = tinyMCEPopup.getWindowArg("input");
-    // Get the input from the opening window.
-    var input = $("#" + inputId, win.document);
-    
     // Define the filebrowser plugin.
     $.filebrowser = {}
+    
+    // Filebrowser callback for TinyMCE.
+    $.filebrowser.createCallback = function(browserURL) {
+        return function(field_name, url, type, win) {
+            if (browserURL.indexOf("?") < 0) {
+                browserURL = browserURL + "?"
+            }
+            if (type == "image") {
+                browserURL = browserURL + '&file__iregex=\x5C.(png|gif|jpg|jpeg)$';
+            }
+            if (type == "media") {
+                browserURL = browserURL + '&file__iregex=\x5C.(swf|flv|m4a|mov|wmv)$';
+            }
+            tinyMCE.activeEditor.windowManager.open({
+                file: browserURL,
+                title: "Select file",
+                width: 800,
+                height: 600,
+                resizable: "yes",
+                inline: "yes",
+                close_previous: "no",
+                popup_css: false
+            }, {
+                window: win,
+                input: field_name
+            });
+            return false;
+        }
+    }
     
     // Closes the filebrowser and sends the information back to the TinyMCE
     // editor.
     $.filebrowser.complete = function(permalink, title) {
+        // Get the important values from TinyMCE.
+        var win = tinyMCEPopup.getWindowArg("window");
+        // Get the input from the opening window.
+        var input = $("#" + tinyMCEPopup.getWindowArg("input"), win.document);
         input.attr("value", permalink);
         // Set the link dialogue values.
         $("#linktitle", win.document).attr("value", title);
@@ -57,12 +84,12 @@
                 close_previous: "no",
                 popup_css: false
             }, {
-                window: win,
-                input: inputId
+                window: tinyMCEPopup.getWindowArg("window"),
+                input: tinyMCEPopup.getWindowArg("input")
             });
             tinyMCEPopup.close();
             return false;
         });
     }
 
-}(jQuery, tinyMCE));
+}(django.jQuery, tinyMCE));

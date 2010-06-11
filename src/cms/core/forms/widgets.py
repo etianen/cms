@@ -19,9 +19,10 @@ class HtmlWidget(forms.Textarea):
 
     def get_media(self):
         """Returns the media used by the widget."""
+        filebrowser_js = settings.CMS_MEDIA_URL + "js/jquery.filebrowser.js"
         tiny_mce_js = settings.CMS_MEDIA_URL + "js/tiny_mce/tiny_mce.js"
         init_js =  self.init_js or reverse("admin:tinymce_init")
-        return forms.Media(js=(tiny_mce_js, init_js))
+        return forms.Media(js=(tiny_mce_js, filebrowser_js, init_js))
         
     media = property(get_media,
                      doc="The media used by the widget.")

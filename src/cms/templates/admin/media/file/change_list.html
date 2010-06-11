@@ -1,17 +1,21 @@
 {% extends "reversion/change_list.html" %}
+{% load adminmedia %}
 
 
 {% block extrahead %}
     {{block.super}}
     {% if is_popup %}
-        <script type="text/javascript" src="{{CMS_MEDIA_URL}}js/jquery/jquery.js"></script>
+        <script type="text/javascript" src="{% admin_media_prefix %}js/jquery.min.js"></script>
+        <script type="text/javascript" src="{% admin_media_prefix %}js/jquery.init.js"></script>
         <script type="text/javascript" src="{{CMS_MEDIA_URL}}js/tiny_mce/tiny_mce_popup.js"></script>
         <script type="text/javascript" src="{{CMS_MEDIA_URL}}js/jquery.filebrowser.js"></script>
         <script type="text/javascript">
         // <![CDATA[
-            $(function() {
-                $.filebrowser.initBrowser();
-            });
+            (function($) {
+                $(function() {
+                    $.filebrowser.initBrowser();
+                });
+            }(django.jQuery));
         // ]]>
         </script>
     {% endif %}
