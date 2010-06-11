@@ -1,1 +1,1 @@
-{{title}}{% ifnotequal title site_title %} - {{site_title}}{% endifnotequal %}
+{{title}}{% if title != site_title %} - {{site_title}}{% endif %}

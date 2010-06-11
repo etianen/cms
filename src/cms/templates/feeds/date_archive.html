@@ -7,16 +7,16 @@
         <ul>
             {% for year_archive in year_archives %}
                 <li class="{% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
-                    <a title="Archive for {{year_archive.grouper}}" class="{% ifequal year_archive.grouper date.year %}here{% endifequal %}" href="{% page_url page year_archive year_archive.grouper %}">{{year_archive.grouper}}</a>
-                    {% ifequal year_archive.grouper date.year %}
+                    <a title="Archive for {{year_archive.grouper}}" class="{% if year_archive.grouper == date.year %}here{% endif %}" href="{% page_url page year_archive year_archive.grouper %}">{{year_archive.grouper}}</a>
+                    {% if year_archive.grouper == date.year %}
                         <ul>
                             {% for month_archive in year_archive.list %}
                                 <li class="{% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
-                                    <a title="Archive for {{month_archive|date:'F Y'}}" class="{% ifequal month_archive.month date.month %}here{% endifequal %}" href="{% page_url page month_archive year_archive.grouper, month_archive.month %}">{{month_archive|date:"F"}}</a>
+                                    <a title="Archive for {{month_archive|date:'F Y'}}" class="{% if month_archive.month == date.month %}here{% endif %}" href="{% page_url page month_archive year_archive.grouper, month_archive.month %}">{{month_archive|date:"F"}}</a>
                                 </li>
                             {% endfor %}
                         </ul>
-                    {% endifequal %}
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>
