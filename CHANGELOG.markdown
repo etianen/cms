@@ -5,6 +5,7 @@ CMS Changelog
 HEAD
 ----
 
+*   Added CSRF protection to admin sitemap.
 *   Django 1.2 compatibility.
 
 
