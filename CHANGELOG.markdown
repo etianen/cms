@@ -5,6 +5,7 @@ CMS Changelog
 HEAD
 ----
 
+*   Upgraded TinyMCE to 3.3.7.
 *   Added CSRF protection to admin sitemap.
 *   Django 1.2 compatibility.
 
