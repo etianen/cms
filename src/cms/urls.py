@@ -38,4 +38,4 @@ if settings.MEDIA_DEBUG:
                             media_url(settings.MEDIA_URL, settings.MEDIA_ROOT),)
 
 
-handler500 = "cms.apps.pages.views.handler500"
+handler500 = "cms.core.views.handler500"
