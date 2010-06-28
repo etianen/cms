@@ -113,7 +113,8 @@ def rss(request):
     feed = DefaultFeed(title=title,
                        link=fullpath % page.get_absolute_url(),
                        description=page.meta_description or homepage.meta_description,
-                       language=settings.LANGUAGE_CODE)
+                       language=settings.LANGUAGE_CODE,
+                       feed_url=fullpath % page.reverse("rss"))
     # Generate the feed body.
     for article in all_articles[:30]:
         feed.add_item(title=article.title,
