@@ -1,2 +1,1 @@
-"""Core CMS functionality."""
-
+"""Page publication and managment."""

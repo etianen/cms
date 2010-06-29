@@ -6,7 +6,6 @@ from django.core.urlresolvers import reverse
 
 from cms.core.templatetags import PatternNode
 from cms.core.admin import site
-from cms.apps.pages.admin import PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.apps.pages.models import Page
 
 
@@ -22,6 +21,10 @@ def sitemap(parser, token):
         
     """
     def handler(context):
+        # Perform a conditional import so as not to load the admin module if this
+        # is called by a {% dynamic_tag %}
+        from cms.apps.pages.admin import PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
+        # Actually do the tag.
         request = context["request"]
         page_admin = site._registry[Page]
         try:
@@ -50,6 +53,9 @@ def sitemap_entry(parser, token):
     
     """
     def handler(context, page):
+        # Perform a conditional import so as not to load the admin module if this
+        # is called by a {% dynamic_tag %}
+        from cms.apps.pages.admin import PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
         # Extract required context variables.
         page_admin = site._registry[Page]
         request = context["request"]
