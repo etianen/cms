@@ -16,7 +16,7 @@ class PublishedModelAdmin(admin.ModelAdmin):
     
     actions = ("publish_selected", "unpublish_selected",)
     
-    change_form_template = "admin/pages/publishedmodel/change_form.html"
+    change_form_template = "admin/core/publishedmodel/change_form.html"
     
     publication_fieldsets = (("Publication", {"fields": ("is_online",),
                                               "classes": ("collapse",),}),)
