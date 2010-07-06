@@ -11,7 +11,7 @@ to the right place.
 
 **This is a preview release of an unfinished product. It's stable, secure and
 fast, but the API is still subject to change, and the documentation is pretty
-thin. Please contact me if you have any questions.**
+thin. Please [contact](mailto:dave@etianen.com) me if you have any questions.**
 
 
 Licence
@@ -36,7 +36,7 @@ More information
 Dave Hall is a freelance web developer, based in Cambridge, UK. You can usually
 find him on the Internet in a number of different places:
 
-    * http://www.etianen.com/
-    * http://www.etianen.com/feeds/latest/
-    * http://twitter.com/etianen
-    * http://www.google.com/profiles/david.etianen
+*   http://www.etianen.com/
+*   http://www.etianen.com/feeds/latest/
+*   http://twitter.com/etianen
+*   http://www.google.com/profiles/david.etianen
