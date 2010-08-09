@@ -36,7 +36,7 @@ More information
 Dave Hall is a freelance web developer, based in Cambridge, UK. You can usually
 find him on the Internet in a number of different places:
 
-*   http://www.etianen.com/
-*   http://www.etianen.com/feeds/latest/
-*   http://twitter.com/etianen
-*   http://www.google.com/profiles/david.etianen
+*   [Website](http://www.etianen.com/ "Dave Hall's homepage")
+*   [Blog](http://www.etianen.com/blog/developers/ "Dave Hall's blog")
+*   [Twitter](http://twitter.com/etianen "Dave Hall on Twitter")
+*   [Google Profile](http://www.google.com/profiles/david.etianen "Dave Hall's Google profile")
