@@ -2,8 +2,8 @@ CMS Changelog
 =============
 
 
-HEAD
-----
+2.3 - 09/08/2010
+----------------
 
 *   Upgraded TinyMCE to 3.3.7.
 *   Added CSRF protection to admin sitemap.
