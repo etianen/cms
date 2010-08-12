@@ -24,9 +24,9 @@ SITE_DOMAIN = "example.com"
 
 # Database settings.
 
-DATABASE_NAME = "ges"
+DATABASE_NAME = ""
 
-DATABASE_USER = "david"
+DATABASE_USER = DATABASE_NAME
 
 DATABASE_PASSWORD = ""
 
