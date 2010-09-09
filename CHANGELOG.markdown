@@ -2,6 +2,12 @@ CMS Changelog
 =============
 
 
+Master
+------
+
+*   Improved IE7 compatibility in admin system.
+
+
 2.3 - 09/08/2010
 ----------------
 
