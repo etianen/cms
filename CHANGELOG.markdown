@@ -5,6 +5,7 @@ CMS Changelog
 Master
 ------
 
+*   Upgraded TinyMCE to 3.3.9.
 *   Improved IE7 compatibility in admin system.
 
 

@@ -37,8 +37,7 @@
         }
     }
     
-    // Closes the filebrowser and sends the information back to the TinyMCE
-    // editor.
+    // Closes the filebrowser and sends the information back to the TinyMCE editor.
     $.filebrowser.complete = function(permalink, title) {
         // Get the important values from TinyMCE.
         var win = tinyMCEPopup.getWindowArg("window");
