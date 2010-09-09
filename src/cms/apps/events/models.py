@@ -35,6 +35,8 @@ class Event(ArticleBase):
     
     class Meta:
         ordering = ("-is_featured", "start_date", "id")
+        # HACK: This should be picked up from ArticleBase, but Django doesn't seem to implement this.
+        unique_together = (("url_title", "feed",),)
 
 
 class EventSitemap(sitemaps.PageBaseSitemap):

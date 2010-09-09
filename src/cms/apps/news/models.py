@@ -33,6 +33,8 @@ class Article(ArticleBase):
     class Meta:
         verbose_name = "news article"
         ordering = ("-is_featured", "-publication_date", "-id")
+        # HACK: This should be picked up from ArticleBase, but Django doesn't seem to implement this.
+        unique_together = (("url_title", "feed",),)
 
 
 class ArticleSitemap(sitemaps.PageBaseSitemap):

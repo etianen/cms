@@ -5,14 +5,11 @@ from django.contrib import admin
 
 from cms.core.admin import site, PageBaseAdmin
 from cms.apps.news.models import Article
-from cms.apps.news.forms import ArticleForm
 
 
 class ArticleAdmin(PageBaseAdmin):
     
     """Admin settings used by news articles."""
-    
-    form = ArticleForm
     
     date_hierarchy = "publication_date"
     
