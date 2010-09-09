@@ -71,24 +71,8 @@
             $.filebrowser.complete(permalink, title)
             return false;
         });
-        // Make the add link clickable.
-        $("a.addlink").click(function() {
-            tinyMCE.activeEditor.windowManager.open({
-                file: $(this).attr("href") + "&_tinymce=1",
-                title: "Add file",
-                width: 760,
-                height: 400,
-                resizable: "yes",
-                inline: "yes",
-                close_previous: "no",
-                popup_css: false
-            }, {
-                window: tinyMCEPopup.getWindowArg("window"),
-                input: tinyMCEPopup.getWindowArg("input")
-            });
-            tinyMCEPopup.close();
-            return false;
-        });
+        // Made the add link flagged for TinyMCE.
+        $("a.addlink").attr("href", $("a.addlink").attr("href") + "&_tinymce=1");
     }
 
 }(django.jQuery, tinyMCE, window.tinyMCEPopup));
