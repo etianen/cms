@@ -46,6 +46,7 @@ body.dashboard div.sitemap-entry {
     position: relative;
     padding: 5px 7px 6px 7px;
     margin: 0px 0px 5px 0px;
+    height: 14px;
 }
 
 body.dashboard div.sitemap-entry a.title,
