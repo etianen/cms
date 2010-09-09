@@ -3,7 +3,7 @@
 */
 
 
-(function($, tinyMCE) {
+(function($, tinyMCE, tinyMCEPopup) {
     
     // Define the filebrowser plugin.
     $.filebrowser = {}
@@ -59,7 +59,6 @@
         }
         // Close the dialogue.
         tinyMCEPopup.close();
-        return false;
     }
     
     // Initializes the popup file browser.
@@ -70,6 +69,7 @@
             var title = img.attr("title");
             var permalink = img.attr("cms:permalink");
             $.filebrowser.complete(permalink, title)
+            return false;
         });
         // Make the add link clickable.
         $("a.addlink").click(function() {
@@ -91,4 +91,4 @@
         });
     }
 
-}(django.jQuery, tinyMCE));
+}(django.jQuery, tinyMCE, window.tinyMCEPopup));

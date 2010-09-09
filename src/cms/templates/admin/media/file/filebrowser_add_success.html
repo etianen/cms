@@ -11,11 +11,11 @@
         <script type="text/javascript" src="{{CMS_MEDIA_URL}}js/jquery.filebrowser.js"></script>
         <script type="text/javascript">
         // <![CDATA[
-            (function($) {
-                $(function() {
+            (function($, tinyMCE, tinyMCEPopup) {
+                tinyMCEPopup.onInit.add(function() {
                     $.filebrowser.complete("{{permalink|escapejs}}", "{{title|escapejs}}");
                 });
-            }(django.jQuery));
+            }(django.jQuery, tinyMCE, tinyMCEPopup));
         // ]]>
         </script>
     </head>
