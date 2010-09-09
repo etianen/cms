@@ -134,6 +134,20 @@ class Thumbnail(object):
         """Returns the thumbnail as a XHTML image tag."""
         return str(unicode(self))
     
+    
+# Cache of image size information, used to cut down massively on disk hits.
+_size_cache = {}
+
+
+def _load_once(path):
+    """
+    Loads the image on the first call to next, further calls to next return
+    the same image.
+    """
+    image_data = Image.open(path)
+    while True:
+        yield image_data
+    
 
 def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
     """
@@ -142,14 +156,30 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
     If the image file is missing or corrupted, then an IOError is raised.
     """
     # Load the image data.
-    image_data = Image.open(image.path)
+    image_loader = _load_once(image.path)
     # Get the desired generation method.
     try:
         display_size_callback, image_size_callback, resize_callback, folder = _methods[method]
     except KeyError:
-        raise ValueError, "'%' is not a valid thumbnail generation method. Accepted methods are: %s" % (method, ", ".join(_methods.iterkeys()))
+        raise ValueError, "'%s' is not a valid thumbnail generation method. Accepted methods are: %s" % (method, ", ".join(_methods.iterkeys()))
+    # Look up image modified timestamp.
+    try:
+        image_timestamp = os.stat(image.path).st_mtime
+    except OSError:
+        raise IOError("Cannot generate thumbnail: '%s' does not exist")
+    # Look up the image size.
+    def load_size():
+        image_size = Size(*image_loader.next().size)
+        _size_cache[image.path] = (image_timestamp, image_size)
+        return image_size
+    try:
+        file_timestamp, image_size = _size_cache[image.path]
+    except KeyError:
+        image_size = load_size()
+    else:
+        if image_timestamp > file_timestamp:
+            image_size = load_size()
     # Calculate the final width and height of the thumbnail.
-    image_size = Size(*image_data.size)
     thumbnail_display_size = display_size_callback(image_size, Size(width, height))
     thumbnail_image_size = image_size_callback(thumbnail_display_size, thumbnail_display_size.intersect(image_size))
     # If the file data and thumbnail data are identical, don't bother making a thumbnail.
@@ -160,13 +190,7 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
         # Calculate the various file paths.
         thumbnail_name = "thumbnails/%s/%s/%s" % (folder, thumbnail_image_size, image.name)
         thumbnail_path = storage.path(thumbnail_name)
-        # Make any intermediate directories.
-        try:
-            os.makedirs(os.path.dirname(thumbnail_path))
-        except OSError:
-            pass
         # Check whether the thumbnail exists, and is more recent than the image.
-        image_timestamp = os.stat(image.path).st_mtime 
         try:
             thumbnail_timestamp = os.stat(thumbnail_path).st_mtime
         except OSError:
@@ -176,6 +200,13 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
             generation_required = image_timestamp > thumbnail_timestamp
         # If we need to generate the thumbnail, then generate it!
         if generation_required:
+            # Make any intermediate directories.
+            try:
+                os.makedirs(os.path.dirname(thumbnail_path))
+            except OSError:
+                pass
+            # Load the image data.
+            image_data = image_loader.next()
             # Use efficient image loading if this would be sensible.
             if image_size.width < thumbnail_image_size.width and image_size.height < thumbnail_image_size.height:
                 image_data.draft(None, thumbnail_image_size)

@@ -5,8 +5,11 @@ CMS Changelog
 Master
 ------
 
+*   Improved thumbnailing efficiency using an in-memory size cache.
+*   Fixed inline image upload problem in Chrome.
+*   Fixed inline image upload problem in IE7.
 *   Upgraded TinyMCE to 3.3.9.
-*   Improved IE7 compatibility in admin system.
+*   Fixed IE7 rendering of dashboard sitemap.
 
 
 2.3 - 09/08/2010
