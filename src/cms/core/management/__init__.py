@@ -2,7 +2,8 @@
 
 
 from django.conf import settings
-from django.contrib.auth.models import Permission
+from django.contrib.auth import models as auth_app
+from django.contrib.auth.models import Permission, Group, User
 from django.contrib.sites import models as sites_app
 from django.contrib.sites.models import Site
 from django.contrib.sites.management import create_default_site

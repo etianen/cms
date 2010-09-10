@@ -5,6 +5,7 @@ CMS Changelog
 Master
 ------
 
+*   Added command to generate default admin groups.
 *   Added cache for admin sitemap to greatly improve load times.
 *   Improved thumbnailing efficiency using an in-memory size cache.
 *   Fixed inline image upload problem in Chrome.

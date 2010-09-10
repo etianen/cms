@@ -72,9 +72,9 @@ ROOT_URLCONF = "cms.urls"
 
 # Application settings.
 
-INSTALLED_APPS = ("django.contrib.auth",
-                  "django.contrib.contenttypes",
+INSTALLED_APPS = ("django.contrib.contenttypes",
                   "django.contrib.sessions",
+                  "django.contrib.auth",
                   "django.contrib.admin",
                   "django.contrib.sitemaps",
                   "django.contrib.sites",
