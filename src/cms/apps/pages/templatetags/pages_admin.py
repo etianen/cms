@@ -25,7 +25,7 @@ def sitemap(parser, token):
     def handler(context):
         # Try to use a cached sitemap.
         last_modified = Page.objects.aggregate(last_modified=Max("date_modified"))["last_modified"]
-        cache_key = "sitemap:%s" % last_modified
+        cache_key = "sitemap:%s" % (str(last_modified).replace(" ", "-"))
         cached_sitemap = cache.get(cache_key)
         if cached_sitemap is None:
             # Perform a conditional import so as not to load the admin module if this
