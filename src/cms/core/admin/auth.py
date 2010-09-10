@@ -26,7 +26,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = ((None, {"fields": ("username", "is_staff", "is_active",)}),
                  ("Personal information", {"fields": ("first_name", "last_name", "email",)}),
                  ("Groups", {"fields": ("groups",)}),
-                 ("Advanced permissions", {"fields": ("user_permissions",),
+                 ("Advanced permissions", {"fields": ("user_permissions", "is_superuser"),
                                            "classes": ("collapse",)}),)
     
     filter_horizontal = ("user_permissions", "groups",)
