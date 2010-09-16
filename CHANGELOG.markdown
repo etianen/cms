@@ -2,9 +2,10 @@ CMS Changelog
 =============
 
 
-Master
-------
+2.3.1 - 16/09/2010
+------------------
 
+*   Added advanced permissions to user admin page.
 *   Added command to generate default admin groups.
 *   Added cache for admin sitemap to greatly improve load times.
 *   Improved thumbnailing efficiency using an in-memory size cache.
