@@ -9,7 +9,7 @@
                             <span class="date">{{article.date_field|date}}</span>
                             <span class="title">{{article}}</span>
                         </span>
-                        <span class="summary">{{article.summary|default:article.content|striptags|truncatewords:5}}</span>
+                        <span class="summary">{{article.summary|default:article.content|striptags|truncatewords:5|safe}}</span>
                     </a>
                 </li>
             {% endfor %}
