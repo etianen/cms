@@ -59,3 +59,13 @@ class File(models.Model):
     
     class Meta:
         ordering = ("title",)
+        
+        
+class ImageRefField(models.ForeignKey):
+    
+    """A foreign key to a File, constrained to only select image files."""
+    
+    def __init__(self, **kwargs):
+        kwargs["to"] = File
+        kwargs["limit_choices_to"] = {"file__iregex": ur"^.+\.(png|gif|jpg|jpeg)$"}
+        super(ImageRefField, self).__init__(**kwargs)
