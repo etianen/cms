@@ -5,7 +5,6 @@ from django import template
 from django.core.paginator import Paginator, InvalidPage
 from django.http import Http404
 from django.utils.html import escape
-from django.utils.http import urlencode
 
 from cms.core.templatetags import PatternNode
 
@@ -69,7 +68,7 @@ def pagination_url(parser, token):
         request = context["request"]
         params = request.GET.copy()
         params[context["pagination_key"]] = page_number
-        url = "?%s" % urlencode(params)
+        url = "?%s" % params.urlencode()
         return escape(url)
     return PatternNode(parser, token, handler, ("{page_number}",))
 
