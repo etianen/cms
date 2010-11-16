@@ -5,6 +5,7 @@ import os
 
 from PIL import Image  #@UnresolvedImport
 
+from django.conf import settings
 from django.core.files.storage import default_storage
 from django.utils import html
 
@@ -187,8 +188,19 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
         thumbnail_name = image.name
         thumbnail_path = image.path
     else:
+        # Deal with absolute and relative image names.
+        if os.path.isabs(image.name):
+            if image.name.startswith(settings.MEDIA_ROOT):
+                image_name = os.path.relpath(image.name, settings.MEDIA_ROOT)
+            else:
+                if image.name.startswith(settings.SITE_MEDIA_ROOT):
+                    image_name = os.path.join("site", os.path.relpath(image.name, settings.SITE_MEDIA_ROOT))
+                else:
+                    raise IOError("%s is outside of the site's MEDIA_ROOT and SITE_MEDIA_ROOT." % image.name)
+        else:
+            image_name = image.name
         # Calculate the various file paths.
-        thumbnail_name = "thumbnails/%s/%s/%s" % (folder, thumbnail_image_size, image.name)
+        thumbnail_name = "thumbnails/%s/%s/%s" % (folder, thumbnail_image_size, image_name)
         thumbnail_path = storage.path(thumbnail_name)
         # Check whether the thumbnail exists, and is more recent than the image.
         try:
