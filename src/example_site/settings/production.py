@@ -37,6 +37,8 @@ MEDIA_ROOT = "/var/uploads/%s" % SITE_DOMAIN
 
 MEDIA_URL = "/media/"
 
+FILE_UPLOAD_PERMISSIONS = 0644
+
 
 # Email settings.
 
