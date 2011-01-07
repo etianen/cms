@@ -77,6 +77,14 @@ class FileAdmin(VersionAdmin):
 
     change_list_template = "admin/media/file/change_list.html"
     
+    # Customizations.
+    
+    def lookup_allowed(self, lookup):
+        """Allows the file iregex lookup needed by TinyMCE integration."""
+        if lookup == "file__iregex":
+            return True
+        return super(FileAdmin, self).lookup_allowed(lookup)
+    
     # Custom actions.
     
     def update_folder_action(self, request, queryset, folder):
