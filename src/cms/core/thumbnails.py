@@ -183,22 +183,22 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
     # Calculate the final width and height of the thumbnail.
     thumbnail_display_size = display_size_callback(image_size, Size(width, height))
     thumbnail_image_size = image_size_callback(thumbnail_display_size, thumbnail_display_size.intersect(image_size))
+    # Get the image name.
+    if os.path.isabs(image.name):
+        if image.name.startswith(settings.MEDIA_ROOT):
+            image_name = os.path.relpath(image.name, settings.MEDIA_ROOT)
+        else:
+            if image.name.startswith(settings.SITE_MEDIA_ROOT):
+                image_name = os.path.join("site", os.path.relpath(image.name, settings.SITE_MEDIA_ROOT))
+            else:
+                raise IOError("%s is outside of the site's MEDIA_ROOT and SITE_MEDIA_ROOT." % image.name)
+    else:
+        image_name = image.name
     # If the file data and thumbnail data are identical, don't bother making a thumbnail.
     if image_size == thumbnail_image_size:
-        thumbnail_name = image.name
+        thumbnail_name = image_name
         thumbnail_path = image.path
     else:
-        # Deal with absolute and relative image names.
-        if os.path.isabs(image.name):
-            if image.name.startswith(settings.MEDIA_ROOT):
-                image_name = os.path.relpath(image.name, settings.MEDIA_ROOT)
-            else:
-                if image.name.startswith(settings.SITE_MEDIA_ROOT):
-                    image_name = os.path.join("site", os.path.relpath(image.name, settings.SITE_MEDIA_ROOT))
-                else:
-                    raise IOError("%s is outside of the site's MEDIA_ROOT and SITE_MEDIA_ROOT." % image.name)
-        else:
-            image_name = image.name
         # Calculate the various file paths.
         thumbnail_name = "thumbnails/%s/%s/%s" % (folder, thumbnail_image_size, image_name)
         thumbnail_path = storage.path(thumbnail_name)
