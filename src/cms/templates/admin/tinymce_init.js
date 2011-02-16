@@ -14,7 +14,7 @@
         paste_auto_cleanup_on_paste: true,
         paste_remove_spans: true,
         paste_remove_styles: true,
-        theme_advanced_buttons1: "code,|,formatselect,styleselect,|,bullist,numlist,table,|,bold,italic,|,sub,sup,|,link,unlink,image",
+        theme_advanced_buttons1: "code,|,formatselect,styleselect,|,bullist,numlist,table,hr,|,bold,italic,|,sub,sup,|,link,unlink,image",
         theme_advanced_buttons2: "",
         theme_advanced_buttons3: "",
         theme_advanced_resizing: true,
