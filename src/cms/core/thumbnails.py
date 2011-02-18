@@ -238,8 +238,6 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
                     os.unlink(thumbnail_path)
                 except OSError:
                     pass
-                # Re-raise the original exception.
-                raise
     # Return the thumbnail object.
     thumbnail_url = storage.url(thumbnail_name)
     return Thumbnail(thumbnail_name, thumbnail_path, thumbnail_url, thumbnail_display_size, thumbnail_image_size)
