@@ -79,11 +79,11 @@ class FileAdmin(VersionAdmin):
     
     # Customizations.
     
-    def lookup_allowed(self, lookup):
+    def lookup_allowed(self, lookup, *args, **kwargs):
         """Allows the file iregex lookup needed by TinyMCE integration."""
         if lookup == "file__iregex":
             return True
-        return super(FileAdmin, self).lookup_allowed(lookup)
+        return super(FileAdmin, self).lookup_allowed(lookup, *args, **kwargs)
     
     # Custom actions.
     
