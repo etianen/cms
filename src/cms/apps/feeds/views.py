@@ -101,7 +101,6 @@ def rss(request):
     page = request.page
     content = page.content
     article_model = content.article_model
-    fullpath = "http://%s%%s" % page.site.domain 
     homepage = page.homepage
     # Generate the feed title.
     page_title = page.browser_title or page.title
@@ -111,14 +110,14 @@ def rss(request):
     all_articles = content.get_articles().order_by("-%s" % article_model.date_field_name)
     # Generate the head.
     feed = DefaultFeed(title=title,
-                       link=fullpath % page.get_absolute_url(),
+                       link=request.build_absolute_uri(page.get_absolute_url()),
                        description=page.meta_description or homepage.meta_description,
                        language=settings.LANGUAGE_CODE,
-                       feed_url=fullpath % page.reverse("rss"))
+                       feed_url=request.build_absolute_uri(page.reverse("rss")))
     # Generate the feed body.
     for article in all_articles[:30]:
         feed.add_item(title=article.title,
-                      link=fullpath % article.get_absolute_url(),
+                      link=request.build_absolute_uri(article.get_absolute_url()),
                       description=html.process(article.summary or article.content))
     # Generate the response.
     response = HttpResponse(mimetype=feed.mime_type)
