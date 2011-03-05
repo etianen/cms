@@ -2,6 +2,7 @@
 
 
 import re
+from functools import wraps
 
 from django import template
 
@@ -74,4 +75,30 @@ class PatternNode(template.Node):
             kwargs[key] = value.resolve(context)
         return self.handler(context, **kwargs)
 
+
+def scoped_inclusion_tag(register, template_name, *patterns):
+    """
+    A decorator used to defined a more versatile inclusion tag.
     
+    The decorated function will be passed the context object and the value of any variables
+    parsed from the patterns. The function must return a dictionary of params which will
+    be pushed onto the context and used to render the named template.
+    
+    Once the render has finished, the context will be popped and rendering of the rest of the
+    outer template will resume.
+    """
+    def decorator(func):
+        @register.tag
+        @wraps(func)
+        def compiler(parser, token):
+            def handler(context, *args, **kwargs):
+                params = func(context, *args, **kwargs)
+                context.push()
+                context.update(params)
+                try:
+                    return template.loader.render_to_string(template_name, context)
+                finally:
+                    context.pop()
+            return PatternNode(parser, token, handler, patterns)
+        return func
+    return decorator
