@@ -34,11 +34,6 @@ CMS_MEDIA_ROOT = os.path.join(CMS_ROOT, "media")
 MEDIA_DEBUG = False
 
 
-# Database settings.
-
-DATABASE_ENGINE = "mysql"
-
-
 # Template settings.
 
 TEMPLATE_LOADERS = ("django.template.loaders.filesystem.load_template_source",

@@ -24,11 +24,16 @@ SITE_DOMAIN = "example.com"
 
 # Database settings.
 
-DATABASE_NAME = "example"
-
-DATABASE_USER = DATABASE_NAME
-
-DATABASE_PASSWORD = ""
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "example",
+        "USER": "example",
+        "PASSWORD": "",
+        "HOST": "",
+        "PORT": "",
+    }
+}
 
 
 # Absolute path to the directory where all uploaded media files are stored.
@@ -66,9 +71,11 @@ PREPEND_WWW = True
 
 # Error reporting settings.  Use these to set up automatic error notifications.
 
-ADMINS = (("Etianen.com Error Reporting", "errors@etianen.com"),)
+ADMINS = (
+    ("Etianen.com Error Reporting", "errors@etianen.com"),
+)
 
-MANAGERS = ()
+MANAGERS = ADMINS
 
 SEND_BROKEN_LINK_EMAILS = False
 
@@ -132,6 +139,6 @@ CACHE_MIDDLEWARE_KEY_PREFIX = SITE_DOMAIN
 # generated from your site domain, database password and email password.  If,
 # for some reason, these are not considered secure, you can override it below.
 
-SECURE_SETTINGS = (SITE_DOMAIN, DATABASE_PASSWORD, EMAIL_HOST_PASSWORD)
+SECURE_SETTINGS = (SITE_DOMAIN, DATABASES["default"]["PASSWORD"], EMAIL_HOST_PASSWORD)
 
 SECRET_KEY = hashlib.sha1("".join(SECURE_SETTINGS)).hexdigest()

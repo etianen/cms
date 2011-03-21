@@ -37,8 +37,4 @@ PREPEND_WWW = False
 
 # Optional separate database settings
 
-DATABASE_NAME = DATABASE_NAME
-
-DATABASE_USER = getpass.getuser()
-
-DATABASE_PASSWORD = DATABASE_PASSWORD
+DATABASES["default"]["USER"] = getpass.getuser()

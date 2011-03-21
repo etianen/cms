@@ -57,7 +57,7 @@ class EnumField(models.PositiveSmallIntegerField):
         # Only basestrings and ints are allowed.
         raise ValidationError, "'%s' should be a basestring or an int." % value
         
-    def get_db_prep_value(self, value):
+    def get_prep_value(self, value):
         """Converts the given value to an integer."""
         if value is None:
             return value
