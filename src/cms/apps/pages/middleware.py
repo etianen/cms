@@ -27,6 +27,7 @@ class LazyPage(object):
     def __get__(self, request, obj_type=None):
         """Loads the page on first attribute access."""
         if not hasattr(request, REQUEST_PAGE_CACHE_ATTRIBUTE):
+            # Load the individual page.
             try:
                 page = Page.objects.get_by_path(request.path)
             except Page.DoesNotExist:
