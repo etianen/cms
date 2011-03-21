@@ -2,6 +2,14 @@ CMS Changelog
 =============
 
 
+2.3.2 - 21/03/2010
+------------------
+
+*   Compatibility fix for django 1.2.5.
+*   Better file upload permission handling.
+*   WSIWYG tweaks.
+
+
 2.3.1 - 16/09/2010
 ------------------
 
