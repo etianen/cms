@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html>
-
+    {% load pages %}
     <head>
         
         <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="keywords" content="{% block meta_keywords %}{% meta_keywords %}{% endblock %}">
+        <meta name="description" content="{% block meta_description %}{% meta_description %}{% endblock %}">
+        <meta name="robots" content="{% block meta_robots %}{% meta_robots %}{% endblock %}">
         
-        <title>{% block title %}{% endblock %}</title>
+        <title>{% block title %}{% title %}{% endblock %}</title>
         
         <link rel="stylesheet" href="{{STATIC_URL}}site/css/layout.css">
         <link rel="stylesheet" href="{{STATIC_URL}}site/css/content.css">
@@ -34,7 +37,7 @@
         <nav id="nav-primary">
             <div class="container">
                 
-                {% block nav_primary %}{% endblock %}
+                {% nav_primary %}
                 
                 <div class="clear"></div>
                 
@@ -45,13 +48,13 @@
             <div class="container">
             
                 <article id="content-primary">
-                    {% block breadcrumbs %}{% endblock %}
-                    <h1>{% block header %}{% endblock %}</h1>
-                    {% block content_primary %}{% endblock %}
+                    {% block breadcrumbs %}{% breadcrumbs %}{% endblock %}
+                    <h1>{% block header %}{% header %}{% endblock %}</h1>
+                    {% block content_primary %}{% content "content_primary" %}{% endblock %}
                 </article>
             
                 <aside id="content-secondary">
-                    {% block content_secondary %}{% endblock %}
+                    {% block content_secondary %}{% content "content_secondary" %}{% endblock %}
                 </aside>
             
                 <div class="clear"></div>

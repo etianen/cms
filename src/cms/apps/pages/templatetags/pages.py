@@ -163,10 +163,7 @@ def meta_description(parser, token):
     """
     def handler(context, description=None):
         page = context["page"]
-        description = description or context.get("meta_description", "")
-        while not description and page:
-            description = page.meta_description
-            page = page.parent
+        description = description or context.get("meta_description", page.meta_description)
         return conditional_escape(description)
     return PatternNode(parser, token, handler, ("{description}", "",))
 
@@ -192,10 +189,7 @@ def meta_keywords(parser, token):
     """
     def handler(context, keywords=None):
         page = context["page"]
-        keywords = keywords or context.get("meta_keywords", "")
-        while not keywords and page:
-            keywords = page.meta_keywords
-            page = page.parent
+        keywords = keywords or context.get("meta_keywords", page.meta_keywords)
         return conditional_escape(keywords)
     return PatternNode(parser, token, handler, ("{keywords}", "",))
 

@@ -89,7 +89,7 @@ class PageBase(PublishedModel):
 
     meta_description = models.TextField("description",
                                         blank=True,
-                                        help_text="A brief description of the contents of this page. Leave blank to use to use the parent page description.")
+                                        help_text="A brief description of the contents of this page.")
     
     sitemap_priority = models.FloatField("priority",
                                          choices=settings.SEO_PRIORITIES,
@@ -125,23 +125,6 @@ class PageBase(PublishedModel):
                                       blank=True,
                                       default=None,
                                       help_text="Use this to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis. Leave blank to use the setting from the parent page.")
-
-    def render_to_response(self, request, template, context=None, **kwargs):
-        """
-        Renders a template as a HttpResponse using the context of this page.
-        
-        The template should extend the "pages/base.html" template for everything
-        to work correctly.
-        """
-        page_context = {"meta_description": self.meta_description,
-                        "meta_keywords": self.meta_keywords,
-                        "robots_index": self.robots_index,
-                        "robots_archive": self.robots_archive,
-                        "robots_follow": self.robots_follow,
-                        "title": self.browser_title or self.title,
-                        "header": self.title}
-        page_context.update(context or {})
-        return render(request, template, page_context, **kwargs)
     
     # Base model methods.
     
