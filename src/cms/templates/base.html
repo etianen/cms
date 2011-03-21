@@ -45,6 +45,7 @@
             <div class="container">
             
                 <article id="content-primary">
+                    {% block breadcrumbs %}{% endblock %}
                     <h1>{% block header %}{% endblock %}</h1>
                     {% block content_primary %}{% endblock %}
                 </article>

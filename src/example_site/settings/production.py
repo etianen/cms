@@ -24,7 +24,7 @@ SITE_DOMAIN = "example.com"
 
 # Database settings.
 
-DATABASE_NAME = ""
+DATABASE_NAME = "example"
 
 DATABASE_USER = DATABASE_NAME
 

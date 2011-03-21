@@ -6,9 +6,9 @@ using the django-admin.py utility.
 """
 
 
-import os  # @UnusedImport
+import os, getpass
 
-from production import *  # @UnusedWildImport
+from production import *
 
 
 # Run in debug mode.
@@ -37,21 +37,8 @@ PREPEND_WWW = False
 
 # Optional separate database settings
 
-#DATABASE_NAME = ""
+DATABASE_NAME = DATABASE_NAME
 
-#DATABASE_USER = ""
+DATABASE_USER = getpass.getuser()
 
-#DATABASE_PASSWORD = ""
-
-
-# Optional separate email settings.
-
-#EMAIL_HOST = "smtp.gmail.com"
-
-#EMAIL_HOST_USER = ""
-
-#EMAIL_HOST_PASSWORD = ""
-
-#EMAIL_PORT = 587
-
-#EMAIL_USE_TLS = True
+DATABASE_PASSWORD = DATABASE_PASSWORD
