@@ -1,5 +1,5 @@
 {% extends "admin/index.html" %}
-{% load cms_admin adminmedia %}
+{% load adminmedia pages_admin %}
 
 
 {% block extrahead %}
@@ -13,7 +13,7 @@
 
 {% block sidebar %}
     {% if "cms.apps.pages" in settings.INSTALLED_APPS %}
-        {% dynamic_tag cms.apps.pages.templatetags.pages_admin.sitemap %}
+        {% sitemap %}
     {% else %}
         {{block.super}}
     {% endif %}

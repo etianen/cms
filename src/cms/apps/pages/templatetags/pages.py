@@ -32,8 +32,8 @@ def html(text):
     return mark_safe(text)
     
 
-@register.tag
-def content(parser, token):
+@register.simple_tag(takes_context=True)
+def content(context, content_area, inherited_flag="not-inherited"):
     """
     Renders the named content area of the current page.
     
@@ -41,27 +41,32 @@ def content(parser, token):
     
         {% content "content_primary" %}
         
-    If you use the 'inherit' keyword, and the page content area is blank, then
+    If you use the 'inherited' keyword, and the page content area is blank, then
     the parent page content area will be rendered instead::
     
         {% content "content_primary" inherited %}
         
     """
-    def handler(context, content_area, inherited=False):
-        page = context["page"]
-        content = ""
-        while not content and page:
-            content_obj = page.content
-            content = getattr(content_obj, content_area, "")
-            if not inherited:
-                break
-            page = page.parent
-        return html(content)
-    return PatternNode(parser, token, handler, ("{content_area} [inherited]", "{content_area}"))
+    # Parse arguments.
+    if inherited_flag == "inherited":
+        inherited = True
+    elif inherited_flag == "not-inherited":
+        inherited = False
+    else:
+        raise template.TemplateSyntaxError("The inherited flag should be 'inherited' or 'not-inherited', {0!r} found.".format(inherited_flag))
+    # Render the tag.
+    page = context["page"]
+    content = ""
+    while not content and page:
+        content_obj = page.content
+        content = getattr(content_obj, content_area, "")
+        if not inherited:
+            break
+        page = page.parent
+    return html(content)
 
 
 # Page linking.
-
 
 class PageUrlNode(template.Node):
     
@@ -141,9 +146,8 @@ def page_url(parser, token):
 
 # Page widgets.
 
-
-@register.tag
-def meta_description(parser, token):
+@register.simple_tag(takes_context=True)
+def meta_description(context, description=None):
     """
     Renders the content of the meta description tag for the current page::
     
@@ -161,15 +165,13 @@ def meta_description(parser, token):
         {% meta_description "foo" %}
         
     """
-    def handler(context, description=None):
-        page = context["page"]
-        description = description or context.get("meta_description", page.meta_description)
-        return conditional_escape(description)
-    return PatternNode(parser, token, handler, ("{description}", "",))
+    page = context["page"]
+    description = description or context.get("meta_description", page.meta_description)
+    return conditional_escape(description)
 
 
-@register.tag
-def meta_keywords(parser, token):
+@register.simple_tag(takes_context=True)
+def meta_keywords(context, keywords=None):
     """
     Renders the content of the meta keywords tag for the current page::
     
@@ -187,15 +189,13 @@ def meta_keywords(parser, token):
         {% meta_keywords "foo" %}
         
     """
-    def handler(context, keywords=None):
-        page = context["page"]
-        keywords = keywords or context.get("meta_keywords", page.meta_keywords)
-        return conditional_escape(keywords)
-    return PatternNode(parser, token, handler, ("{keywords}", "",))
+    page = context["page"]
+    keywords = keywords or context.get("meta_keywords", page.meta_keywords)
+    return conditional_escape(keywords)
 
 
-@register.tag
-def meta_robots(parser, token):
+@register.simple_tag(takes_context=True)
+def meta_robots(context, index=None, follow=None, archive=None):
     """
     Renders the content of the meta robots tag for the current page::
     
@@ -214,38 +214,36 @@ def meta_robots(parser, token):
         {% meta_robots 1 1 1 %}
         
     """
-    def handler(context, index=None, follow=None, archive=None):
-        page = context["page"]
-        if index is None:
-            index = context.get("robots_index", None)
-        if archive is None:
-            archive = context.get("robots_archive", None)
-        if follow is None:
-            follow = context.get("robots_follow", None)
-        # Follow the page ancestry, looking for robots flags.
-        while page:
-            if index is None and page.robots_index != None:
-                index = page.robots_index
-            if archive is None and page.robots_archive != None:
-                archive = page.robots_archive
-            if follow is None and page.robots_follow != None:
-                follow = page.robots_follow
-            page = page.parent
-        # If no page specified robots, then default to True.
-        if index is None:
-            index = True
-        if archive is None:
-            archive = True
-        if follow is None:
-            follow = True
-        # Generate the meta content.
-        robots = ", ".join((index and "INDEX" or "NOINDEX", follow and "FOLLOW" or "NOFOLLOW", archive and "ARCHIVE" or "NOARCHIVE"))
-        return escape(robots)
-    return PatternNode(parser, token, handler, ("{index} {follow} {archive}", "",))
+    page = context["page"]
+    if index is None:
+        index = context.get("robots_index", None)
+    if archive is None:
+        archive = context.get("robots_archive", None)
+    if follow is None:
+        follow = context.get("robots_follow", None)
+    # Follow the page ancestry, looking for robots flags.
+    while page:
+        if index is None and page.robots_index != None:
+            index = page.robots_index
+        if archive is None and page.robots_archive != None:
+            archive = page.robots_archive
+        if follow is None and page.robots_follow != None:
+            follow = page.robots_follow
+        page = page.parent
+    # If no page specified robots, then default to True.
+    if index is None:
+        index = True
+    if archive is None:
+        archive = True
+    if follow is None:
+        follow = True
+    # Generate the meta content.
+    robots = ", ".join((index and "INDEX" or "NOINDEX", follow and "FOLLOW" or "NOFOLLOW", archive and "ARCHIVE" or "NOARCHIVE"))
+    return escape(robots)
 
 
-@register.tag
-def title(parser, token):
+@register.simple_tag(takes_context=True)
+def title(context, title=None):
     """
     Renders the title of the current page::
         
@@ -262,18 +260,16 @@ def title(parser, token):
         {% title "foo" %}
     
     """
-    def handler(context, title=None):
-        page = context["page"]
-        homepage = page.homepage
-        # Render the title template.
-        context.push()
-        try:
-            context.update({"title": title or context.get("title", "") or page.browser_title or page.title,
-                            "site_title": homepage.browser_title or homepage.title})
-            return template.loader.render_to_string("title.html", context)
-        finally:
-            context.pop()
-    return PatternNode(parser, token, handler, ("{title}", "",))
+    page = context["page"]
+    homepage = page.homepage
+    # Render the title template.
+    context.push()
+    try:
+        context.update({"title": title or context.get("title", "") or page.browser_title or page.title,
+                        "site_title": homepage.browser_title or homepage.title})
+        return template.loader.render_to_string("title.html", context)
+    finally:
+        context.pop()
 
 
 class NavEntry(object):
@@ -298,91 +294,85 @@ class NavEntry(object):
         return [NavEntry(entry, self.current_page) for entry in self.page.navigation]
     
     
-@register.tag
-def nav_primary(parser, token):
+@register.simple_tag(takes_context=True)
+def nav_primary(context):
     """
     Renders the primary navigation of the current page::
     
         {% nav_primary %}
         
     """
-    def handler(context):
-        page = context["page"]
-        homepage = page.homepage
-        navigation = []
-        if homepage.in_navigation:
-            nav_entry = NavEntry(homepage, page, [])
-            nav_entry.short_title = "Home"
-            nav_entry.here = homepage == page
-            navigation.append(nav_entry)
-        for entry in homepage.navigation:
-            navigation.append(NavEntry(entry, page))
-        context.push()
-        try:
-            context.update({"homepage": homepage,
-                            "navigation": navigation})
-            return template.loader.render_to_string("nav_primary.html", context)
-        finally:
-            context.pop()
-    return PatternNode(parser, token, handler, ("",))
+    page = context["page"]
+    homepage = page.homepage
+    navigation = []
+    if homepage.in_navigation:
+        nav_entry = NavEntry(homepage, page, [])
+        nav_entry.short_title = "Home"
+        nav_entry.here = homepage == page
+        navigation.append(nav_entry)
+    for entry in homepage.navigation:
+        navigation.append(NavEntry(entry, page))
+    context.push()
+    try:
+        context.update({"homepage": homepage,
+                        "navigation": navigation})
+        return template.loader.render_to_string("nav_primary.html", context)
+    finally:
+        context.pop()
     
     
-@register.tag
-def nav_secondary(parser, token):
+@register.simple_tag(takes_context=True)
+def nav_secondary(context):
     """
     Renders the secondary navigation of the current page::
     
         {% nav_secondary %}
         
     """
-    def handler(context):
-        page = context["page"]
-        try:
-            section = page.breadcrumbs[1]
-        except IndexError:
-            section = None
-            navigation = []
-        else:
-            navigation = [NavEntry(entry, page) for entry in section.navigation]
-        context.push()
-        try:
-            context.update({"section": section,
-                            "navigation": navigation})
-            return template.loader.render_to_string("nav_secondary.html", context)
-        finally:
-            context.pop()
-    return PatternNode(parser, token, handler, ("",))
+    page = context["page"]
+    try:
+        section = page.breadcrumbs[1]
+    except IndexError:
+        section = None
+        navigation = []
+    else:
+        navigation = [NavEntry(entry, page) for entry in section.navigation]
+    context.push()
+    try:
+        context.update({"section": section,
+                        "navigation": navigation})
+        return template.loader.render_to_string("nav_secondary.html", context)
+    finally:
+        context.pop()
     
 
-@register.tag
-def nav_tertiary(parser, token):
+@register.simple_tag(takes_context=True)
+def nav_tertiary(context):
     """
     Renders the tertiary navigation of the current page::
     
         {% nav_tertiary %}
         
     """
-    def handler(context):
-        page = context["page"]
-        try:
-            subsection = page.breadcrumbs[2]
-        except IndexError:
-            subsection = None
-            navigation = []
-        else:
-            navigation = [NavEntry(entry, page) for entry in subsection.navigation]
-        context.push()
-        try:
-            context.update({"subsection": subsection,
-                            "navigation": navigation})
-            return template.loader.render_to_string("nav_tertiary.html", context)
-        finally:
-            context.pop()
-    return PatternNode(parser, token, handler, ("",))
+    page = context["page"]
+    try:
+        subsection = page.breadcrumbs[2]
+    except IndexError:
+        subsection = None
+        navigation = []
+    else:
+        navigation = [NavEntry(entry, page) for entry in subsection.navigation]
+    context.push()
+    try:
+        context.update({"subsection": subsection,
+                        "navigation": navigation})
+        return template.loader.render_to_string("nav_tertiary.html", context)
+    finally:
+        context.pop()
 
 
-@register.tag
-def breadcrumbs(parser, token):
+@register.simple_tag(takes_context=True)
+def breadcrumbs(context, extended_flag="not-extended"):
     """
     Renders the breadcrumbs trail for the current page::
     
@@ -394,32 +384,38 @@ def breadcrumbs(parser, token):
         {% breadcrumbs extended %}
         
     """
-    def handler(context, extended=False):
-        page = context["page"]
-        breadcrumbs = [{"short_title": breadcrumb.short_title or breadcrumb.title,
-                        "title": breadcrumb.title,
-                        "url": breadcrumb.get_absolute_url(),
-                        "last": False,
-                        "page": breadcrumb}
-                       for breadcrumb in page.breadcrumbs]
-        if not extended:
-            if len(breadcrumbs) == 1:
-                # Display no breadcrumbs on the homepage.
-                breadcrumbs = []
-            else:
-                breadcrumbs[-1]["last"] = True
-        # Render the breadcrumbs.
-        context.push()
-        try:
-            context.update({"breadcrumbs": breadcrumbs,})
-            return template.loader.render_to_string("breadcrumbs.html", context)
-        finally:
-            context.pop()
-    return PatternNode(parser, token, handler, ("[extended]", ""))
+    # Parse arguments.
+    if extended_flag == "extended":
+        extended = True
+    elif extended_flag == "not-extended":
+        extended = False
+    else:
+        raise template.TemplateSyntaxError("The extended flag should be 'extended' or 'not-extended', {0!r} found.".format(extended_flag))
+    # Render the tag.
+    page = context["page"]
+    breadcrumbs = [{"short_title": breadcrumb.short_title or breadcrumb.title,
+                    "title": breadcrumb.title,
+                    "url": breadcrumb.get_absolute_url(),
+                    "last": False,
+                    "page": breadcrumb}
+                   for breadcrumb in page.breadcrumbs]
+    if not extended:
+        if len(breadcrumbs) == 1:
+            # Display no breadcrumbs on the homepage.
+            breadcrumbs = []
+        else:
+            breadcrumbs[-1]["last"] = True
+    # Render the breadcrumbs.
+    context.push()
+    try:
+        context.update({"breadcrumbs": breadcrumbs,})
+        return template.loader.render_to_string("breadcrumbs.html", context)
+    finally:
+        context.pop()
 
 
-@register.tag
-def header(parser, token):
+@register.simple_tag(takes_context=True)
+def header(context, header=None):
     """
     Renders the header for the current page::
     
@@ -437,8 +433,13 @@ def header(parser, token):
         {% header "foo" %}
         
     """
-    def handler(context, header=None):
-        page = context["page"]
-        header = header or context.get("header", None) or context.get("title", "") or page.title
-        return conditional_escape(header)
-    return PatternNode(parser, token, handler, ("{header}", "",))
+    page = context["page"]
+    header = header or context.get("header", None) or context.get("title", page.title)
+    context.push()
+    try:
+        context.update({
+            "header": header
+        })
+        return template.loader.render_to_string("header.html", context)
+    finally:
+        context.pop()
