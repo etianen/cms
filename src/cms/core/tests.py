@@ -98,8 +98,8 @@ class TestPermalinks(TestCase):
         
 # Create a dummy file object for testing thumbnail generation.
 DUMMY_IMAGE_NAME = "img/python-powered.png"
-DUMMY_IMAGE_PATH = "/".join((settings.CMS_MEDIA_ROOT, DUMMY_IMAGE_NAME))
-DUMMY_IMAGE_URL = "/".join((settings.CMS_MEDIA_URL, DUMMY_IMAGE_NAME))
+DUMMY_IMAGE_PATH = "/".join((settings.CMS_ROOT, "media", DUMMY_IMAGE_NAME))
+DUMMY_IMAGE_URL = "/".join((settings.STATIC_URL, DUMMY_IMAGE_NAME))
 DUMMY_IMAGE = thumbnails.Thumbnail(DUMMY_IMAGE_NAME, DUMMY_IMAGE_PATH, DUMMY_IMAGE_URL, thumbnails.Size(200, 80))
 
 

@@ -11,13 +11,6 @@ def site(request):
     return context
 
 
-def media(request):
-    """Sets up the site and cms media references in the template."""
-    context = {"SITE_MEDIA_URL": settings.SITE_MEDIA_URL,
-               "CMS_MEDIA_URL": settings.CMS_MEDIA_URL}
-    return context
-
-
 def conf(request):
     """Gives the settings object to the template."""
     context = {"settings": settings}

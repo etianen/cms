@@ -45,6 +45,13 @@ MEDIA_URL = "/media/"
 FILE_UPLOAD_PERMISSIONS = 0644
 
 
+# Absolute path to the directory where static files will be collected.
+
+STATIC_ROOT = os.path.join(MEDIA_ROOT, "static")
+
+STATIC_URL = MEDIA_URL + "static/"
+
+
 # Email settings.
 
 EMAIL_HOST = ""
@@ -96,26 +103,21 @@ SITE_PACKAGE = os.path.split(SITE_ROOT)[-1]
 
 # A list of additional installed applications.
 
-INSTALLED_APPS += ("%s.apps.site" % SITE_PACKAGE,)
+INSTALLED_APPS += (
+    "%s.apps.site" % SITE_PACKAGE,
+)
 
 
-# Absolute path to the directory where site-specific media files are stored.
+# Additional static file locations.
 
-SITE_MEDIA_ROOT = os.path.join(SITE_ROOT, "media")
-
-SITE_MEDIA_URL = MEDIA_URL + "site/"
-
-TINYMCE_CONTENT_CSS = SITE_MEDIA_URL + "css/content.css"
+STATICFILES_DIRS += (
+    ("site", os.path.join("SITE_ROOT", "media")),
+)
 
 
 # Absolute URL of the location where admin media files are served.
 
-ADMIN_MEDIA_PREFIX = MEDIA_URL + "admin/"
-
-
-# Absolute URL of the location where CMS media files are served.
-
-CMS_MEDIA_URL = MEDIA_URL + "cms/"
+ADMIN_MEDIA_PREFIX = STATIC_URL + "admin/"
 
 
 # Absolute path to the directory where templates are stored.

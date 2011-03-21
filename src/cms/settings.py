@@ -26,12 +26,9 @@ CMS_ROOT = os.path.dirname(__file__)
 
 # Absolute path to the directory containing the CMS media files.
 
-CMS_MEDIA_ROOT = os.path.join(CMS_ROOT, "media")
-
-
-# Static media serving.
-
-MEDIA_DEBUG = False
+STATICFILES_DIRS = (
+    ("cms", os.path.join(CMS_ROOT, "media")),
+)
 
 
 # Template settings.
@@ -48,10 +45,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
+    "django.core.context_processors.static",
     "django.contrib.messages.context_processors.messages",
     "django.core.context_processors.request",
     "cms.core.context_processors.site",
-    "cms.core.context_processors.media",
     "cms.core.context_processors.conf",
     "cms.apps.pages.context_processors.page",
 )
@@ -81,6 +78,7 @@ INSTALLED_APPS = (
     "django.contrib.sitemaps",
     "django.contrib.sites",
     "django.contrib.messages",
+    "django.contrib.staticfiles",
     "reversion",
     "cms.core",
     "cms.apps.pages",

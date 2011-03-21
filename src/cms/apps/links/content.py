@@ -12,10 +12,12 @@ class Link(content.Content):
     
     classifier = "utilities"
     
-    icon = settings.CMS_MEDIA_URL + "img/content-types/redirect.png"
+    icon = settings.STATIC_URL + "cms/img/content-types/redirect.png"
     
     urlconf = "cms.apps.links.urls"
     
-    link_url = content.CharField("link URL",
-                                 help_text="The URL where the user will be redirected.")
+    link_url = content.CharField(
+        "link URL",
+        help_text = "The URL where the user will be redirected."
+    )
     

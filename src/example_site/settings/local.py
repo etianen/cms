@@ -17,8 +17,6 @@ DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
 
-MEDIA_DEBUG = DEBUG
-
 
 # Save media files to the uploads directory in the user's home folder.
 

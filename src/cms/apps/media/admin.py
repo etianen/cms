@@ -34,32 +34,34 @@ site.register(Folder, FolderAdmin)
     
        
 # Different types of file.
-AUDIO_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/audio-x-generic.png"
-DOCUMENT_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/x-office-document.png"
-SPREADSHEET_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/x-office-spreadsheet.png"
-TEXT_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/text-x-generic.png"
-IMAGE_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/image-x-generic.png"
-MOVIE_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/video-x-generic.png"
-UNKNOWN_FILE_ICON = settings.CMS_MEDIA_URL + "img/file-types/text-x-generic-template.png"
+AUDIO_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/audio-x-generic.png"
+DOCUMENT_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/x-office-document.png"
+SPREADSHEET_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/x-office-spreadsheet.png"
+TEXT_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/text-x-generic.png"
+IMAGE_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/image-x-generic.png"
+MOVIE_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/video-x-generic.png"
+UNKNOWN_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/text-x-generic-template.png"
 
 # Different types of recognised file extensions.
-FILE_ICONS = {"mp3": AUDIO_FILE_ICON,
-              "m4a": AUDIO_FILE_ICON,
-              "wav": AUDIO_FILE_ICON,
-              "doc": DOCUMENT_FILE_ICON,
-              "odt": DOCUMENT_FILE_ICON,
-              "pdf": DOCUMENT_FILE_ICON,
-              "xls": SPREADSHEET_FILE_ICON,
-              "txt": TEXT_FILE_ICON,
-              "png": IMAGE_FILE_ICON,
-              "gif": IMAGE_FILE_ICON,
-              "jpg": IMAGE_FILE_ICON,
-              "jpeg": IMAGE_FILE_ICON,
-              "swf": MOVIE_FILE_ICON,
-              "flv": MOVIE_FILE_ICON,
-              "mp4": MOVIE_FILE_ICON,
-              "mov": MOVIE_FILE_ICON,
-              "wmv": MOVIE_FILE_ICON,}
+FILE_ICONS = {
+    "mp3": AUDIO_FILE_ICON,
+    "m4a": AUDIO_FILE_ICON,
+    "wav": AUDIO_FILE_ICON,
+    "doc": DOCUMENT_FILE_ICON,
+    "odt": DOCUMENT_FILE_ICON,
+    "pdf": DOCUMENT_FILE_ICON,
+    "xls": SPREADSHEET_FILE_ICON,
+    "txt": TEXT_FILE_ICON,
+    "png": IMAGE_FILE_ICON,
+    "gif": IMAGE_FILE_ICON,
+    "jpg": IMAGE_FILE_ICON,
+    "jpeg": IMAGE_FILE_ICON,
+    "swf": MOVIE_FILE_ICON,
+    "flv": MOVIE_FILE_ICON,
+    "mp4": MOVIE_FILE_ICON,
+    "mov": MOVIE_FILE_ICON,
+    "wmv": MOVIE_FILE_ICON,
+}
     
     
 class FileAdmin(VersionAdmin):

@@ -101,7 +101,7 @@ class Content(object):
     abstract = True
     
     # This must be a 64 x 64 pixel image.
-    icon = settings.CMS_MEDIA_URL + "img/content-types/content.png"
+    icon = settings.STATIC_URL + "cms/img/content-types/content.png"
     
     # The heading that the admin places this content under.
     classifier = "content"

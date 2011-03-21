@@ -25,7 +25,7 @@
         dialog_type: "modal",
         external_link_list_url: "{% url admin:tinymce_link_list %}",
         theme_advanced_blockformats: "h2,h3,p",
-        content_css: "{{settings.TINYMCE_CONTENT_CSS|escapejs}}",
+        content_css: "{{STATIC_URL|escapejs}}site/css/content.css",
         extended_valid_elements : "iframe[src|width|height|name|align]",  // Permit embedded iframes.
         convert_urls: false,
         button_tile_map: true,  // Client-side optimization.
