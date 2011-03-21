@@ -34,7 +34,7 @@ urlpatterns = patterns("",
 
 if settings.DEBUG:
     urlpatterns += patterns("",
-        url(settings.MEDIA_URL[1:] + "(.+)", "django.views.static.serve", kwargs={"document_root": settings.MEDIA_ROOT})
+        url("^{0}(.+)".format(settings.MEDIA_URL[1:]), "django.views.static.serve", kwargs={"document_root": settings.MEDIA_ROOT})
     )
 
 
