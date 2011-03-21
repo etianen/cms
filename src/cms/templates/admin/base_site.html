@@ -1,4 +1,5 @@
 {% extends "admin/base.html" %}
+{% load url from future %}
 
 
 {% block extrahead %}
@@ -16,7 +17,7 @@
 
 
 {% block userlinks %}
-    <a href="{% url admin:staff_edit_details %}">Edit details</a> /
+    <a href="{% url 'admin:staff_edit_details' %}">Edit details</a> /
     {{block.super}}
 {% endblock %}
 

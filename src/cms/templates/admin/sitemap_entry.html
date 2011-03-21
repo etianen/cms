@@ -1,4 +1,5 @@
 {% load pages_admin %}
+{% load url from future %}
 <li>
     {% if page.parent and page.children %}<div class="sitemap-collapse-control"></div>{% endif %}
     <div class="sitemap-entry{% if not page.is_online %} offline{% endif %}{% if can_change %} can-change{% endif %}">
@@ -17,7 +18,7 @@
             <a href="{{delete_url}}" class="deletelink" title="Delete this page">Delete</a>
         {% endif %}
         {% if can_move %}
-            <form method="post" action="{% url admin:pages_page_move_page %}">
+            <form method="post" action="{% url 'admin:pages_page_move_page' %}">
                 {% csrf_token %}
                 <input type="hidden" name="page" value="{{page.id}}"/>
                 <input type="submit" class="move-up" title="Move this page up" name="direction" value="up"/>

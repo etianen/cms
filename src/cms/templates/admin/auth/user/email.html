@@ -1,5 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% load adminmedia %}
+{% load url from future %}
 
 
 {% block extrahead %}
@@ -11,9 +12,9 @@
 
 {% block breadcrumbs %}
     <div class="breadcrumbs">
-        <a href="{% url admin:index %}">Home</a> &rsaquo;
-        <a href="{% url admin:app_list 'auth' %}">{{app_label|capfirst|escape}}</a> &rsaquo; 
-        {% if has_change_permission %}<a href="{% url admin:auth_user_changelist %}">{{opts.verbose_name_plural|capfirst}}</a>{% else %}{{opts.verbose_name_plural|capfirst}}{% endif %} &rsaquo; 
+        <a href="{% url 'admin:index' %}">Home</a> &rsaquo;
+        <a href="{% url 'admin:app_list' 'auth' %}">{{app_label|capfirst|escape}}</a> &rsaquo; 
+        {% if has_change_permission %}<a href="{% url 'admin:auth_user_changelist' %}">{{opts.verbose_name_plural|capfirst}}</a>{% else %}{{opts.verbose_name_plural|capfirst}}{% endif %} &rsaquo; 
         {{title}}
     </div>
 {% endblock %}

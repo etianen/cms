@@ -1,7 +1,7 @@
+{% load url from future %}
 /*
     Initializes the TinyMCE editor.
 */
-
 
 (function($, tinyMCE) {
     
@@ -23,13 +23,13 @@
         width: "700px",
         height: "350px",
         dialog_type: "modal",
-        external_link_list_url: "{% url admin:tinymce_link_list %}",
+        external_link_list_url: "{% url 'admin:tinymce_link_list' %}",
         theme_advanced_blockformats: "h2,h3,p",
         content_css: "{{STATIC_URL|escapejs}}site/css/content.css",
         extended_valid_elements : "iframe[src|width|height|name|align]",  // Permit embedded iframes.
         convert_urls: false,
         button_tile_map: true,  // Client-side optimization.
-        file_browser_callback: $.filebrowser.createCallback("{% url admin:media_file_changelist %}?pop=1")
+        file_browser_callback: $.filebrowser.createCallback("{% url 'admin:media_file_changelist' %}?pop=1")
     });
     
 }(django.jQuery, tinyMCE));
