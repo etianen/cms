@@ -1,2 +1,0 @@
-"""Simple contact form application."""
-

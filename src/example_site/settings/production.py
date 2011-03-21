@@ -99,11 +99,6 @@ SITE_PACKAGE = os.path.split(SITE_ROOT)[-1]
 INSTALLED_APPS += ("%s.apps.site" % SITE_PACKAGE,)
 
 
-# A list of registered contact form types.
-
-CONTACT_FORMS = (("contact", "cms.apps.contact.forms.ContactForm"),)
-
-
 # Absolute path to the directory where site-specific media files are stored.
 
 SITE_MEDIA_ROOT = os.path.join(SITE_ROOT, "media")
