@@ -60,8 +60,9 @@ MIDDLEWARE_CLASSES = (
     "django.middleware.transaction.TransactionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
+    'django.middleware.csrf.CsrfViewMiddleware',
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
     "cms.apps.pages.middleware.PageMiddleware",
 )
 
