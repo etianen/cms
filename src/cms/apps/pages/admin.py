@@ -187,27 +187,27 @@ class PageAdmin(PageBaseAdmin):
             homepage = None
         # Compile the initial data.
         data = {
-            "can_add": self.has_add_permission(request),
-            "can_change": self.has_change_permission(request),
-            "create_homepage_url": reverse("admin:pages_page_add") + "?{0}={1}".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE)
+            "canAdd": self.has_add_permission(request),
+            "canChange": self.has_change_permission(request),
+            "createHomepageUrl": reverse("admin:pages_page_add") + "?{0}={1}".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE)
         }
         # Add in the page data.
         if homepage:
             def sitemap_entry(page):
                 children = []
                 for child in page.children:
-                    children.append(sitemap_entry(page))
+                    children.append(sitemap_entry(child))
                 return {
-                    "parent": page.parent,
-                    "is_online": page.is_online,
+                    "hasParent": page.parent is not None,
+                    "isOnline": page.is_online,
                     "id": page.id,
                     "title": unicode(page),
-                    "can_change": self.has_change_permission(request, page),
-                    "can_delete": self.has_delete_permission(request, page),
-                    "can_move": self.has_move_permission(request, page),
-                    "add_url": reverse("admin:pages_page_add") + "?%s=%s&parent=%i" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE, page.id),
-                    "change_url": reverse("admin:pages_page_change", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
-                    "delete_url": reverse("admin:pages_page_delete", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+                    "canChange": self.has_change_permission(request, page),
+                    "canDelete": self.has_delete_permission(request, page),
+                    "canMove": self.has_move_permission(request, page),
+                    "addUrl": reverse("admin:pages_page_add") + "?%s=%s&parent=%i" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE, page.id),
+                    "changeUrl": reverse("admin:pages_page_change", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+                    "deleteUrl": reverse("admin:pages_page_delete", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
                     "children": children,
                 }
             data["entries"] = [sitemap_entry(homepage)]

@@ -22,22 +22,22 @@ body.dashboard div#content-related h2 {
     margin-bottom: 10px;
 }
 
-body.dashboard ul#sitemap {
+body.dashboard #sitemap-module ul {
     margin: 0px 10px 10px 10px;
     padding: 0px 0px 0px 0px;
 }
 
-body.dashboard ul#sitemap li {
+body.dashboard #sitemap-module li {
     position: relative;
     list-style: none;
     padding: 0px 0px 0px 0px;
 }
 
-body.dashboard ul#sitemap li.closed ul {
+body.dashboard #sitemap-module li.closed ul {
     display: none;
 }
 
-body.dashboard ul#sitemap li li {
+body.dashboard #sitemap-module li li {
     margin: 0px 0px 0px 27px;
 }
 
@@ -74,7 +74,7 @@ body.dashboard div.sitemap-entry a.deletelink {
     right: 7px;
 }
 
-body.dashboard ul#sitemap ul {
+body.dashboard #sitemap-module ul ul {
     margin: 0px 0px 0px 0px;
     padding: 0px 0px 0px 0px;
 }
@@ -107,8 +107,8 @@ body.dashboard li.closed div.sitemap-collapse-control:hover {
     background-position: 0px -13px;
 }
 
-body.dashboard ul#sitemap li:first-child > div.sitemap-entry input.move-up,
-body.dashboard ul#sitemap li:last-child > div.sitemap-entry input.move-down {
+body.dashboard #sitemap-module li:first-child > div.sitemap-entry input.move-up,
+body.dashboard #sitemap-module li:last-child > div.sitemap-entry input.move-down {
     display: none;
 }
 
@@ -197,3 +197,14 @@ span.content-type-name {
     text-align: center;
 }
 
+
+/* Ajax loader. */
+
+#sitemap-module .loading {
+    margin-left: 10px;
+    padding-left: 40px;
+    background: url(../img/ajax-loader.gif) 0 0 no-repeat;
+    height: 30px;
+    line-height: 30px;
+    color: #5B80B8;
+}
