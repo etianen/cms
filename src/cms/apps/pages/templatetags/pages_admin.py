@@ -1,9 +1,7 @@
 """Template tags used to adminstrate pages."""
 
-
 from django import template
 from django.core.urlresolvers import reverse
-from django.db.models import Max
 
 from cms.core.templatetags import PatternNode
 from cms.core.admin import site

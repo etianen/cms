@@ -1,11 +1,9 @@
 """Abstract base models used by the page management application."""
 
-
-from django.template import RequestContext
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 
 from cms.core.models.managers import PublishedModelManager, PageBaseManager
 from cms.core.models.fields import NullBooleanField, EnumField
@@ -143,7 +141,7 @@ class PageBase(PublishedModel):
                         "title": self.browser_title or self.title,
                         "header": self.title}
         page_context.update(context or {})
-        return render_to_response(template, page_context, RequestContext(request), **kwargs)
+        return render(request, template, page_context, **kwargs)
     
     # Base model methods.
     

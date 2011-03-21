@@ -39,7 +39,7 @@ def resolve(permalink):
     """
     # Attempt to resolve the URL.
     try:
-        callback, callback_args, callback_kwargs = urlresolvers.resolve(permalink)  # @UnusedVariable
+        callback, _, callback_kwargs = urlresolvers.resolve(permalink)  # @UnusedVariable
     except (urlresolvers.Resolver404, TypeError):
         raise PermalinkError, "'%s' is not a valid permalink." % permalink
     # Check if the URL refers to a permalink.
@@ -49,7 +49,7 @@ def resolve(permalink):
     try:
         content_type_id = callback_kwargs["content_type_id"]
         object_id = callback_kwargs["object_id"]
-    except IndexError:
+    except KeyError:
         raise ImproperlyConfigured, "The permalink_redirect view should be configured using keyword arguments."
     # Resolve the object. 
     content_type = ContentType.objects.get_for_id(content_type_id)

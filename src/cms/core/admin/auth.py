@@ -10,7 +10,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render, redirect
 
 from cms.core.forms.auth import UserCreationForm, EditDetailsForm, UserContactForm
 
@@ -89,7 +89,7 @@ class UserAdmin(BaseUserAdmin):
                    "contact_form": form,
                    "has_change_permission": self.has_change_permission(request),
                    "opts": self.model._meta}
-        return render_to_response("admin/auth/user/email.html", context, template.RequestContext(request))
+        return render(request, "admin/auth/user/email.html", context)
     
     @transaction.commit_on_success
     def add_view(self, request):
@@ -130,7 +130,7 @@ class UserAdmin(BaseUserAdmin):
                    "media": media,
                    "save_as": False,
                    "app_label": self.model._meta.app_label,}
-        return render_to_response("admin/auth/user/add_form.html", context, template.RequestContext(request))
+        return render(request, "admin/auth/user/add_form.html", context)
     
     @transaction.commit_on_success
     def edit_details(self, request):
@@ -164,7 +164,7 @@ class UserAdmin(BaseUserAdmin):
                    "media": media,
                    "save_as": False,
                    "app_label": self.model._meta.app_label,}
-        return render_to_response("admin/auth/edit_details_form.html", context, template.RequestContext(request))
+        return render(request, "admin/auth/edit_details_form.html", context)
 
 
 class GroupAdmin(admin.ModelAdmin):

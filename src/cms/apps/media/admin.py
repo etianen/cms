@@ -1,14 +1,12 @@
 """Admin settings for the static media management application."""
 
-
 import os
 from functools import partial
 
-from django import template
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin.views.main import IS_POPUP_VAR
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template.defaultfilters import filesizeformat
 from django.utils.text import truncate_words
 
@@ -166,9 +164,8 @@ class FileAdmin(VersionAdmin):
         if "_tinymce" in request.GET:
             context = {"permalink": permalinks.create(obj),
                        "title": obj.title}
-            return render_to_response("admin/media/file/filebrowser_add_success.html", context, template.RequestContext(request))
+            return render(request, "admin/media/file/filebrowser_add_success.html", context)
         return super(FileAdmin, self).response_add(request, obj, *args, **kwargs)
     
     
 site.register(File, FileAdmin)
-

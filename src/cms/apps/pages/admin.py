@@ -10,12 +10,11 @@ from __future__ import with_statement
 
 import urllib
 
-from django import template
 from django.core.exceptions import PermissionDenied
 from django.conf.urls.defaults import patterns, url
 from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render, redirect
 
 from cms.core.admin import PageBaseAdmin, site
 from cms.apps.pages import content
@@ -227,7 +226,7 @@ class PageAdmin(PageBaseAdmin):
             # Render the select page template.
             context = {"title": "Select page type",
                        "content_types": content_types}
-            return render_to_response("admin/pages/page/select_page_type.html", context, template.RequestContext(request))
+            return render(request, "admin/pages/page/select_page_type.html", context)
         else:
             if not self.has_add_content_permission(request, request.GET[PAGE_TYPE_PARAMETER]):
                 raise PermissionDenied, "You are not allowed to add pages of that content type."

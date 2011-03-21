@@ -1,14 +1,12 @@
 """Extensions to the Django admin site."""
 
-
 from __future__ import with_statement
 
 import functools, itertools
 
-from django import template
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.views.generic.simple import direct_to_template
 
 from cms.core import permalinks
@@ -60,4 +58,4 @@ class AdminSite(admin.AdminSite):
             generators.append((unicode(obj), permalinks.create(obj)) for obj in model._default_manager.all().iterator())
         links = sorted(itertools.chain(*generators))
         context = {"links": links}
-        return render_to_response("admin/tinymce_link_list.js", context, template.RequestContext(request), mimetype="text/javascript")
+        return render(request, "admin/tinymce_link_list.js", context, mimetype="text/javascript")
