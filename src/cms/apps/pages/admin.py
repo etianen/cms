@@ -122,10 +122,11 @@ class PageAdmin(PageBaseAdmin):
         obj.content = page_content
         # Get the page order.
         if not obj.order:
-            try:
-                obj.order = self.model.objects.order_by("-order").values_list("order", flat=True)[0] + 1
-            except IndexError:
-                obj.order = 1
+            with locked(Page):
+                try:
+                    obj.order = self.model.objects.order_by("-order").values_list("order", flat=True)[0] + 1
+                except IndexError:
+                    obj.order = 1
         # Save the model.
         super(PageBaseAdmin, self).save_model(request, obj, form, change)
 
