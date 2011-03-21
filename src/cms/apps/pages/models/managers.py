@@ -103,12 +103,6 @@ class PageManager(PageBaseManager):
     
     """Manager for Page objects."""
     
-    def get_query_set(self):
-        """Defers all content data."""
-        qs = super(PageManager, self).get_query_set()
-        qs = qs.defer("content_data")
-        return qs
-    
     def get_homepage(self):
         """Returns the site homepage."""
         homepage = cache.get_homepage()

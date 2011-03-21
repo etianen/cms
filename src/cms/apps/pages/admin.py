@@ -43,7 +43,7 @@ class PageAdmin(PageBaseAdmin):
                                             "classes": ("collapse",),},),)
 
     fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),) + publication_fieldsets + navigation_fieldsets + PageBaseAdmin.seo_fieldsets
-
+    
     # Reversion
 
     def get_revision_form_data(self, request, obj, version):
