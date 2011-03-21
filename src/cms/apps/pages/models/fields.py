@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models.fields.related import ReverseSingleRelatedObjectDescriptor
 
 from cms.apps.pages import content
+from cms.core.models.base import PublishedModel
 from cms.core.models.managers import publication_manager
 
 
@@ -23,7 +24,10 @@ class PageDescriptor(ReverseSingleRelatedObjectDescriptor):
                 return None
             raise self.field.rel.to.DoesNotExist
         # Access the page.
-        with publication_manager.select_published(getattr(instance, "_select_published_active", publication_manager.select_published_active())):
+        if isinstance(instance, PublishedModel):
+            with publication_manager.select_published(instance._select_published_active):
+                return self.field.rel.to.objects.get_by_id(page_id)
+        else:
             return self.field.rel.to.objects.get_by_id(page_id)
         
 
