@@ -83,11 +83,15 @@ class PageManager(PageBaseManager):
     
     """Manager for Page objects."""
     
+    def add_deferrals(self, qs):
+        """Adds in the appropriate field deferrals to the querysey."""
+        return qs.defer("content_data", "meta_description", "meta_keywords")
+    
     def get_homepage(self):
         """Returns the site homepage."""
         homepage = cache.get_homepage()
         if homepage is None:
-            homepage = self.get(parent=None)
+            homepage = self.add_deferrals(self.all()).get(parent=None)
             cache.set_homepage(homepage)
         return homepage
     
@@ -100,7 +104,7 @@ class PageManager(PageBaseManager):
         try:
             return cache.get_by_id(id)
         except KeyError:
-            return self.get(id=id)
+            return self.add_deferrals(self.all()).get(id=id)
     
     def get_by_permalink(self, permalink):
         """
@@ -111,7 +115,7 @@ class PageManager(PageBaseManager):
         try:
             return cache.get_by_permalink(permalink)
         except KeyError:
-            return self.get(permalink=permalink)
+            return self.add_deferrals(self.all()).get(permalink=permalink)
         
     def get_by_path(self, path):
         """Returns the page that best matches the given URL."""
