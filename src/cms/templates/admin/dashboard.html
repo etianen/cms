@@ -1,5 +1,6 @@
 {% extends "admin/index.html" %}
-{% load adminmedia pages_admin %}
+{% load adminmedia %}
+{% load url from future %}
 
 
 {% block extrahead %}
@@ -13,7 +14,18 @@
 
 {% block sidebar %}
     {% if "cms.apps.pages" in settings.INSTALLED_APPS %}
-        {% sitemap %}
+        <div id="content-related">
+            {% if perms.pages.change_page %}
+                <div id="sitemap-panel">
+                    <div id="sitemap-module" class="module">
+                        <h2>Sitemap</h2>
+                        <noscript>
+                            <p>Please turn on javascript to activate the sitemap.</p>
+                        </script>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
     {% else %}
         {{block.super}}
     {% endif %}
