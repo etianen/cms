@@ -37,8 +37,8 @@ MEDIA_DEBUG = False
 # Template settings.
 
 TEMPLATE_LOADERS = (
-    "django.template.loaders.filesystem.load_template_source",
-    "django.template.loaders.app_directories.load_template_source",
+    "django.template.loaders.filesystem.Loader",
+    "django.template.loaders.app_directories.Loader",
 )
 
 TEMPLATE_DIRS = (os.path.join(CMS_ROOT, "templates",),)
@@ -59,29 +59,33 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 # Dispatch settings.
 
-MIDDLEWARE_CLASSES = ("django.middleware.transaction.TransactionMiddleware",
-                      "django.middleware.common.CommonMiddleware",
-                      "django.contrib.sessions.middleware.SessionMiddleware",
-                      "django.contrib.messages.middleware.MessageMiddleware",
-                      "django.contrib.auth.middleware.AuthenticationMiddleware",
-                      "cms.apps.pages.middleware.PageMiddleware",)
+MIDDLEWARE_CLASSES = (
+    "django.middleware.transaction.TransactionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "cms.apps.pages.middleware.PageMiddleware",
+)
 
 ROOT_URLCONF = "cms.urls"
 
 
 # Application settings.
 
-INSTALLED_APPS = ("django.contrib.contenttypes",
-                  "django.contrib.sessions",
-                  "django.contrib.auth",
-                  "django.contrib.admin",
-                  "django.contrib.sitemaps",
-                  "django.contrib.sites",
-                  "django.contrib.messages",
-                  "reversion",
-                  "cms.core",
-                  "cms.apps.pages",
-                  "cms.apps.media",)
+INSTALLED_APPS = (
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.auth",
+    "django.contrib.admin",
+    "django.contrib.sitemaps",
+    "django.contrib.sites",
+    "django.contrib.messages",
+    "reversion",
+    "cms.core",
+    "cms.apps.pages",
+    "cms.apps.media",
+)
 
 
 # Multi-site settings.
@@ -96,11 +100,13 @@ PUBLICATION_PREVIEW_KEY = "preview"
 
 # SEO settings.
 
-SEO_PRIORITIES = ((1.0, "Very high"),
-                  (0.8, "High"),
-                  (0.5, "Medium"),
-                  (0.3, "Low"),
-                  (0.0, "Very low"),)
+SEO_PRIORITIES = (
+    (1.0, "Very high"),
+    (0.8, "High"),
+    (0.5, "Medium"),
+    (0.3, "Low"),
+    (0.0, "Very low"),
+)
 
 
 # Internationalization settings.
