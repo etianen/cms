@@ -111,7 +111,7 @@ INSTALLED_APPS += (
 # Additional static file locations.
 
 STATICFILES_DIRS += (
-    ("site", os.path.join("SITE_ROOT", "media")),
+    ("site", os.path.join(SITE_ROOT, "media")),
 )
 
 
