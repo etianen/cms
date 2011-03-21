@@ -226,18 +226,20 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
             # Resize the image data.
             try:
                 thumbnail_image = resize_callback(image_data, image_size, thumbnail_display_size, thumbnail_image_size)
-            except SyntaxError, ex:
-                # HACK: The PIL will raise a SyntaxError if it encounters a 'broken png'. 
+            except Exception as ex:  # HACK: PIL can raise all sorts of wierd errors.
                 raise IOError, str(ex)
             # Save the thumbnail.
             try:
                 thumbnail_image.save(thumbnail_path)
-            except:
-                # Remove an incomplete file, if present.
+            except Exception as ex:  # HACK: PIL can raise all sorts of wierd errors.
                 try:
-                    os.unlink(thumbnail_path)
-                except OSError:
-                    pass
+                    raise ex
+                finally:
+                    # Remove an incomplete file, if present.
+                    try:
+                        os.unlink(thumbnail_path)
+                    except:
+                        pass
     # Return the thumbnail object.
     thumbnail_url = storage.url(thumbnail_name)
     return Thumbnail(thumbnail_name, thumbnail_path, thumbnail_url, thumbnail_display_size, thumbnail_image_size)
