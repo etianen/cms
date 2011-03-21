@@ -36,21 +36,25 @@ MEDIA_DEBUG = False
 
 # Template settings.
 
-TEMPLATE_LOADERS = ("django.template.loaders.filesystem.load_template_source",
-                    "django.template.loaders.app_directories.load_template_source",)
+TEMPLATE_LOADERS = (
+    "django.template.loaders.filesystem.load_template_source",
+    "django.template.loaders.app_directories.load_template_source",
+)
 
 TEMPLATE_DIRS = (os.path.join(CMS_ROOT, "templates",),)
 
-TEMPLATE_CONTEXT_PROCESSORS = ("django.contrib.auth.context_processors.auth",
-                               "django.core.context_processors.debug",
-                               "django.core.context_processors.i18n",
-                               "django.core.context_processors.media",
-                               "django.contrib.messages.context_processors.messages",
-                               "django.core.context_processors.request",
-                               "cms.core.context_processors.site",
-                               "cms.core.context_processors.media",
-                               "cms.core.context_processors.conf",
-                               "cms.apps.pages.context_processors.page",)
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.contrib.messages.context_processors.messages",
+    "django.core.context_processors.request",
+    "cms.core.context_processors.site",
+    "cms.core.context_processors.media",
+    "cms.core.context_processors.conf",
+    "cms.apps.pages.context_processors.page",
+)
 
 
 # Dispatch settings.
@@ -103,7 +107,30 @@ SEO_PRIORITIES = ((1.0, "Very high"),
 
 USE_I18N = False
 
+USE_L10N = True
+
 
 # Staff management settings.
 
 DEFAULT_GROUP_IDS = (1,)
+
+
+# Logging settings.
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "mail_admins": {
+            "level": "ERROR",
+            "class": "django.utils.log.AdminEmailHandler"
+        }
+    },
+    "loggers": {
+        "django.request": {
+            "handlers": ["mail_admins"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+    }
+}
