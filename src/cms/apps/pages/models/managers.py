@@ -21,11 +21,8 @@ class PageCache(threading.local):
     def clear(self):
         """Clears the page cache."""
         self._id_cache = {}
-        self._published_id_cache = {}
         self._permalink_cache = {}
-        self._published_permalink_cache = {}
         self._homepage_cache = None
-        self._published_homepage_cache = None
         
     def add(self, page):
         """Adds the given page to the cache."""
@@ -33,11 +30,6 @@ class PageCache(threading.local):
         self._id_cache[page.id] = page
         if page.permalink:
             self._permalink_cache[page.permalink] = page
-        # Set the published cache value.    
-        if publication_manager.select_published_active():
-            self._published_id_cache[page.id] = page
-            if page.permalink:
-                self._published_permalink_cache[page.permalink] = page
         
     def remove(self, page):
         """
@@ -46,53 +38,41 @@ class PageCache(threading.local):
         If the page is not in the cache, this is a no-op.
         """
         self._id_cache.pop(page.id, None)
-        self._published_id_cache.pop(page.id, None)
         if page.permalink:
             self._permalink_cache.pop(page.permalink, None)
-            self._published_permalink_cache.pop(page.permalink, None)
-            
-    def contains_permalink(self, permalink):
-        """Checks whether the given permalink is in the cache."""
-        if publication_manager.select_published_active():
-            return permalink in self._published_permalink_cache
-        return permalink in self._permalink_cache
+    
+    def _filter_unpublished(self, page):
+        """
+        Checks whether the page was retrieved under an adequate publication context.
+        
+        If it was, the page is returned. Otherwise, None is returned.
+        """
+        if page is not None and not page._select_published_active and publication_manager.select_published_active():
+            return None
+        return page
     
     def get_by_permalink(self, permalink):
         """
         Returns the page referenced by the given permalink.
         
-        Raises a KeyError if the page does not exist.
+        Returns None if the page is not in the cache.
         """
-        if publication_manager.select_published_active():
-            return self._published_permalink_cache[permalink]
-        return self._permalink_cache[permalink]
-    
-    def contains_id(self, id):
-        """Checks whether the given page id is in the cache."""
-        if publication_manager.select_published_active():
-            return id in self._published_id_cache
-        return id in self._id_cache
+        return self._filter_unpublished(self._permalink_cache.get(permalink))
     
     def get_by_id(self, id):
         """
         Returns the page referenced by the given id.
         
-        Raises a KeyError if the page does not exist.
+        Returns None if the page is not in the cache.
         """
-        if publication_manager.select_published_active():
-            return self._published_id_cache[id]
-        return self._id_cache[id]
+        return self._filter_unpublished(self._id_cache.get(id))
         
     def get_homepage(self):
         """Returns the cached homepage, or None."""
-        if publication_manager.select_published_active():
-            return self._published_homepage_cache
-        return self._homepage_cache
+        return self._filter_unpublished(self._homepage_cache)
         
     def set_homepage(self, homepage):
         """Sets the cached homepage."""
-        if publication_manager.select_published_active():
-            self._published_homepage_cache = homepage
         self._homepage_cache = homepage
     
 

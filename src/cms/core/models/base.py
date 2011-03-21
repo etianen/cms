@@ -5,7 +5,7 @@ from django.contrib.sites.models import Site
 from django.db import models
 from django.shortcuts import render
 
-from cms.core.models.managers import PublishedModelManager, PageBaseManager
+from cms.core.models.managers import PublishedModelManager, PageBaseManager, publication_manager
 from cms.core.models.fields import NullBooleanField, EnumField
 
 
@@ -27,6 +27,12 @@ class PublishedModel(models.Model):
         rules.
         """
         return queryset.filter(is_online=True)
+    
+    def __init__(self, *args, **kwargs):
+        """Initializes the PublishedModel."""
+        super(PublishedModel, self).__init__(*args, **kwargs)
+        # Add a flag to determine whether the publication manager was active.
+        self._select_published_active = publication_manager.select_published_active()
     
     date_created = models.DateTimeField(auto_now_add=True)
     
