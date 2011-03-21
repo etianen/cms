@@ -4,6 +4,7 @@
 from __future__ import with_statement
 
 import threading, contextlib
+from functools import wraps
 
 from django.contrib.sites.models import Site
 from django.db import models
@@ -60,6 +61,14 @@ class PublicationManager(threading.local):
             raise
         finally:
             self._end()
+            
+    def getter(self, func):
+        """Decorator for getters that perform subqueries on published models."""
+        @wraps(func)
+        def wrapper(obj, *args, **kwargs):
+            with self.select_published(obj._select_published_active):
+                return func(obj, *args, **kwargs)
+        return wrapper
             
     
 # A single, thread-safe publication manager.

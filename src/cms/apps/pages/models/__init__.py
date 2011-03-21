@@ -9,6 +9,7 @@ from django.db.models import Q
 
 from cms.core import sitemaps
 from cms.core.models.base import PageBase
+from cms.core.models.managers import publication_manager
 from cms.core.optimizations import cached_getter, cached_setter
 from cms.apps.pages import content
 from cms.apps.pages.models.managers import PageManager, cache
@@ -82,6 +83,7 @@ class Page(PageBase):
                            doc="Whether this page is the site homepage.")
 
     @cached_getter
+    @publication_manager.getter
     def get_children(self):
         """
         Returns all the children of this page, regardless of their publication
