@@ -68,7 +68,10 @@ class PageBase(PublishedModel):
     url_title = models.SlugField("URL title",
                                  db_index=False)
     
-    title = models.CharField(max_length=1000)
+    title = models.CharField(
+        max_length = 1000,
+        db_index = True
+    )
     
     # Navigation fields.
     
