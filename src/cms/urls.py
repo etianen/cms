@@ -1,6 +1,5 @@
 """Base URLs for the CMS."""
 
-
 from django.conf import settings
 from django.conf.urls.defaults import patterns, url, include, handler404
 from django.contrib import admin
@@ -31,6 +30,12 @@ urlpatterns = patterns("",
     url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}, name="robots_txt"),
     
 )
+
+
+if settings.DEBUG:
+    urlpatterns += patterns("",
+        url(settings.MEDIA_URL[1:] + "(.+)", "django.views.static.serve", kwargs={"document_root": settings.MEDIA_ROOT})
+    )
 
 
 handler500 = "cms.core.views.handler500"
