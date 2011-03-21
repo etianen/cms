@@ -54,7 +54,10 @@ def sitemap_entry(context, page):
     context.push()
     try:
         context.update({
-            "page": page,
+            "parent": page.parent,
+            "is_online": page.is_online,
+            "id": page.id,
+            "title": unicode(page),
             "can_change": page_admin.has_change_permission(request, page),
             "can_delete": page_admin.has_delete_permission(request, page),
             "can_move": page_admin.has_move_permission(request, page),

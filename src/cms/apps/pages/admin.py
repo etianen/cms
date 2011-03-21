@@ -8,9 +8,10 @@ standard implementation.
 
 from __future__ import with_statement
 
-import urllib
+import urllib, json
 
 from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
 from django.conf.urls.defaults import patterns, url
 from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
@@ -135,9 +136,12 @@ class PageAdmin(PageBaseAdmin):
     def get_urls(self):
         """Generates custom admin URLS."""
         urls = super(PageAdmin, self).get_urls()
-        custom_urls = patterns("",
-                               url(r"^move-page/$", self.admin_site.admin_view(self.move_page), name="pages_page_move_page"),)
-        return custom_urls + urls
+        admin_view = self.admin_site.admin_view
+        urls = patterns("",
+            url(r"^move-page/$", admin_view(self.move_page), name="pages_page_move_page"),
+            url(r"^sitemap.json$", admin_view(self.sitemap_json), name="pages_page_sitemap_json"),
+        ) + urls
+        return urls
 
     @transaction.commit_on_success
     def move_page(self, request):
@@ -173,7 +177,47 @@ class PageAdmin(PageBaseAdmin):
             return HttpResponse("Page #%s was moved %s." % (page.id, direction))
         else:
             return redirect("admin:index")
-
+    
+    def sitemap_json(self, request):
+        """Returns a JSON data structure describing the sitemap."""
+        # Get the homepage.
+        try:
+            homepage = Page.objects.get_homepage()
+        except Page.DoesNotExist:
+            homepage = None
+        # Compile the initial data.
+        data = {
+            "can_add": self.has_add_permission(request),
+            "can_change": self.has_change_permission(request),
+            "create_homepage_url": reverse("admin:pages_page_add") + "?{0}={1}".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE)
+        }
+        # Add in the page data.
+        if homepage:
+            def sitemap_entry(page):
+                children = []
+                for child in page.children:
+                    children.append(sitemap_entry(page))
+                return {
+                    "parent": page.parent,
+                    "is_online": page.is_online,
+                    "id": page.id,
+                    "title": unicode(page),
+                    "can_change": self.has_change_permission(request, page),
+                    "can_delete": self.has_delete_permission(request, page),
+                    "can_move": self.has_move_permission(request, page),
+                    "add_url": reverse("admin:pages_page_add") + "?%s=%s&parent=%i" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE, page.id),
+                    "change_url": reverse("admin:pages_page_change", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+                    "delete_url": reverse("admin:pages_page_delete", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+                    "children": children,
+                }
+            data["entries"] = [sitemap_entry(homepage)]
+        else:
+            data["entries"] = []
+        # Render the JSON.
+        response = HttpResponse(content_type="application/json; charset=utf-8")
+        json.dump(data, response)
+        return response
+    
     def patch_response_location(self, request, response):
         """Perpetuates the 'from' key in all redirect responses."""
         if isinstance(response, HttpResponseRedirect):
