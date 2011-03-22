@@ -180,6 +180,7 @@ class PageAdmin(PageBaseAdmin):
         else:
             return redirect("admin:index")
     
+    @debug.print_exc
     def sitemap_json(self, request):
         """Returns a JSON data structure describing the sitemap."""
         # Get the homepage.
@@ -193,7 +194,10 @@ class PageAdmin(PageBaseAdmin):
             "canChange": self.has_change_permission(request),
             "canDelete": self.has_delete_permission(request),
             "createHomepageUrl": reverse("admin:pages_page_add") + "?{0}={1}".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
-            "moveUrl": reverse("admin:pages_page_move_page")
+            "moveUrl": reverse("admin:pages_page_move_page"),
+            "addUrl": reverse("admin:pages_page_add") + "?%s=%s&parent=__id__" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+            "changeUrl": reverse("admin:pages_page_change", args=("__id__",)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+            "deleteUrl": reverse("admin:pages_page_delete", args=("__id__",)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
         }
         # Add in the page data.
         if homepage:
@@ -205,9 +209,6 @@ class PageAdmin(PageBaseAdmin):
                     "isOnline": page.is_online,
                     "id": page.id,
                     "title": unicode(page),
-                    "addUrl": reverse("admin:pages_page_add") + "?%s=%s&parent=%i" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE, page.id),
-                    "changeUrl": reverse("admin:pages_page_change", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
-                    "deleteUrl": reverse("admin:pages_page_delete", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
                     "children": children,
                 }
             data["entries"] = [sitemap_entry(homepage)]

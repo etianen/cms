@@ -85,13 +85,13 @@
                                     pageContainer.append('<span class="title">' + page.title + '</span>');
                                 }
                                 if (data.canAdd) {
-                                    pageContainer.append('<a href="' + page.addUrl + '" class="addlink" title="Add a new page underneath this page">Add</a>');
+                                    pageContainer.append('<a href="' + data.addUrl.replace("__id__", page.id) + '" class="addlink" title="Add a new page underneath this page">Add</a>');
                                 }
                                 if (data.canChange) {
-                                    pageContainer.append('<a href="' + page.changeUrl + '" class="changelink" title="Edit this page">Change</a>');
+                                    pageContainer.append('<a href="' + data.changeUrl.replace("__id__", page.id) + '" class="changelink" title="Edit this page">Change</a>');
                                 }
                                 if (data.canDelete) {
-                                    pageContainer.append('<a href="' + page.deleteUrl + '" class="deletelink" title="Delete this page">Delete</a>');
+                                    pageContainer.append('<a href="' + data.deleteUrl.replace("__id__", page.id) + '" class="deletelink" title="Delete this page">Delete</a>');
                                 }
                                 // Add the move functionality.
                                 if (data.canChange) {
