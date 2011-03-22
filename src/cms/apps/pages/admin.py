@@ -17,6 +17,7 @@ from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
 
+from cms.core import debug
 from cms.core.admin import PageBaseAdmin, site
 from cms.core.db import locked
 from cms.apps.pages import content
@@ -144,11 +145,12 @@ class PageAdmin(PageBaseAdmin):
         return urls
 
     @transaction.commit_on_success
+    @debug.print_exc
     def move_page(self, request):
         """Moves a page up or down."""
         page = Page.objects.get_by_id(request.POST["page"])
         # Check that the user has permission to move the page.
-        if not self.has_move_permission(request, page):
+        if not self.has_change_permission(request, page):
             return HttpResponseForbidden("You do not have permission to move this page.")
         # Get the page to swap with.
         direction = request.POST["direction"]
@@ -189,7 +191,9 @@ class PageAdmin(PageBaseAdmin):
         data = {
             "canAdd": self.has_add_permission(request),
             "canChange": self.has_change_permission(request),
-            "createHomepageUrl": reverse("admin:pages_page_add") + "?{0}={1}".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE)
+            "canDelete": self.has_delete_permission(request),
+            "createHomepageUrl": reverse("admin:pages_page_add") + "?{0}={1}".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+            "moveUrl": reverse("admin:pages_page_move_page")
         }
         # Add in the page data.
         if homepage:
@@ -198,13 +202,9 @@ class PageAdmin(PageBaseAdmin):
                 for child in page.children:
                     children.append(sitemap_entry(child))
                 return {
-                    "hasParent": page.parent is not None,
                     "isOnline": page.is_online,
                     "id": page.id,
                     "title": unicode(page),
-                    "canChange": self.has_change_permission(request, page),
-                    "canDelete": self.has_delete_permission(request, page),
-                    "canMove": self.has_move_permission(request, page),
                     "addUrl": reverse("admin:pages_page_add") + "?%s=%s&parent=%i" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE, page.id),
                     "changeUrl": reverse("admin:pages_page_change", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
                     "deleteUrl": reverse("admin:pages_page_delete", args=(page.pk,)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
@@ -243,10 +243,6 @@ class PageAdmin(PageBaseAdmin):
         # Check user has correct permission.
         add_permission = "%s.%s" % (opts.app_label, content.get_add_permission(slug))
         return request.user.has_perm(add_permission)
-    
-    def has_move_permission(self, request, obj):
-        """Checks whether the given user can move the given page."""
-        return self.has_change_permission(request, obj.parent)
     
     def add_view(self, request, *args, **kwargs):
         """Ensures that a valid content type is chosen."""

@@ -101,10 +101,10 @@ class PageManager(PageBaseManager):
         
         The result is cached in the page cache.
         """
-        try:
-            return cache.get_by_id(id)
-        except KeyError:
-            return self.add_deferrals(self.all()).get(id=id)
+        page = cache.get_by_id(id)
+        if page is None:
+            page = self.add_deferrals(self.all()).get(id=id)
+        return page
     
     def get_by_permalink(self, permalink):
         """
@@ -112,10 +112,10 @@ class PageManager(PageBaseManager):
         
         The result is cached in the page cache.
         """
-        try:
-            return cache.get_by_permalink(permalink)
-        except KeyError:
-            return self.add_deferrals(self.all()).get(permalink=permalink)
+        page = cache.get_by_permalink(permalink)
+        if page is None:
+            page = self.add_deferrals(self.all()).get(permalink=permalink)
+        return page
         
     def get_by_path(self, path):
         """Returns the page that best matches the given URL."""

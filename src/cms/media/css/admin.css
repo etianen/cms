@@ -95,25 +95,20 @@ body.dashboard div.sitemap-collapse-control {
     background-position: -13px 0px;
 }
 
-body.dashboard div.sitemap-collapse-control:hover {
+body.dashboard .sitemap-collapse-control:hover {
     background-position: 0px 0px;
 }
 
-body.dashboard li.closed div.sitemap-collapse-control {
+body.dashboard li.closed .sitemap-collapse-control {
     background-position: -13px -13px;
 }
 
-body.dashboard li.closed div.sitemap-collapse-control:hover {
+body.dashboard li.closed .sitemap-collapse-control:hover {
     background-position: 0px -13px;
 }
 
-body.dashboard #sitemap-module li:first-child > div.sitemap-entry input.move-up,
-body.dashboard #sitemap-module li:last-child > div.sitemap-entry input.move-down {
-    display: none;
-}
-
-body.dashboard div.sitemap-entry input.move-up,
-body.dashboard div.sitemap-entry input.move-down {
+body.dashboard div.sitemap-entry .move-up,
+body.dashboard div.sitemap-entry .move-down {
     width: 11px;
     height: 5px;
     background-image: url(../img/arrows.png);
@@ -132,21 +127,21 @@ body.dashboard div.sitemap-entry input.move-down {
     outline: none;
 }
 
-body.dashboard div.sitemap-entry input.move-up {
+body.dashboard div.sitemap-entry .move-up {
     background-position: -15px -29px;
     top: 5px;
 }
 
-body.dashboard div.sitemap-entry input.move-up:hover {
+body.dashboard div.sitemap-entry .move-up:hover {
     background-position: -2px -29px;
 }
 
-body.dashboard div.sitemap-entry input.move-down {
+body.dashboard div.sitemap-entry .move-down {
     background-position: -15px -34px;
     top: 14px;
 }
 
-body.dashboard div.sitemap-entry input.move-down:hover {
+body.dashboard div.sitemap-entry .move-down:hover {
     background-position: -2px -34px;
 }
 
@@ -201,8 +196,8 @@ span.content-type-name {
 /* Ajax loader. */
 
 #sitemap-module .loading {
-    margin-left: 10px;
-    padding-left: 40px;
+    margin: 0 0 0 10px;
+    padding: 0 0 10px 40px;
     background: url(../img/ajax-loader.gif) 0 0 no-repeat;
     height: 30px;
     line-height: 30px;
