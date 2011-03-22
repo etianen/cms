@@ -1,6 +1,5 @@
 """Template extensions used by the CMS"""
 
-
 import re
 from functools import wraps
 
