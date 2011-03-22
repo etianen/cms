@@ -50,7 +50,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.request",
     "cms.core.context_processors.site",
     "cms.core.context_processors.conf",
-    "cms.apps.pages.context_processors.page",
+    "cms.apps.pages.context_processors.homepage",
 )
 
 

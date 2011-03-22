@@ -17,25 +17,6 @@ from cms.core.models import publication_manager
 from cms.apps.pages.models import Page, cache
 
 
-REQUEST_PAGE_CACHE_ATTRIBUTE = "_page_cache"
-
-
-class LazyPage(object):
-    
-    """Lazily loads the current page."""
-    
-    def __get__(self, request, obj_type=None):
-        """Loads the page on first attribute access."""
-        if not hasattr(request, REQUEST_PAGE_CACHE_ATTRIBUTE):
-            # Load the individual page.
-            try:
-                page = Page.objects.get_by_path(request.path_info)
-            except Page.DoesNotExist:
-                page = None
-            setattr(request, REQUEST_PAGE_CACHE_ATTRIBUTE, page)
-        return getattr(request, REQUEST_PAGE_CACHE_ATTRIBUTE)
-
-
 class PageMiddleware(object):
     
     """Serves up pages when no other view is matched."""
@@ -50,10 +31,6 @@ class PageMiddleware(object):
         simply caught 404 responses, then there would be a lot of wasted
         template rendering.
         """
-        # Add the lazy page loader to the request. Modifying the request's class
-        # seems very dodgy to me, but that's how Django's lazy user loading
-        # works, so who am I to argue?
-        request.__class__.page = LazyPage()
         # See if preview mode is requested.
         try:
             preview_mode = int(request.GET.get(settings.PUBLICATION_PREVIEW_KEY, 0))
@@ -68,7 +45,7 @@ class PageMiddleware(object):
                 # attempt to dispatch to a page.
                 resolver.resolve(request.path)
             except urlresolvers.Resolver404:
-                page = request.page
+                page = Page.objects.get_by_path(request.path_info)
                 if page is None:
                     return None
                 script_name = page.get_absolute_url()[:-1]
@@ -92,6 +69,7 @@ class PageMiddleware(object):
                             else:
                                 return redirect(script_name + new_path_info)
                         return
+                    callback_kwargs["page"] = page
                     response = commit_on_success(callback)(request, *callback_args, **callback_kwargs)
                     # Validate the response.
                     if not isinstance(response, HttpResponse):

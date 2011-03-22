@@ -65,7 +65,28 @@ class PageBase(PublishedModel):
     
     objects = PageBaseManager()
     
+    # Hierarchy fields.
+    
     parent = None
+    
+    def get_all_parents(self):
+        """Returns a list of all parents of this page."""
+        if self.parent:
+            return [self.parent] + self.parent.all_parents
+        return []
+    
+    all_parents = property(get_all_parents,
+                           doc="A list of all parents of this page.")
+
+    def get_breadcrumbs(self):
+        """Returns the breadcrumb trail for this page, including this page."""
+        parents = self.all_parents
+        parents.reverse()
+        parents.append(self)
+        return parents
+    
+    breadcrumbs = property(get_breadcrumbs,
+                           doc="The breadcrumb trail for this page.")
     
     # Base fields.
     
@@ -153,6 +174,7 @@ class PageBase(PublishedModel):
             page = page.parent
         # Return the context.
         return {
+            "page": self,
             "meta_description": self.meta_description,
             "meta_keywords": self.meta_keywords,
             "robots_index": robots_index,
