@@ -76,7 +76,6 @@ class PageBase(PublishedModel):
     
     title = models.CharField(
         max_length = 1000,
-        db_index = True
     )
     
     # Navigation fields.
