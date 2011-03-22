@@ -52,11 +52,11 @@
                         <p id="breadcrumbs">{% block breadcrumbs %}{% breadcrumbs %}{% endblock %}</p>
                     {% endif %}
                     <h1>{% block header %}{% header %}{% endblock %}</h1>
-                    {% block content_primary %}{% content "content_primary" %}{% endblock %}
+                    {% block content_primary %}{% endblock %}
                 </article>
             
                 <aside id="content-secondary">
-                    {% block content_secondary %}{% content "content_secondary" %}{% endblock %}
+                    {% block content_secondary %}{% endblock %}
                 </aside>
             
                 <div class="clear"></div>
