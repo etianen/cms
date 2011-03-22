@@ -168,7 +168,7 @@ class Page(PageBase):
         """Generates the absolute url of the page."""
         if self.parent:
             return self.parent.get_absolute_url() + self.url_title + "/"
-        return "/"
+        return urlresolvers.get_script_prefix()
     
     def reverse(self, view_func, *args, **kwargs):
         """Performs a reverse URL lookup."""

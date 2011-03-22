@@ -29,7 +29,7 @@ class LazyPage(object):
         if not hasattr(request, REQUEST_PAGE_CACHE_ATTRIBUTE):
             # Load the individual page.
             try:
-                page = Page.objects.get_by_path(request.path)
+                page = Page.objects.get_by_path(request.path_info)
             except Page.DoesNotExist:
                 page = None
             setattr(request, REQUEST_PAGE_CACHE_ATTRIBUTE, page)
