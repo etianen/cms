@@ -48,7 +48,9 @@
             <div class="container">
             
                 <article id="content-primary">
-                    {% block breadcrumbs %}{% breadcrumbs %}{% endblock %}
+                    {% if not is_homepage %}
+                        <p id="breadcrumbs">{% block breadcrumbs %}{% breadcrumbs %}{% endblock %}</p>
+                    {% endif %}
                     <h1>{% block header %}{% header %}{% endblock %}</h1>
                     {% block content_primary %}{% content "content_primary" %}{% endblock %}
                 </article>
