@@ -138,14 +138,26 @@ class PageBase(PublishedModel):
     
     def get_context_data(self):
         """Returns the SEO context data for this page."""
-        
-        
+        robots_index = self.robots_index
+        robots_archive = self.robots_archive
+        robots_follow = self.robots_follow
+        # Follow the page ancestry, looking for robots flags.
+        page = self
+        while page:
+            if robots_index is None:
+                robots_index = page.robots_index
+            if robots_archive is None:
+                robots_archive = page.robots_archive
+            if robots_follow is None:
+                robots_follow = page.robots_follow
+            page = page.parent
+        # Return the context.
         return {
             "meta_description": self.meta_description,
             "meta_keywords": self.meta_keywords,
-            "robots_index": self.robots_index,
-            "robots_archive": self.robots_archive,
-            "robots_follow": self.robots_follow,
+            "robots_index": robots_index,
+            "robots_archive": robots_archive,
+            "robots_follow": robots_follow,
             "title": self.browser_title or self.title,
             "header": self.title
         }

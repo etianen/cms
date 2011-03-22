@@ -163,8 +163,7 @@ def meta_description(context, description=None):
         {% meta_description "foo" %}
         
     """
-    page = context["page"]
-    description = description or context.get("meta_description") or page.meta_description
+    description = description or context.get("meta_description", "")
     return conditional_escape(description)
 
 
@@ -187,8 +186,7 @@ def meta_keywords(context, keywords=None):
         {% meta_keywords "foo" %}
         
     """
-    page = context["page"]
-    keywords = keywords or context.get("meta_keywords") or page.meta_keywords
+    keywords = keywords or context.get("meta_keywords", "")
     return conditional_escape(keywords)
 
 
@@ -212,29 +210,18 @@ def meta_robots(context, index=None, follow=None, archive=None):
         {% meta_robots 1 1 1 %}
         
     """
-    page = context["page"]
     if index is None:
         index = context.get("robots_index")
-    if archive is None:
-        archive = context.get("robots_archive")
+        if index is None:
+            index = True
     if follow is None:
         follow = context.get("robots_follow")
-    # Follow the page ancestry, looking for robots flags.
-    while page:
-        if index is None and page.robots_index != None:
-            index = page.robots_index
-        if archive is None and page.robots_archive != None:
-            archive = page.robots_archive
-        if follow is None and page.robots_follow != None:
-            follow = page.robots_follow
-        page = page.parent
-    # If no page specified robots, then default to True.
-    if index is None:
-        index = True
+        if follow is None:
+            follow = True
     if archive is None:
-        archive = True
-    if follow is None:
-        follow = True
+        archive = context.get("robots_archive")
+        if archive is None:
+            archive = True
     # Generate the meta content.
     robots = ", ".join((index and "INDEX" or "NOINDEX", follow and "FOLLOW" or "NOFOLLOW", archive and "ARCHIVE" or "NOARCHIVE"))
     return escape(robots)
@@ -382,7 +369,7 @@ def breadcrumbs(parser, token):
         {% breadcrumbs extended %}
         
     """
-    def handler(context, extended):
+    def handler(context, extended=False):
         # Render the tag.
         page = context["page"]
         breadcrumbs = [{"short_title": breadcrumb.short_title or breadcrumb.title,
