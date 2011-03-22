@@ -188,10 +188,10 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
         if image.name.startswith(settings.MEDIA_ROOT):
             image_name = os.path.relpath(image.name, settings.MEDIA_ROOT)
         else:
-            if image.name.startswith(settings.SITE_MEDIA_ROOT):
-                image_name = os.path.join("site", os.path.relpath(image.name, settings.SITE_MEDIA_ROOT))
+            if image.name.startswith(settings.STATIC_ROOT):
+                image_name = os.path.join("static", os.path.relpath(image.name, settings.STATIC_ROOT))
             else:
-                raise IOError("%s is outside of the site's MEDIA_ROOT and SITE_MEDIA_ROOT." % image.name)
+                raise IOError("%s is outside of the site's MEDIA_ROOT and STATIC_ROOT." % image.name)
     else:
         image_name = image.name
     # If the file data and thumbnail data are identical, don't bother making a thumbnail.
