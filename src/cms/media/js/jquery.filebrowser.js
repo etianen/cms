@@ -54,8 +54,6 @@
             if (win.ImageDialog.showPreviewImage) {
                 win.ImageDialog.showPreviewImage(permalink);
             }
-            $("#alt", win.document).attr("value", title);
-            $("#title", win.document).attr("value", title);
         }
         // Close the dialogue.
         tinyMCEPopup.close();

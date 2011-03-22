@@ -28,7 +28,8 @@
         content_css: "{{STATIC_URL|escapejs}}site/css/content.css",
         extended_valid_elements : "iframe[src|width|height|name|align]",  // Permit embedded iframes.
         convert_urls: false,
-        file_browser_callback: $.filebrowser.createCallback("{% url 'admin:media_file_changelist' %}?pop=1")
+        file_browser_callback: $.filebrowser.createCallback("{% url 'admin:media_file_changelist' %}?pop=1"),
+        accessibility_warnings: false
     });
     
 }(django.jQuery, tinyMCE));

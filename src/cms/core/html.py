@@ -36,7 +36,10 @@ def process(text):
                         resolved_permalinks[value] = None
                 obj = resolved_permalinks[value]
                 if obj:
+                    # Add in the URL of the obj.
                     attrs[attr_name] = '"%s"' % escape(obj.get_absolute_url())
+                    # Add in the title of the obj.
+                    attrs.setdefault("title", getattr(obj, "title", unicode(obj)))
                 return obj
             return None
         if tagname == "a":
