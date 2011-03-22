@@ -1,13 +1,10 @@
 """Pluggable page content, serialized to XML."""
 
 
-import cStringIO, imp, weakref
-from xml.dom import minidom
-from xml.sax.saxutils import XMLGenerator
+import imp, weakref, json
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.serializers.xml_serializer import getInnerText
 from django.db.models.options import get_verbose_name
 
 from cms.apps.pages.forms import PageForm
@@ -140,37 +137,24 @@ class Content(object):
     # Content serialization methods.
         
     def _get_serialized_data(self):
-        """Returns the content data, serialized to XML."""
-        # Start the XML document.
-        out = cStringIO.StringIO()
-        generator = XMLGenerator(out, "utf-8")
-        generator.startDocument()
-        generator.startElement("content", {})
+        """Returns the content data, serialized to JSON."""
+        data = {}
         # Generate the XML.
         for field in self.fields:
             key = field.name
             value = self.data[key]
-            generator.startElement("attribute", {"name": key})
             if value is None:
                 serialized_value = ""
             else:
                 serialized_value = field.serialize(value)
-            generator.characters(serialized_value)
-            generator.endElement("attribute")
-        # Return the generated XML.
-        generator.endElement("content")
-        generator.endDocument()
-        return out.getvalue()
+            data[key] = serialized_value
+        # Return the generated JSON.
+        return json.dumps(data)
     
     def _set_serialized_data(self, serialized_data):
         """Deserializes the given data into a dictionary."""
         # Generate a dictionary of serialized data.
-        raw_data = {}
-        xml_data = minidom.parseString(serialized_data.encode("utf8")).documentElement
-        for element in xml_data.getElementsByTagName("attribute"):
-            key = element.attributes["name"].nodeValue
-            value = getInnerText(element)
-            raw_data[key] = value
+        raw_data = json.loads(serialized_data)
         # Deserialize the data using fields.
         data = {}
         for field in self.fields:
