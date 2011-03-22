@@ -42,6 +42,25 @@
     }
     
     /**
+     * Disables text selection on the given element.
+     */
+    cms.disableTextSelect = function() {
+        return this.each(function() {
+        	if ($.browser.mozilla) {
+        		$(this).css('MozUserSelect', 'none');
+        	 } else if ($.browser.msie) {
+        		$(this).bind('selectstart', function () {
+        		    return false;
+        		});
+        	} else {
+        		$(this).mousedown(function() {
+        		    return false;
+        		});
+        	}
+        });
+    }
+    
+    /**
      * Activates the main CMS dashboard sitemap.
      */
     cms.sitemap = function() {
@@ -187,6 +206,8 @@
                                 dataContainer.append('<p>It\'s time to go ahead and <a href="' + data.createHomepageUrl + '">create one</a>!</p>');
                             }
                         }
+                        // Disable text selection.
+                        dataContainer.cms("disableTextSelect");
                         // Fade in data.
                         container.append(dataContainer);
                         container.animate({
