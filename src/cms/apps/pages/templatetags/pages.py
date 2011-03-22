@@ -166,7 +166,7 @@ def meta_description(context, description=None):
         
     """
     page = context["page"]
-    description = description or context.get("meta_description", page.meta_description)
+    description = description or context.get("meta_description") or page.meta_description
     return conditional_escape(description)
 
 
@@ -190,7 +190,7 @@ def meta_keywords(context, keywords=None):
         
     """
     page = context["page"]
-    keywords = keywords or context.get("meta_keywords", page.meta_keywords)
+    keywords = keywords or context.get("meta_keywords") or page.meta_keywords
     return conditional_escape(keywords)
 
 
@@ -216,11 +216,11 @@ def meta_robots(context, index=None, follow=None, archive=None):
     """
     page = context["page"]
     if index is None:
-        index = context.get("robots_index", None)
+        index = context.get("robots_index")
     if archive is None:
-        archive = context.get("robots_archive", None)
+        archive = context.get("robots_archive")
     if follow is None:
-        follow = context.get("robots_follow", None)
+        follow = context.get("robots_follow")
     # Follow the page ancestry, looking for robots flags.
     while page:
         if index is None and page.robots_index != None:
@@ -265,7 +265,7 @@ def title(context, title=None):
     # Render the title template.
     context.push()
     try:
-        context.update({"title": title or context.get("title", "") or page.browser_title or page.title,
+        context.update({"title": title or context.get("title") or page.browser_title or page.title,
                         "site_title": homepage.browser_title or homepage.title})
         return template.loader.render_to_string("title.html", context)
     finally:
@@ -434,7 +434,7 @@ def header(context, header=None):
         
     """
     page = context["page"]
-    header = header or context.get("header", None) or context.get("title", page.title)
+    header = header or context.get("header") or context.get("title") or page.title
     context.push()
     try:
         context.update({
