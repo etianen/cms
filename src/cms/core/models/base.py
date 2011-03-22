@@ -65,6 +65,8 @@ class PageBase(PublishedModel):
     
     objects = PageBaseManager()
     
+    parent = None
+    
     # Base fields.
     
     site = models.ForeignKey(Site,
@@ -136,6 +138,8 @@ class PageBase(PublishedModel):
     
     def get_context_data(self):
         """Returns the SEO context data for this page."""
+        
+        
         return {
             "meta_description": self.meta_description,
             "meta_keywords": self.meta_keywords,

@@ -32,8 +32,8 @@ def html(text):
     return mark_safe(text)
     
 
-@register.simple_tag(takes_context=True)
-def content(context, content_area, inherited_flag="not-inherited"):
+@register.tag
+def content(parser, token):
     """
     Renders the named content area of the current page.
     
@@ -47,23 +47,21 @@ def content(context, content_area, inherited_flag="not-inherited"):
         {% content "content_primary" inherited %}
         
     """
-    # Parse arguments.
-    if inherited_flag == "inherited":
-        inherited = True
-    elif inherited_flag == "not-inherited":
-        inherited = False
-    else:
-        raise template.TemplateSyntaxError("The inherited flag should be 'inherited' or 'not-inherited', {0!r} found.".format(inherited_flag))
-    # Render the tag.
-    page = context["page"]
-    content = ""
-    while not content and page:
-        content_obj = page.content
-        content = getattr(content_obj, content_area, "")
-        if not inherited:
-            break
-        page = page.parent
-    return html(content)
+    def handler(context, content_area, inherited=False):
+        # Render the tag.
+        page = context["page"]
+        content = ""
+        while not content and page:
+            content_obj = page.content
+            content = getattr(content_obj, content_area, "")
+            if not inherited:
+                break
+            page = page.parent
+        return html(content)
+    return PatternNode(parser, token, handler, (
+        "{content_area} [inherited]",
+        "{content_area}",
+    ))
 
 
 # Page linking.
@@ -261,7 +259,7 @@ def title(context, title=None):
     
     """
     page = context["page"]
-    homepage = page.homepage
+    homepage = Page.objects.get_homepage()
     # Render the title template.
     context.push()
     try:
@@ -303,7 +301,7 @@ def nav_primary(context):
         
     """
     page = context["page"]
-    homepage = page.homepage
+    homepage = Page.objects.get_homepage()
     navigation = []
     if homepage.in_navigation:
         nav_entry = NavEntry(homepage, page, [])
@@ -371,8 +369,8 @@ def nav_tertiary(context):
         context.pop()
 
 
-@register.simple_tag(takes_context=True)
-def breadcrumbs(context, extended_flag="not-extended"):
+@register.tag
+def breadcrumbs(parser, token):
     """
     Renders the breadcrumbs trail for the current page::
     
@@ -384,34 +382,32 @@ def breadcrumbs(context, extended_flag="not-extended"):
         {% breadcrumbs extended %}
         
     """
-    # Parse arguments.
-    if extended_flag == "extended":
-        extended = True
-    elif extended_flag == "not-extended":
-        extended = False
-    else:
-        raise template.TemplateSyntaxError("The extended flag should be 'extended' or 'not-extended', {0!r} found.".format(extended_flag))
-    # Render the tag.
-    page = context["page"]
-    breadcrumbs = [{"short_title": breadcrumb.short_title or breadcrumb.title,
-                    "title": breadcrumb.title,
-                    "url": breadcrumb.get_absolute_url(),
-                    "last": False,
-                    "page": breadcrumb}
-                   for breadcrumb in page.breadcrumbs]
-    if not extended:
-        if len(breadcrumbs) == 1:
-            # Display no breadcrumbs on the homepage.
-            breadcrumbs = []
-        else:
-            breadcrumbs[-1]["last"] = True
-    # Render the breadcrumbs.
-    context.push()
-    try:
-        context.update({"breadcrumbs": breadcrumbs,})
-        return template.loader.render_to_string("breadcrumbs.html", context)
-    finally:
-        context.pop()
+    def handler(context, extended):
+        # Render the tag.
+        page = context["page"]
+        breadcrumbs = [{"short_title": breadcrumb.short_title or breadcrumb.title,
+                        "title": breadcrumb.title,
+                        "url": breadcrumb.get_absolute_url(),
+                        "last": False,
+                        "page": breadcrumb}
+                       for breadcrumb in page.breadcrumbs]
+        if not extended:
+            if len(breadcrumbs) == 1:
+                # Display no breadcrumbs on the homepage.
+                breadcrumbs = []
+            else:
+                breadcrumbs[-1]["last"] = True
+        # Render the breadcrumbs.
+        context.push()
+        try:
+            context.update({"breadcrumbs": breadcrumbs,})
+            return template.loader.render_to_string("breadcrumbs.html", context)
+        finally:
+            context.pop()
+    return PatternNode(parser, token, handler, (
+        "[extended]",
+        ""
+    ))
 
 
 @register.simple_tag(takes_context=True)

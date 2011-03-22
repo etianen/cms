@@ -65,23 +65,6 @@ class Page(PageBase):
 
     order = models.PositiveIntegerField(editable=False)
 
-    def get_homepage(self):
-        """Returns the homepage for this page."""
-        page = self
-        while page.parent:
-            page = page.parent
-        return page
-    
-    homepage = property(get_homepage,
-                        doc="The homepage for this page.")
-
-    def get_is_homepage(self):
-        """Returns whether this page is the site homepage."""
-        return self.parent != None
-    
-    is_homepage = property(get_is_homepage,
-                           doc="Whether this page is the site homepage.")
-
     @cached_getter
     @publication_manager.getter
     def get_children(self):
