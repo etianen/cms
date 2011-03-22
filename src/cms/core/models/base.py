@@ -134,9 +134,9 @@ class PageBase(PublishedModel):
                                       default=None,
                                       help_text="Use this to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis. Leave blank to use the setting from the parent page.")
     
-    def render(self, request, template, context=None, **kwargs):
-        """Renders a template as a HttpResponse using the context of this page."""
-        page_context = {
+    def get_context_data(self):
+        """Returns the SEO context data for this page."""
+        return {
             "meta_description": self.meta_description,
             "meta_keywords": self.meta_keywords,
             "robots_index": self.robots_index,
@@ -145,6 +145,10 @@ class PageBase(PublishedModel):
             "title": self.browser_title or self.title,
             "header": self.title
         }
+    
+    def render(self, request, template, context=None, **kwargs):
+        """Renders a template as a HttpResponse using the context of this page."""
+        page_context = self.get_context_data()
         page_context.update(context or {})
         return render(request, template, page_context, **kwargs)
     
