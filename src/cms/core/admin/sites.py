@@ -7,7 +7,6 @@ import functools, itertools
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.shortcuts import render
-from django.views.generic import TemplateView
 
 from cms.core import permalinks
 from cms.core.models.managers import publication_manager
