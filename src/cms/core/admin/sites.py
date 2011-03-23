@@ -7,7 +7,7 @@ import functools, itertools
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.shortcuts import render
-from django.views.generic.simple import direct_to_template
+from django.views.generic import TemplateView
 
 from cms.core import permalinks
 from cms.core.models.managers import publication_manager
@@ -34,14 +34,6 @@ class AdminSite(admin.AdminSite):
     
     # Custom admin views.
     
-    def get_urls(self):
-        """Generates custom admin URLS."""
-        urls = super(AdminSite, self).get_urls()
-        custom_urls = patterns("",
-                               url(r"^tinymce-init.js$", self.admin_view(direct_to_template), kwargs={"template": "admin/tinymce_init.js", "mimetype": "text/javascript"}, name="tinymce_init"),
-                               url(r"^tinymce-link-list.js$", self.admin_view(self.tinymce_link_list), name="tinymce_link_list"),)
-        return custom_urls + urls
-    
     def admin_view(self, view, *args, **kwargs):
         """Turns off publication management for admin views."""
         view = super(AdminSite, self).admin_view(view, *args, **kwargs)
@@ -50,6 +42,19 @@ class AdminSite(admin.AdminSite):
             with publication_manager.select_published(False):
                 return view(*args, **kwargs)
         return wrapper
+    
+    def get_urls(self):
+        """Generates custom admin URLS."""
+        urls = super(AdminSite, self).get_urls()
+        custom_urls = patterns("",
+            url(r"^tinymce-init.js$", self.admin_view(self.tinymce_init), name="tinymce_init"),
+            url(r"^tinymce-link-list.js$", self.admin_view(self.tinymce_link_list), name="tinymce_link_list"),
+        )
+        return custom_urls + urls
+    
+    def tinymce_init(self, request):
+        """Renders the tinymce init script."""
+        return render(request, "admin/tinymce_init.js", {}, content_type="text/javascript; charset=utf-8")
     
     def tinymce_link_list(self, request):
         """Generates the tinymce link list."""
