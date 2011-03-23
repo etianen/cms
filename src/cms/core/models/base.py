@@ -3,8 +3,10 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
+from django.db.models.query import QuerySet
 from django.shortcuts import render
 
+from cms.core import debug
 from cms.core.models.managers import PublishedModelManager, PageBaseManager, publication_manager
 from cms.core.models.fields import NullBooleanField, EnumField
 
@@ -93,6 +95,41 @@ class PageBase(PublishedModel):
     def navigation(self):
         """The navigation entries underneath this page."""
         return self.children
+    
+    @property
+    def siblings(self):
+        """All sibling pages in the hierarchy."""
+        if self.parent:
+            return self.parent.children
+        return ()
+        
+    @property
+    @debug.print_exc
+    def next(self):
+        """The next sibling, according to the default child ordering, or None."""
+        sibling_iter = iter(list(self.siblings))
+        while True:
+            try:
+                sibling = sibling_iter.next()
+                if sibling == self:
+                    return sibling_iter.next()
+            except StopIteration:
+                break
+        return None
+        
+    @property
+    @debug.print_exc
+    def prev(self):
+        """The previous sibling, according to the default child ordering, or None."""
+        sibling_iter = iter(reversed(list(self.siblings)))
+        while True:
+            try:
+                sibling = sibling_iter.next()
+                if sibling == self:
+                    return sibling_iter.next()
+            except StopIteration:
+                break
+        return None
     
     # Base fields.
     
