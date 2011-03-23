@@ -77,6 +77,4 @@ class PageBaseAdmin(VersionAdmin, PublishedModelAdmin):
     
     search_fields = ("title",)
     
-    ordering = ("title",)
-    
     get_date_modified = get_date_modified
