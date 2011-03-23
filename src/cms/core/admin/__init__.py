@@ -3,7 +3,7 @@
 
 from django.contrib.auth.models import User, Group
 
-from cms.core.admin.sites import AdminSite
+from cms.core.admin.sites import AdminSite, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.core.admin.base import PageBaseAdmin, PublishedModelAdmin, get_date_modified  # @UnusedImport
 from cms.core.admin.auth import UserAdmin, GroupAdmin
 

@@ -18,17 +18,11 @@ from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpRespons
 from django.shortcuts import render, redirect
 
 from cms.core import debug
-from cms.core.admin import PageBaseAdmin, site
+from cms.core.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.core.db import locked
 from cms.apps.pages import content
 from cms.apps.pages.models import Page
 
-
-# The GET parameter used to indicate where page admin actions originated.
-PAGE_FROM_KEY = "from"
-
-# The GET parameter value used to indicate that the page admin action came form the sitemap.
-PAGE_FROM_SITEMAP_VALUE = "sitemap"
 
 # The GET parameter used to indicate content type.
 PAGE_TYPE_PARAMETER = "type"
@@ -134,91 +128,6 @@ class PageAdmin(PageBaseAdmin):
         super(PageBaseAdmin, self).save_model(request, obj, form, change)
 
     # Custom views.
-
-    def get_urls(self):
-        """Generates custom admin URLS."""
-        urls = super(PageAdmin, self).get_urls()
-        admin_view = self.admin_site.admin_view
-        urls = patterns("",
-            url(r"^move-page/$", admin_view(self.move_page), name="pages_page_move_page"),
-            url(r"^sitemap.json$", admin_view(self.sitemap_json), name="pages_page_sitemap_json"),
-        ) + urls
-        return urls
-
-    @transaction.commit_on_success
-    @debug.print_exc
-    def move_page(self, request):
-        """Moves a page up or down."""
-        page = Page.objects.get_page(request.POST["page"])
-        # Check that the user has permission to move the page.
-        if not self.has_change_permission(request, page):
-            return HttpResponseForbidden("You do not have permission to move this page.")
-        # Get the page to swap with.
-        direction = request.POST["direction"]
-        parent = page.parent
-        if parent is not None:
-            try:
-                if direction == "up":
-                    other = parent.children.order_by("-order").filter(order__lt=page.order)[0]
-                elif direction == "down":
-                    other = parent.children.order_by("order").filter(order__gt=page.order)[0]
-                else:
-                    raise ValueError, "Direction should be 'up' or 'down', not '%s'." % direction
-            except IndexError:
-                # Impossible to move pag up or down because it already is at the top or bottom!
-                pass
-            else:
-                with locked(Page):
-                    page_order = page.order
-                    other_order = other.order
-                    page.order = other_order
-                    other.order = page_order
-                    page.save()
-                    other.save()
-        # Return a response appropriate to whether this was an AJAX request or not.
-        if request.is_ajax():
-            return HttpResponse("Page #%s was moved %s." % (page.id, direction))
-        else:
-            return redirect("admin:index")
-    
-    @debug.print_exc
-    def sitemap_json(self, request):
-        """Returns a JSON data structure describing the sitemap."""
-        # Get the homepage.
-        try:
-            homepage = Page.objects.get_homepage()
-        except Page.DoesNotExist:
-            homepage = None
-        # Compile the initial data.
-        data = {
-            "canAdd": self.has_add_permission(request),
-            "canChange": self.has_change_permission(request),
-            "canDelete": self.has_delete_permission(request),
-            "createHomepageUrl": reverse("admin:pages_page_add") + "?{0}={1}".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
-            "moveUrl": reverse("admin:pages_page_move_page"),
-            "addUrl": reverse("admin:pages_page_add") + "?%s=%s&parent=__id__" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
-            "changeUrl": reverse("admin:pages_page_change", args=("__id__",)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
-            "deleteUrl": reverse("admin:pages_page_delete", args=("__id__",)) + "?%s=%s" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
-        }
-        # Add in the page data.
-        if homepage:
-            def sitemap_entry(page):
-                children = []
-                for child in page.children:
-                    children.append(sitemap_entry(child))
-                return {
-                    "isOnline": page.is_online,
-                    "id": page.id,
-                    "title": unicode(page),
-                    "children": children,
-                }
-            data["entries"] = [sitemap_entry(homepage)]
-        else:
-            data["entries"] = []
-        # Render the JSON.
-        response = HttpResponse(content_type="application/json; charset=utf-8")
-        json.dump(data, response)
-        return response
     
     def patch_response_location(self, request, response):
         """Perpetuates the 'from' key in all redirect responses."""

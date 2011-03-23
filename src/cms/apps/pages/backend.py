@@ -11,6 +11,8 @@ class PageBackend(BackendBase):
     
     """A page backend that uses Page models."""
     
+    model = Page
+    
     def get_homepage(self, request):
         """Returns the site homepage."""
         try:

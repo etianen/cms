@@ -14,6 +14,9 @@ class BackendBase(object):
     
     __metaclass__ = abc.ABCMeta
     
+    # The primary model of the backend.
+    model = None
+    
     @abc.abstractmethod
     def get_homepage(self, request):
         """Returns the current homepage, or None."""
@@ -24,10 +27,9 @@ class BackendBase(object):
         """Returns the current best-matched page, or None."""
         raise NotImplementedError
     
-    @abc.abstractmethod
     def get(self, id):
         """Returns the page matching the given id."""
-        raise NotImplementedError
+        return self.model._default_manager.get(pd=id)
         
     @abc.abstractmethod
     def reverse(self, request, page, view_name, args, kwargs):
@@ -72,7 +74,7 @@ class MountedBackend(object):
         """Initializes the MountedBackend."""
         self.backend = backend
         self.request = request
-        
+    
     @property
     def homepage(self):
         """The current homepage."""
@@ -117,21 +119,6 @@ class MountedBackend(object):
     def nav_tertiary(self):
         """Returns the tertiary navigation for the site."""
         return self.get_navigation(2)
-    
-    # Movement
-        
-    @property
-    def can_move(self):
-        """Whether this bachend supports moving pages around."""
-        return self.backend.can_move
-        
-    def move_up(self, page):
-        """Moves the given page up, relative to it's siblings."""
-        return self.backend.move_up(self.request, page)
-    
-    def move_down(self, page):
-        """Moves the given page down, relative to it's siblings."""
-        return self.backend.move_down(self.request, page)
 
 
 _backend_cache = None

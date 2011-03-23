@@ -75,7 +75,7 @@
             container.append(loader);
             container.height(container.height());
             loader.hide().fadeIn(function() {
-                $.getJSON("/admin/pages/page/sitemap.json", function(data) {
+                $.getJSON("/admin/sitemap.json", function(data) {
                     loader.fadeOut(function() {
                         var dataContainer = $("<div>").css("opacity", 0);
                         // Process data.
@@ -120,7 +120,7 @@
                                     pageContainer.append('<a href="' + deleteUrl + '" class="deletelink" title="Delete this page">Delete</a>');
                                 }
                                 // Add the move functionality.
-                                if (data.canChange) {
+                                if (data.canChange && data.moveUrl) {
                                     function makeMoveHandler(direction) {
                                         return function() {
                                             // Prevent simultanious page moves.
