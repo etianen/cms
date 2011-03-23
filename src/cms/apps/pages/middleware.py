@@ -14,7 +14,7 @@ from django.views.debug import technical_404_response
 from django.shortcuts import redirect
 
 from cms.core.models import publication_manager
-from cms.apps.pages.models import Page, cache
+from cms.apps.pages.models import Page
 
 
 class PageMiddleware(object):
@@ -45,8 +45,9 @@ class PageMiddleware(object):
                 # attempt to dispatch to a page.
                 resolver.resolve(request.path)
             except urlresolvers.Resolver404:
-                page = Page.objects.get_by_path(request.path_info)
-                if page is None:
+                try:
+                    page = Page.objects.get_by_path(request.path_info)
+                except Page.DoesNotExist:
                     return None
                 script_name = page.get_absolute_url()[:-1]
                 path_info = request.path[len(script_name):]
@@ -85,7 +86,7 @@ class PageMiddleware(object):
             
     def process_response(self, request, response):
         """Clears the page cache."""
-        cache.clear()
+        Page.objects.cache.clear()
         return response
         
         

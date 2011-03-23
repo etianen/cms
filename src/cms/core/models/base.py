@@ -43,12 +43,6 @@ class PublishedModel(models.Model):
                                     default=True,
                                     help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by clicking the 'view on site' button.")
     
-    # Default class properties for sitemap generation.
-    
-    sitemap_changefreq = None
-    
-    sitemap_priority = None
-    
     class Meta:
         abstract = True
     

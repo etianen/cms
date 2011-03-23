@@ -12,7 +12,7 @@ from cms.core.models.base import PageBase
 from cms.core.models.managers import publication_manager
 from cms.core.optimizations import cached_getter, cached_setter
 from cms.apps.pages import content
-from cms.apps.pages.models.managers import PageManager, cache
+from cms.apps.pages.models.managers import PageManager
 from cms.apps.pages.models.fields import PageField
 
 
@@ -37,7 +37,7 @@ class Page(PageBase):
         """"Initializes the Page."""
         super(Page, self).__init__(*args, **kwargs)
         if self.id:
-            cache.add(self)
+            self.__class__.objects.cache.put(self)
     
     # Hierarchy fields.
 
@@ -121,12 +121,12 @@ class Page(PageBase):
     def save(self, *args, **kwargs):
         """Saves the page."""
         super(Page, self).save(*args, **kwargs)
-        cache.add(self)
+        self.__class__.objects.cache.put(self)
         
     def delete(self, *args, **kwargs):
         """Deletes the page."""
         super(Page, self).delete(*args, **kwargs)
-        cache.remove(self)
+        self.__class__.objects.cache.remove(self)
     
     class Meta:
         unique_together = (("parent", "url_title",),)

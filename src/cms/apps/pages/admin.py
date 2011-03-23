@@ -98,8 +98,9 @@ class PageAdmin(PageBaseAdmin):
             invalid_parents.add(obj.id)
         else:
             invalid_parents = frozenset()
-        homepage = Page.objects.get_homepage()
-        if homepage is None:
+        try:
+            homepage = Page.objects.get_homepage()
+        except Page.DoesNotExist:
             parent_choices = []
         else:
             parent_choices = []
@@ -148,7 +149,7 @@ class PageAdmin(PageBaseAdmin):
     @debug.print_exc
     def move_page(self, request):
         """Moves a page up or down."""
-        page = Page.objects.get_by_id(request.POST["page"])
+        page = Page.objects.get_page(request.POST["page"])
         # Check that the user has permission to move the page.
         if not self.has_change_permission(request, page):
             return HttpResponseForbidden("You do not have permission to move this page.")

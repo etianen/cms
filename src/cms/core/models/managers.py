@@ -97,4 +97,4 @@ class PageBaseManager(PublishedModelManager):
         """Returns the filtered query set."""
         queryset = super(PageBaseManager, self).get_query_set()
         queryset = queryset.filter(site=Site.objects.get_current())
-        return queryset        
+        return queryset
