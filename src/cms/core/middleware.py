@@ -72,7 +72,7 @@ class PageMiddleware(object):
             resolver.resolve(request.path)
         except urlresolvers.Resolver404:
             # Get the current page.
-            page = self.backend.get_current(request)
+            page = request.pages.current
             if page is None:
                 return None
             script_name = page.get_absolute_url()[:-1]
