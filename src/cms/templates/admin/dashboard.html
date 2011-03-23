@@ -13,23 +13,21 @@
 
 
 {% block sidebar %}
-    {% if "cms.apps.pages" in settings.INSTALLED_APPS %}
+    {% if request.pages %}
         <div id="content-related">
-            {% if perms.pages.change_page %}
-                <div id="sitemap-panel">
-                    <div id="sitemap-module" class="module">
-                        <h2>Sitemap</h2>
-                        <noscript>
-                            <p>Please turn on javascript to activate the sitemap.</p>
-                        </noscript>
-                    </div>
-                    <script type="text/javascript">
-                        (function($) {
-                            $("#sitemap-module").cms("sitemap");
-                        }(django.jQuery));
-                    </script>
+            <div id="sitemap-panel">
+                <div id="sitemap-module" class="module">
+                    <h2>Sitemap</h2>
+                    <noscript>
+                        <p>Please turn on javascript to activate the sitemap.</p>
+                    </noscript>
                 </div>
-            {% endif %}
+                <script type="text/javascript">
+                    (function($) {
+                        $("#sitemap-module").cms("sitemap");
+                    }(django.jQuery));
+                </script>
+            </div>
         </div>
     {% else %}
         {{block.super}}
