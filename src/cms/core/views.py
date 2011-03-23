@@ -21,4 +21,5 @@ class PageView(DetailView):
         """Sets the page's SEO information in the context."""
         context = self.object.get_context_data()
         context.update(kwargs)
+        context["page"] = self.object
         return super(PageView, self).get_context_data(**context)

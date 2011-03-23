@@ -246,12 +246,14 @@ def title(context, title=None):
     
     """
     page = context["page"]
-    homepage = Page.objects.get_homepage()
+    homepage = page.homepage
     # Render the title template.
     context.push()
     try:
-        context.update({"title": title or context.get("title") or page.browser_title or page.title,
-                        "site_title": homepage.browser_title or homepage.title})
+        context.update({
+            "title": title or context.get("title", ""),
+            "site_title": homepage.browser_title or homepage.title
+        })
         return template.loader.render_to_string("title.html", context)
     finally:
         context.pop()
@@ -288,7 +290,7 @@ def nav_primary(context):
         
     """
     page = context["page"]
-    homepage = Page.objects.get_homepage()
+    homepage = page.homepage
     navigation = []
     if homepage.in_navigation:
         nav_entry = NavEntry(homepage, page, [])
@@ -369,9 +371,9 @@ def breadcrumbs(parser, token):
         {% breadcrumbs extended %}
         
     """
-    def handler(context, extended=False):
+    def handler(context, page=None, extended=False):
         # Render the tag.
-        page = context["page"]
+        page = page or context["page"]
         breadcrumbs = [{"short_title": breadcrumb.short_title or breadcrumb.title,
                         "title": breadcrumb.title,
                         "url": breadcrumb.get_absolute_url(),
@@ -392,7 +394,9 @@ def breadcrumbs(parser, token):
         finally:
             context.pop()
     return PatternNode(parser, token, handler, (
+        "for {page} [extended]",
         "[extended]",
+        "for {page}",
         ""
     ))
 

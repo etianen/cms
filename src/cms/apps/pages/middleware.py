@@ -45,8 +45,9 @@ class PageMiddleware(object):
                 # attempt to dispatch to a page.
                 resolver.resolve(request.path)
             except urlresolvers.Resolver404:
-                page = Page.objects.get_by_path(request.path_info)
-                if page is None:
+                try:
+                    page = Page.objects.get_by_path(request.path_info)
+                except Page.DoesNotExist:
                     return None
                 script_name = page.get_absolute_url()[:-1]
                 path_info = request.path[len(script_name):]
