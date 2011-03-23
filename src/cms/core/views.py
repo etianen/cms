@@ -11,15 +11,23 @@ def handler500(request):
     return response
     
     
-class PageView(DetailView):
+class PageMixin(object):
     
-    """A generic view that displays a detail page for a PageBase instance."""
+    """A generic view that adds in SEO information for a specified page."""
     
-    slug_field = "url_title"
+    def get_page(self):
+        """Returns the current page."""
+        return self.object
     
     def get_context_data(self, **kwargs):
         """Sets the page's SEO information in the context."""
-        context = self.object.get_context_data()
-        context.update(kwargs)
-        context["page"] = self.object
-        return super(PageView, self).get_context_data(**context)
+        context = super(PageMixin, self).get_context_data(**kwargs)
+        context.update(self.get_page().get_context_data())
+        return context
+        
+        
+class PageDetailView(PageMixin, DetailView):
+    
+    """A generic view that provides a detail view for a page."""
+    
+    slug_field = "url_title"

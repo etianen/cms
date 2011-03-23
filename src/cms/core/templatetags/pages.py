@@ -10,6 +10,7 @@ from cms.core.html import process as process_html
 from cms.core.optimizations import cached_getter
 from cms.core.templatetags import PatternNode
 from cms.core.models import PageBase
+from cms.core import debug
 
 
 register = template.Library()
@@ -100,9 +101,9 @@ def navigation(parser, token):
         finally:
             context.pop()
     return PatternNode(parser, token, handler, (
-        "{pages} with {section} as {alias}",
+        "{pages} with {section} as [alias]",
+        "{pages} as [alias]",
         "{pages} with {section}",
-        "{pages} as {alias}",
         "{pages}",
     ))
 
@@ -257,18 +258,23 @@ def meta_robots(context, index=None, follow=None, archive=None):
         {% meta_robots 1 1 1 %}
         
     """
+    request = context["request"]
+    # Override with context variables.
     if index is None:
         index = context.get("robots_index")
-        if index is None:
-            index = True
     if follow is None:
         follow = context.get("robots_follow")
-        if follow is None:
-            follow = True
     if archive is None:
         archive = context.get("robots_archive")
-        if archive is None:
-            archive = True
+    # Override with page variables.
+    index, follow, archive = request.pages.current.resolve_meta_robots(index, follow, archive)
+    # Final override, set to True.
+    if index is None:
+        index = True
+    if follow is None:
+        follow = True
+    if archive is None:
+        archive = True
     # Generate the meta content.
     robots = ", ".join((index and "INDEX" or "NOINDEX", follow and "FOLLOW" or "NOFOLLOW", archive and "ARCHIVE" or "NOARCHIVE"))
     return escape(robots)
@@ -320,6 +326,7 @@ def breadcrumbs(parser, token):
         {% breadcrumbs extended %}
         
     """
+    @debug.print_exc
     def handler(context, page=None, extended=False):
         request = context["request"]
         # Render the tag.
@@ -331,11 +338,7 @@ def breadcrumbs(parser, token):
                         "page": breadcrumb}
                        for breadcrumb in page.breadcrumbs]
         if not extended:
-            if len(breadcrumbs) == 1:
-                # Display no breadcrumbs on the homepage.
-                breadcrumbs = []
-            else:
-                breadcrumbs[-1]["last"] = True
+            breadcrumbs[-1]["last"] = True
         # Render the breadcrumbs.
         context.push()
         try:
