@@ -4,6 +4,7 @@
 from django.db import models
 
 from cms.core.models import HtmlField
+from cms.core.optimizations import cached_getter
 from cms.apps.pages.models import PageBase
 
 
@@ -29,6 +30,26 @@ class ArticleBase(PageBase):
         
     date_field = property(get_date_field,
                           doc="The primary date field for the article.")
+    
+    @property
+    def next(self):
+        """Returns the next article in the feed."""
+        try:
+            return self.__class__.objects.reverse().filter(feed=self.feed).filter(**{
+                "%s__gt" % self.date_field_name: self.date_field
+            })[0]
+        except IndexError:
+            return None
+            
+    @property
+    def prev(self):
+        """Returns the previous article in the feed."""
+        try:
+            return self.__class__.objects.all().filter(feed=self.feed).filter(**{
+                "%s__lt" % self.date_field_name: self.date_field
+            })[0]
+        except IndexError:
+            return None
     
     def get_absolute_url(self):
         """Returns the absolute URL of the article."""
