@@ -98,9 +98,8 @@ class PageAdmin(PageBaseAdmin):
             invalid_parents.add(obj.id)
         else:
             invalid_parents = frozenset()
-        try:
-            homepage = Page.objects.get_homepage()
-        except Page.DoesNotExist:
+        homepage = Page.objects.get_homepage()
+        if homepage is None:
             parent_choices = []
         else:
             parent_choices = []

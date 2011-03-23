@@ -46,38 +46,17 @@ class Page(PageBase):
 
     order = models.PositiveIntegerField(editable=False)
 
+    @property
     @cached_getter
     @publication_manager.getter
-    def get_children(self):
-        """
-        Returns all the children of this page, regardless of their publication
-        state.
-        """
-        return Page.objects.filter(parent=self)
+    def children(self):
+        """The children of this page."""
+        return Page.objects.filter(parent=self).order_by("order")
     
-    children = property(get_children,
-                        doc="All children of this page.")
-    
-    def get_all_children(self):
-        """
-        Returns all the children of this page, cascading down to their children
-        too.
-        """
-        children = []
-        for child in self.children:
-            children.append(child)
-            children.extend(child.all_children)
-        return children
-            
-    all_children = property(get_all_children,
-                            doc="All the children of this page, cascading down to their children too.")
-    
-    def get_navigation(self):
-        """Returns the sub-navigation of this page."""
-        return [child for child in self.children if child.in_navigation]
-    
-    navigation = property(get_navigation,
-                          doc="The sub-navigation of this page.")
+    @property
+    def navigation(self):
+        """The sub-navigation of this page."""
+        return [child for child in super(Page, self).navigation if child.in_navigation]
     
     # Publication fields.
     

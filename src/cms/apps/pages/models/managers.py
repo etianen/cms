@@ -84,10 +84,13 @@ class PageManager(PageBaseManager):
     """Manager for Page objects."""
     
     def get_homepage(self):
-        """Returns the site homepage."""
+        """Returns the site homepage, or None."""
         homepage = cache.get_homepage()
         if homepage is None:
-            homepage = self.get(parent=None)
+            try:
+                homepage = self.get(parent=None)
+            except self.model.DoesNotExist:
+                homepage = None
             cache.set_homepage(homepage)
         return homepage
     
@@ -114,17 +117,18 @@ class PageManager(PageBaseManager):
         return page
         
     def get_by_path(self, path):
-        """Returns the page that best matches the given URL."""
+        """Returns the page that best matches the given URL or None."""
         page = self.get_homepage()
-        # Get the most exact page match.
-        for slug in path.strip("/").split("/"):
-            matched = False
-            for child in page.children:
-                if child.url_title == slug:
-                    page = child
-                    matched = True
-            if not matched:
-                break
+        if page is not None:
+            # Get the most exact page match.
+            for slug in path.strip("/").split("/"):
+                matched = False
+                for child in page.children:
+                    if child.url_title == slug:
+                        page = child
+                        matched = True
+                if not matched:
+                    break
         return page
     
     def get_page(self, id):

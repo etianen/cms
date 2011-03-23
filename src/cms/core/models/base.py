@@ -77,20 +77,28 @@ class PageBase(PublishedModel):
         return []
 
     @property
-    def homepage(self):
-        """The top-level page in the hierarchy."""
-        try:
-            return self.all_parents[-1]
-        except IndexError:
-            return self
-
-    @property
     def breadcrumbs(self):
         """The breadcrumb trail for this page, including this page."""
         parents = self.all_parents
         parents.reverse()
         parents.append(self)
         return parents
+        
+    children = ()
+    
+    @property
+    def all_children(self):
+        """All the children of this page, cascading down to their children too."""
+        children = []
+        for child in self.children:
+            children.append(child)
+            children.extend(child.all_children)
+        return children
+    
+    @property
+    def navigation(self):
+        """The navigation entries underneath this page."""
+        return self.children
     
     # Base fields.
     
