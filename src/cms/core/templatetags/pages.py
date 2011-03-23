@@ -2,20 +2,20 @@
 
 
 from django import template
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.safestring import mark_safe
 from django.utils.html import escape, conditional_escape
 
 from cms.core.html import process as process_html
 from cms.core.optimizations import cached_getter
 from cms.core.templatetags import PatternNode
-from cms.apps.pages.models import Page
+from cms.core.models import PageBase
 
 
 register = template.Library()
 
 
 # HTML processing.
-
 
 @register.filter
 def html(text):
@@ -30,37 +30,80 @@ def html(text):
         return ""
     text = process_html(text)
     return mark_safe(text)
+
+
+# Navigation.
+
+class NavigationItem(object):
+    
+    """An item in a navigation list."""
+    
+    def __init__(self, request, page):
+        """Initializes the NavigationItem."""
+        self.url = page.get_absolute_url()
+        self.page = page
+        self.title = page.title
+        self.short_title = unicode(page)
+        self.here = request.path.startswith(self.url)
+        
+    @property
+    @cached_getter
+    def navigation(self):
+        """Returns the sub-navigation."""
+        return [NavigationItem(child) for child in self.page.navigation]
+        
+    def __unicode__(self):
+        """Returns a unicode representation."""
+        return self.short_title
+
+
+class SectionNavigationItem(NavigationItem):
+    
+    """An item in a navigation list with no navigation."""
+    
+    def __init__(self, request, page):
+        """Initialzies the SectionNavigationItem."""
+        super(SectionNavigationItem, self).__init__(request, page)
+        self.here = request.path == self.url
+    
+    navigation = ()
     
 
 @register.tag
-def content(parser, token):
+def navigation(parser, token):
     """
-    Renders the named content area of the current page.
+    Renders a navigation list for the given pages.
     
-    For example, to render the content area called 'content_primary'::
+    The pages should all be a subclass of PageBase, and possess a get_absolute_url() method.
     
-        {% content "content_primary" %}
-        
-    If you use the 'inherited' keyword, and the page content area is blank, then
-    the parent page content area will be rendered instead::
-    
-        {% content "content_primary" inherited %}
-        
+    You can also specify an alias for the navigation, at which point it will be set in the
+    context rather than rendered.
     """
-    def handler(context, content_area, inherited=False):
-        # Render the tag.
-        page = context["page"]
-        content = ""
-        while not content and page:
-            content_obj = page.content
-            content = getattr(content_obj, content_area, "")
-            if not inherited:
-                break
-            page = page.parent
-        return html(content)
+    def handler(context, pages, section=None, alias=None):
+        request = context["request"]
+        # Compile the entries.
+        entries = [NavigationItem(request, page) for page in pages]
+        # Add the section.
+        if section:
+            entries = [SectionNavigationItem(request, section)] + entries
+        # Set to alias, maybe.
+        if alias:
+            context[alias] = entries
+            return ""
+        # Render the template.
+        context.push()
+        try:
+            context.update({
+                "navigation": entries
+            })
+            return template.loader.render_to_string("navigation.html", context)
+        finally:
+            context.pop()
     return PatternNode(parser, token, handler, (
-        "{content_area} [inherited]",
-        "{content_area}",
+        "{pages} with {section} as {alias}",
+        "{pages} with {section}",
+        "{pages} as {alias}",
+        "{pages}",
     ))
 
 
@@ -80,13 +123,17 @@ class PageUrlNode(template.Node):
         
     def render(self, context):
         """Renders the PageUrlNode."""
+        request = context["request"]
         page = self.page.resolve(context)
-        # Get the page URL.
-        try:
-            page = Page.objects.get_page(page)
-        except Page.DoesNotExist:
-            url = "#"
-        else:
+        # Look up pages, if given an id.
+        url = None
+        if not isinstance(page, PageBase):
+            try:
+                page = request.pages.get(page)
+            except ObjectDoesNotExist:
+                url = "#"
+        if url is None:
+            # Get the page URL.
             if self.view_func is None:
                 url = page.get_absolute_url()
             else:
@@ -245,115 +292,17 @@ def title(context, title=None):
         {% title "foo" %}
     
     """
-    page = context["page"]
-    homepage = page.homepage
+    request = context["request"]
+    page = request.pages.current
+    homepage = request.pages.homepage
     # Render the title template.
     context.push()
     try:
         context.update({
-            "title": title or context.get("title", ""),
+            "title": title or context.get("title") or page.browser_title or page.title,
             "site_title": homepage.browser_title or homepage.title
         })
         return template.loader.render_to_string("title.html", context)
-    finally:
-        context.pop()
-
-
-class NavEntry(object):
-    
-    """Helper object used to display site navigation."""
-    
-    def __init__(self, page, current_page, nav_override=None):
-        """Initializes the NavigationHelper."""
-        self.page = page
-        self.here = page in current_page.breadcrumbs
-        self.url = page.get_absolute_url()
-        self.title = page.title
-        self.short_title = page.short_title or page.title
-        self.current_page = current_page
-        self.nav_override = nav_override
-
-    @property
-    @cached_getter
-    def navigation(self):
-        if self.nav_override is not None:
-            return self.nav_override
-        return [NavEntry(entry, self.current_page) for entry in self.page.navigation]
-    
-    
-@register.simple_tag(takes_context=True)
-def nav_primary(context):
-    """
-    Renders the primary navigation of the current page::
-    
-        {% nav_primary %}
-        
-    """
-    page = context["page"]
-    homepage = page.homepage
-    navigation = []
-    if homepage.in_navigation:
-        nav_entry = NavEntry(homepage, page, [])
-        nav_entry.short_title = "Home"
-        nav_entry.here = homepage == page
-        navigation.append(nav_entry)
-    for entry in homepage.navigation:
-        navigation.append(NavEntry(entry, page))
-    context.push()
-    try:
-        context.update({"homepage": homepage,
-                        "navigation": navigation})
-        return template.loader.render_to_string("nav_primary.html", context)
-    finally:
-        context.pop()
-    
-    
-@register.simple_tag(takes_context=True)
-def nav_secondary(context):
-    """
-    Renders the secondary navigation of the current page::
-    
-        {% nav_secondary %}
-        
-    """
-    page = context["page"]
-    try:
-        section = page.breadcrumbs[1]
-    except IndexError:
-        section = None
-        navigation = []
-    else:
-        navigation = [NavEntry(entry, page) for entry in section.navigation]
-    context.push()
-    try:
-        context.update({"section": section,
-                        "navigation": navigation})
-        return template.loader.render_to_string("nav_secondary.html", context)
-    finally:
-        context.pop()
-    
-
-@register.simple_tag(takes_context=True)
-def nav_tertiary(context):
-    """
-    Renders the tertiary navigation of the current page::
-    
-        {% nav_tertiary %}
-        
-    """
-    page = context["page"]
-    try:
-        subsection = page.breadcrumbs[2]
-    except IndexError:
-        subsection = None
-        navigation = []
-    else:
-        navigation = [NavEntry(entry, page) for entry in subsection.navigation]
-    context.push()
-    try:
-        context.update({"subsection": subsection,
-                        "navigation": navigation})
-        return template.loader.render_to_string("nav_tertiary.html", context)
     finally:
         context.pop()
 
@@ -372,8 +321,9 @@ def breadcrumbs(parser, token):
         
     """
     def handler(context, page=None, extended=False):
+        request = context["request"]
         # Render the tag.
-        page = page or context["page"]
+        page = page or request.pages.current
         breadcrumbs = [{"short_title": breadcrumb.short_title or breadcrumb.title,
                         "title": breadcrumb.title,
                         "url": breadcrumb.get_absolute_url(),
@@ -420,8 +370,8 @@ def header(context, header=None):
         {% header "foo" %}
         
     """
-    page = context["page"]
-    header = header or context.get("header") or context.get("title") or page.title
+    request = context["request"]
+    header = header or context.get("header") or context.get("title") or request.pages.current.title
     context.push()
     try:
         context.update({

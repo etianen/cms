@@ -2,10 +2,10 @@
 {% load pages %}
 
 
-{% block content_primary %}{% content "content_primary" %}{% endblock %}
+{% block content_primary %}{{page.content.content_primary|html}}{% endblock %}
 
 
-{% block content_secondary %}{% content "content_secondary" %}{% endblock %}
+{% block content_secondary %}{{page.content.content_secondary|html}}{% endblock %}
 
 
-{% block content_tertiary %}{% content "content_tertiary" %}{% endblock %}
+{% block content_tertiary %}{{page.content.content_tertiary|html}}{% endblock %}

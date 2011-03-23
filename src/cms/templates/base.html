@@ -37,7 +37,7 @@
         <nav id="nav-primary">
             <div class="container">
                 
-                {% nav_primary %}
+                {% navigation pages.nav_primary with pages.homepage %}
                 
                 <div class="clear"></div>
                 
@@ -48,8 +48,8 @@
             <div class="container">
             
                 <article id="content-primary">
-                    {% if not is_homepage %}
-                        <p id="breadcrumbs">{% block breadcrumbs %}{% breadcrumbs %}{% endblock %}</p>
+                    {% if not pages.is_homepage %}
+                        <nav id="nav-breadcrumbs">{% block breadcrumbs %}{% breadcrumbs %}{% endblock %}</nav>
                     {% endif %}
                     <h1>{% block header %}{% header %}{% endblock %}</h1>
                     {% block content_primary %}{% endblock %}

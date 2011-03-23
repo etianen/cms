@@ -68,6 +68,13 @@ footer {
 }
 
 
+/* Breadcrumbs. */
+
+#nav-breadcrumbs {
+    margin-bottom: 10px;
+}
+
+
 /* Content. */
 
 #content {

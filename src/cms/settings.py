@@ -50,6 +50,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.request",
     "cms.core.context_processors.site",
     "cms.core.context_processors.conf",
+    "cms.core.context_processors.pages",
 )
 
 
@@ -62,7 +63,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "cms.apps.pages.middleware.PageMiddleware",
+    "cms.core.middleware.PreviewMiddleware",
+    "cms.core.middleware.PageMiddleware",
 )
 
 ROOT_URLCONF = "cms.urls"
@@ -84,6 +86,8 @@ INSTALLED_APPS = (
     "cms.apps.pages",
     "cms.apps.media",
 )
+
+PAGE_BACKEND = "cms.apps.pages.backend.PageBackend"
 
 
 # Multi-site settings.

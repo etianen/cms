@@ -1,1 +1,1 @@
-{{title}}{% if title != site_title %} &ndash; {{site_title}}{% endif %}
+{% if title %}{{title}}{% if title != site_title %} &ndash; {{site_title}}{% endif %}{% else %}{{site_title}}{% endif %}

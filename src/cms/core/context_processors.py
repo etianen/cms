@@ -13,5 +13,15 @@ def site(request):
 
 def conf(request):
     """Gives the settings object to the template."""
-    context = {"settings": settings}
+    context = {
+        "settings": settings
+    }
+    return context
+    
+    
+def pages(request):
+    """Adds the current page backend to the template."""
+    context = {
+        "pages": request.pages
+    }
     return context

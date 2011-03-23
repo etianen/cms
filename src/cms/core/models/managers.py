@@ -30,7 +30,7 @@ class PublicationManager(threading.local):
         """Initializes the PublicationManager."""
         self._stack = []
         
-    def _begin(self, select_published):
+    def begin(self, select_published):
         """Starts a block using the given publication setting."""
         self._stack.append(select_published)
         
@@ -44,7 +44,7 @@ class PublicationManager(threading.local):
         except IndexError:
             return True
         
-    def _end(self):
+    def end(self):
         """Ends a block of publication control."""
         try:
             self._stack.pop()
@@ -54,13 +54,13 @@ class PublicationManager(threading.local):
     @contextlib.contextmanager
     def select_published(self, select_published):
         """Marks a block of publication management."""
-        self._begin(select_published)
+        self.begin(select_published)
         try:
             yield
         except:
             raise
         finally:
-            self._end()
+            self.end()
             
     def getter(self, func):
         """Decorator for getters that perform subqueries on published models."""

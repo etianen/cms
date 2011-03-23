@@ -113,7 +113,7 @@ class Page(PageBase):
             return self.parent.get_absolute_url() + self.url_title + "/"
         return urlresolvers.get_script_prefix()
     
-    def reverse(self, view_func, *args, **kwargs):
+    def reverse(self, view_func, args, kwargs):
         """Performs a reverse URL lookup."""
         urlconf = content.lookup(self.content_type).urlconf
         return self.get_absolute_url() + urlresolvers.reverse(view_func, args=args, kwargs=kwargs, urlconf=urlconf, prefix="")

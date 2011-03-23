@@ -5,6 +5,8 @@ from __future__ import with_statement
 
 import threading
 
+from django.core.signals import request_finished
+
 from cms.core.models.managers import PageBaseManager, publication_manager
     
     
@@ -15,6 +17,8 @@ class PageCache(threading.local):
     def __init__(self):
         """Initializes the PageCache."""
         self.clear()
+        # Add the cleanup handler.
+        request_finished.connect(self.handle_request_finished)
         
     def clear(self):
         """Clears the page cache."""
@@ -68,6 +72,10 @@ class PageCache(threading.local):
         if self._needs_reload(self._homepage_cache):
             raise KeyError("__homepage__")
         return self._homepage_cache
+        
+    def handle_request_finished(self, **kwargs):
+        """Signal handler for end of request."""
+        self.clear()
 
 
 class PageManager(PageBaseManager):
@@ -120,16 +128,12 @@ class PageManager(PageBaseManager):
         
         If not page is found, a Page.DoesNotExist will be raised.
         
-        This general-perpose method accepts three possible types of id.  If
+        This general-perpose method accepts two possible types of id.  If
         given an integer or basestring, then the page will be looked up by id
-        or permalink respectively.  If passed a page instance, then the instance
-        will be returned.
+        or permalink respectively.
         
         The result is cached in the page cache.
         """
-        # Accept Page arguments.
-        if isinstance(id, self.model):
-            return id
         # Try the cache.
         try:
             return self.cache.get(id)
