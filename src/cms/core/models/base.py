@@ -7,6 +7,7 @@ from django.db.models.query import QuerySet
 from django.shortcuts import render
 
 from cms.core import debug
+from cms.core.optimizations import cached_getter
 from cms.core.models.managers import PublishedModelManager, PageBaseManager, publication_manager
 from cms.core.models.fields import NullBooleanField, EnumField
 
@@ -104,6 +105,7 @@ class PageBase(PublishedModel):
         return ()
         
     @property
+    @cached_getter
     @debug.print_exc
     def next(self):
         """The next sibling, according to the default child ordering, or None."""
@@ -118,6 +120,7 @@ class PageBase(PublishedModel):
         return None
         
     @property
+    @cached_getter
     @debug.print_exc
     def prev(self):
         """The previous sibling, according to the default child ordering, or None."""
