@@ -2,7 +2,6 @@
 
 
 from django import template
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils.safestring import mark_safe
 from django.utils.html import escape, conditional_escape
 
@@ -129,11 +128,10 @@ class PageUrlNode(template.Node):
         # Look up pages, if given an id.
         url = None
         if not isinstance(page, PageBase):
-            try:
-                page = request.pages.get(page)
-            except ObjectDoesNotExist:
-                url = "#"
-        if url is None:
+            page = request.pages.get(page)
+        if page is None:
+            url = "#"
+        else:
             # Get the page URL.
             if self.view_func is None:
                 url = page.get_absolute_url()

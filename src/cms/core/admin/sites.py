@@ -119,32 +119,21 @@ class AdminSite(admin.AdminSite):
     @debug.print_exc
     def move_page(self, request):
         """Moves a page up or down."""
-        page = Page.objects.get_page(request.POST["page"])
+        backend = request.pages.backend
+        page = backend.get(request, request.POST["page"])
+        page_model = backend.model
+        admin_opts = self._registry[page_model]
         # Check that the user has permission to move the page.
-        if not self.has_change_permission(request, page):
+        if not backend.can_move or not admin_opts.has_change_permission(request, page):
             return HttpResponseForbidden("You do not have permission to move this page.")
-        # Get the page to swap with.
+        # Do the swap.
         direction = request.POST["direction"]
-        parent = page.parent
-        if parent is not None:
-            try:
-                if direction == "up":
-                    other = parent.children.order_by("-order").filter(order__lt=page.order)[0]
-                elif direction == "down":
-                    other = parent.children.order_by("order").filter(order__gt=page.order)[0]
-                else:
-                    raise ValueError, "Direction should be 'up' or 'down', not '%s'." % direction
-            except IndexError:
-                # Impossible to move pag up or down because it already is at the top or bottom!
-                pass
-            else:
-                with locked(Page):
-                    page_order = page.order
-                    other_order = other.order
-                    page.order = other_order
-                    other.order = page_order
-                    page.save()
-                    other.save()
+        if direction == "up":
+            backend.move_up(request, page)
+        elif direction == "down":
+            backend.move_down(request, page)
+        else:
+            raise ValueError("Direction should be 'up' or 'down'.")
         # Return a response appropriate to whether this was an AJAX request or not.
         if request.is_ajax():
             return HttpResponse("Page #%s was moved %s." % (page.id, direction))

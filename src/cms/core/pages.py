@@ -27,8 +27,8 @@ class BackendBase(object):
         """Returns the current best-matched page, or None."""
         raise NotImplementedError
     
-    def get(self, id):
-        """Returns the page matching the given id."""
+    def get(self, request, id):
+        """Returns the page matching the given id, or None."""
         return self.model._default_manager.get(pd=id)
         
     @abc.abstractmethod
@@ -64,6 +64,7 @@ class BackendBase(object):
     @abc.abstractmethod    
     def resolve(self, request, page, path_info):
         """Attempts to resolve the given path info to a request handler."""
+        raise NotImplementedError
         
     
 class MountedBackend(object):
@@ -84,6 +85,10 @@ class MountedBackend(object):
     def is_homepage(self):
         """Whether the current request is for the site homepage."""
         return self.request.path == self.homepage.get_absolute_url()
+    
+    def get(self, id):
+        """Returns the page with the given id, or None."""
+        return self.backend.get(self.request, id)
         
     @property
     def current(self):
