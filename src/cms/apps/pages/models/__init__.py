@@ -162,6 +162,7 @@ class ContentBase(models.Model):
         Page,
         primary_key = True,
         editable = False,
+        related_name = "+",
     )
     
     def __unicode__(self):

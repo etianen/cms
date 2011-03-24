@@ -1,8 +1,7 @@
 """Views used by the pages app."""
 
+from django.contrib.contenttypes.models import ContentType
 from django.views.generic import TemplateView
-
-from cms.apps.pages import content
 
 
 class ContentIndexView(TemplateView):
@@ -11,7 +10,7 @@ class ContentIndexView(TemplateView):
     
     def get_template_names(self):
         """Returns the list of template names."""
-        content_cls = content.lookup(self.request.pages.current.content_type)
+        content_cls = ContentType.objects.get_for_id(self.request.pages.current.content_type_id).model_class()
         return (
             "pages/{0}.html".format(content_cls.__name__.lower()),
             "pages/base.html",
