@@ -50,8 +50,7 @@ class PageAdmin(PageBaseAdmin):
         to the given revision.
         """
         data = super(PageAdmin, self).get_revision_form_data(request, obj, version)
-        content_data = version.object_version.object.content.data
-        data.update(content_data)
+        # TODO
         return data
 
     # Plugable content types.
@@ -61,7 +60,7 @@ class PageAdmin(PageBaseAdmin):
         if PAGE_TYPE_PARAMETER in request.GET:
             return ContentType.objects.get_for_id(request.GET[PAGE_TYPE_PARAMETER]).model_class()
         if obj and obj.content_type:
-            return obj.content_type
+            return obj.content_type.model_class()
         raise Http404, "You must specify a page content type."
 
     def get_fieldsets(self, request, obj=None):
@@ -79,7 +78,16 @@ class PageAdmin(PageBaseAdmin):
     def get_form(self, request, obj=None, **kwargs):
         """Adds the template area fields to the form."""
         content_cls = self.get_page_content_cls(request, obj)
-        form_attrs = dict((field.name, self.formfield_for_dbfield(field, request=request)) for field in content_cls._meta.fields if field.name != "page")
+        form_attrs = {}
+        for field in content_cls._meta.fields:
+            if field.name == "page":
+                continue
+            form_field = self.formfield_for_dbfield(field, request=request)
+            # HACK: add in the initial value. No other way to pass this on.
+            if obj:
+                form_field.initial = getattr(obj.content, field.name, "")
+            # Store the field.
+            form_attrs[field.name] = form_field
         ContentForm = type("%sForm" % self.__class__.__name__, (PageFormBase,), form_attrs)
         defaults = {"form": ContentForm}
         defaults.update(kwargs)
@@ -108,14 +116,22 @@ class PageAdmin(PageBaseAdmin):
 
     def save_model(self, request, obj, form, change):
         """Saves the model and adds its content fields."""
+        content_cls = self.get_page_content_cls(request, obj)
+        content_cls_type = ContentType.objects.get_for_model(content_cls)
+        # Delete the old page content, if it's expired.
+        if change and ContentType.objects.get_for_id(obj.content_type_id) != content_cls_type:
+            obj.content.delete()
         # Create the page content.
-        page_content_type = self.get_page_content_type(request, obj)
-        page_content = self.get_page_content(request, obj)
-        for field_name in page_content.get_field_names():
-            field_data = form.cleaned_data[field_name]
-            setattr(page_content, field_name, field_data)
-        obj.content_type = page_content_type
-        obj.content = page_content
+        obj.content_type = content_cls_type
+        if change:
+            content_obj = obj.content
+        else:
+            content_obj = content_cls()
+        # Modify the page content.
+        for field in content_obj._meta.fields:
+            if field.name == "page":
+                continue
+            setattr(content_obj, field.name, form.cleaned_data[field.name])
         # Get the page order.
         if not obj.order:
             with locked(Page):
@@ -125,6 +141,9 @@ class PageAdmin(PageBaseAdmin):
                     obj.order = 1
         # Save the model.
         super(PageBaseAdmin, self).save_model(request, obj, form, change)
+        # Save the page content.
+        content_obj.page = obj
+        content_obj.save()
 
     # Custom views.
     
