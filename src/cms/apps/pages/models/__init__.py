@@ -105,7 +105,7 @@ class Page(PageBase):
     
     def reverse(self, view_func, args, kwargs):
         """Performs a reverse URL lookup."""
-        urlconf = content.lookup(self.content_type).urlconf
+        urlconf = ContentType.objects.get_for_id(self.content_type_id).model_class().urlconf
         return self.get_absolute_url() + urlresolvers.reverse(view_func, args=args, kwargs=kwargs, urlconf=urlconf, prefix="")
     
     def save(self, *args, **kwargs):

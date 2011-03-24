@@ -1,12 +1,12 @@
 """"Content used by the links application."""
 
-
 from django.conf import settings
+from django.db import models
 
-from cms.apps.pages import content
+from cms.apps.pages.models import ContentBase
 
 
-class Link(content.Content):
+class Link(ContentBase):
     
     """A redirect to another URL."""
     
@@ -16,7 +16,7 @@ class Link(content.Content):
     
     urlconf = "cms.apps.links.urls"
     
-    link_url = content.CharField(
+    link_url = models.CharField(
         "link URL",
         help_text = "The URL where the user will be redirected."
     )
