@@ -1,6 +1,5 @@
 """The backend implementation for the app."""
 
-from django.conf import settings
 from django.core import urlresolvers
 
 from cms.core.db import locked

@@ -8,20 +8,13 @@ standard implementation.
 
 from __future__ import with_statement
 
-import urllib, json
-
-from django import forms
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
-from django.conf.urls.defaults import patterns, url
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
-from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect
 
 import reversion
 
-from cms.core import debug
 from cms.core.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.core.db import locked
 from cms.apps.pages.models import Page, get_registered_content

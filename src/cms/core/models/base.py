@@ -3,7 +3,6 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
-from django.db.models.query import QuerySet
 from django.shortcuts import render
 
 from cms.core import debug

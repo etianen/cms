@@ -1,7 +1,5 @@
 """Admin settings for the staff management application."""
 
-
-from django import template
 from django.core import urlresolvers, mail
 from django.conf import settings
 from django.conf.urls.defaults import patterns, url
