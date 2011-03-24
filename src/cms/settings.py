@@ -48,7 +48,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.static",
     "django.contrib.messages.context_processors.messages",
     "django.core.context_processors.request",
-    "cms.core.context_processors.site",
     "cms.core.context_processors.conf",
     "cms.core.context_processors.pages",
 )
