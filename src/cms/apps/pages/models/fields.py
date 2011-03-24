@@ -34,9 +34,9 @@ class PageField(models.ForeignKey):
     
     """A foreign key to a Page model."""
     
-    def __init__(self, content_type=None, limit_choices_to=None, **kwargs):
+    def __init__(self, **kwargs):
         """Initializes the Page Field."""
-        super(PageField, self).__init__(to="pages.Page")
+        super(PageField, self).__init__(to="pages.Page", **kwargs)
         
     def get_default(self):
         """Returns the default page."""

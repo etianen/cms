@@ -42,8 +42,10 @@ class Page(PageBase):
     
     # Hierarchy fields.
 
-    parent = PageField(blank=True,
-                       null=True)
+    parent = PageField(
+        blank = True,
+        null = True
+    )
 
     order = models.PositiveIntegerField(editable=False)
 
@@ -82,6 +84,7 @@ class Page(PageBase):
     
     content_type = models.ForeignKey(
         ContentType,
+        editable = False,
         help_text="The type of page content.",
     )
     
@@ -158,6 +161,7 @@ class ContentBase(models.Model):
     page = models.OneToOneField(
         Page,
         primary_key = True,
+        editable = False,
     )
     
     class Meta:

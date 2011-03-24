@@ -10,6 +10,7 @@ from __future__ import with_statement
 
 import urllib, json
 
+from django import forms
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.conf.urls.defaults import patterns, url
@@ -22,6 +23,7 @@ from cms.core import debug
 from cms.core.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.core.db import locked
 from cms.apps.pages.models import Page, get_registered_content
+from cms.apps.pages.forms import PageFormBase
 
 
 # The GET parameter used to indicate content type.
@@ -54,7 +56,7 @@ class PageAdmin(PageBaseAdmin):
 
     # Plugable content types.
 
-    def get_page_content_type(self, request, obj=None):
+    def get_page_content_cls(self, request, obj=None):
         """Retrieves the page content type slug."""
         if PAGE_TYPE_PARAMETER in request.GET:
             return ContentType.objects.get_for_id(request.GET[PAGE_TYPE_PARAMETER]).model_class()
@@ -64,17 +66,22 @@ class PageAdmin(PageBaseAdmin):
 
     def get_fieldsets(self, request, obj=None):
         """Generates the custom content fieldsets."""
-        page_content = self.get_page_content(request, obj)
-        content_fieldsets = page_content.get_fieldsets()
+        content_cls = self.get_page_content_cls(request, obj)
+        content_fieldsets = (
+            ("Page content", {
+                "fields": [field.name for field in content_cls._meta.fields if field.name != "page"]
+            }),
+        )
         fieldsets = super(PageBaseAdmin, self).get_fieldsets(request, obj)
-        fieldsets = fieldsets[0:1] + content_fieldsets + fieldsets[1:]
+        fieldsets = tuple(fieldsets[0:1]) + content_fieldsets + tuple(fieldsets[1:])
         return fieldsets
 
     def get_form(self, request, obj=None, **kwargs):
         """Adds the template area fields to the form."""
-        content_cls = self.get_page_content(request, obj)
-        Form = page_content.get_form()
-        defaults = {"form": Form}
+        content_cls = self.get_page_content_cls(request, obj)
+        form_attrs = dict((field.name, self.formfield_for_dbfield(field, request=request)) for field in content_cls._meta.fields if field.name != "page")
+        ContentForm = type("%sForm" % self.__class__.__name__, (PageFormBase,), form_attrs)
+        defaults = {"form": ContentForm}
         defaults.update(kwargs)
         PageForm = super(PageAdmin, self).get_form(request, obj, **defaults)
         # HACK: Need to limit parents field based on object. This should be done in
@@ -166,8 +173,10 @@ class PageAdmin(PageBaseAdmin):
             if len(content_types) == 1:
                 return redirect(content_types[0]["url"])
             # Render the select page template.
-            context = {"title": "Select page type",
-                       "content_types": content_types}
+            context = {
+                "title": "Select page type",
+                "content_types": content_types
+            }
             return render(request, "admin/pages/page/select_page_type.html", context)
         else:
             if not self.has_add_content_permission(request, ContentType.objects.get_for_id(request.GET[PAGE_TYPE_PARAMETER]).model_class()):

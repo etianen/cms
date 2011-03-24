@@ -4,7 +4,7 @@
 from django import forms
 
 
-class PageForm(forms.ModelForm):
+class PageFormBase(forms.ModelForm):
     
     """Form used to edit Page models."""
     
