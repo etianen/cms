@@ -164,5 +164,9 @@ class ContentBase(models.Model):
         editable = False,
     )
     
+    def __unicode__(self):
+        """Returns a unicode representation."""
+        return u"Content for {0}.".format(self.page)
+    
     class Meta:
         abstract = True

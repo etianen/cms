@@ -19,6 +19,8 @@ from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
 
+import reversion
+
 from cms.core import debug
 from cms.core.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.core.db import locked
@@ -42,6 +44,12 @@ class PageAdmin(PageBaseAdmin):
 
     fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),) + publication_fieldsets + navigation_fieldsets + PageBaseAdmin.seo_fieldsets
     
+    def __init__(self, *args, **kwargs):
+        """Initialzies the PageAdmin."""
+        super(PageAdmin, self).__init__(*args, **kwargs)
+        for content_cls in get_registered_content():
+            reversion.register(content_cls, fields=[field.name for field in content_cls._meta.fields if field.name != "page"])
+    
     # Reversion
 
     def get_revision_form_data(self, request, obj, version):
@@ -50,7 +58,8 @@ class PageAdmin(PageBaseAdmin):
         to the given revision.
         """
         data = super(PageAdmin, self).get_revision_form_data(request, obj, version)
-        # TODO
+        content_version = version.revision.version_set.all().get(content_type=obj.content_type_id)
+        data.update(content_version.field_dict)
         return data
 
     # Plugable content types.
@@ -85,7 +94,10 @@ class PageAdmin(PageBaseAdmin):
             form_field = self.formfield_for_dbfield(field, request=request)
             # HACK: add in the initial value. No other way to pass this on.
             if obj:
-                form_field.initial = getattr(obj.content, field.name, "")
+                try:
+                    form_field.initial = getattr(obj.content, field.name, "")
+                except content_cls.DoesNotExist:
+                    pass  # This means that we're in a reversion recovery, or something weird has happened to the databae.
             # Store the field.
             form_attrs[field.name] = form_field
         ContentForm = type("%sForm" % self.__class__.__name__, (PageFormBase,), form_attrs)
@@ -124,7 +136,10 @@ class PageAdmin(PageBaseAdmin):
         # Create the page content.
         obj.content_type = content_cls_type
         if change:
-            content_obj = obj.content
+            try:
+                content_obj = obj.content
+            except content_cls.DoesNotExist:
+                content_obj = content_cls()  # We're either in a reversion recovery, or something has gone very wrong with the database...
         else:
             content_obj = content_cls()
         # Modify the page content.
