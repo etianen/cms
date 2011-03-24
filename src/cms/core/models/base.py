@@ -109,7 +109,7 @@ class PageBase(PublishedModel):
     @debug.print_exc
     def next(self):
         """The next sibling, according to the default child ordering, or None."""
-        sibling_iter = iter(list(self.siblings))
+        sibling_iter = iter(self.siblings)
         while True:
             try:
                 sibling = sibling_iter.next()
@@ -124,7 +124,7 @@ class PageBase(PublishedModel):
     @debug.print_exc
     def prev(self):
         """The previous sibling, according to the default child ordering, or None."""
-        sibling_iter = iter(reversed(list(self.siblings)))
+        sibling_iter = iter(reversed(self.siblings))
         while True:
             try:
                 sibling = sibling_iter.next()

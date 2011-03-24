@@ -51,7 +51,7 @@ class Page(PageBase):
     @publication_manager.getter
     def children(self):
         """The children of this page."""
-        return Page.objects.filter(parent=self).order_by("order")
+        return list(Page.objects.filter(parent=self).order_by("order").iterator())
     
     @property
     def navigation(self):

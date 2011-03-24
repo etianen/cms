@@ -57,10 +57,9 @@ class PageBackend(BackendBase):
         
     def move_up(self, request, page):
         """Moves the given page up, relative to it's siblings."""
-        parent = page.parent
-        if parent is not None:
+        if page.parent is not None:
             try:
-                other = parent.children.order_by("-order").filter(order__lt=page.order)[0]
+                other = page.prev
             except IndexError:
                 # Impossible to move pag up or down because it already is at the top or bottom!
                 pass
@@ -69,10 +68,9 @@ class PageBackend(BackendBase):
 
     def move_down(self, request, page):
         """Moves the given page down, relative to it's siblings."""
-        parent = page.parent
-        if parent is not None:
+        if page.parent is not None:
             try:
-                other = parent.children.order_by("order").filter(order__gt=page.order)[0]
+                other = page.next
             except IndexError:
                 # Impossible to move pag up or down because it already is at the top or bottom!
                 pass
