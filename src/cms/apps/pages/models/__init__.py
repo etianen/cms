@@ -134,6 +134,14 @@ sitemaps.registered_sitemaps["pages"] = PageSitemap
 
 # Base content class.
 
+def get_registered_content():
+    """Returns a list of all registered content objects."""
+    return [
+        model for model in models.get_models()
+        if issubclass(model, ContentBase) and not model._meta.abstract
+    ]
+    
+
 class ContentBase(models.Model):
     
     """Base class for page content."""

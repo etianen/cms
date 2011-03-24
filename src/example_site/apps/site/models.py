@@ -12,3 +12,16 @@ class Content(ContentBase):
         "primary content",
         blank = True
     )
+    
+    
+class TwoColumn(ContentBase):
+
+    content_primary = HtmlField(
+        "primary content",
+        blank = True
+    )
+    
+    content_secondary = HtmlField(
+        "secondary content",
+        blank = True
+    )
