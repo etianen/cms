@@ -1,13 +1,12 @@
 """URLs used by the standard content page."""
 
 from django.conf.urls.defaults import patterns, url
-from django.views.generic import TemplateView
+
+from cms.apps.pages import views
 
 
-urlpatterns = patterns("",
+urlpatterns = patterns("cms.apps.pages.views",
 
-    url(r"^$", TemplateView.as_view(
-        template_name = "pages/base.html"
-    ), name="index")
+    url(r"^$", views.ContentIndexView.as_view(), name="index")
     
 )
