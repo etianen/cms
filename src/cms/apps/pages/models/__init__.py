@@ -3,6 +3,8 @@
 
 import datetime
 
+from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
 from django.db import models
 from django.db.models import Q
@@ -11,7 +13,6 @@ from cms.core import sitemaps
 from cms.core.models.base import PageBase
 from cms.core.models.managers import publication_manager
 from cms.core.optimizations import cached_getter, cached_setter
-from cms.apps.pages import content
 from cms.apps.pages.models.managers import PageManager
 from cms.apps.pages.models.fields import PageField
 
@@ -79,31 +80,17 @@ class Page(PageBase):
 
     # Content fields.
     
-    content_type = models.CharField(max_length=100,
-                                    editable=False,
-                                    db_index=True,
-                                    help_text="The type of page content.")
-
-    content_data = models.TextField(editable=False,
-                                    help_text="The encoded data of this page.")
+    content_type = models.ForeignKey(
+        ContentType,
+        help_text="The type of page content.",
+    )
     
+    @property
     @cached_getter
-    def get_content(self):
-        """Returns the content object associated with this page."""
-        if not self.content_type:
-            return None
-        content_cls = content.lookup(self.content_type)
-        content_instance = content_cls(self)
-        return content_instance
-
-    @cached_setter(get_content)
-    def set_content(self, content):
-        """Sets the content object for this page."""
-        self.content_data = content._get_serialized_data()
-
-    content = property(get_content,
-                       set_content,
-                       doc="The content object associated with this page.")
+    def content(self):
+        """The associated content model for this page."""
+        content_cls = ContentType.objects.get_for_id(self.content_type_id).model_class()
+        return content_cls._default_manager.get(page=self)
 
     # Standard model methods.
     
@@ -133,6 +120,8 @@ class Page(PageBase):
         ordering = ("order",)
 
 
+# Sitemaps.
+
 class PageSitemap(sitemaps.PageBaseSitemap):
     
     """Sitemap for page models."""
@@ -141,3 +130,27 @@ class PageSitemap(sitemaps.PageBaseSitemap):
     
     
 sitemaps.registered_sitemaps["pages"] = PageSitemap
+
+
+# Base content class.
+
+class ContentBase(models.Model):
+    
+    """Base class for page content."""
+    
+    # This must be a 64 x 64 pixel image.
+    icon = settings.STATIC_URL + "cms/img/content-types/content.png"
+
+    # The heading that the admin places this content under.
+    classifier = "content"
+
+    # The urlconf used to power this content's views.
+    urlconf = "cms.apps.pages.urls"
+    
+    page = models.OneToOneField(
+        Page,
+        primary_key = True,
+    )
+    
+    class Meta:
+        abstract = True

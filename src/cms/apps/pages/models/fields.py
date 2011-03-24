@@ -4,7 +4,6 @@
 from django.db import models
 from django.db.models.fields.related import ReverseSingleRelatedObjectDescriptor
 
-from cms.apps.pages import content
 from cms.core.models.base import PublishedModel
 from cms.core.models.managers import publication_manager
 
@@ -37,18 +36,7 @@ class PageField(models.ForeignKey):
     
     def __init__(self, content_type=None, limit_choices_to=None, **kwargs):
         """Initializes the Page Field."""
-        if isinstance(content_type, basestring):
-            content_type = content.lookup(content_type)
-        self.content_type = content_type
-        # Generate the page filter.
-        if content_type is not None:
-            limit_choices_to = limit_choices_to or {}
-            content_keys = tuple(cls.registration_key
-                                 for cls in content.registered_content.values()
-                                 if issubclass(cls, content_type))
-            limit_choices_to.setdefault("content_type__in", content_keys)
-        # Initialize the PageField.
-        super(PageField, self).__init__(to="pages.Page", limit_choices_to=limit_choices_to, default=self.get_default, **kwargs)
+        super(PageField, self).__init__(to="pages.Page")
         
     def get_default(self):
         """Returns the default page."""

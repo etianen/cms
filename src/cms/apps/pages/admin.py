@@ -20,7 +20,6 @@ from django.shortcuts import render, redirect
 from cms.core import debug
 from cms.core.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.core.db import locked
-from cms.apps.pages import content
 from cms.apps.pages.models import Page
 
 
