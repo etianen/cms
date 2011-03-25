@@ -62,6 +62,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "cms.apps.permalinks.middleware.PermalinkFallbackMiddleware",
     "cms.core.middleware.PreviewMiddleware",
     "cms.core.middleware.PageMiddleware",
 )
