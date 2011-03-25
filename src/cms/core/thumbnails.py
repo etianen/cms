@@ -231,14 +231,14 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
             # Save the thumbnail.
             try:
                 thumbnail_image.save(thumbnail_path)
-            except Exception as ex:  # HACK: PIL can raise all sorts of wierd errors.
+            except Exception as ex:  # pylint: disable=W0703
                 try:
                     raise ex
                 finally:
                     # Remove an incomplete file, if present.
                     try:
                         os.unlink(thumbnail_path)
-                    except:
+                    except:  # pylint: disable=W0702
                         pass
     # Return the thumbnail object.
     thumbnail_url = storage.url(thumbnail_name)

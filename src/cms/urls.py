@@ -1,7 +1,7 @@
 """Base URLs for the CMS."""
 
 from django.conf import settings
-from django.conf.urls.defaults import patterns, url, include, handler404
+from django.conf.urls.defaults import patterns, url, include, handler404  # pyline: disable=W0611
 from django.contrib import admin
 
 from cms.core.admin import site as admin_site

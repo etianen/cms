@@ -73,7 +73,7 @@ class PageAdmin(PageBaseAdmin):
                 "fields": [field.name for field in content_cls._meta.fields if field.name != "page"]
             }),
         )
-        fieldsets = super(PageBaseAdmin, self).get_fieldsets(request, obj)
+        fieldsets = super(PageAdmin, self).get_fieldsets(request, obj)
         fieldsets = tuple(fieldsets[0:1]) + content_fieldsets + tuple(fieldsets[1:])
         return fieldsets
 
@@ -148,7 +148,7 @@ class PageAdmin(PageBaseAdmin):
                 except IndexError:
                     obj.order = 1
         # Save the model.
-        super(PageBaseAdmin, self).save_model(request, obj, form, change)
+        super(PageAdmin, self).save_model(request, obj, form, change)
         # Save the page content.
         content_obj.page = obj
         content_obj.save()
@@ -208,7 +208,7 @@ class PageAdmin(PageBaseAdmin):
         else:
             if not self.has_add_content_permission(request, ContentType.objects.get_for_id(request.GET[PAGE_TYPE_PARAMETER]).model_class()):
                 raise PermissionDenied, "You are not allowed to add pages of that content type."
-        return super(PageBaseAdmin, self).add_view(request, *args, **kwargs)
+        return super(PageAdmin, self).add_view(request, *args, **kwargs)
     
     def response_add(self, request, *args, **kwargs):
         """Redirects to the sitemap if appropriate."""

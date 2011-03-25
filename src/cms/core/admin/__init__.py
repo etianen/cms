@@ -8,7 +8,7 @@ from cms.core.admin.base import PageBaseAdmin, PublishedModelAdmin, get_date_mod
 from cms.core.admin.auth import UserAdmin, GroupAdmin
 
 
-site= AdminSite()
+site = AdminSite()
 
 
 # Register the auth models.

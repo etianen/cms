@@ -47,13 +47,22 @@ def thumbnail(parser, token):
     """
     def handler(context, image, width, height, method=thumbnails.PROPORTIONAL, alias=None):
         try:
-            thumbnail = thumbnails.create(image, width, height, method)
+            thumbnail_obj = thumbnails.create(image, width, height, method)
         except IOError:
-            thumbnail = thumbnails.Thumbnail(image.name, image.path, image.url, thumbnails.Size(width, height))
+            thumbnail_obj = thumbnails.Thumbnail(
+                image.name,
+                image.path,
+                image.url,
+                thumbnails.Size(width, height)
+            )
         if alias:
-            context[alias] = thumbnail
+            context[alias] = thumbnail_obj
             return ""
-        return '<img src="%s" width="%s" height="%s" alt=""/>' % (escape(thumbnail.url), thumbnail.width, thumbnail.height)
+        return u'<img src="{src}" width="{width}" height="{height}" alt=""/>'.format(
+            src = escape(thumbnail_obj.url),
+            width = thumbnail_obj.width,
+            height = thumbnail_obj.height,
+        )
     return PatternNode(parser, token, handler, ("{image} {width} {height} [method] as [alias]",
                                                 "{image} {width} {height} as [alias]",
                                                 "{image} {width} {height} [method]",

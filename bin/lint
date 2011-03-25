@@ -1,0 +1,3 @@
+#! /bin/bash
+DIRNAME=`dirname $0`
+pylint --rcfile="${DIRNAME}/lint.rc" cms

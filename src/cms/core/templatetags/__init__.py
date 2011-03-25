@@ -65,7 +65,10 @@ class PatternNode(template.Node):
                 self.variables = variables
                 self.flags = flags
                 return
-        raise template.TemplateSyntaxError, '%s tag expects the following format: "%s"' % (token.split_contents()[0], '" or "'.join(patterns))
+        raise template.TemplateSyntaxError('{tag_name} tag expects the following format: "{tag_format}"'.format(
+            tag_name = token.split_contents()[0],
+            tag_format = '" or "'.join(patterns)
+        ))
         
     def render(self, context):
         """Renders the PatternNode."""
@@ -73,31 +76,3 @@ class PatternNode(template.Node):
         for key, value in self.variables.items():
             kwargs[key] = value.resolve(context)
         return self.handler(context, **kwargs)
-
-
-def scoped_inclusion_tag(register, template_name, *patterns):
-    """
-    A decorator used to defined a more versatile inclusion tag.
-    
-    The decorated function will be passed the context object and the value of any variables
-    parsed from the patterns. The function must return a dictionary of params which will
-    be pushed onto the context and used to render the named template.
-    
-    Once the render has finished, the context will be popped and rendering of the rest of the
-    outer template will resume.
-    """
-    def decorator(func):
-        @register.tag
-        @wraps(func)
-        def compiler(parser, token):
-            def handler(context, *args, **kwargs):
-                params = func(context, *args, **kwargs)
-                context.push()
-                context.update(params)
-                try:
-                    return template.loader.render_to_string(template_name, context)
-                finally:
-                    context.pop()
-            return PatternNode(parser, token, handler, patterns)
-        return func
-    return decorator

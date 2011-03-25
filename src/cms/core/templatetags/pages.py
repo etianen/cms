@@ -2,6 +2,7 @@
 
 
 from django import template
+from django.template import Node, TemplateSyntaxError
 from django.utils.safestring import mark_safe
 from django.utils.html import escape, conditional_escape
 
@@ -109,12 +110,13 @@ def navigation(parser, token):
 
 # Page linking.
 
-class PageUrlNode(template.Node):
+class PageUrlNode(Node):
     
     """Renders the page_url tag."""
     
     def __init__(self, page, view_func, args, kwargs, varname):
         """Initializes the PageUrlNode."""
+        super(PageUrlNode, self).__init__()
         self.page = page
         self.view_func = view_func
         self.args = args
@@ -138,7 +140,7 @@ class PageUrlNode(template.Node):
             else:
                 args = [arg.resolve(context) for arg in self.args]
                 kwargs = dict((key, value.resolve(context)) for key, value in self.kwargs.items())
-                url = page.reverse(self.view_func, *args, **kwargs)
+                url = request.pages.reverse(self.view_func, args, kwargs)
         # Return the value, or set as a context variable as appropriate.
         if self.varname:
             context[self.varname] = url
@@ -159,7 +161,9 @@ def page_url(parser, token):
             varname = contents[-1]
             contents = contents[:-2]
         else:
-            raise template.TemplateSyntaxError, "%s tag expects only one argument after 'as' statement" % tag_name
+            raise TemplateSyntaxError("{tag_name} tag expects only one argument after 'as' statement".format(
+                tag_name = tag_name,
+            ))
     except ValueError:
         # No varname was specified.
         varname = None
@@ -274,12 +278,16 @@ def meta_robots(context, index=None, follow=None, archive=None):
     if archive is None:
         archive = True
     # Generate the meta content.
-    robots = ", ".join((index and "INDEX" or "NOINDEX", follow and "FOLLOW" or "NOFOLLOW", archive and "ARCHIVE" or "NOARCHIVE"))
+    robots = ", ".join((
+        index and "INDEX" or "NOINDEX",
+        follow and "FOLLOW" or "NOFOLLOW",
+        archive and "ARCHIVE" or "NOARCHIVE",
+    ))
     return escape(robots)
 
 
 @register.simple_tag(takes_context=True)
-def title(context, title=None):
+def title(context, browser_title=None):
     """
     Renders the title of the current page::
         
@@ -303,7 +311,7 @@ def title(context, title=None):
     context.push()
     try:
         context.update({
-            "title": title or context.get("title") or page.browser_title or page.title,
+            "title": browser_title or context.get("title") or page.browser_title or page.title,
             "site_title": homepage.browser_title or homepage.title
         })
         return template.loader.render_to_string("title.html", context)
@@ -329,18 +337,19 @@ def breadcrumbs(parser, token):
         request = context["request"]
         # Render the tag.
         page = page or request.pages.current
-        breadcrumbs = [{"short_title": breadcrumb.short_title or breadcrumb.title,
-                        "title": breadcrumb.title,
-                        "url": breadcrumb.get_absolute_url(),
-                        "last": False,
-                        "page": breadcrumb}
-                       for breadcrumb in page.breadcrumbs]
+        breadcrumb_list = [{
+            "short_title": breadcrumb.short_title or breadcrumb.title,
+            "title": breadcrumb.title,
+            "url": breadcrumb.get_absolute_url(),
+            "last": False,
+            "page": breadcrumb,
+        } for breadcrumb in page.breadcrumbs]
         if not extended:
-            breadcrumbs[-1]["last"] = True
+            breadcrumb_list[-1]["last"] = True
         # Render the breadcrumbs.
         context.push()
         try:
-            context.update({"breadcrumbs": breadcrumbs,})
+            context.update({"breadcrumbs": breadcrumb_list,})
             return template.loader.render_to_string("breadcrumbs.html", context)
         finally:
             context.pop()
@@ -353,7 +362,7 @@ def breadcrumbs(parser, token):
 
 
 @register.simple_tag(takes_context=True)
-def header(context, header=None):
+def header(context, page_header=None):
     """
     Renders the header for the current page::
     
@@ -372,11 +381,11 @@ def header(context, header=None):
         
     """
     request = context["request"]
-    header = header or context.get("header") or context.get("title") or request.pages.current.title
+    page_header = page_header or context.get("header") or context.get("title") or request.pages.current.title
     context.push()
     try:
         context.update({
-            "header": header
+            "header": page_header
         })
         return template.loader.render_to_string("header.html", context)
     finally:

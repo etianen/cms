@@ -27,6 +27,7 @@ class PublicationManager(threading.local):
     
     def __init__(self):
         """Initializes the PublicationManager."""
+        super(PublicationManager, self).__init__()
         self._stack = []
         
     def begin(self, select_published):

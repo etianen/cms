@@ -8,8 +8,8 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseForbidden
+from django.shortcuts import render, redirect
 
 from cms.core import permalinks, debug
 from cms.core.models.managers import publication_manager
@@ -43,9 +43,9 @@ class AdminSite(admin.AdminSite):
     
     # Custom admin views.
     
-    def admin_view(self, view, *args, **kwargs):
+    def admin_view(self, view, cacheable=False):
         """Turns off publication management for admin views."""
-        view = super(AdminSite, self).admin_view(view, *args, **kwargs)
+        view = super(AdminSite, self).admin_view(view, cacheable)
         @functools.wraps(view)
         def wrapper(*args, **kwargs):
             with publication_manager.select_published(False):

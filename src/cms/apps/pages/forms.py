@@ -20,7 +20,7 @@ class PageFormBase(forms.ModelForm):
         try:
             other = model.objects.get_by_permalink(value)
             if other != instance:
-                raise forms.ValidationError, "Page with this permalink already exists."
+                raise forms.ValidationError("Page with this permalink already exists.")
         except model.DoesNotExist:
             pass
         # Check that permalinks do not start with a number.
@@ -29,6 +29,6 @@ class PageFormBase(forms.ModelForm):
         except ValueError:
             pass
         else:
-            raise forms.ValidationError, "A permalink cannot start with a number."
+            raise forms.ValidationError("A permalink cannot start with a number.")
         # All good!
         return value

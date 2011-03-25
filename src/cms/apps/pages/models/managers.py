@@ -16,14 +16,15 @@ class PageCache(threading.local):
     
     def __init__(self):
         """Initializes the PageCache."""
+        super(PageCache, self).__init__()
         self.clear()
         # Add the cleanup handler.
         request_finished.connect(self.handle_request_finished)
         
     def clear(self):
         """Clears the page cache."""
-        self._cache = {}
-        self._homepage_cache = None
+        self._cache = {}  # pylint: disable=W0201
+        self._homepage_cache = None  # pylint: disable=W0201
         
     def put(self, page):
         """Adds the given page to the cache."""
@@ -59,7 +60,7 @@ class PageCache(threading.local):
         
     def put_homepage(self, homepage):
         """Stores the given homepage."""
-        self._homepage_cache = homepage
+        self._homepage_cache = homepage  # pylint: disable=W0201
         
     def get_homepage(self):
         """

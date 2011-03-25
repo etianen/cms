@@ -108,14 +108,14 @@ class Page(PageBase):
         urlconf = ContentType.objects.get_for_id(self.content_type_id).model_class().urlconf
         return self.get_absolute_url() + urlresolvers.reverse(view_func, args=args, kwargs=kwargs, urlconf=urlconf, prefix="")
     
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None):
         """Saves the page."""
-        super(Page, self).save(*args, **kwargs)
+        super(Page, self).save(force_insert, force_update, using)
         self.__class__.objects.cache.put(self)
         
-    def delete(self, *args, **kwargs):
+    def delete(self, using=None):
         """Deletes the page."""
-        super(Page, self).delete(*args, **kwargs)
+        super(Page, self).delete(using)
         self.__class__.objects.cache.remove(self)
     
     class Meta:

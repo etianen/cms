@@ -2,6 +2,7 @@
 
 
 from django import forms
+from django.forms import NullBooleanSelect
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
@@ -28,12 +29,11 @@ class HtmlWidget(forms.Textarea):
                      doc="The media used by the widget.")
     
     
-class NullBooleanWidget(forms.NullBooleanSelect):
+class NullBooleanWidget(NullBooleanSelect):
     
     """A null boolean widget with a blank choice instead of 'maybe'."""
     
     def __init__(self, attrs=None):
         """Sets some different default choices."""
-        choices = ((u"1", "---------"), (u"2", "Yes"), (u"3", "No"))
-        super(forms.NullBooleanSelect, self).__init__(attrs, choices)
-
+        super(NullBooleanWidget, self).__init__(attrs,)
+        self.choices = ((u"1", "---------"), (u"2", "Yes"), (u"3", "No"))

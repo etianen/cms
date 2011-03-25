@@ -40,9 +40,14 @@ class PublishedModel(models.Model):
     date_modified = models.DateTimeField("last modified",
                                          auto_now=True)
     
-    is_online = models.BooleanField("online",
-                                    default=True,
-                                    help_text="Uncheck this box to remove the page from the public website.  Logged-in admin users will still be able to view this page by clicking the 'view on site' button.")
+    is_online = models.BooleanField(
+        "online",
+        default = True,
+        help_text = (
+            "Uncheck this box to remove the page from the public website. "
+            "Logged-in admin users will still be able to view this page by clicking the 'view on site' button."
+        )
+    )
     
     class Meta:
         abstract = True
@@ -141,15 +146,26 @@ class PageBase(PublishedModel):
     
     # Navigation fields.
     
-    short_title = models.CharField(max_length=200,
-                                   blank=True,
-                                   help_text="A shorter version of the title that will be used in site navigation. Leave blank to use the full-length title.")
+    short_title = models.CharField(
+        max_length = 200,
+        blank = True,
+        help_text = (
+            "A shorter version of the title that will be used in site navigation. "
+            "Leave blank to use the full-length title."
+        ),
+    )
     
     # SEO fields.
     
-    browser_title = models.CharField(max_length=1000,
-                                     blank=True,
-                                     help_text="The heading to use in the user's web browser.  Leave blank to use the page title.  Search engines pay particular attention to this attribute.")
+    browser_title = models.CharField(
+        max_length = 1000,
+        blank = True,
+        help_text = (
+            "The heading to use in the user's web browser. "
+            "Leave blank to use the page title. "
+            "Search engines pay particular attention to this attribute."
+        )
+    )
     
     meta_keywords = models.CharField("keywords",
                                      max_length=1000,

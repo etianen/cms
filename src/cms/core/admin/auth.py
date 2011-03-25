@@ -70,11 +70,10 @@ class UserAdmin(BaseUserAdmin):
                     if user.first_name and user.last_name:
                         return "%s %s <%s>" % (user.first_name, user.last_name, user.email)
                     return user.email
-                user = request.user
                 content = form.cleaned_data["content"]
                 subject = "".join((settings.EMAIL_SUBJECT_PREFIX, form.cleaned_data["subject"]))
                 from_email = make_addr(request.user)
-                mail.send_mass_mail((subject, content, from_email, (make_addr(user),))
+                mail.send_mass_mail((subject, content, from_email, (make_addr(request.user),))
                                     for user in users
                                     if user.email)
                 self.message_user(request, "Your email was successfully sent.")
@@ -90,7 +89,7 @@ class UserAdmin(BaseUserAdmin):
         return render(request, "admin/auth/user/email.html", context)
     
     @transaction.commit_on_success
-    def add_view(self, request):
+    def add_view(self, request, form_url='', extra_context=None):
         """Allows new users to be added to the admin interface."""
         if request.method == "POST":
             form = self.add_form(request.POST)
@@ -128,6 +127,7 @@ class UserAdmin(BaseUserAdmin):
                    "media": media,
                    "save_as": False,
                    "app_label": self.model._meta.app_label,}
+        context.update(extra_context or {})
         return render(request, "admin/auth/user/add_form.html", context)
     
     @transaction.commit_on_success

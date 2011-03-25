@@ -31,10 +31,12 @@ def paginate(parser, token):
         # Set the context variable.
         context[varname] = page
         return ""
-    return PatternNode(parser, token, handler, ("{queryset} into {page_size} as [varname] using [pagination_key]",
-                                                "{queryset} into {page_size} as [varname]",
-                                                "{queryset} as [varname] using [pagination_key]",
-                                                "{queryset} as [varname]"))
+    return PatternNode(parser, token, handler, (
+        "{queryset} into {page_size} as [varname] using [pagination_key]",
+        "{queryset} into {page_size} as [varname]",
+        "{queryset} as [varname] using [pagination_key]",
+        "{queryset} as [varname]",
+    ))
 
 
 @register.simple_tag(takes_context=True)
