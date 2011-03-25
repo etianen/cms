@@ -100,7 +100,7 @@ class PageAdmin(PageBaseAdmin):
         # HACK: Need to limit parents field based on object. This should be done in
         # formfield_for_foreignkey, but that method does not know about the object instance.
         if obj:
-            invalid_parents = set(child.id for child in obj.children)
+            invalid_parents = set(child.id for child in obj.all_children)
             invalid_parents.add(obj.id)
         else:
             invalid_parents = frozenset()

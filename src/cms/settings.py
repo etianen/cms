@@ -81,6 +81,7 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "reversion",
     "cms.core",
+    "cms.apps.permalinks",
     "cms.apps.pages",
     "cms.apps.media",
 )

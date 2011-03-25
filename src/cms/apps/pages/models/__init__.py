@@ -13,6 +13,7 @@ from cms.core import sitemaps
 from cms.core.models.base import PageBase
 from cms.core.models.managers import publication_manager
 from cms.core.optimizations import cached_getter, cached_setter
+from cms.apps import permalinks
 from cms.apps.pages.models.managers import PageManager
 from cms.apps.pages.models.fields import PageField
 
@@ -121,6 +122,9 @@ class Page(PageBase):
     class Meta:
         unique_together = (("parent", "url_title",),)
         ordering = ("order",)
+
+
+permalinks.register(Page)
 
 
 # Sitemaps.
