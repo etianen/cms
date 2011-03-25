@@ -18,7 +18,7 @@ class PageFormBase(forms.ModelForm):
             return value
         # Check that non-null permalinks are unique.
         try:
-            other = model.objects.get_by_permalink(value)
+            other = model.objects.get_page(value)
             if other != instance:
                 raise forms.ValidationError("Page with this permalink already exists.")
         except model.DoesNotExist:
