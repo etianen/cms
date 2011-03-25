@@ -41,6 +41,7 @@ class NavigationItem(object):
     
     def __init__(self, request, page):
         """Initializes the NavigationItem."""
+        self._request = request
         self.url = page.get_absolute_url()
         self.page = page
         self.title = page.title
@@ -48,10 +49,10 @@ class NavigationItem(object):
         self.here = request.path.startswith(self.url)
         
     @property
-    @cached_getter
+    @debug.print_exc
     def navigation(self):
         """Returns the sub-navigation."""
-        return [NavigationItem(child) for child in self.page.navigation]
+        return self.page.navigation
         
     def __unicode__(self):
         """Returns a unicode representation."""
