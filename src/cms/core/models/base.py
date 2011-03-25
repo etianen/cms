@@ -1,13 +1,12 @@
 """Abstract base models used by the page management application."""
 
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.db import models
 from django.shortcuts import render
 
 from cms.core import debug
 from cms.core.optimizations import cached_getter
-from cms.core.models.managers import PublishedModelManager, PageBaseManager, publication_manager
+from cms.core.models.managers import PublishedModelManager, publication_manager
 from cms.core.models.fields import NullBooleanField, EnumField
 
 
@@ -58,8 +57,6 @@ class PageBase(PublishedModel):
     For permanent or semi-permanent fixtures in a site, use the PageBase model
     instead.
     """
-    
-    objects = PageBaseManager()
     
     # Hierarchy fields.
     
@@ -134,10 +131,6 @@ class PageBase(PublishedModel):
         return None
     
     # Base fields.
-    
-    site = models.ForeignKey(Site,
-                             editable=False,
-                             default=Site.objects.get_current)
     
     url_title = models.SlugField("URL title",
                                  db_index=False)

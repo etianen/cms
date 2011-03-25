@@ -77,7 +77,6 @@ INSTALLED_APPS = (
     "django.contrib.auth",
     "django.contrib.admin",
     "django.contrib.sitemaps",
-    "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "reversion",

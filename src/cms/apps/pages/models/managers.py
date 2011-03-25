@@ -7,7 +7,7 @@ import threading
 
 from django.core.signals import request_finished
 
-from cms.core.models.managers import PageBaseManager, publication_manager
+from cms.core.models.managers import PublishedModelManager, publication_manager
     
     
 class PageCache(threading.local):
@@ -78,7 +78,7 @@ class PageCache(threading.local):
         self.clear()
 
 
-class PageManager(PageBaseManager):
+class PageManager(PublishedModelManager):
     
     """Manager for Page objects."""
     

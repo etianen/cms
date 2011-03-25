@@ -1,7 +1,6 @@
 """Context processors used by the CMS."""
 
 from django.conf import settings
-from django.contrib.sites.models import Site
 
 
 def conf(request):

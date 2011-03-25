@@ -6,7 +6,6 @@ from __future__ import with_statement
 import threading, contextlib
 from functools import wraps
 
-from django.contrib.sites.models import Site
 from django.db import models
 
 
@@ -86,15 +85,4 @@ class PublishedModelManager(models.Manager):
         queryset = super(PublishedModelManager, self).get_query_set()
         if publication_manager.select_published_active():
             queryset = self.model.select_published(queryset)
-        return queryset
-    
-    
-class PageBaseManager(PublishedModelManager):
-    
-    """Base managed for pages."""
-    
-    def get_query_set(self):
-        """Returns the filtered query set."""
-        queryset = super(PageBaseManager, self).get_query_set()
-        queryset = queryset.filter(site=Site.objects.get_current())
         return queryset
