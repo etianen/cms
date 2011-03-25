@@ -1,9 +1,11 @@
 """The backend implementation for the app."""
 
 from django.core import urlresolvers
+from django.contrib.contenttypes.models import ContentType
 
 from cms.core.db import locked
 from cms.core.pages import BackendBase
+from cms.apps.permalinks.models import Permalink
 from cms.apps.pages.models import Page
 
 
@@ -44,7 +46,7 @@ class PageBackend(BackendBase):
     
     def _swap(self, page, other):
         """Swaps over two pages."""
-        with locked(Page):
+        with locked(Page, ContentType, Permalink):
             page_order = page.order
             other_order = other.order
             page.order = other_order
