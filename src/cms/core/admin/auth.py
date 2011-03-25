@@ -176,13 +176,3 @@ class GroupAdmin(admin.ModelAdmin):
     search_fields = ("name",)
     
     ordering = ("name",)
-    
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        """Sets up custom foreign key choices."""
-        if db_field.name == "permissions":
-            content_types = [ContentType.objects.get_for_model(model)
-                             for model in self.admin_site._registry.keys()]
-            permissions = Permission.objects.filter(content_type__in=content_types)
-            permissions = permissions.order_by("content_type__app_label", "content_type__model", "name")
-            kwargs["queryset"] = permissions
-        return super(GroupAdmin, self).formfield_for_dbfield(db_field, **kwargs)
