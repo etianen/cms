@@ -1,9 +1,7 @@
-{% if breadcrumbs|length > 1 %}    
-    {% for breadcrumb in breadcrumbs %}
-        {% if not breadcrumb.last %}
-            <a title="{{breadcrumb.title}}" href="{{breadcrumb.url}}">{{breadcrumb.short_title}}</a> &rsaquo;
-        {% else %}
-            {{breadcrumb.short_title}}
-        {% endif %}
-    {% endfor %}
-{% endif %}
+{% for breadcrumb in breadcrumbs %}
+    {% if not breadcrumb.last %}
+        <a title="{{breadcrumb.title}}" href="{{breadcrumb.url}}">{{breadcrumb.short_title}}</a> &rsaquo;
+    {% else %}
+        {{breadcrumb.short_title}}
+    {% endif %}
+{% endfor %}
