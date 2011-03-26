@@ -43,9 +43,9 @@ class AdminSite(admin.AdminSite):
     
     # Custom admin views.
     
-    def admin_view(self, view, cacheable=False):
+    def admin_view(self, view, *args, **kwargs):
         """Turns off publication management for admin views."""
-        view = super(AdminSite, self).admin_view(view, cacheable)
+        view = super(AdminSite, self).admin_view(view, *args, **kwargs)
         @functools.wraps(view)
         def wrapper(*args, **kwargs):
             with publication_manager.select_published(False):
