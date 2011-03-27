@@ -74,7 +74,7 @@ class AdminSite(admin.AdminSite):
             generators.append((unicode(obj), permalinks.create(obj)) for obj in model._default_manager.all().iterator())
         links = sorted(itertools.chain(*generators))
         context = {"links": links}
-        return render(request, "admin/tinymce_link_list.js", context, mimetype="text/javascript")
+        return render(request, "admin/tinymce_link_list.js", context, content_type="text/javascript; charset=utf-8")
     
     @debug.print_exc
     def sitemap_json(self, request):
