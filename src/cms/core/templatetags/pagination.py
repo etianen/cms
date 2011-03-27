@@ -55,7 +55,7 @@ def pagination(context, item_page):
                         "previous_page_number": item_page.previous_page_number(),
                         "start_index": item_page.start_index(),
                         "end_index": item_page.end_index(),
-                        "pagination_key": item_page._pagination_key})
+                        "pagination_key": getattr(item_page, "_pagination_key", "page")})
         return template.loader.render_to_string("pagination.html", context)
     finally:
         context.pop()

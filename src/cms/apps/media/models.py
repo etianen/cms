@@ -68,4 +68,5 @@ class ImageRefField(models.ForeignKey):
     def __init__(self, **kwargs):
         kwargs["to"] = File
         kwargs["limit_choices_to"] = {"file__iregex": ur"^.+\.(png|gif|jpg|jpeg)$"}
+        kwargs.setdefault("related_name", "+")
         super(ImageRefField, self).__init__(**kwargs)
