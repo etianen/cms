@@ -41,8 +41,12 @@ class BackendBase(object):
     def get_navigation(self, request, level):
         """Returns the navigation list for the given level (zero-indexed)."""
         page = self.get_current(request)
-        section = page.breadcrumbs[level]
-        return section.navigation
+        try:
+            section = page.breadcrumbs[level]
+        except IndexError:
+            return []
+        else:
+            return section.navigation
     
     # Does this backend support moving pages around?    
     can_move = False
