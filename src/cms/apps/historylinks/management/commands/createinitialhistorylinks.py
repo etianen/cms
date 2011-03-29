@@ -2,8 +2,8 @@ from django.core.management.base import NoArgsCommand
 from django.db import transaction
 
 from cms.core.models.managers import publication_manager
-from cms.apps.linkhistory.registration import get_registered_models
-from cms.apps.linkhistory.models import HistoryLink
+from cms.apps.historylinks.registration import get_registered_models
+from cms.apps.historylinks.models import HistoryLink
 
 
 class Command(NoArgsCommand):

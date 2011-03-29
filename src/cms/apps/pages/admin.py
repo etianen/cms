@@ -17,7 +17,7 @@ import reversion
 
 from cms.core.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.core.db import locked
-from cms.apps.linkhistory.models import HistoryLink
+from cms.apps.historylinks.models import HistoryLink
 from cms.apps.pages.models import Page, get_registered_content
 from cms.apps.pages.forms import PageFormBase
 

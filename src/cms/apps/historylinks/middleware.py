@@ -1,7 +1,7 @@
 """Middleware used by the history links service."""
 
 from django.shortcuts import redirect
-from cms.apps.linkhistory.models import HistoryLink
+from cms.apps.historylinks.models import HistoryLink
 
 
 class PermalinkFallbackMiddleware(object):

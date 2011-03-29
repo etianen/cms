@@ -62,7 +62,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "cms.apps.linkhistory.middleware.PermalinkFallbackMiddleware",
+    "cms.apps.historylinks.middleware.PermalinkFallbackMiddleware",
     "cms.core.middleware.PreviewMiddleware",
     "cms.core.middleware.PageMiddleware",
 )
@@ -82,7 +82,7 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "reversion",
     "cms.core",
-    "cms.apps.linkhistory",
+    "cms.apps.historylinks",
     "cms.apps.pages",
     "cms.apps.media",
 )

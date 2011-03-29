@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from cms.core.db import locked
 from cms.core.pages import BackendBase
-from cms.apps.linkhistory.models import HistoryLink
+from cms.apps.historylinks.models import HistoryLink
 from cms.apps.pages.models import Page
 
 

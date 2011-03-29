@@ -2,7 +2,7 @@
 
 from django.db.models.signals import post_save
 
-from cms.apps.linkhistory.models import HistoryLink
+from cms.apps.historylinks.models import HistoryLink
 
 
 _registry = set()
