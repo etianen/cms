@@ -1,20 +1,46 @@
 """Abstract base models used by the page management application."""
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import models
 from django.shortcuts import render
 
 from cms.core import debug
 from cms.core.optimizations import cached_getter
-from cms.core.models.managers import PublishedModelManager, publication_manager
+from cms.core.models.managers import PublishedBaseManager, publication_manager
 from cms.core.models.fields import NullBooleanField, EnumField
 
 
-class PublishedModel(models.Model):
+class AuditBase(models.Model):
+    
+    """A model that allows improved admin auditing."""
+    
+    date_created = models.DateTimeField(
+        auto_now_add = True
+    )
+    
+    date_modified = models.DateTimeField(
+        auto_now = True
+    )
+    
+    last_modified_user = models.ForeignKey(
+        User,
+        blank = True,
+        null = True,
+        editable = False,
+        on_delete = models.SET_NULL,
+        help_text = "The user who last modified this item."
+    )
+    
+    class Meta:
+        abstract = True
+
+
+class PublishedBase(AuditBase):
     
     """A model with publication controls."""
     
-    objects = PublishedModelManager()
+    objects = PublishedBaseManager()
     
     @classmethod
     def select_published(cls, queryset):
@@ -30,15 +56,10 @@ class PublishedModel(models.Model):
         return queryset.filter(is_online=True)
     
     def __init__(self, *args, **kwargs):
-        """Initializes the PublishedModel."""
-        super(PublishedModel, self).__init__(*args, **kwargs)
+        """Initializes the PublishedBase."""
+        super(PublishedBase, self).__init__(*args, **kwargs)
         # Add a flag to determine whether the publication manager was active.
         self._select_published_active = publication_manager.select_published_active()
-    
-    date_created = models.DateTimeField(auto_now_add=True)
-    
-    date_modified = models.DateTimeField("last modified",
-                                         auto_now=True)
     
     is_online = models.BooleanField(
         "online",
@@ -53,7 +74,7 @@ class PublishedModel(models.Model):
         abstract = True
     
 
-class PageBase(PublishedModel):
+class PageBase(PublishedBase):
     
     """
     Base model for models used to generate a HTML page.

@@ -4,9 +4,10 @@
 from django.db import models
 
 from cms.core.files import get_upload_path
+from cms.core.models import AuditBase
 
 
-class Folder(models.Model):
+class Folder(AuditBase):
     
     """
     A notional folder used to organise static media.
@@ -16,11 +17,6 @@ class Folder(models.Model):
     
     name = models.CharField(max_length=200)
     
-    date_created = models.DateTimeField(auto_now_add=True)
-    
-    date_modified = models.DateTimeField("last modified",
-                                         auto_now=True,)
-    
     def __unicode__(self):
         """Returns the name of the folder."""
         return self.name
@@ -29,17 +25,12 @@ class Folder(models.Model):
         ordering = ("name",)
     
     
-class File(models.Model):
+class File(AuditBase):
     
     """A static file."""
     
     title = models.CharField(max_length=200,
                              help_text="The title will be used as the default rollover text when this media is embedded in a web page.")
-    
-    date_created = models.DateTimeField(auto_now_add=True)
-    
-    date_modified = models.DateTimeField("last modified",
-                                         auto_now=True,)
     
     folder = models.ForeignKey(Folder,
                                blank=True,

@@ -30,13 +30,23 @@ class PageAdmin(PageBaseAdmin):
 
     """Admin settings for Page models."""
 
-    publication_fieldsets = (("Publication", {"fields": ("publication_date", "expiry_date", "is_online",),
-                                              "classes": ("collapse",)}),)
-
-    navigation_fieldsets = (("Navigation", {"fields": ("short_title", "permalink", "in_navigation",),
-                                            "classes": ("collapse",),},),)
-
-    fieldsets = ((None, {"fields": ("title", "url_title", "parent",),},),) + publication_fieldsets + navigation_fieldsets + PageBaseAdmin.seo_fieldsets
+    fieldsets = (
+        (None, {
+            "fields": ("title", "url_title", "parent",),
+        },),
+        ("Publication", {
+            "fields": ("publication_date", "expiry_date", "is_online",),
+            "classes": ("collapse",),
+        }),
+        ("Navigation", {
+            "fields": ("short_title", "permalink", "in_navigation",),
+            "classes": ("collapse",),
+        }),
+        ("Search engine optimization", {
+            "fields": ("browser_title", "meta_keywords", "meta_description", "robots_index", "robots_follow", "robots_archive", "sitemap_priority", "sitemap_changefreq",),
+            "classes": ("collapse",),
+        }),
+    )
     
     def __init__(self, *args, **kwargs):
         """Initialzies the PageAdmin."""

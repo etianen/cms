@@ -12,7 +12,37 @@ from reversion.admin import VersionAdmin
 from cms.core import debug
 
 
-class PublishedModelAdmin(admin.ModelAdmin):
+class AuditBaseAdmin(admin.ModelAdmin):
+    
+    """Base class for audited models."""
+    
+    def get_last_modified(self, obj):
+        """Returns the date modified timestamp and the user who did the deed."""
+        datestr = dateformat.format(obj.date_modified, settings.DATE_FORMAT)
+        if obj.last_modified_user:
+            user = obj.last_modified_user
+            if user.first_name and user.last_name:
+                userstr = u"by {first_name} {last_name}".format(
+                    first_name = user.first_name,
+                    last_name = user.last_name,
+                )
+            else:
+                userstr = u"by {username}".format(
+                    username = user.username
+                )
+        else:
+            userstr = ""
+        return u" ".join((datestr, userstr))
+    get_last_modified.admin_order_field = "date_modified"
+    get_last_modified.short_description = "last modified"
+    
+    def save_model(self, request, obj, form, change):
+        """Saves the model, attaching the user model."""
+        obj.last_modified_user = request.user
+        super(AuditBaseAdmin, self).save_model(request, obj, form, change)
+            
+
+class PublishedBaseAdmin(AuditBaseAdmin):
     
     """Base admin class for published models."""
     
@@ -20,8 +50,7 @@ class PublishedModelAdmin(admin.ModelAdmin):
     
     change_form_template = "admin/core/publishedmodel/change_form.html"
     
-    publication_fieldsets = (("Publication", {"fields": ("is_online",),
-                                              "classes": ("collapse",),}),)
+    list_display = ("__unicode__", "get_last_modified",)
     
     list_filter = ("is_online",)
     
@@ -38,43 +67,12 @@ class PublishedModelAdmin(admin.ModelAdmin):
     unpublish_selected.short_description = "Take selected %(verbose_name_plural)s offline"
 
 
-@debug.print_exc
-def get_date_modified(_, obj, field_name="date_modified"):
-    """Returns the date modified timestamp and the user who did the deed."""
-    datestr = dateformat.format(getattr(obj, field_name), settings.DATE_FORMAT)
-    try:
-        latest_log = LogEntry.objects.select_related().filter(object_id=obj.pk, content_type=ContentType.objects.get_for_model(obj)).order_by("-action_time")[0]
-    except IndexError:
-        userstr = ""
-    else:
-        user = latest_log.user
-        if user.first_name and user.last_name:
-            userstr = "by %s %s" % (user.first_name, user.last_name)
-        else:
-            userstr = "by %s" % user.username
-    return " ".join((datestr, userstr))
-get_date_modified.admin_order_field = "date_modified"
-get_date_modified.short_description = "last modified"
+class PageBaseAdmin(VersionAdmin, PublishedBaseAdmin):
+    
+    """Base admin class for PageBase models."""
 
-
-class PageBaseAdmin(VersionAdmin, PublishedModelAdmin):
-    
-    """Base admin class for ArticleBase models."""
-    
-    base_fieldsets = ((None, {"fields": ("title", "url_title",),},),)
-    
-    navigation_fieldsets = (("Navigation", {"fields": ("short_title",),
-                                            "classes": ("collapse",),}),)
-    
-    seo_fieldsets = (("Search engine optimization", {"fields": ("browser_title", "meta_keywords", "meta_description", "robots_index", "robots_follow", "robots_archive", "sitemap_priority", "sitemap_changefreq",),
-                                                     "classes": ("collapse",),},),)
-    
-    fieldsets = base_fieldsets + PublishedModelAdmin.publication_fieldsets + navigation_fieldsets + seo_fieldsets
-
-    list_display = ("title", "is_online", "get_date_modified",)
+    list_display = ("title", "is_online", "get_last_modified",)
     
     prepopulated_fields = {"url_title": ("title",),}
     
     search_fields = ("title",)
-    
-    get_date_modified = get_date_modified

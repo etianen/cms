@@ -75,7 +75,7 @@ class PublicationManager(threading.local):
 publication_manager = PublicationManager()
 
 
-class PublishedModelManager(models.Manager):
+class PublishedBaseManager(models.Manager):
     
     """Manager that fetches published models."""
     
@@ -83,7 +83,7 @@ class PublishedModelManager(models.Manager):
     
     def get_query_set(self):
         """"Returns the queryset, filtered if appropriate."""
-        queryset = super(PublishedModelManager, self).get_query_set()
+        queryset = super(PublishedBaseManager, self).get_query_set()
         if publication_manager.select_published_active():
             queryset = self.model.select_published(queryset)
         return queryset

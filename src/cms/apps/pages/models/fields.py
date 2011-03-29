@@ -4,7 +4,7 @@
 from django.db import models
 from django.db.models.fields.related import ReverseSingleRelatedObjectDescriptor
 
-from cms.core.models.base import PublishedModel
+from cms.core.models.base import PublishedBase
 from cms.core.models.managers import publication_manager
 
 
@@ -23,7 +23,7 @@ class PageDescriptor(ReverseSingleRelatedObjectDescriptor):
                 return None
             raise self.field.rel.to.DoesNotExist
         # Access the page.
-        if isinstance(instance, PublishedModel):
+        if isinstance(instance, PublishedBase):
             with publication_manager.select_published(instance._select_published_active):
                 return self.field.rel.to.objects.get_page(page_id)
         else:

@@ -23,7 +23,7 @@ class PageBaseSitemap(Sitemap):
         """Returns all items in this sitemap."""
         pages = []
         for obj in self.model.objects.all():
-            # HACK: PublishedModel instances might be not be published, due to an
+            # HACK: PublishedBase instances might be not be published, due to an
             # unpublished parent. This checks to see if they can provide a URL
             # before passing them on to the renderer.
             try:
