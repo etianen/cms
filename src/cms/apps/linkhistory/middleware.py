@@ -1,7 +1,7 @@
-"""Middleware used by the permalinks service."""
+"""Middleware used by the history links service."""
 
 from django.shortcuts import redirect
-from cms.apps.permalinks.models import Permalink
+from cms.apps.linkhistory.models import HistoryLink
 
 
 class PermalinkFallbackMiddleware(object):
@@ -13,8 +13,8 @@ class PermalinkFallbackMiddleware(object):
         if response.status_code == 404:
             # Try to rescue the response.
             try:
-                permalink = Permalink.objects.get(path=request.path)
-                return redirect(permalink.object, permanent=True)
-            except Permalink.DoesNotExist:
+                link = HistoryLink.objects.get(path=request.path)
+                return redirect(link.object, permanent=True)
+            except HistoryLink.DoesNotExist:
                 pass
         return response
