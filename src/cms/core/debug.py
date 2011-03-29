@@ -23,3 +23,9 @@ def print_exc(func):
         return wrapper
     else:
         return func
+        
+        
+def print_current_exc():
+    """Prints the current exception, if in debug model"""
+    if settings.DEBUG:
+        traceback.print_exc()

@@ -3,11 +3,13 @@
 
 import os
 
-from PIL import Image  #@UnresolvedImport
+from PIL import Image
 
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.utils import html
+
+from cms.core import debug
 
 
 __all__ = ("create", "PROPORTIONAL", "RESIZED", "CROPPED",)
@@ -79,17 +81,31 @@ def _resize(image, image_size, thumbnail_display_size, thumbnail_image_size):
     Resizes the image to exactly match the desired data size, ignoring aspect
     ratio.
     """
-    return image.resize((thumbnail_image_size), Image.ANTIALIAS)
+    return image.resize(thumbnail_image_size, Image.ANTIALIAS)
 
 def _resize_cropped(image, image_size, thumbnail_display_size, thumbnail_image_size):
     """
     Resizes the image to fit the desired size, preserving aspect ratio by
     cropping, if required.
     """
-    source_size = image_size.constrain(thumbnail_display_size)
-    source_x = (image_size.width - source_size.width) / 2
-    source_y = (image_size.height - source_size.height) / 2
-    return image.transform(thumbnail_image_size, Image.EXTENT, (source_x, source_y, source_x + source_size.width, source_y + source_size.height), Image.BICUBIC)
+    # Resize with nice filter.
+    image_aspect = image_size.aspect
+    if image_aspect > thumbnail_image_size.aspect:
+        # Too wide.
+        pre_cropped_size = Size(thumbnail_image_size.height * image_aspect, thumbnail_image_size.height)
+    else:
+        # Too tall.
+        pre_cropped_size = Size(thumbnail_image_size.width, thumbnail_image_size.width / image_aspect)
+    # Crop.
+    image = image.resize(pre_cropped_size, Image.ANTIALIAS)
+    source_x = (pre_cropped_size.width - thumbnail_image_size.width) / 2
+    source_y = (pre_cropped_size.height - thumbnail_image_size.height) / 2
+    return image.crop((
+        source_x,
+        source_y,
+        source_x + thumbnail_image_size.width,
+        source_y + thumbnail_image_size.height,
+    ))
 
 
 # Methods of generating thumbnails.
@@ -227,6 +243,7 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
             try:
                 thumbnail_image = resize_callback(image_data, image_size, thumbnail_display_size, thumbnail_image_size)
             except Exception as ex:  # HACK: PIL can raise all sorts of wierd errors.
+                debug.print_current_exc()
                 raise IOError, str(ex)
             # Save the thumbnail.
             try:
