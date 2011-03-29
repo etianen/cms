@@ -4,7 +4,6 @@ import os
 from functools import partial
 
 from django.conf import settings
-from django.contrib import admin
 from django.contrib.admin.views.main import IS_POPUP_VAR
 from django.shortcuts import render
 from django.template.defaultfilters import filesizeformat
@@ -133,7 +132,7 @@ class FileAdmin(VersionAdmin, AuditBaseAdmin):
     
     def get_preview(self, obj):
         """Generates a thumbnail of the image."""
-        name, extension = os.path.splitext(obj.file.name)  # @UnusedVariable
+        _, extension = os.path.splitext(obj.file.name)  # @UnusedVariable
         extension = extension.lower()[1:]
         icon = FILE_ICONS.get(extension, UNKNOWN_FILE_ICON)
         permalink = permalinks.create(obj)

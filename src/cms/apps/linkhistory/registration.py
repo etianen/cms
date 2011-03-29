@@ -1,7 +1,6 @@
 """Registration helpers."""
 
 from django.db.models.signals import post_save
-from django.contrib.contenttypes.models import ContentType
 
 from cms.apps.linkhistory.models import HistoryLink
 

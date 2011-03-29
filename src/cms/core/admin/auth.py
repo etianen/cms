@@ -5,8 +5,6 @@ from django.conf import settings
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.shortcuts import render, redirect
 

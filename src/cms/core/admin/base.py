@@ -1,15 +1,10 @@
 """Base classes for the CMS admin interface."""
 
-
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.admin.models import LogEntry
-from django.contrib.contenttypes.models import ContentType
 from django.utils import dateformat 
 
 from reversion.admin import VersionAdmin
-
-from cms.core import debug
 
 
 class AuditBaseAdmin(admin.ModelAdmin):

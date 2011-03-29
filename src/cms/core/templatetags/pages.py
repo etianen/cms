@@ -7,7 +7,6 @@ from django.utils.safestring import mark_safe
 from django.utils.html import escape, conditional_escape
 
 from cms.core.html import process as process_html
-from cms.core.optimizations import cached_getter
 from cms.core.templatetags import PatternNode
 from cms.core.models import PageBase
 from cms.core import debug
