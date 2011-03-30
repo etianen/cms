@@ -8,7 +8,7 @@ from django.shortcuts import render
 from cms.core import debug
 from cms.core.optimizations import cached_getter
 from cms.core.models.managers import PublishedBaseManager, publication_manager
-from cms.core.models.fields import NullBooleanField, EnumField
+from cms.core.models.fields import NullBooleanField
 
 
 class AuditBase(models.Model):
@@ -204,18 +204,22 @@ class PageBase(PublishedBase):
                                          null=True,
                                          help_text="The relative importance of this content in your site.  Search engines use this as a hint when ranking the pages within your site.")
 
-    sitemap_changefreq = EnumField("change frequency",
-                                   choices=((1, "always", "Always"),
-                                            (2, "hourly", "Hourly"),
-                                            (3, "daily", "Daily"),
-                                            (4, "weekly", "Weekly"),
-                                            (5, "monthly", "Monthly"),
-                                            (6, "yearly", "Yearly"),
-                                            (7, "never", "Never")),
-                                   default=None,
-                                   blank=True,
-                                   null=True,
-                                   help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates.")
+    sitemap_changefreq = models.PositiveSmallIntegerField(
+        "change frequency",
+        choices=(
+            (1, "Always"),
+            (2, "Hourly"),
+            (3, "Daily"),
+            (4, "Weekly"),
+            (5, "Monthly"),
+            (6, "Yearly"),
+            (7, "Never")
+        ),
+        default=None,
+        blank=True,
+        null=True,
+        help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates."
+    )
     
     robots_index = NullBooleanField("allow indexing",
                                     blank=True,

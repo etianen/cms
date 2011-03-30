@@ -50,7 +50,9 @@ class File(AuditBase):
     
     class Meta:
         ordering = ("title",)
-        
+
+
+IMAGE_FILTER = {"file__iregex": ur"^.+\.(png|gif|jpg|jpeg)$"} 
         
 class ImageRefField(models.ForeignKey):
     
@@ -58,6 +60,17 @@ class ImageRefField(models.ForeignKey):
     
     def __init__(self, **kwargs):
         kwargs["to"] = File
-        kwargs["limit_choices_to"] = {"file__iregex": ur"^.+\.(png|gif|jpg|jpeg)$"}
+        kwargs["limit_choices_to"] = IMAGE_FILTER
         kwargs.setdefault("related_name", "+")
         super(ImageRefField, self).__init__(**kwargs)
+        
+        
+# Register custom fields with South.
+
+try:
+    from south.modelsinspector import add_introspection_rules
+except ImportError:
+    pass
+else:
+    # Rules for ImageRefField.
+    add_introspection_rules((), ("^cms\.apps\.media\.models\.ImageRefField",))
