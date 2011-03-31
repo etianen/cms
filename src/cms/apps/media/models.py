@@ -62,6 +62,7 @@ class ImageRefField(models.ForeignKey):
         kwargs["to"] = File
         kwargs["limit_choices_to"] = IMAGE_FILTER
         kwargs.setdefault("related_name", "+")
+        kwargs.setdefault("on_delete", models.PROTECT)
         super(ImageRefField, self).__init__(**kwargs)
         
         
