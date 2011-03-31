@@ -32,6 +32,16 @@ class AuditBase(models.Model):
         help_text = "The user who last modified this item."
     )
     
+    def save(self, force_insert=False, force_update=False, using=None, user=None):
+        """
+        Saves the AuditBase.
+        
+        If you wish to take the save with a user model, it must be supplied as a keyword
+        argument.
+        """
+        self.last_modified_user = user
+        super(AuditBase, self).save(force_insert, force_update, using)
+    
     class Meta:
         abstract = True
 

@@ -35,8 +35,7 @@ class AuditBaseAdmin(admin.ModelAdmin):
     
     def save_model(self, request, obj, form, change):
         """Saves the model, attaching the user model."""
-        obj.last_modified_user = request.user
-        super(AuditBaseAdmin, self).save_model(request, obj, form, change)
+        obj.save(user=request.user)
             
 
 class PublishedBaseAdmin(AuditBaseAdmin):
