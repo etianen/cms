@@ -11,6 +11,8 @@ class AuditBaseAdmin(admin.ModelAdmin):
     
     """Base class for audited models."""
     
+    list_display = ("__unicode__", "get_last_modified",)
+    
     def get_last_modified(self, obj):
         """Returns the date modified timestamp and the user who did the deed."""
         datestr = dateformat.format(obj.date_modified, settings.DATE_FORMAT)
@@ -44,8 +46,6 @@ class PublishedBaseAdmin(AuditBaseAdmin):
     actions = ("publish_selected", "unpublish_selected",)
     
     change_form_template = "admin/core/publishedmodel/change_form.html"
-    
-    list_display = ("__unicode__", "get_last_modified",)
     
     list_filter = ("is_online",)
     
