@@ -158,8 +158,10 @@ class PageBase(PublishedBase):
     
     # Base fields.
     
-    url_title = models.SlugField("URL title",
-                                 db_index=False)
+    url_title = models.SlugField(
+        "URL title",
+        db_index=False
+    )
     
     title = models.CharField(
         max_length = 1000,
@@ -188,25 +190,37 @@ class PageBase(PublishedBase):
         )
     )
     
-    meta_keywords = models.CharField("keywords",
-                                     max_length=1000,
-                                     blank=True,
-                                     help_text="A comma-separated list of keywords for this page. Use this to specify common mis-spellings or alternative versions of important words in this page.")
+    meta_keywords = models.CharField(
+        "keywords",
+         max_length = 1000,
+         blank = True,
+         help_text = (
+            "A comma-separated list of keywords for this page. Use this to specify common mis-spellings "
+            "or alternative versions of important words in this page."
+        ),
+    )
 
-    meta_description = models.TextField("description",
-                                        blank=True,
-                                        help_text="A brief description of the contents of this page.")
+    meta_description = models.TextField(
+        "description",
+        blank = True,
+        help_text = "A brief description of the contents of this page.",
+    )
     
-    sitemap_priority = models.FloatField("priority",
-                                         choices=settings.SEO_PRIORITIES,
-                                         default=None,
-                                         blank=True,
-                                         null=True,
-                                         help_text="The relative importance of this content in your site.  Search engines use this as a hint when ranking the pages within your site.")
+    sitemap_priority = models.FloatField(
+        "priority",
+         choices = settings.SEO_PRIORITIES,
+         default = None,
+         blank = True,
+         null = True,
+         help_text = (
+            "The relative importance of this content in your site.  Search engines use this "
+            "as a hint when ranking the pages within your site."
+        ),
+    )
 
     sitemap_changefreq = models.PositiveSmallIntegerField(
         "change frequency",
-        choices=(
+        choices = (
             (1, "Always"),
             (2, "Hourly"),
             (3, "Daily"),
@@ -215,26 +229,47 @@ class PageBase(PublishedBase):
             (6, "Yearly"),
             (7, "Never")
         ),
-        default=None,
-        blank=True,
-        null=True,
-        help_text="How frequently you expect this content to be updated.  Search engines use this as a hint when scanning your site for updates."
+        default = None,
+        blank = True,
+        null = True,
+        help_text = (
+            "How frequently you expect this content to be updated."
+            "Search engines use this as a hint when scanning your site for updates."
+        ),
     )
     
-    robots_index = NullBooleanField("allow indexing",
-                                    blank=True,
-                                    default=None,
-                                    help_text="Use this to prevent search engines from indexing this page. Disable this only if the page contains information which you do not wish to show up in search results. Leave blank to use the setting from the parent page.")
+    robots_index = NullBooleanField(
+        "allow indexing",
+        blank = True,
+        default = None,
+        help_text = (
+            "Use this to prevent search engines from indexing this page. "
+            "Disable this only if the page contains information which you do not wish "
+            "to show up in search results. Leave blank to use the setting from the parent page."
+        ),
+    )
 
-    robots_follow = NullBooleanField("follow links",
-                                     blank=True,
-                                     default=None,
-                                     help_text="Use this to prevent search engines from following any links they find in this page. Disable this only if the page contains links to other sites that you do not wish to publicise. Leave blank to use the setting from the parent page.")
+    robots_follow = NullBooleanField(
+        "follow links",
+         blank = True,
+         default = None,
+         help_text = (
+            "Use this to prevent search engines from following any links they find in this page. "
+            "Disable this only if the page contains links to other sites that you do not wish to "
+            "publicise. Leave blank to use the setting from the parent page."
+        ),
+    )
 
-    robots_archive = NullBooleanField("allow archiving",
-                                      blank=True,
-                                      default=None,
-                                      help_text="Use this to prevent search engines from archiving this page. Disable this only if the page is likely to change on a very regular basis. Leave blank to use the setting from the parent page.")
+    robots_archive = NullBooleanField(
+        "allow archiving",
+        blank = True,
+        default = None,
+        help_text = (
+            "Use this to prevent search engines from archiving this page. "
+            "Disable this only if the page is likely to change on a very regular basis. "
+            "Leave blank to use the setting from the parent page."
+        ),
+    )
     
     def resolve_meta_robots(self, index=None, follow=None, archive=None):
         """
@@ -285,4 +320,3 @@ class PageBase(PublishedBase):
     class Meta:
         abstract = True
         ordering = ("title",)
-
