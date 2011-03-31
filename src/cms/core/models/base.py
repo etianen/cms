@@ -29,6 +29,7 @@ class AuditBase(models.Model):
         null = True,
         editable = False,
         on_delete = models.SET_NULL,
+        related_name = "+",
         help_text = "The user who last modified this item."
     )
     
