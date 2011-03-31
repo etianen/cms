@@ -45,6 +45,7 @@ class AuditBase(models.Model):
     
     class Meta:
         abstract = True
+        ordering = ("-date_modified",)
 
 
 class PublishedBase(AuditBase):
