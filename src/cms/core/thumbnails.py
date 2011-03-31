@@ -155,6 +155,9 @@ class Thumbnail(object):
 # Cache of image size information, used to cut down massively on disk hits.
 _size_cache = {}
 
+# Cache of created thumbnails, used to remove stats for thumbnails.
+_created_thumbnails = set()
+
 
 def _load_once(path):
     """
@@ -208,36 +211,40 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
         thumbnail_name = "thumbnails/%s/%s/%s" % (folder, thumbnail_image_size, image_name)
         thumbnail_path = storage.path(thumbnail_name)
         # If we need to generate the thumbnail, then generate it!
-        if not os.path.exists(thumbnail_path):
-            # Make any intermediate directories.
-            try:
-                os.makedirs(os.path.dirname(thumbnail_path))
-            except OSError:
-                pass
-            # Load the image data.
-            image_data = image_loader.next()
-            # Use efficient image loading if this would be sensible.
-            if image_size.width < thumbnail_image_size.width and image_size.height < thumbnail_image_size.height:
-                image_data.draft(None, thumbnail_image_size)
-                image_size = Size(*image_data.size)
-            # Resize the image data.
-            try:
-                thumbnail_image = resize_callback(image_data, image_size, thumbnail_display_size, thumbnail_image_size)
-            except Exception as ex:  # HACK: PIL can raise all sorts of wierd errors.
-                debug.print_current_exc()
-                raise IOError, str(ex)
-            # Save the thumbnail.
-            try:
-                thumbnail_image.save(thumbnail_path)
-            except Exception as ex:  # pylint: disable=W0703
+        if not thumbnail_path in _created_thumbnails:
+            if os.path.exists(thumbnail_path):
+                _created_thumbnails.add(thumbnail_path)
+            else:
+                # Make any intermediate directories.
                 try:
-                    raise ex
-                finally:
-                    # Remove an incomplete file, if present.
+                    os.makedirs(os.path.dirname(thumbnail_path))
+                except OSError:
+                    pass
+                # Load the image data.
+                image_data = image_loader.next()
+                # Use efficient image loading if this would be sensible.
+                if image_size.width < thumbnail_image_size.width and image_size.height < thumbnail_image_size.height:
+                    image_data.draft(None, thumbnail_image_size)
+                    image_size = Size(*image_data.size)
+                # Resize the image data.
+                try:
+                    thumbnail_image = resize_callback(image_data, image_size, thumbnail_display_size, thumbnail_image_size)
+                except Exception as ex:  # HACK: PIL can raise all sorts of wierd errors.
+                    debug.print_current_exc()
+                    raise IOError, str(ex)
+                # Save the thumbnail.
+                try:
+                    thumbnail_image.save(thumbnail_path)
+                except Exception as ex:  # pylint: disable=W0703
                     try:
-                        os.unlink(thumbnail_path)
-                    except:  # pylint: disable=W0702
-                        pass
+                        raise ex
+                    finally:
+                        # Remove an incomplete file, if present.
+                        try:
+                            os.unlink(thumbnail_path)
+                        except:  # pylint: disable=W0702
+                            pass
+                _created_thumbnails.add(thumbnail_path)
     # Return the thumbnail object.
     thumbnail_url = storage.url(thumbnail_name)
     return Thumbnail(thumbnail_name, thumbnail_path, thumbnail_url, thumbnail_display_size, thumbnail_image_size)
