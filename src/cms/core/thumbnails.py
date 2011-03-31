@@ -179,23 +179,12 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
         display_size_callback, image_size_callback, resize_callback, folder = _methods[method]
     except KeyError:
         raise ValueError, "'%s' is not a valid thumbnail generation method. Accepted methods are: %s" % (method, ", ".join(_methods.iterkeys()))
-    # Look up image modified timestamp.
-    try:
-        image_timestamp = os.stat(image.path).st_mtime
-    except OSError:
-        raise IOError("Cannot generate thumbnail: '%s' does not exist")
     # Look up the image size.
-    def load_size():
-        image_size = Size(*image_loader.next().size)
-        _size_cache[image.path] = (image_timestamp, image_size)
-        return image_size
     try:
-        file_timestamp, image_size = _size_cache[image.path]
+        image_size = _size_cache[image.path]
     except KeyError:
-        image_size = load_size()
-    else:
-        if image_timestamp > file_timestamp:
-            image_size = load_size()
+        image_size = Size(*image_loader.next().size)
+        _size_cache[image.path] = image_size
     # Calculate the final width and height of the thumbnail.
     thumbnail_display_size = display_size_callback(image_size, Size(width, height))
     thumbnail_image_size = image_size_callback(thumbnail_display_size, thumbnail_display_size.intersect(image_size))
@@ -218,16 +207,8 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
         # Calculate the various file paths.
         thumbnail_name = "thumbnails/%s/%s/%s" % (folder, thumbnail_image_size, image_name)
         thumbnail_path = storage.path(thumbnail_name)
-        # Check whether the thumbnail exists, and is more recent than the image.
-        try:
-            thumbnail_timestamp = os.stat(thumbnail_path).st_mtime
-        except OSError:
-            # The thumbnail does not exist, so we need to generate it.
-            generation_required = True
-        else:
-            generation_required = image_timestamp > thumbnail_timestamp
         # If we need to generate the thumbnail, then generate it!
-        if generation_required:
+        if not os.path.exists(thumbnail_path):
             # Make any intermediate directories.
             try:
                 os.makedirs(os.path.dirname(thumbnail_path))
