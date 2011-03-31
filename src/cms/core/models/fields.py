@@ -1,7 +1,5 @@
 """Fields used by the page management application."""
 
-
-from django.core.exceptions import ValidationError
 from django.db import models
 
 from cms.core.forms.widgets import HtmlWidget, NullBooleanWidget
