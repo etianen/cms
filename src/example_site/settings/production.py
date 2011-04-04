@@ -64,7 +64,10 @@ EMAIL_PORT = 25
 
 EMAIL_USE_TLS = False
 
-SERVER_EMAIL = "notifications@" + SITE_DOMAIN
+SERVER_EMAIL = u"{name} <notifications@{domain}>".format(
+    name = SITE_NAME,
+    domain = SITE_DOMAIN,
+)
 
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
