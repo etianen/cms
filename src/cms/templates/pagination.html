@@ -1,8 +1,12 @@
 {% load pagination %}
-{% if has_other_pages %}
+{% if page_obj.has_other_pages %}
     <p class="pagination">
-        {% if has_previous %}<a class="prev" rel="prev" href="{% pagination_url previous_page_number %}">&lsaquo; Previous</a>{% endif %}
-        <span class="current">Page {{number}} of {{num_pages}}</span>
-        {% if has_next %}<a class="next" rel="next" href="{% pagination_url next_page_number %}">Next &rsaquo;</a>{% endif %}
+        {% if page_obj.has_previous %}
+            <a class="prev" rel="prev" href="{% pagination_url page_obj.previous_page_number %}">&lsaquo; Previous</a>
+        {% endif %}
+        <span class="current">Page {{page_obj.number}} of {{paginator.num_pages}}</span>
+        {% if page_obj.has_next %}
+            <a class="next" rel="next" href="{% pagination_url page_obj.next_page_number %}">Next &rsaquo;</a>
+        {% endif %}
     </p>
 {% endif %}

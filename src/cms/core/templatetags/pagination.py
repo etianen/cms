@@ -40,22 +40,15 @@ def paginate(parser, token):
 
 
 @register.simple_tag(takes_context=True)
-def pagination(context, item_page):
+def pagination(context, page_obj):
     """Renders the pagination for the given page of items."""
     context.push()
     try:
-        context.update({"num_pages": item_page.paginator.num_pages,
-                        "count": item_page.paginator.count,
-                        "page_range": item_page.paginator.page_range,
-                        "number": item_page.number,
-                        "has_other_pages": item_page.has_other_pages(),
-                        "has_next": item_page.has_next(),
-                        "has_previous": item_page.has_previous(),
-                        "next_page_number": item_page.next_page_number(),
-                        "previous_page_number": item_page.previous_page_number(),
-                        "start_index": item_page.start_index(),
-                        "end_index": item_page.end_index(),
-                        "pagination_key": getattr(item_page, "_pagination_key", "page")})
+        context.update({
+            "page_obj": page_obj,
+            "paginator": page_obj.paginator,
+            "pagination_key": getattr(page_obj, "_pagination_key", "page")
+        })
         return template.loader.render_to_string("pagination.html", context)
     finally:
         context.pop()
