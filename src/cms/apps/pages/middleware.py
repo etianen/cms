@@ -13,7 +13,7 @@ from django.http import Http404, HttpResponse
 from django.views.debug import technical_404_response
 from django.shortcuts import redirect
 
-from cms.core.models import publication_manager
+from cms.core.models import publication_manager, PublicationManagementError
 from cms.apps.pages.models import Page, cache
 
 
@@ -60,53 +60,63 @@ class PageMiddleware(object):
             preview_mode = False
         # Only allow preview mode if the user is a logged in administrator.
         preview_mode = preview_mode and request.user.is_authenticated() and request.user.is_staff and request.user.is_active
-        with publication_manager.select_published(not preview_mode):
-            resolver = urlresolvers.get_resolver(urlresolvers.get_urlconf())
+        # Active publication management.
+        publication_manager._begin(not preview_mode)
+        # Dispatch to a page.
+        resolver = urlresolvers.get_resolver(urlresolvers.get_urlconf())
+        try:
+            # Try to match the given path with the URL conf. If it fails, then
+            # attempt to dispatch to a page.
+            resolver.resolve(request.path)
+        except urlresolvers.Resolver404:
+            page = request.page
+            if page is None:
+                return None
+            script_name = page.get_absolute_url()[:-1]
+            path_info = request.path[len(script_name):]
+            # Append a slash to match the page precisely.
+            if not path_info and not request.path.endswith("/") and settings.APPEND_SLASH:
+                return redirect(request.path + "/")
+            # Dispatch to the content.
             try:
-                # Try to match the given path with the URL conf. If it fails, then
-                # attempt to dispatch to a page.
-                resolver.resolve(request.path)
-            except urlresolvers.Resolver404:
-                page = request.page
-                if page is None:
-                    return None
-                script_name = page.get_absolute_url()[:-1]
-                path_info = request.path[len(script_name):]
-                # Append a slash to match the page precisely.
-                if not path_info and not request.path.endswith("/") and settings.APPEND_SLASH:
-                    return redirect(request.path + "/")
-                # Dispatch to the content.
+                content = page.content
                 try:
-                    content = page.content
-                    try:
-                        callback, callback_args, callback_kwargs = urlresolvers.resolve(path_info, content.urlconf)
-                    except urlresolvers.Resolver404:
-                        # First of all see if adding a slash will help matters.
-                        if settings.APPEND_SLASH:
-                            new_path_info = path_info + "/"
-                            try:
-                                urlresolvers.resolve(new_path_info, content.urlconf)
-                            except urlresolvers.Resolver404:
-                                pass
-                            else:
-                                return redirect(script_name + new_path_info)
-                        return
-                    response = commit_on_success(callback)(request, *callback_args, **callback_kwargs)
-                    # Validate the response.
-                    if not isinstance(response, HttpResponse):
-                        raise ValueError, "The view %s.%s didn't return an HttpResponse object." % (content.__class__.__name__, callback.__name__)
-                    return response
-                except Http404, ex:
-                    if settings.DEBUG:
-                        return technical_404_response(request, ex)
-                    # Let the normal 404 mechanisms render an error page.
+                    callback, callback_args, callback_kwargs = urlresolvers.resolve(path_info, content.urlconf)
+                except urlresolvers.Resolver404:
+                    # First of all see if adding a slash will help matters.
+                    if settings.APPEND_SLASH:
+                        new_path_info = path_info + "/"
+                        try:
+                            urlresolvers.resolve(new_path_info, content.urlconf)
+                        except urlresolvers.Resolver404:
+                            pass
+                        else:
+                            return redirect(script_name + new_path_info)
                     return
-                except:
-                    return BaseHandler().handle_uncaught_exception(request, resolver, sys.exc_info())
+                response = commit_on_success(callback)(request, *callback_args, **callback_kwargs)
+                # Validate the response.
+                if not isinstance(response, HttpResponse):
+                    raise ValueError, "The view %s.%s didn't return an HttpResponse object." % (content.__class__.__name__, callback.__name__)
+                return response
+            except Http404, ex:
+                if settings.DEBUG:
+                    return technical_404_response(request, ex)
+                # Let the normal 404 mechanisms render an error page.
+                return
+            except:
+                return BaseHandler().handle_uncaught_exception(request, resolver, sys.exc_info())
             
     def process_response(self, request, response):
         """Clears the page cache."""
+        # End publication management.
+        while True:
+            try:
+                publication_manager._end()
+            except PublicationManagementError:
+                break
+        # Clear the page cache.
         cache.clear()
+        # Carry on with the response.
         return response
         
         

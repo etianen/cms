@@ -41,7 +41,7 @@ class PublicationManager(threading.local):
         try:
             return self._stack[-1]
         except IndexError:
-            return True
+            return False
         
     def _end(self):
         """Ends a block of publication control."""
