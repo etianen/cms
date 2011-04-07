@@ -118,11 +118,6 @@ USE_I18N = False
 USE_L10N = True
 
 
-# Message settings.
-
-MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
-
-
 # Staff management settings.
 
 DEFAULT_GROUP_IDS = (1,)
