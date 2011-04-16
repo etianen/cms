@@ -23,6 +23,7 @@
 {% block content %}
     <p>You are about to send an email to {{users|length}} user{{users|pluralize}}, listed below.</p>
     <form method="post" action="">
+        {% csrf_token %}
         <fieldset class="module aligned">
     
             <div class="form-row">
