@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from cms.apps.historylinks.models import HistoryLink
 
 
-class PermalinkFallbackMiddleware(object):
+class HistoryLinkFallbackMiddleware(object):
     
     """Middleware that attempts to rescue 404 responses with a redirect to it's new location."""
     
