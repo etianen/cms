@@ -32,7 +32,7 @@ urlpatterns = patterns("",
     
     # Redirect to a sensible favicon location. At the very least, this will keep the 404 page out of Django, saving database hits.
     url(r"favicon.ico$", generic.RedirectView.as_view(
-        url = settings.STATIC_URL + "site/favicon.ico",
+        url = settings.STATIC_URL + "site/img/favicon.png",
     ), name="favicon.ico"),
     
 )
