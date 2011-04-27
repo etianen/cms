@@ -36,7 +36,9 @@ class PageBaseSitemap(Sitemap):
         
     def changefreq(self, obj):
         """Returns the change frequency of the given page."""
-        return obj.get_sitemap_changefreq_display().lower()
+        if obj.sitemap_changefreq:
+            return obj.get_sitemap_changefreq_display().lower()
+        return None
         
     def priority(self, obj):
         """Returns the priority of the given page."""
