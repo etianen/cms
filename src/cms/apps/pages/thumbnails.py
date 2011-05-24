@@ -189,7 +189,7 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
             # Save the thumbnail.
             try:
                 thumbnail_image.save(thumbnail_path)
-            except:
+            except Exception as ex:
                 try:
                     raise ex
                 finally:
