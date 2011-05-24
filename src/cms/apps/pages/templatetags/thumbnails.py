@@ -49,7 +49,7 @@ def thumbnail(parser, token):
         try:
             thumbnail = thumbnails.create(image, width, height, method)
         except:
-            thumbnail = thumbnails.Thumbnail(image.name, image.url, image.path, (width, height))
+            thumbnail = thumbnails.Thumbnail(image.name, image.url, image.path, thumbnails.Size(width, height))
         if alias:
             context[alias] = thumbnail
             return ""
