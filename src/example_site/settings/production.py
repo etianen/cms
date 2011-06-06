@@ -26,7 +26,7 @@ SITE_DOMAIN = "example.com"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "example",
         "USER": "example",
         "PASSWORD": "",
@@ -82,7 +82,7 @@ PREPEND_WWW = True
 # Error reporting settings.  Use these to set up automatic error notifications.
 
 ADMINS = (
-    ("Etianen.com Error Reporting", "errors@etianen.com"),
+    ("Dave Hall", "errors@etianen.com"),
 )
 
 MANAGERS = ADMINS
@@ -102,6 +102,11 @@ LANGUAGE_CODE = "en-gb"
 SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 SITE_PACKAGE = os.path.split(SITE_ROOT)[-1]
+
+
+# The root URL configuration.
+
+ROOT_URLCONF = "{site_package}.urls".format(site_package=SITE_PACKAGE)
 
 
 # A list of additional installed applications.
@@ -136,9 +141,9 @@ CACHE_MIDDLEWARE_KEY_PREFIX = SITE_DOMAIN
 
 
 # A secret key used for cryptographic algorithms.  For convenience, this is
-# generated from your site domain, database password and email password.  If,
-# for some reason, these are not considered secure, you can override it below.
+# generated from your database password and email password.  If, for some
+# reason, these are not considered secure, you can override it below.
 
-SECURE_SETTINGS = (SITE_DOMAIN, DATABASES["default"]["PASSWORD"], EMAIL_HOST_PASSWORD)
+SECURE_SETTINGS = (DATABASES["default"]["PASSWORD"], EMAIL_HOST_PASSWORD)
 
 SECRET_KEY = hashlib.sha1("".join(SECURE_SETTINGS)).hexdigest()

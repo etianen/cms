@@ -35,4 +35,8 @@ PREPEND_WWW = False
 
 # Optional separate database settings
 
-DATABASES["default"]["USER"] = getpass.getuser()
+#DATABASES["default"]["NAME"] = ""
+
+#DATABASES["default"]["USER"] = ""
+
+#DATABASES["default"]["PASSWORD"] = ""
