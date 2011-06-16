@@ -2,10 +2,26 @@ CMS Changelog
 =============
 
 
+2.4 - 15/06/2011
+----------------
+
+*   General Iimprovements based on new Django 1.3 APIs.
+*   Admin performance improvements, notably asynchronous sitemap loader.
+*   Thumbnailing performance and rendering enhancements.
+*   New historylinks application for tracking old content URLs.
+*   Integration of custom fields with South.
+*   Better example_project environment.
+*   Added in table locks to support more reliable page movement.
+*   Adding in support for running CMS-powered sites from a sub-URL via SCRIPT_NAME.
+*   Adding in default favicon handling redirect.
+*   Added in support for different page backends.
+*   Switched to using separate database model for page content, rather than serialized XML (backwards incompatible).
+
+
 2.3.2 - 21/03/2010
 ------------------
 
-*   Compatibility fix for django 1.2.5.
+*   Compatibility fix for Django 1.2.5.
 *   Better file upload permission handling.
 *   WSIWYG tweaks.
 
