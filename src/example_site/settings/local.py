@@ -33,6 +33,14 @@ SITE_DOMAIN = "localhost:8000"
 PREPEND_WWW = False
 
 
+# Disable the template cache for development.
+
+TEMPLATE_LOADERS = (
+    "django.template.loaders.filesystem.Loader",
+    "django.template.loaders.app_directories.Loader",
+)
+
+
 # Optional separate database settings
 
 #DATABASES["default"]["NAME"] = ""
