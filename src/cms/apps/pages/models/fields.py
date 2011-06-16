@@ -36,7 +36,8 @@ class PageField(models.ForeignKey):
     
     def __init__(self, **kwargs):
         """Initializes the Page Field."""
-        super(PageField, self).__init__(to="pages.Page", **kwargs)
+        kwargs.setdefault("to", "pages.Page")
+        super(PageField, self).__init__(**kwargs)
         
     def get_default(self):
         """Returns the default page."""
@@ -49,3 +50,16 @@ class PageField(models.ForeignKey):
         """Sets the PageDescriptor on the class."""
         super(PageField, self).contribute_to_class(cls, name)
         setattr(cls, self.name, PageDescriptor(self))
+        
+        
+# Register custom fields with South.
+
+try:
+    from south.modelsinspector import add_introspection_rules
+except ImportError:
+    pass
+else:
+    # Simple rules for HtmlField and NullBooleanField.
+    add_introspection_rules((), (
+        "^cms\.apps\.pages\.models\.fields\.PageField",
+    ))
