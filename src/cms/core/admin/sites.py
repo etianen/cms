@@ -87,8 +87,6 @@ class AdminSite(admin.AdminSite):
         # Compile the initial data.
         data = {
             "canAdd": admin_opts.has_add_permission(request),
-            "canChange": admin_opts.has_change_permission(request),
-            "canDelete": admin_opts.has_delete_permission(request),
             "createHomepageUrl": reverse("admin:{0}_{1}_add".format(*url_params)) + "?{0}={1}".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
             "moveUrl": request.pages.backend.can_move and reverse("admin:move_page") or None,
             "addUrl": reverse("admin:{0}_{1}_add".format(*url_params)) + "?%s=%s&parent=__id__" % (PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
@@ -106,6 +104,8 @@ class AdminSite(admin.AdminSite):
                     "id": page.id,
                     "title": unicode(page),
                     "children": children,
+                    "canChange": admin_opts.has_change_permission(request, page),
+                    "canDelete": admin_opts.has_delete_permission(request, page),
                 }
             data["entries"] = [sitemap_entry(homepage)]
         else:

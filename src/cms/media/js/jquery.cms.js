@@ -104,7 +104,7 @@
                                 if (page.isOffline) {
                                     pageContainer.addClass("offline");
                                 }
-                                if (data.canChange) {
+                                if (page.canChange) {
                                     pageContainer.addClass("can-change");
                                     pageContainer.append('<a href="' + changeUrl + '" class="title" title="Edit this page">' + page.title + '</a>');
                                 } else {
@@ -113,14 +113,14 @@
                                 if (data.canAdd) {
                                     pageContainer.append('<a href="' + addUrl + '" class="addlink" title="Add a new page underneath this page">Add</a>');
                                 }
-                                if (data.canChange) {
+                                if (page.canChange) {
                                     pageContainer.append('<a href="' + changeUrl + '" class="changelink" title="Edit this page">Change</a>');
                                 }
-                                if (data.canDelete) {
+                                if (page.canDelete) {
                                     pageContainer.append('<a href="' + deleteUrl + '" class="deletelink" title="Delete this page">Delete</a>');
                                 }
                                 // Add the move functionality.
-                                if (data.canChange && data.moveUrl) {
+                                if (page.canChange && data.moveUrl) {
                                     function makeMoveHandler(direction) {
                                         return function() {
                                             // Prevent simultanious page moves.
