@@ -163,7 +163,49 @@ class PageAdmin(PageBaseAdmin):
             # Save the page content.
             content_obj.page = obj
             content_obj.save()
-
+    
+    # Permissions.
+    
+    def has_add_content_permission(self, request, model):
+        """Checks whether the given user can edit the given content model."""
+        opts = model._meta
+        return request.user.has_perm("{0}.{1}".format(opts.app_label, opts.get_add_permission()))
+    
+    def has_add_permission(self, request):
+        """Checks whether the user can edits pages and at least one content model."""
+        if not super(PageAdmin, self).has_add_permission(request):
+            return False
+        for content_model in get_registered_content():
+            if self.has_add_content_permission(request, content_model):
+                return True
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        """Checks whether the user can edit the page and associated content model."""
+        if not super(PageAdmin, self).has_change_permission(request, obj):
+            return False
+        if obj:
+            content_model = ContentType.objects.get_for_id(obj.content_type_id).model_class()
+            content_opts = content_model._meta
+            return request.user.has_perm("{0}.{1}".format(
+                content_opts.app_label,
+                content_opts.get_change_permission(),
+            ))
+        return True
+        
+    def has_delete_permission(self, request, obj=None):
+        """Checks whether the user can delete the page and associated content model."""
+        if not super(PageAdmin, self).has_delete_permission(request, obj):
+            return False
+        if obj:
+            content_model = ContentType.objects.get_for_id(obj.content_type_id).model_class()
+            content_opts = content_model._meta
+            return request.user.has_perm("{0}.{1}".format(
+                content_opts.app_label,
+                content_opts.get_delete_permission(),
+            ))
+        return True
+    
     # Custom views.
     
     def patch_response_location(self, request, response):
@@ -180,11 +222,6 @@ class PageAdmin(PageBaseAdmin):
             if redirect_slug == PAGE_FROM_SITEMAP_VALUE:
                 return redirect("admin:index")
         return super(PageAdmin, self).changelist_view(request, *args, **kwargs)
-    
-    def has_add_content_permission(self, request, model):
-        """Checks whether the given user can edit the given content model."""
-        opts = model._meta
-        return request.user.has_perm("{0}.{1}".format(opts.app_label, opts.get_add_permission()))
     
     def add_view(self, request, *args, **kwargs):
         """Ensures that a valid content type is chosen."""
