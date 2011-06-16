@@ -30,6 +30,8 @@ STATICFILES_DIRS = (
     ("cms", os.path.join(CMS_ROOT, "media")),
 )
 
+STATICFILES_STORAGE = "cms.core.files.OptimizingStaticFilesStorage"
+
 
 # Template settings.
 
