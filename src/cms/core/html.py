@@ -10,7 +10,7 @@ from django.utils.html import escape
 from cms.core import permalinks, thumbnails
 
 
-RE_TAG = re.compile(ur"<(img|a)(.*?)(/?)>", re.IGNORECASE)
+RE_TAG = re.compile(ur"<(img|a)(\s+.*?)(/?)>", re.IGNORECASE)
 
 RE_ATTR = re.compile(ur"\s(\w+)=(\".*?\"|'.*?')", re.IGNORECASE)
 
