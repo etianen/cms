@@ -17,24 +17,49 @@ class PageBackend(BackendBase):
     
     def get_homepage(self, request):
         """Returns the site homepage."""
+        # Try to use the cache.
         try:
-            return Page.objects.get_homepage()
+            return Page.objects.cache.get_homepage()
+        except KeyError:
+            pass
+        # Load in the homepage.
+        try:
+            homepage = Page.objects.get(parent=None)
         except Page.DoesNotExist:
             return None
+        else:
+            Page.objects.cache.put_homepage(homepage)
+            return homepage
         
     def get_current(self, request):
         """Returns the best-matched page, or None"""
-        try:
-            return Page.objects.get_by_path(request.path_info)
-        except Page.DoesNotExist:
-            return None
+        page = self.get_homepage(request)
+        if page is not None:
+            # Get the most exact page match.
+            for slug in request.path_info.strip("/").split("/"):
+                matched = False
+                for child in page.children:
+                    if child.url_title == slug:
+                        page = child
+                        matched = True
+                if not matched:
+                    break
+        return page
     
     def get(self, request, id):
         """Returns the page with the given id."""
-        try:
-            return Page.objects.get_page(id)
-        except Page.DoesNotExist:
-            return None
+        if isinstance(id, int):
+            try:
+                return Page.objects.get_by_id(id)
+            except Page.DoesNotExist:
+                return None
+        elif isinstance(id, basestring):
+            try:
+                return Page.objects.filter(permalink=id)[0]
+            except IndexError:
+                return None
+        else:
+            raise ValueError("Page id should be a basestring or an int, not {!r}".format(id))
     
     def reverse(self, request, page, view_name, args, kwargs):
         """Reverses the given URL in the context of the given page."""

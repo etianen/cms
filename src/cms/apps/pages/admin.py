@@ -12,6 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django import forms
 
 import reversion
 
@@ -19,7 +20,6 @@ from cms.core.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP
 from cms.core.db import locked
 from cms.apps.historylinks.models import HistoryLink
 from cms.apps.pages.models import Page, get_registered_content
-from cms.apps.pages.forms import PageFormBase
 
 
 # The GET parameter used to indicate content type.
@@ -104,7 +104,7 @@ class PageAdmin(PageBaseAdmin):
                     pass  # This means that we're in a reversion recovery, or something weird has happened to the databae.
             # Store the field.
             form_attrs[field.name] = form_field
-        ContentForm = type("%sForm" % self.__class__.__name__, (PageFormBase,), form_attrs)
+        ContentForm = type("%sForm" % self.__class__.__name__, (forms.ModelForm,), form_attrs)
         defaults = {"form": ContentForm}
         defaults.update(kwargs)
         PageForm = super(PageAdmin, self).get_form(request, obj, **defaults)
@@ -115,15 +115,14 @@ class PageAdmin(PageBaseAdmin):
             invalid_parents.add(obj.id)
         else:
             invalid_parents = frozenset()
-        try:
-            homepage = Page.objects.get_homepage()
-        except Page.DoesNotExist:
-            parent_choices = []
-        else:
+        homepage = request.pages.homepage
+        if homepage:
             parent_choices = []
             for page in [homepage] + homepage.all_children:
                 if not page.id in invalid_parents:
                     parent_choices.append((page.id, u" \u203a ".join(unicode(breadcrumb) for breadcrumb in page.breadcrumbs)))
+        else:
+            parent_choices = []
         if not parent_choices:
             parent_choices = (("", "---------"),)
         PageForm.base_fields["parent"].choices = parent_choices

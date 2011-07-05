@@ -25,9 +25,9 @@ class PageDescriptor(ReverseSingleRelatedObjectDescriptor):
         # Access the page.
         if isinstance(instance, PublishedBase):
             with publication_manager.select_published(instance._select_published_active):
-                return self.field.rel.to.objects.get_page(page_id)
+                return self.field.rel.to.objects.get_by_id(page_id)
         else:
-            return self.field.rel.to.objects.get_page(page_id)
+            return self.field.rel.to.objects.get_by_id(page_id)
         
 
 class PageField(models.ForeignKey):
