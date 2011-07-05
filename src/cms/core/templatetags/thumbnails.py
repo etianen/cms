@@ -4,7 +4,7 @@
 from django import template
 from django.utils.html import escape
 
-from cms.core import thumbnails
+from cms.core import thumbnails, debug
 from cms.core.templatetags import PatternNode
 
 
@@ -49,6 +49,7 @@ def thumbnail(parser, token):
         try:
             thumbnail_obj = thumbnails.create(image, width, height, method)
         except IOError:
+            debug.print_current_exc()
             thumbnail_obj = thumbnails.Thumbnail(
                 image.name,
                 image.path,

@@ -14,7 +14,10 @@ class HistoryLinkFallbackMiddleware(object):
             # Try to rescue the response.
             try:
                 link = HistoryLink.objects.get(path=request.path)
-                return redirect(link.object, permanent=True)
+                path = link.object.get_absolute_url()
+                if path != request.path:
+                    return redirect(link.object, permanent=True)
+                return response
             except HistoryLink.DoesNotExist:
                 pass
         return response
