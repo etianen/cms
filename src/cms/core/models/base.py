@@ -90,6 +90,80 @@ class EntityBase(PublishedBase):
     
     """Base model for models used to generate a standalone HTML page."""
     
+    # Hierarchy fields.
+    
+    parent = None
+    
+    @property
+    def all_parents(self):
+        """A list of all parents of this page."""
+        if self.parent:
+            return [self.parent] + self.parent.all_parents
+        return []
+
+    @property
+    def breadcrumbs(self):
+        """The breadcrumb trail for this page, including this page."""
+        parents = self.all_parents
+        parents.reverse()
+        parents.append(self)
+        return parents
+        
+    children = ()
+    
+    @property
+    def all_children(self):
+        """All the children of this page, cascading down to their children too."""
+        children = []
+        for child in self.children:
+            children.append(child)
+            children.extend(child.all_children)
+        return children
+    
+    @property
+    def navigation(self):
+        """The navigation entries underneath this page."""
+        return self.children
+    
+    @property
+    def siblings(self):
+        """All sibling pages in the hierarchy."""
+        if self.parent:
+            return self.parent.children
+        return ()
+        
+    @property
+    @cached_getter
+    @debug.print_exc
+    def next(self):
+        """The next sibling, according to the default child ordering, or None."""
+        sibling_iter = iter(self.siblings)
+        while True:
+            try:
+                sibling = sibling_iter.next()
+                if sibling == self:
+                    return sibling_iter.next()
+            except StopIteration:
+                break
+        return None
+        
+    @property
+    @cached_getter
+    @debug.print_exc
+    def prev(self):
+        """The previous sibling, according to the default child ordering, or None."""
+        sibling_iter = iter(reversed(self.siblings))
+        while True:
+            try:
+                sibling = sibling_iter.next()
+                if sibling == self:
+                    return sibling_iter.next()
+            except StopIteration:
+                break
+        return None
+    
+    # SEO fields.
+    
     browser_title = models.CharField(
         max_length = 1000,
         blank = True,
@@ -228,81 +302,7 @@ class PageBase(EntityBase):
     """
     An enhanced EntityBase with a sensible set of common features suitable for
     most pages.
-    
-    This model is expected to sit within a hierarchal tree of content.
     """
-    
-    # Hierarchy fields.
-    
-    parent = None
-    
-    @property
-    def all_parents(self):
-        """A list of all parents of this page."""
-        if self.parent:
-            return [self.parent] + self.parent.all_parents
-        return []
-
-    @property
-    def breadcrumbs(self):
-        """The breadcrumb trail for this page, including this page."""
-        parents = self.all_parents
-        parents.reverse()
-        parents.append(self)
-        return parents
-        
-    children = ()
-    
-    @property
-    def all_children(self):
-        """All the children of this page, cascading down to their children too."""
-        children = []
-        for child in self.children:
-            children.append(child)
-            children.extend(child.all_children)
-        return children
-    
-    @property
-    def navigation(self):
-        """The navigation entries underneath this page."""
-        return self.children
-    
-    @property
-    def siblings(self):
-        """All sibling pages in the hierarchy."""
-        if self.parent:
-            return self.parent.children
-        return ()
-        
-    @property
-    @cached_getter
-    @debug.print_exc
-    def next(self):
-        """The next sibling, according to the default child ordering, or None."""
-        sibling_iter = iter(self.siblings)
-        while True:
-            try:
-                sibling = sibling_iter.next()
-                if sibling == self:
-                    return sibling_iter.next()
-            except StopIteration:
-                break
-        return None
-        
-    @property
-    @cached_getter
-    @debug.print_exc
-    def prev(self):
-        """The previous sibling, according to the default child ordering, or None."""
-        sibling_iter = iter(reversed(self.siblings))
-        while True:
-            try:
-                sibling = sibling_iter.next()
-                if sibling == self:
-                    return sibling_iter.next()
-            except StopIteration:
-                break
-        return None
     
     # Base fields.
     
