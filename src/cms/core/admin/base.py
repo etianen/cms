@@ -42,6 +42,8 @@ class PublishedBaseAdmin(AuditBaseAdmin):
     
     """Base admin class for published models."""
     
+    list_display = ("__unicode__", "is_online", "get_last_modified",)
+    
     actions = ("publish_selected", "unpublish_selected",)
     
     change_form_template = "admin/core/publishedmodel/change_form.html"
@@ -61,7 +63,12 @@ class PublishedBaseAdmin(AuditBaseAdmin):
     unpublish_selected.short_description = "Take selected %(verbose_name_plural)s offline"
 
 
-class PageBaseAdmin(VersionAdmin, PublishedBaseAdmin):
+class EntityBaseAdmin(VersionAdmin, PublishedBaseAdmin):
+    
+    """Base admin class for EntityBase models."""
+
+
+class PageBaseAdmin(EntityBaseAdmin):
     
     """Base admin class for PageBase models."""
 

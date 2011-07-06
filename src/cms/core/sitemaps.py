@@ -9,10 +9,10 @@ from django.contrib.sitemaps import Sitemap
 registered_sitemaps = {}
 
 
-class PageBaseSitemap(Sitemap):
+class EntityBaseSitemap(Sitemap):
     
     """
-    Base sitemap for all subclasses of PageBase.
+    Base sitemap for all subclasses of EntityBase.
     
     Subclasses need to override the model property.
     """
@@ -46,4 +46,12 @@ class PageBaseSitemap(Sitemap):
 
     def lastmod(self, obj):
         return obj.date_modified
+        
+
+class PageBaseSitemap(EntityBaseSitemap):
     
+    """
+    Base sitemap for all subclasses of PageBase.
+    
+    Subclasses need to override the model property.
+    """

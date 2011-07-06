@@ -84,113 +84,11 @@ class PublishedBase(AuditBase):
     
     class Meta:
         abstract = True
-    
 
-class PageBase(PublishedBase):
-    
-    """
-    Base model for models used to generate a HTML page.
-    
-    This class is suited to pages that are to be included in feed-based views.
-    For permanent or semi-permanent fixtures in a site, use the PageBase model
-    instead.
-    """
-    
-    # Hierarchy fields.
-    
-    parent = None
-    
-    @property
-    def all_parents(self):
-        """A list of all parents of this page."""
-        if self.parent:
-            return [self.parent] + self.parent.all_parents
-        return []
 
-    @property
-    def breadcrumbs(self):
-        """The breadcrumb trail for this page, including this page."""
-        parents = self.all_parents
-        parents.reverse()
-        parents.append(self)
-        return parents
-        
-    children = ()
+class EntityBase(PublishedBase):
     
-    @property
-    def all_children(self):
-        """All the children of this page, cascading down to their children too."""
-        children = []
-        for child in self.children:
-            children.append(child)
-            children.extend(child.all_children)
-        return children
-    
-    @property
-    def navigation(self):
-        """The navigation entries underneath this page."""
-        return self.children
-    
-    @property
-    def siblings(self):
-        """All sibling pages in the hierarchy."""
-        if self.parent:
-            return self.parent.children
-        return ()
-        
-    @property
-    @cached_getter
-    @debug.print_exc
-    def next(self):
-        """The next sibling, according to the default child ordering, or None."""
-        sibling_iter = iter(self.siblings)
-        while True:
-            try:
-                sibling = sibling_iter.next()
-                if sibling == self:
-                    return sibling_iter.next()
-            except StopIteration:
-                break
-        return None
-        
-    @property
-    @cached_getter
-    @debug.print_exc
-    def prev(self):
-        """The previous sibling, according to the default child ordering, or None."""
-        sibling_iter = iter(reversed(self.siblings))
-        while True:
-            try:
-                sibling = sibling_iter.next()
-                if sibling == self:
-                    return sibling_iter.next()
-            except StopIteration:
-                break
-        return None
-    
-    # Base fields.
-    
-    url_title = models.SlugField(
-        "URL title",
-        db_index=False
-    )
-    
-    title = models.CharField(
-        max_length = 1000,
-    )
-    
-    # Navigation fields.
-    
-    short_title = models.CharField(
-        max_length = 200,
-        blank = True,
-        help_text = (
-            "A shorter version of the title that will be used in site navigation. "
-            "Leave blank to use the full-length title."
-        ),
-    )
-    
-    # SEO fields.
+    """Base model for models used to generate a standalone HTML page."""
     
     browser_title = models.CharField(
         max_length = 1000,
@@ -303,6 +201,7 @@ class PageBase(PublishedBase):
     def get_context_data(self):
         """Returns the SEO context data for this page."""
         robots_index, robots_follow, robots_archive = self.resolve_meta_robots()
+        title = unicode(self)
         # Return the context.
         return {
             "meta_description": self.meta_description,
@@ -310,15 +209,133 @@ class PageBase(PublishedBase):
             "robots_index": robots_index,
             "robots_archive": robots_archive,
             "robots_follow": robots_follow,
-            "title": self.browser_title or self.title,
-            "header": self.title
+            "title": title,
+            "header": title,
         }
-    
+        
     def render(self, request, template, context=None, **kwargs):
         """Renders a template as a HttpResponse using the context of this page."""
         page_context = self.get_context_data()
         page_context.update(context or {})
         return render(request, template, page_context, **kwargs)
+        
+    class Meta:
+        abstract = True
+    
+
+class PageBase(EntityBase):
+    
+    """
+    An enhanced EntityBase with a sensible set of common features suitable for
+    most pages.
+    
+    This model is expected to sit within a hierarchal tree of content.
+    """
+    
+    # Hierarchy fields.
+    
+    parent = None
+    
+    @property
+    def all_parents(self):
+        """A list of all parents of this page."""
+        if self.parent:
+            return [self.parent] + self.parent.all_parents
+        return []
+
+    @property
+    def breadcrumbs(self):
+        """The breadcrumb trail for this page, including this page."""
+        parents = self.all_parents
+        parents.reverse()
+        parents.append(self)
+        return parents
+        
+    children = ()
+    
+    @property
+    def all_children(self):
+        """All the children of this page, cascading down to their children too."""
+        children = []
+        for child in self.children:
+            children.append(child)
+            children.extend(child.all_children)
+        return children
+    
+    @property
+    def navigation(self):
+        """The navigation entries underneath this page."""
+        return self.children
+    
+    @property
+    def siblings(self):
+        """All sibling pages in the hierarchy."""
+        if self.parent:
+            return self.parent.children
+        return ()
+        
+    @property
+    @cached_getter
+    @debug.print_exc
+    def next(self):
+        """The next sibling, according to the default child ordering, or None."""
+        sibling_iter = iter(self.siblings)
+        while True:
+            try:
+                sibling = sibling_iter.next()
+                if sibling == self:
+                    return sibling_iter.next()
+            except StopIteration:
+                break
+        return None
+        
+    @property
+    @cached_getter
+    @debug.print_exc
+    def prev(self):
+        """The previous sibling, according to the default child ordering, or None."""
+        sibling_iter = iter(reversed(self.siblings))
+        while True:
+            try:
+                sibling = sibling_iter.next()
+                if sibling == self:
+                    return sibling_iter.next()
+            except StopIteration:
+                break
+        return None
+    
+    # Base fields.
+    
+    url_title = models.SlugField(
+        "URL title",
+        db_index = False
+    )
+    
+    title = models.CharField(
+        max_length = 1000,
+    )
+    
+    # Navigation fields.
+    
+    short_title = models.CharField(
+        max_length = 200,
+        blank = True,
+        help_text = (
+            "A shorter version of the title that will be used in site navigation. "
+            "Leave blank to use the full-length title."
+        ),
+    )
+    
+    # SEO fields.
+    
+    def get_context_data(self):
+        """Returns the SEO context data for this page."""
+        context_data = super(PageBase, self).get_context_data()
+        context.data.update({
+            "title": self.browser_title or self.title,
+            "header": self.title,
+        })
+        return context_data
     
     # Base model methods.
     
