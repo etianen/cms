@@ -331,7 +331,7 @@ class PageBase(EntityBase):
     def get_context_data(self):
         """Returns the SEO context data for this page."""
         context_data = super(PageBase, self).get_context_data()
-        context.data.update({
+        context_data.update({
             "title": self.browser_title or self.title,
             "header": self.title,
         })
