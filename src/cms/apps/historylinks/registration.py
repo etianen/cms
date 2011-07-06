@@ -8,9 +8,10 @@ from cms.apps.historylinks.models import HistoryLink
 _registry = set()
 
 
-def save_history_link(instance, **kwargs):
+def save_history_link(instance, raw, **kwargs):
     """Saves a link for models with a get_absolute_url method."""
-    HistoryLink.objects.create_for_obj(instance)
+    if not raw:
+        HistoryLink.objects.create_for_obj(instance)
 
 
 class HistoryLinkRegistrationError(Exception):
