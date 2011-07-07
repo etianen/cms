@@ -2,11 +2,11 @@
 
 
 import os, os.path
+from shutil import copyfile
 
 from PIL import Image
 
 from django.conf import settings
-from django.core.files import File
 from django.core.files.storage import default_storage
 from django.utils import html
 
@@ -170,6 +170,20 @@ _size_cache = {}
 _created_thumbnails = set()
 
 
+def copy_to_storage(image, storage=default_storage):
+    """
+    Copies the given image to the given storage under the a thumbnails original prefix.
+    
+    This method will not override the image at the destination if present.
+    The new name of the file is returned.
+    """
+    thumbnail_name = u"thumbnails/originals/{image_name}".format(image_name=image.name)
+    thumbnail_path = storage.path(thumbnail_name)
+    if not os.path.exists(thumbnail_path):
+        copyfile(image.path, thumbnail_path)
+    return thumbnail_name
+
+
 def _load_once(path):
     """
     Loads the image on the first call to next, further calls to next return
@@ -220,8 +234,7 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
             thumbnail_path = image.path
         else:
             # The image does not have a URL, so copy it into the storage.
-            thumbnail_name = u"thumbnails/originals/{image_name}".format(image_name=image.name)
-            thumbnail_name = storage.save(thumbnail_name, File(open(image.path, "rb")))
+            thumbnail_name = copy_to_storage(image, storage)
             thumbnail_path = storage.path(thumbnail_name)
     else:
         # Calculate the various file paths.
