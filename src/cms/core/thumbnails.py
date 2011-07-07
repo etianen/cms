@@ -1,11 +1,12 @@
 """Thumbnail generation routines."""
 
 
-import os
+import os, os.path
 
 from PIL import Image
 
 from django.conf import settings
+from django.core.files import File
 from django.core.files.storage import default_storage
 from django.utils import html
 
@@ -119,6 +120,16 @@ _methods = {PROPORTIONAL: (_size_proportional, _size, _resize, "resized"),
             CROPPED: (_size, _size_proportional, _resize_cropped, "cropped")}
 
 
+class StaticFile(object):
+    
+    """A static file reference to be passed to the thumbnail generator."""
+    
+    def __init__(self, name):
+        self.name = name
+        self.path = os.path.join(settings.STATIC_ROOT, name)
+        self.url = None
+
+
 class Thumbnail(object):
     
     """Efficient data structure for holding generated thumbnail data."""
@@ -197,18 +208,24 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
             image_name = os.path.relpath(image.name, settings.MEDIA_ROOT)
         else:
             if image.name.startswith(settings.STATIC_ROOT):
-                image_name = os.path.join("static", os.path.relpath(image.name, settings.STATIC_ROOT))
+                image_name = os.path.relpath(image.name, settings.STATIC_ROOT)
             else:
                 raise IOError("%s is outside of the site's MEDIA_ROOT and STATIC_ROOT." % image.name)
     else:
         image_name = image.name
     # If the file data and thumbnail data are identical, don't bother making a thumbnail.
     if image_size == thumbnail_image_size:
-        thumbnail_name = image_name
-        thumbnail_path = image.path
+        if image.url:
+            thumbnail_name = image_name
+            thumbnail_path = image.path
+        else:
+            # The image does not have a URL, so copy it into the storage.
+            thumbnail_name = u"thumbnails/originals/{image_name}".format(image_name=image.name)
+            thumbnail_name = storage.save(thumbnail_name, File(open(image.path, "rb")))
+            thumbnail_path = storage.path(thumbnail_name)
     else:
         # Calculate the various file paths.
-        thumbnail_name = "thumbnails/%s/%s/%s" % (folder, thumbnail_image_size, image_name)
+        thumbnail_name = u"thumbnails/%s/%s/%s" % (folder, thumbnail_image_size, image_name)
         thumbnail_path = storage.path(thumbnail_name)
         # If we need to generate the thumbnail, then generate it!
         if not thumbnail_path in _created_thumbnails:
