@@ -2,11 +2,11 @@
 
 
 import os, os.path
-from shutil import copyfile
 
 from PIL import Image
 
 from django.conf import settings
+from django.core.files import File
 from django.core.files.storage import default_storage
 from django.utils import html
 
@@ -172,15 +172,16 @@ _created_thumbnails = set()
 
 def copy_to_storage(image, storage=default_storage):
     """
-    Copies the given image to the given storage under the a thumbnails original prefix.
+    Copies the given image to the given storage under a thumbnails originals prefix.
     
     This method will not override the image at the destination if present.
     The new name of the file is returned.
     """
     thumbnail_name = u"thumbnails/originals/{image_name}".format(image_name=image.name)
-    thumbnail_path = storage.path(thumbnail_name)
-    if not os.path.exists(thumbnail_path):
-        copyfile(image.path, thumbnail_path)
+    if not image.path in _created_thumbnails:
+        if not storage.exists(thumbnail_name):
+            thumbnail_name = storage.save(thumbnail_name, File(open(image.path, "rb")))
+        _created_thumbnails.add(image.path)
     return thumbnail_name
 
 
