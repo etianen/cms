@@ -120,7 +120,7 @@ class AdminSite(admin.AdminSite):
     def move_page(self, request):
         """Moves a page up or down."""
         backend = request.pages.backend
-        page = request.pages.get(request.POST["page"])
+        page = request.pages.get(int(request.POST["page"]))
         page_model = backend.model
         admin_opts = self._registry[page_model]
         # Check that the user has permission to move the page.
