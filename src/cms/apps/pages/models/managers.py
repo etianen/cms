@@ -7,7 +7,7 @@ import threading, contextlib
 
 from django.contrib.sites.models import Site
 from django.db import models
-from django.forms.fields import slug_re
+from django.core.validators import slug_re
 
 
 class PublicationManagementError(Exception):
