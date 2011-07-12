@@ -6,7 +6,7 @@ using the django-admin.py utility.
 """
 
 
-import os, getpass
+import os
 
 from production import *
 
