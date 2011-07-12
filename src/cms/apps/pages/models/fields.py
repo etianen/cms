@@ -145,4 +145,6 @@ else:
     add_introspection_rules((), (
         "^cms\.apps\.pages\.models\.fields\.HtmlField",
         "^cms\.apps\.pages\.models\.fields\.NullBooleanField",
+        "^cms\.apps\.pages\.models\.fields\.PageField",
+        "^cms\.apps\.pages\.models\.fields\.EnumField",
     ))    
