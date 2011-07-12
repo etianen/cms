@@ -140,7 +140,7 @@ class PageUrlNode(Node):
             else:
                 args = [arg.resolve(context) for arg in self.args]
                 kwargs = dict((key, value.resolve(context)) for key, value in self.kwargs.items())
-                url = request.pages.reverse(self.view_func, args, kwargs)
+                url = request.pages.reverse(page, self.view_func, *args, **kwargs)
         # Return the value, or set as a context variable as appropriate.
         if self.varname:
             context[self.varname] = url
