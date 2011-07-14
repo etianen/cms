@@ -85,7 +85,9 @@ ADMINS = (
     ("Dave Hall", "errors@etianen.com"),
 )
 
-MANAGERS = ADMINS
+MANAGERS = (
+    ("Dave Hall", "notifications@etianen.com"),
+)
 
 SEND_BROKEN_LINK_EMAILS = False
 
