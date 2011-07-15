@@ -262,13 +262,14 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
                     thumbnail_image = resize_callback(image_data, image_size, thumbnail_display_size, thumbnail_image_size)
                 except Exception as ex:  # HACK: PIL can raise all sorts of wierd errors.
                     debug.print_current_exc()
-                    raise IOError, str(ex)
+                    raise IOError(str(ex))
                 # Save the thumbnail.
                 try:
                     thumbnail_image.save(thumbnail_path)
                 except Exception as ex:  # pylint: disable=W0703
+                    debug.print_current_exc()
                     try:
-                        raise ex
+                        raise IOError(str(ex))
                     finally:
                         # Remove an incomplete file, if present.
                         try:
