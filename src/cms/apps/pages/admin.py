@@ -79,7 +79,7 @@ class PageAdmin(PageBaseAdmin):
     def get_fieldsets(self, request, obj=None):
         """Generates the custom content fieldsets."""
         content_cls = self.get_page_content_cls(request, obj)
-        content_fieldsets = (
+        content_fieldsets = content_cls.fieldsets or (
             ("Page content", {
                 "fields": [field.name for field in content_cls._meta.fields if field.name != "page"]
             }),

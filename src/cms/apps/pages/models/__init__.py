@@ -162,6 +162,8 @@ class ContentBase(models.Model):
     # The urlconf used to power this content's views.
     urlconf = "cms.apps.pages.urls"
     
+    fieldsets = None
+    
     page = models.OneToOneField(
         Page,
         primary_key = True,
