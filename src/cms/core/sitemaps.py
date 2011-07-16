@@ -9,10 +9,10 @@ from django.contrib.sitemaps import Sitemap
 registered_sitemaps = {}
 
 
-class EntityBaseSitemap(Sitemap):
+class PublishedBaseSitemap(Sitemap):
     
     """
-    Base sitemap for all subclasses of EntityBase.
+    Base sitemap for all subclasses of PublishedBase.
     
     Subclasses need to override the model property.
     """
@@ -34,6 +34,18 @@ class EntityBaseSitemap(Sitemap):
                 pages.append(obj)
         return pages
         
+    def lastmod(self, obj):
+        return obj.date_modified
+
+
+class EntityBaseSitemap(PublishedBaseSitemap):
+    
+    """
+    Base sitemap for all subclasses of EntityBase.
+    
+    Subclasses need to override the model property.
+    """
+        
     def changefreq(self, obj):
         """Returns the change frequency of the given page."""
         if obj.sitemap_changefreq:
@@ -43,9 +55,6 @@ class EntityBaseSitemap(Sitemap):
     def priority(self, obj):
         """Returns the priority of the given page."""
         return obj.sitemap_priority
-
-    def lastmod(self, obj):
-        return obj.date_modified
         
 
 class PageBaseSitemap(EntityBaseSitemap):
