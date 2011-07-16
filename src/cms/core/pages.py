@@ -102,7 +102,6 @@ class MountedBackend(object):
         """Returns the current best-matched page."""
         return self.backend.get_current(self.request)
         
-    @property
     def reverse(self, page, view_name="index", *args, **kwargs):
         """
         Reverses the given url in the context of the given page.

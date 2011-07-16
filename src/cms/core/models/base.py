@@ -308,7 +308,6 @@ class PageBase(EntityBase):
     
     url_title = models.SlugField(
         "URL title",
-        db_index = False
     )
     
     title = models.CharField(
