@@ -26,7 +26,7 @@
         external_link_list_url: "{% url 'admin:tinymce_link_list' %}",
         theme_advanced_blockformats: "h2,h3,p",
         content_css: "{{STATIC_URL|escapejs}}site/css/content.css",
-        extended_valid_elements : "iframe[src|width|height|name|align],article[id|class],section[id|class]",  // Permit embedded iframes and various HTML5 elements.
+        extended_valid_elements : "iframe[scrolling|frameborder|class|id|src|width|height|name|align],article[id|class],section[id|class]",  // Permit embedded iframes and various HTML5 elements.
         convert_urls: false,
         file_browser_callback: $.filebrowser.createCallback("{% url 'admin:media_file_changelist' %}?pop=1"),
         accessibility_warnings: false
