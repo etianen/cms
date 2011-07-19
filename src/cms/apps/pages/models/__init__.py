@@ -94,7 +94,9 @@ class Page(PageBase):
     def content(self):
         """The associated content model for this page."""
         content_cls = ContentType.objects.get_for_id(self.content_type_id).model_class()
-        return content_cls._default_manager.get(page=self)
+        content = content_cls._default_manager.get(page=self)
+        content.page = self
+        return content
 
     # Standard model methods.
     
@@ -162,6 +164,7 @@ class ContentBase(models.Model):
     # The urlconf used to power this content's views.
     urlconf = "cms.apps.pages.urls"
     
+    # A fieldset definition. If blank, one will be generated.
     fieldsets = None
     
     page = models.OneToOneField(
