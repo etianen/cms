@@ -161,7 +161,7 @@ class PageAdmin(PageBaseAdmin):
             obj.content_type = content_cls_type
             if change:
                 try:
-                    content_obj = obj.content
+                    content_obj = content_cls_type.model_class().objects.get(page=obj)
                 except content_cls.DoesNotExist:
                     content_obj = content_cls()  # We're either in a reversion recovery, or something has gone very wrong with the database...
             else:
