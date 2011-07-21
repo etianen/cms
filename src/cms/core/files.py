@@ -42,6 +42,22 @@ def get_upload_path(instance, filename):
 
 
 RE_COMPRESSIBLE_FILENAME = re.compile(r"^.+\.(css|js)$")
+
+
+def compress_src(src, type):
+    """Compresses the given CSS or JS source code."""
+    compressor = subprocess.Popen(
+        'java -jar "{compressor_path}" --type {type}'.format(
+            compressor_path = os.path.join(os.path.dirname(cms.__file__), "resources", "yuicompressor.jar").replace('"', '\"'),
+            type = type,
+        ),
+        stdin = subprocess.PIPE,
+        stdout = subprocess.PIPE,
+        shell = True,
+        bufsize = len(src),
+    )
+    result, _ = compressor.communicate(src)
+    return result
         
         
 class OptimizingStorage(Storage):
@@ -64,17 +80,7 @@ class OptimizingStorage(Storage):
         """Saves the given file."""
         match = RE_COMPRESSIBLE_FILENAME.match(name)
         if match:
-            compressor = subprocess.Popen(
-                'java -jar "{compressor_path}" --type {type}'.format(
-                    compressor_path = os.path.join(os.path.dirname(cms.__file__), "resources", "yuicompressor.jar").replace('"', '\"'),
-                    type = match.group(1),
-                ),
-                stdin = subprocess.PIPE,
-                stdout = subprocess.PIPE,
-                shell = True,
-                bufsize = content.size,
-            )
-            result, _ = compressor.communicate(content.read())
+            result = compress_src(content.read(), match.group(1))
             content = ContentFile(result)
         return self._inner_storage._save(name, content)
     
