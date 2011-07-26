@@ -71,6 +71,10 @@ class PageAdmin(PageBaseAdmin):
         self.inline_instances.append(inline_instance)
         # Register with reversion.
         self._autoregister(inline, follow=["page"])
+    
+    def queryset(self, request):
+        """Only allows editing of pages in this site."""
+        return request.pages.all
                 
     # Reversion
 

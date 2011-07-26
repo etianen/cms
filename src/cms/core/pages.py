@@ -17,6 +17,10 @@ class BackendBase(object):
     # The primary model of the backend.
     model = None
     
+    def get_all(self, request):
+        """Returns all the pages in the site."""
+        return self.model._default_manager.all()
+    
     @abc.abstractmethod
     def get_homepage(self, request):
         """Returns the current homepage, or None."""
@@ -79,6 +83,11 @@ class MountedBackend(object):
         """Initializes the MountedBackend."""
         self.backend = backend
         self.request = request
+    
+    @property
+    def all(self):
+        """Returns all pages in the site."""
+        return self.backend.get_all(self.request)
     
     @property
     @cached_getter
