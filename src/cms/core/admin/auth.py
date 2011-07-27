@@ -136,8 +136,7 @@ class UserAdmin(BaseUserAdmin):
             form = EditDetailsForm(request.POST, instance=user)
             if form.is_valid():
                 form.save()
-                message = "Your details have been updated."
-                request.user.message_set.create(message=message)
+                self.message_user(request, "Your details have been updated.")
                 if "_continue" in request.POST:
                     return redirect("admin:staff_edit_details")
                 else:
