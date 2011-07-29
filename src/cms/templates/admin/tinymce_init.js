@@ -29,7 +29,12 @@
         extended_valid_elements : "iframe[scrolling|frameborder|class|id|src|width|height|name|align],article[id|class],section[id|class]",  // Permit embedded iframes and various HTML5 elements.
         convert_urls: false,
         file_browser_callback: $.filebrowser.createCallback("{% url 'admin:media_file_changelist' %}?pop=1"),
-        accessibility_warnings: false
+        accessibility_warnings: false,
+        setup: function(editor) {
+            editor.onPostProcess.add(function(editor, o) {
+                o.content = o.content.replace(/&nbsp;/g, " ").replace(/ +/g, " ");
+            });
+        }
     });
     
 }(django.jQuery, tinyMCE));
