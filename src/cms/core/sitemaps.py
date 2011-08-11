@@ -4,6 +4,8 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.sitemaps import Sitemap
 
+from cms.core.models import PublishedBase, EntityBase, PageBase
+
 
 # A dictionary of registered sitemap classes.
 registered_sitemaps = {}
@@ -64,3 +66,37 @@ class PageBaseSitemap(EntityBaseSitemap):
     
     Subclasses need to override the model property.
     """
+
+
+class SitemapRegistrationError(Exception):
+
+    """Error raised when a sitemap could not be registered."""
+    
+    
+def register(model, sitemap_cls=None):
+    """Registers a model with the sitemap registry."""
+    # Generate the registration key.
+    registration_key = u"{app_label}-{model_name}".format(
+        app_label = model._meta.app_label,
+        model_name = model.__name__.lower(),
+    )
+    if registration_key in registered_sitemaps:
+        raise SitemapRegistrationError(u"A sitemap has already been registered under {registration_key}".format(
+            registration_key = registration_key,
+        ))
+    # Generate the sitemap class.
+    if not sitemap_cls:
+        if issubclass(model, PageBase):
+            sitemap_cls_base = PageBaseSitemap
+        elif issubclass(model, EntityBase):
+            sitemap_cls_base = EntityBaseSitemap
+        elif issubclass(model, PublishedBase):
+            sitemap_cls_base = PublishedBaseSitemap
+        else:
+            raise SitemapRegistrationError("You must specify a sitemap class.")
+        sitemap_cls_name = model.__name__ + "Sitemap"
+        sitemap_cls = type(sitemap_cls_name, (sitemap_cls_base,), {
+            "model": model,
+        })
+    # Register the sitemap.
+    registered_sitemaps[registration_key] = sitemap_cls

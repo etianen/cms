@@ -129,16 +129,7 @@ class Page(PageBase):
 historylinks.register(Page)
 
 
-# Sitemaps.
-
-class PageSitemap(sitemaps.PageBaseSitemap):
-    
-    """Sitemap for page models."""
-    
-    model = Page
-    
-    
-sitemaps.registered_sitemaps["pages"] = PageSitemap
+sitemaps.register(Page)
 
 
 # Base content class.
