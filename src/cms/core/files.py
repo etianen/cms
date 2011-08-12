@@ -60,7 +60,7 @@ def compress_src(src, type):
     return result
     
     
-RE_IGNORABLE_TINYMCE_FILE = re.compile(r"^cms/js/.+?_src\.js$")
+RE_IGNORABLE_TINYMCE_FILE = re.compile(r"^cms/js/tiny_mce/.+?\.js$")
     
     
 def compress_tinymce_src(config):
@@ -117,7 +117,7 @@ class OptimizingStorage(Storage):
 
     def _save(self, name, content):
         """Saves the given file."""
-        if name == "cms/js/tiny_mce.js":
+        if name == "cms/js/tiny_mce/tiny_mce.js":
             # Compress tinymce a LOT!
             result = compress_tinymce_src(content.read(), "js")
             content = ContentFile(result)
