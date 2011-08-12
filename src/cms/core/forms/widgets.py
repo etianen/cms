@@ -1,6 +1,5 @@
 """Form widgets used by the CMS."""
 
-
 from django import forms
 from django.forms import NullBooleanSelect
 from django.conf import settings

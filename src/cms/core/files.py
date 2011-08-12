@@ -58,6 +58,45 @@ def compress_src(src, type):
     )
     result, _ = compressor.communicate(src)
     return result
+    
+    
+RE_IGNORABLE_TINYMCE_FILE = re.compile(r"^cms/js/.+?_src\.js$")
+    
+    
+def compress_tinymce_src(config):
+    """Generates a compressed javascript source file for the given TinyMCE config."""
+    # Parse the config.
+    plugins = [plugin.strip() for plugin in config.get("plugins", "").split(",")]
+    theme = config.get("theme", "advanced")
+    language = config.get("language", "en")
+    # Create a list of files.
+    files = [
+        "tiny_mce",
+        os.path.join("langs", language),
+    ]
+    for plugin in plugins:
+        files.append(os.path.join("plugins", plugin, "editor_plugin"))
+        files.append(os.path.join("plugins", plugin, "langs", language))
+        files.append(os.path.join("plugins", plugin, "langs", language + "_dlg"))
+    files.append(os.path.join("themes", theme, "editor_template"))
+    files.append(os.path.join("themes", theme, "langs", language))
+    # Create the full paths.
+    paths = [
+        os.path.join(os.path.dirname(cms.__file__), "media", "js", "tiny_mce", file + ".js")
+        for file in files
+    ]
+    # Load in all the sources.
+    src_items = ["var tinyMCEPreInit={base:'" + settings.STATIC_URL + "cms/js/tiny_mce" + "'};"]
+    for path in paths:
+        if os.path.exists(path):
+            with open(path, "rb") as handle:
+                src_items.append(handle.read())
+    # Add in the boilerplate.
+    src_items.append('tinymce.each("' + ",".join(files) + '".split(","),function(f){tinymce.ScriptLoader.markDone(tinyMCE.baseURL+"/"+f+".js");});')
+    # Join the sources.
+    src = "".join(src_items)
+    # All done!
+    return compress_src(src)
         
         
 class OptimizingStorage(Storage):
@@ -78,10 +117,18 @@ class OptimizingStorage(Storage):
 
     def _save(self, name, content):
         """Saves the given file."""
-        match = RE_COMPRESSIBLE_FILENAME.match(name)
-        if match:
-            result = compress_src(content.read(), match.group(1))
+        if name == "cms/js/tiny_mce.js":
+            # Compress tinymce a LOT!
+            result = compress_tinymce_src(content.read(), "js")
             content = ContentFile(result)
+        elif RE_IGNORABLE_TINYMCE_FILE.match(name):
+            pass
+        else:
+            # Try to compress js and css.
+            match = RE_COMPRESSIBLE_FILENAME.match(name)
+            if match:
+                result = compress_src(content.read(), match.group(1))
+                content = ContentFile(result)
         return self._inner_storage._save(name, content)
     
     def delete(self, name):
