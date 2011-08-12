@@ -3,6 +3,7 @@
 
 import re, subprocess, os.path
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage, Storage
 from django.contrib.staticfiles.storage import StaticFilesStorage
@@ -96,7 +97,7 @@ def compress_tinymce_src(config):
     # Join the sources.
     src = "".join(src_items)
     # All done!
-    return compress_src(src)
+    return compress_src(src, "js")
         
         
 class OptimizingStorage(Storage):
