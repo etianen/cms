@@ -119,7 +119,9 @@ class OptimizingStorage(Storage):
         """Saves the given file."""
         if name == "cms/js/tiny_mce/tiny_mce.js":
             # Compress tinymce a LOT!
-            result = compress_tinymce_src(content.read())
+            result = compress_tinymce_src({
+                "plugins": "table, advimage, inlinepopups, paste",
+            })
             content = ContentFile(result)
         elif RE_IGNORABLE_TINYMCE_FILE.match(name):
             pass
