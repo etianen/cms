@@ -237,14 +237,17 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
         if image.url:
             thumbnail_name = image_name
             thumbnail_path = image.path
+            thumbnail_url = image.url
         else:
             # The image does not have a URL, so copy it into the storage.
             thumbnail_name = copy_to_storage(image, storage)
             thumbnail_path = storage.path(thumbnail_name)
+            thumbnail_url = storage.url(thumbnail_name)
     else:
         # Calculate the various file paths.
         thumbnail_name = u"thumbnails/%s/%s/%s" % (folder, thumbnail_image_size, image_name)
         thumbnail_path = storage.path(thumbnail_name)
+        thumbnail_url = storage.url(thumbnail_name)
         # If we need to generate the thumbnail, then generate it!
         if not thumbnail_path in _created_thumbnails:
             if os.path.exists(thumbnail_path):
@@ -282,6 +285,5 @@ def create(image, width, height, method=PROPORTIONAL, storage=default_storage):
                             pass
                 _created_thumbnails.add(thumbnail_path)
     # Return the thumbnail object.
-    thumbnail_url = storage.url(thumbnail_name)
     return Thumbnail(thumbnail_name, thumbnail_path, thumbnail_url, thumbnail_display_size, thumbnail_image_size)
 
