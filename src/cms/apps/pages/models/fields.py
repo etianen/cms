@@ -55,3 +55,16 @@ class PageField(models.ForeignKey):
         """Sets the PageDescriptor on the class."""
         super(PageField, self).contribute_to_class(cls, name)
         setattr(cls, self.name, PageDescriptor(self))
+        
+        
+# Register custom fields with South.
+
+try:
+    from south.modelsinspector import add_introspection_rules
+except ImportError:
+    pass
+else:
+    # Simple rules for HtmlField and NullBooleanField.
+    add_introspection_rules((), (
+        "^cms\.apps\.pages\.models\.fields\.PageField",
+    ))

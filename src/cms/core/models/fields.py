@@ -86,3 +86,18 @@ class NullBooleanField(models.NullBooleanField):
         defaults = {"widget": NullBooleanWidget}
         defaults.update(kwargs)
         return super(NullBooleanField, self).formfield(**defaults)
+        
+        
+# Register custom fields with South.
+
+try:
+    from south.modelsinspector import add_introspection_rules
+except ImportError:
+    pass
+else:
+    # Simple rules for HtmlField and NullBooleanField.
+    add_introspection_rules((), (
+        "^cms\.core\.models\.fields\.HtmlField",
+        "^cms\.core\.models\.fields\.NullBooleanField",
+        "^cms\.core\.models\.fields\.EnumField",
+    ))
