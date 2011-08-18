@@ -127,7 +127,11 @@ class StaticFile(object):
     def __init__(self, name):
         self.name = name
         self.path = os.path.join(settings.STATIC_ROOT, name)
-        self.url = None
+        
+    @property
+    def url(self):
+        stored_name = copy_to_storage(self)
+        return default_storage.url(stored_name)
 
 
 class Thumbnail(object):
