@@ -29,6 +29,8 @@ class PageField(models.ForeignKey):
     
     """A foreign key to a Page model."""
     
+    _suppress_default = True
+    
     def __init__(self, content_type=None, limit_choices_to=None, **kwargs):
         """Initializes the Page Field."""
         if isinstance(content_type, basestring):
@@ -42,7 +44,10 @@ class PageField(models.ForeignKey):
                                  if issubclass(cls, content_type))
             limit_choices_to.setdefault("content_type__in", content_keys)
         # Initialize the PageField.
-        super(PageField, self).__init__(to="pages.Page", limit_choices_to=limit_choices_to, default=self.get_default, **kwargs)
+        kwargs.setdefault("to", "pages.Page")
+        kwargs.setdefault("limit_choices_to", limit_choices_to)
+        kwargs.setdefault("default", self.get_default)
+        super(PageField, self).__init__(**kwargs)
         
     def get_default(self):
         """Returns the default page."""
