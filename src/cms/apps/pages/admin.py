@@ -84,7 +84,10 @@ class PageAdmin(PageBaseAdmin):
         to the given revision.
         """
         data = super(PageAdmin, self).get_revision_form_data(request, obj, version)
-        content_version = version.revision.version_set.all().get(content_type=obj.content_type_id)
+        content_version = version.revision.version_set.all().get(
+            content_type = obj.content_type_id,
+            object_id_int = obj.pk,
+        )
         data.update(content_version.field_dict)
         return data
 
