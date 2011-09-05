@@ -1,50 +1,73 @@
 """Some useful optimization routines."""
 
-
 from functools import wraps
 
 
-def get_cache_name(func):
-    """Generates a cache name for a function."""
-    func_name = func.__name__
-    # Clean up the function name (assumes standard function naming conventions).
-    if func_name.startswith("get_") or func_name.startswith("set_") or func_name.startswith("del_"):
-        func_name = func_name[4:]
-    return "_%s_cache" % func_name
+class CachedProperty(object):
+
+    """A property who's value is cached on the object."""
     
-    
-def cached_getter(func):
-    """Ensures that the result of the wrapped getter method is cached in the instance."""
-    cache_name = get_cache_name(func)
-    @wraps(func)
-    def func_(obj):
-        if not hasattr(obj, cache_name):
-            result = func(obj)
-            setattr(obj, cache_name, result)
-        return getattr(obj, cache_name)
-    return func_
+    def __init__(self, f_get, f_set=None, f_del=None):
+        """Initializes the cached property."""
+        self.getter(f_get)
+        if callable(f_set):
+            self.setter(f_set)
+        if callable(f_del):
+            self.deleter(f_del)
         
+    def getter(self, f_get):
+        """Decorator that specifies the getter function for this property."""
+        self._f_get = f_get
+        # Store the property name.
+        self._property_name = f_get.__name__
+        # Store the cache name.
+        self._cache_name = "_{name}_cache".format(
+            name = f_get.__name__,
+        )
+        return self
+            
+    def setter(self, f_set):
+        """Decorator that specifies the setter function for this property."""
+        self._f_set = f_set
+        return self
         
-def cached_setter(getter):
-    """Ensures that the getter cache is updated with new values from the wrapped setter."""
-    cache_name = get_cache_name(getter)
-    def decorator(func):
-        @wraps(func)
-        def func_(obj, value):
-            func(obj, value)
-            setattr(obj, cache_name, value)
-        return func_
-    return decorator
-
-
-def cached_deleter(getter):
-    """Ensures that the getter cache is deleted when the wrapped deleter is called."""
-    cache_name = get_cache_name(getter)
-    def decorator(func):
-        @wraps(func)
-        def func_(obj):
-            func(obj)
-            delattr(obj, cache_name)
-        return func_
-    return decorator
-
+    def deleter(self, f_del):
+        """Decorator that specifies the deleter function for this property."""
+        self._f_del = f_del
+        return self
+        
+    def __get__(self, obj, cls):
+        """Accessor for this property."""
+        # Access via class.
+        if obj is None:
+            return self
+        # Access via obj.
+        if hasattr(obj, self._cache_name):
+            return getattr(obj, self._cache_name)
+        # Generate the value to cache.
+        value = self._f_get(obj)
+        setattr(obj, self._cache_name, value)
+        return value
+        
+    def __set__(self, obj, value):
+        """Setter for this property."""
+        if callable(self._f_set):
+            self._f_set(obj, value)
+            # Store the cached value.
+            cache_name = self._cache_name
+            setattr(obj, self._cache_name, value)
+        else:
+            raise AttributeError("{name} is a read-only property".format(
+                name = self._property_name,
+            ))
+        
+    def __delete__(self, obj):
+        """Deleter for this property."""
+        if callable(self._f_del):
+            self._f_del(obj)
+            # Clear the cache.
+            delattr(obj, self._cache_name)
+        else:
+            raise AttributeError("{name} is a read-only property".format(
+                name = self._property_name,
+            ))

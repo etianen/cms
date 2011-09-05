@@ -5,7 +5,7 @@ import abc
 from django.conf import settings
 
 from cms.core.loader import load_object
-from cms.core.optimizations import cached_getter
+from cms.core.optimizations import CachedProperty
 
 
 class BackendBase(object):
@@ -89,14 +89,12 @@ class MountedBackend(object):
         """Returns all pages in the site."""
         return self.backend.get_all(self.request)
     
-    @property
-    @cached_getter
+    @CachedProperty
     def homepage(self):
         """The current homepage."""
         return self.backend.get_homepage(self.request)
     
-    @property
-    @cached_getter
+    @CachedProperty
     def is_homepage(self):
         """Whether the current request is for the site homepage."""
         return self.request.path == self.homepage.get_absolute_url()
@@ -105,8 +103,7 @@ class MountedBackend(object):
         """Returns the page with the given id, or None."""
         return self.backend.get(self.request, id)
         
-    @property
-    @cached_getter
+    @CachedProperty
     def current(self):
         """Returns the current best-matched page."""
         return self.backend.get_current(self.request)
@@ -125,20 +122,17 @@ class MountedBackend(object):
         """Returns the navigation list for the given level (zero-indexed)."""
         return self.backend.get_navigation(self.request, level)
     
-    @property
-    @cached_getter
+    @CachedProperty
     def nav_primary(self):
         """Returs the primary navigation for the site."""
         return self.get_navigation(0)
     
-    @property
-    @cached_getter
+    @CachedProperty
     def nav_secondary(self):
         """Returns the secondary navigation for the site."""
         return self.get_navigation(1)
         
-    @property
-    @cached_getter
+    @CachedProperty
     def nav_tertiary(self):
         """Returns the tertiary navigation for the site."""
         return self.get_navigation(2)

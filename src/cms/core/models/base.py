@@ -6,7 +6,7 @@ from django.db import models
 from django.shortcuts import render
 
 from cms.core import debug
-from cms.core.optimizations import cached_getter
+from cms.core.optimizations import CachedProperty
 from cms.core.models.managers import PublishedBaseManager, publication_manager
 from cms.core.models.fields import NullBooleanField
 
@@ -133,8 +133,6 @@ class EntityBase(PublishedBase):
         return ()
         
     @property
-    @cached_getter
-    @debug.print_exc
     def next(self):
         """The next sibling, according to the default child ordering, or None."""
         sibling_iter = iter(self.siblings)
@@ -148,8 +146,6 @@ class EntityBase(PublishedBase):
         return None
         
     @property
-    @cached_getter
-    @debug.print_exc
     def prev(self):
         """The previous sibling, according to the default child ordering, or None."""
         sibling_iter = iter(reversed(self.siblings))

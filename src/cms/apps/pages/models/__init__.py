@@ -12,7 +12,7 @@ from django.db.models import Q
 from cms.core import sitemaps
 from cms.core.models.base import PageBase
 from cms.core.models.managers import publication_manager
-from cms.core.optimizations import cached_getter, cached_setter
+from cms.core.optimizations import CachedProperty
 from cms.apps import historylinks
 from cms.apps.pages.models.managers import PageManager
 from cms.apps.pages.models.fields import PageField
@@ -50,8 +50,7 @@ class Page(PageBase):
 
     order = models.PositiveIntegerField(editable=False)
 
-    @property
-    @cached_getter
+    @CachedProperty
     @publication_manager.getter
     def children(self):
         """The children of this page."""
@@ -89,8 +88,7 @@ class Page(PageBase):
         help_text="The type of page content.",
     )
     
-    @property
-    @cached_getter
+    @CachedProperty
     def content(self):
         """The associated content model for this page."""
         content_cls = ContentType.objects.get_for_id(self.content_type_id).model_class()
