@@ -12,7 +12,7 @@ from django.db.models import Q
 from cms.core import sitemaps
 from cms.core.models.base import PageBase
 from cms.core.models.managers import publication_manager
-from cms.core.optimizations import CachedProperty
+from cms.core.optimizations import cached_property
 from cms.apps import historylinks
 from cms.apps.pages.models.managers import PageManager
 from cms.apps.pages.models.fields import PageField
