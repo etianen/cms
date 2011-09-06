@@ -3,7 +3,7 @@
 from functools import wraps
 
 
-class _CachedProperty(object):
+class _CachedProperty(property):
 
     """A property who's value is cached on the object."""
     
