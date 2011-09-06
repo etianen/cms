@@ -4,7 +4,7 @@ import unittest
 
 from django.test import TestCase
 
-from cms.core.optimizations import CachedProperty
+from cms.core.optimizations import cached_property
 
 
 # Testing the optimizations module.
@@ -15,7 +15,7 @@ class OptimizationsTestObj(object):
         self._name = name
         self._get_count = 0
     
-    @CachedProperty
+    @cached_property
     def name(self):
         self._get_count += 1
         return self._name
@@ -28,7 +28,7 @@ class OptimizationsTestObj(object):
     def name(self):
         del self._name
         
-    @CachedProperty
+    @cached_property
     def read_only(self):
         self._get_count += 1
         return "baz"

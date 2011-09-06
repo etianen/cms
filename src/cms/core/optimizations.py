@@ -3,7 +3,7 @@
 from functools import wraps
 
 
-class CachedProperty(object):
+class _CachedProperty(object):
 
     """A property who's value is cached on the object."""
     
@@ -71,3 +71,7 @@ class CachedProperty(object):
             raise AttributeError("{name} is a read-only property".format(
                 name = self._property_name,
             ))
+            
+
+# Public name for the cached propert decorator. Using a class as a decorator just looks plain ugly. :P            
+cached_property = _CachedProperty

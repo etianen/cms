@@ -50,7 +50,7 @@ class Page(PageBase):
 
     order = models.PositiveIntegerField(editable=False)
 
-    @CachedProperty
+    @cached_property
     @publication_manager.getter
     def children(self):
         """The children of this page."""
@@ -88,7 +88,7 @@ class Page(PageBase):
         help_text="The type of page content.",
     )
     
-    @CachedProperty
+    @cached_property
     def content(self):
         """The associated content model for this page."""
         content_cls = ContentType.objects.get_for_id(self.content_type_id).model_class()
