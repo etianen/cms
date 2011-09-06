@@ -37,6 +37,9 @@ class OptimizationsTestObj(object):
 class OptimizationsTest(TestCase):
 
     def testCachedProperty(self):
+        self.assertTrue(isinstance(OptimizationsTestObj.name, property))
+        self.assertTrue(isinstance(OptimizationsTestObj.name, cached_property))
+        # Create the test obj.
         obj = OptimizationsTestObj("foo")
         self.assertEqual(obj._get_count, 0)
         # Call the getter.
@@ -44,10 +47,12 @@ class OptimizationsTest(TestCase):
         self.assertEqual(obj._get_count, 1)
         self.assertEqual(obj.name, "foo")
         self.assertEqual(obj._get_count, 1)
+        self.assertEqual(obj._name_cache, "foo")
         # Call the setter.
         obj.name = "bar"
         self.assertEqual(obj.name, "bar")
         self.assertEqual(obj._get_count, 1)
+        self.assertEqual(obj._name_cache, "bar")
         # Call the deleter.
         del obj.name
         self.assertRaises(AttributeError, lambda: obj.name)
