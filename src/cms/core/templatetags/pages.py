@@ -269,7 +269,11 @@ def meta_robots(context, index=None, follow=None, archive=None):
     if archive is None:
         archive = context.get("robots_archive")
     # Override with page variables.
-    index, follow, archive = request.pages.current.resolve_meta_robots(index, follow, archive)
+    current_page = request.pages.current
+    if current_page:
+        index, follow, archive = current_page.resolve_meta_robots(index, follow, archive)
+    else:
+        index, follow, archive = None, None, None
     # Final override, set to True.
     if index is None:
         index = True
@@ -311,8 +315,8 @@ def title(context, browser_title=None):
     context.push()
     try:
         context.update({
-            "title": browser_title or context.get("title") or page.browser_title or page.title,
-            "site_title": homepage.browser_title or homepage.title
+            "title": browser_title or context.get("title") or (page and page.browser_title) or (page and page.title) or "",
+            "site_title": (homepage and homepage.browser_title) or (homepage and homepage.title) or ""
         })
         return template.loader.render_to_string("title.html", context)
     finally:
