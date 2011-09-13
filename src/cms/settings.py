@@ -85,6 +85,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "reversion",
+    "usertools",
     "cms.core",
     "cms.apps.historylinks",
     "cms.apps.pages",

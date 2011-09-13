@@ -14,10 +14,3 @@
 {% block branding %}
     <h1 id="site-name">{{settings.SITE_NAME}} administration</h1>
 {% endblock %}
-
-
-{% block userlinks %}
-    <a href="{% url 'admin:staff_edit_details' %}">Edit details</a> /
-    {{block.super}}
-{% endblock %}
-
