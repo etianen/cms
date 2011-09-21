@@ -84,6 +84,7 @@ INSTALLED_APPS = (
     "django.contrib.sitemaps",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "optimizations",
     "reversion",
     "usertools",
     "cms.core",
