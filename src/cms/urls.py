@@ -7,6 +7,7 @@ from django.views import generic
 
 from cms.core.admin import site as admin_site
 from cms.core.sitemaps import registered_sitemaps
+from cms.core.views import TextTemplateView
 
 
 __all__ = ("patterns", "url", "include", "urlpatterns", "handler404", "handler500",)
@@ -24,16 +25,14 @@ urlpatterns = patterns("",
     url(r"^links/(?P<content_type_id>\d+)/(?P<object_id>.+)/$", "django.contrib.contenttypes.views.shortcut", name="permalink_redirect"),
     
     # Google sitemap service.
-    url(r"^sitemap.xml$", "django.contrib.sitemaps.views.index", {"sitemaps": registered_sitemaps}, name="sitemap"),
+    url(r"^sitemap.xml$", "django.contrib.sitemaps.views.index", {"sitemaps": registered_sitemaps}),
     url(r"^sitemap-(?P<section>.+)\.xml$", "django.contrib.sitemaps.views.sitemap", {"sitemaps": registered_sitemaps}),
     
     # Basic robots.txt.
-    url(r"^robots.txt$", "django.views.generic.simple.direct_to_template", kwargs={"template": "robots.txt", "mimetype": "text/plain"}, name="robots_txt"),
+    url(r"^robots.txt$", TextTemplateView.as_view(template_name="robots.txt")),
     
-    # Redirect to a sensible favicon location. At the very least, this will keep the 404 page out of Django, saving database hits.
-    url(r"favicon.ico$", generic.RedirectView.as_view(
-        url = settings.STATIC_URL + "site/img/favicon.png",
-    ), name="favicon.ico"),
+    # There's no favicon here!
+    url(r"^favicon.ico$", generic.RedirectView.as_view()),
     
 )
 
