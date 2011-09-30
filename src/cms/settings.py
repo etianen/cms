@@ -146,5 +146,9 @@ LOGGING = {
             "level": "ERROR",
             "propagate": True,
         },
+        "optimizations.javascript": {
+            "handlers": ["mail_admins"],
+            "level": "ERROR",
+        }
     }
 }

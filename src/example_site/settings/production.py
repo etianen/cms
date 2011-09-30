@@ -51,6 +51,17 @@ STATIC_ROOT = os.path.join(MEDIA_ROOT, "static")
 
 STATIC_URL = MEDIA_URL + "static/"
 
+STATIC_ASSETS = {
+    "default": {
+        "js": {
+            "dirname": "js",
+        },
+        "css": {
+            "dirname": "css",
+        }
+    },
+}
+
 
 # Email settings.
 
