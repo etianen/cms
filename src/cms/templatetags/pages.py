@@ -6,8 +6,9 @@ from django.template import Node, TemplateSyntaxError
 from django.utils.safestring import mark_safe
 from django.utils.html import escape, conditional_escape
 
+from optimizations.templatetags import parameter_tag, template_tag
+
 from cms.html import process as process_html
-from cms.templatetags import PatternNode
 from cms.models import PageBase
 from cms import debug
 
@@ -69,9 +70,34 @@ class SectionNavigationItem(NavigationItem):
     
     navigation = ()
     
+    
+class NavigationRenderer(object):
+    
+    """Renders navigation."""
+    
+    def __init__(self, entries, context):
+        """Initializes the navigation renderer."""
+        self.entries = entries
+        self.context = context
+    
+    def __iter__(self):
+        """Iterates over the entries."""
+        return iter(self.entries)
+        
+    def __unicode__(self):
+        """Renders the navigation."""
+        self.context.push()
+        try:
+            self.context.update({
+                "navigation": self.entries,
+            })
+            return template.loader.render_to_string("navigation.html", self.context)
+        finally:
+            self.context.pop()
+    
 
-@register.tag
-def navigation(parser, token):
+@parameter_tag(register, takes_context=True)
+def navigation(context, pages, section=None):
     """
     Renders a navigation list for the given pages.
     
@@ -80,32 +106,14 @@ def navigation(parser, token):
     You can also specify an alias for the navigation, at which point it will be set in the
     context rather than rendered.
     """
-    def handler(context, pages, section=None, alias=None):
-        request = context["request"]
-        # Compile the entries.
-        entries = [NavigationItem(request, page) for page in pages]
-        # Add the section.
-        if section:
-            entries = [SectionNavigationItem(request, section)] + entries
-        # Set to alias, maybe.
-        if alias:
-            context[alias] = entries
-            return ""
-        # Render the template.
-        context.push()
-        try:
-            context.update({
-                "navigation": entries
-            })
-            return template.loader.render_to_string("navigation.html", context)
-        finally:
-            context.pop()
-    return PatternNode(parser, token, handler, (
-        "{pages} with {section} as [alias]",
-        "{pages} as [alias]",
-        "{pages} with {section}",
-        "{pages}",
-    ))
+    request = context["request"]
+    # Compile the entries.
+    entries = [NavigationItem(request, page) for page in pages]
+    # Add the section.
+    if section:
+        entries = [SectionNavigationItem(request, section)] + entries
+    # Render the template.
+    return NavigationRenderer(entries, context)
 
 
 # Page linking.
@@ -326,8 +334,8 @@ def title(context, browser_title=None):
         context.pop()
 
 
-@register.tag
-def breadcrumbs(parser, token):
+@template_tag(register, "breadcrumbs.html", takes_context=True)
+def breadcrumbs(context, page=None, extended=False):
     """
     Renders the breadcrumbs trail for the current page::
     
@@ -336,36 +344,25 @@ def breadcrumbs(parser, token):
     To override and extend the breadcrumb trail within page applications, add
     the 'extended' flag to the tag and add your own breadcrumbs underneath::
     
-        {% breadcrumbs extended %}
+        {% breadcrumbs extended=1 %}
         
     """
-    @debug.print_exc
-    def handler(context, page=None, extended=False):
-        request = context["request"]
-        # Render the tag.
-        page = page or request.pages.current
-        breadcrumb_list = [{
-            "short_title": breadcrumb.short_title or breadcrumb.title,
-            "title": breadcrumb.title,
-            "url": breadcrumb.get_absolute_url(),
-            "last": False,
-            "page": breadcrumb,
-        } for breadcrumb in page.breadcrumbs]
-        if not extended:
-            breadcrumb_list[-1]["last"] = True
-        # Render the breadcrumbs.
-        context.push()
-        try:
-            context.update({"breadcrumbs": breadcrumb_list,})
-            return template.loader.render_to_string("breadcrumbs.html", context)
-        finally:
-            context.pop()
-    return PatternNode(parser, token, handler, (
-        "for {page} [extended]",
-        "[extended]",
-        "for {page}",
-        ""
-    ))
+    request = context["request"]
+    # Render the tag.
+    page = page or request.pages.current
+    breadcrumb_list = [{
+        "short_title": breadcrumb.short_title or breadcrumb.title,
+        "title": breadcrumb.title,
+        "url": breadcrumb.get_absolute_url(),
+        "last": False,
+        "page": breadcrumb,
+    } for breadcrumb in page.breadcrumbs]
+    if not extended:
+        breadcrumb_list[-1]["last"] = True
+    # Render the breadcrumbs.
+    return {
+        "breadcrumbs": breadcrumb_list,
+    }
 
 
 @register.simple_tag(takes_context=True)

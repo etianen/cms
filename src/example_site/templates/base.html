@@ -29,24 +29,24 @@
             <h1><a href="{{pages.homepage.get_absolute_url}}">{{settings.SITE_NAME}}</a></h1>
         </header>
         
-        <nav id="nav-primary">
-            {% navigation pages.nav_primary with pages.homepage %}
+        <nav>
+            {% navigation pages.nav_primary section=pages.homepage %}
         </nav>
         
-        <div id="content">
-            <article id="content-primary">
+        <div>
+            <article>
                 {% if not pages.is_homepage %}
                     <nav id="nav-breadcrumbs">{% block breadcrumbs %}{% breadcrumbs %}{% endblock %}</nav>
                 {% endif %}
                 <h1>{% block header %}{% header %}{% endblock %}</h1>
                 {% block content_primary %}{% endblock %}
             </article>
-            <aside id="content-secondary">
+            <aside>
                 {% block content_secondary %}{% endblock %}
             </aside>
         </div>
         
-        <footer id="footer">
+        <footer>
             <p>© {% now "Y" %} Site owner.</p>
         </footer>
         

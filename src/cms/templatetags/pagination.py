@@ -6,37 +6,28 @@ from django.core.paginator import Paginator, InvalidPage
 from django.http import Http404
 from django.utils.html import escape
 
-from cms.templatetags import PatternNode
+from optimizations.templatetags import parameter_tag
 
 
 register = template.Library()
 
 
-@register.tag
-def paginate(parser, token):
+@parameter_tag(register, takes_context=True)
+def paginate(context, queryset, per_page=10, key="page"):
     """Paginates the given queryset as sets it in the context as a variable."""
-    def handler(context, queryset, varname, page_size=10, pagination_key="page"):
-        request = context["request"]
-        # Parse the page number.
-        try:
-            page_number = int(request.GET[pagination_key])
-        except (KeyError, TypeError, ValueError):
-            page_number = 1
-        # Create the paginator.
-        try:
-            page = Paginator(queryset, page_size).page(page_number)
-        except InvalidPage:
-            raise Http404, "There are no items on page %s." % page_number
-        page._pagination_key = pagination_key
-        # Set the context variable.
-        context[varname] = page
-        return ""
-    return PatternNode(parser, token, handler, (
-        "{queryset} into {page_size} as [varname] using [pagination_key]",
-        "{queryset} into {page_size} as [varname]",
-        "{queryset} as [varname] using [pagination_key]",
-        "{queryset} as [varname]",
-    ))
+    request = context["request"]
+    # Parse the page number.
+    try:
+        page_number = int(request.GET[key])
+    except (KeyError, TypeError, ValueError):
+        page_number = 1
+    # Create the paginator.
+    try:
+        page = Paginator(queryset, per_page).page(page_number)
+    except InvalidPage:
+        raise Http404, "There are no items on page %s." % page_number
+    page._pagination_key = key
+    return page
 
 
 @register.simple_tag(takes_context=True)
