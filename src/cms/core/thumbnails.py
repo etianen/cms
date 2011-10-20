@@ -1,7 +1,7 @@
 """Thumbnail generation routines."""
 
 
-import os, os.path
+import os.path
 
 from PIL import Image
 

@@ -1,7 +1,7 @@
 """Base URLs for the CMS."""
 
 from django.conf import settings
-from django.conf.urls.defaults import patterns, url, include, handler404  # pyline: disable=W0611
+from django.conf.urls.defaults import patterns, url, include, handler404
 from django.contrib import admin
 from django.views import generic
 
@@ -44,3 +44,6 @@ if settings.DEBUG:
 
 
 handler500 = "cms.core.views.handler500"
+
+
+handler404 = handler404

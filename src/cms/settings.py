@@ -124,11 +124,6 @@ USE_I18N = False
 USE_L10N = True
 
 
-# Staff management settings.
-
-DEFAULT_GROUP_IDS = (1,)
-
-
 # Logging settings.
 
 LOGGING = {
@@ -146,9 +141,5 @@ LOGGING = {
             "level": "ERROR",
             "propagate": True,
         },
-        "optimizations.javascript": {
-            "handlers": ["mail_admins"],
-            "level": "ERROR",
-        }
     }
 }

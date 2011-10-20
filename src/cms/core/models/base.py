@@ -5,9 +5,6 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.shortcuts import render
 
-import optimizations
-
-from cms.core import debug
 from cms.core.models.managers import PublishedBaseManager, publication_manager
 from cms.core.models.fields import NullBooleanField
 

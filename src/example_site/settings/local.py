@@ -5,9 +5,6 @@ These settings are not fast or efficient, but allow local servers to be run
 using the django-admin.py utility.
 """
 
-
-import os
-
 from production import *
 
 

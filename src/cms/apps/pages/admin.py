@@ -15,8 +15,6 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django import forms
 
-import reversion
-
 from cms.core.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.core.db import locked
 from cms.apps.historylinks.models import HistoryLink
