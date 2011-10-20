@@ -92,17 +92,6 @@ INSTALLED_APPS = (
 PAGE_BACKEND = "cms.apps.pages.backend.PageBackend"
 
 
-# SEO settings.
-
-SEO_PRIORITIES = (
-    (1.0, "Very high"),
-    (0.8, "High"),
-    (0.5, "Medium"),
-    (0.3, "Low"),
-    (0.0, "Very low"),
-)
-
-
 # Internationalization settings.
 
 USE_I18N = False

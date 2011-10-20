@@ -186,11 +186,17 @@ class EntityBase(PublishedBase):
     
     sitemap_priority = models.FloatField(
         "priority",
-         choices = settings.SEO_PRIORITIES,
-         default = None,
-         blank = True,
-         null = True,
-         help_text = (
+        choices = (
+            (1.0, "Very high"),
+            (0.8, "High"),
+            (0.5, "Medium"),
+            (0.3, "Low"),
+            (0.0, "Very low"),
+        ),
+        default = None,
+        lank = True,
+        null = True,
+        help_text = (
             "The relative importance of this content in your site.  Search engines use this "
             "as a hint when ranking the pages within your site."
         ),
