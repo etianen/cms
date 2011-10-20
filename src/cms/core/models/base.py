@@ -1,6 +1,5 @@
 """Abstract base models used by the page management application."""
 
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.shortcuts import render
