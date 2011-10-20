@@ -202,7 +202,7 @@ def page_url(parser, token):
 
 # Page widgets.
 
-@register.simple_tag(takes_context=True)
+@parameter_tag(register, takes_context=True)
 def meta_description(context, description=None):
     """
     Renders the content of the meta description tag for the current page::
@@ -225,7 +225,7 @@ def meta_description(context, description=None):
     return conditional_escape(description)
 
 
-@register.simple_tag(takes_context=True)
+@parameter_tag(register, takes_context=True)
 def meta_keywords(context, keywords=None):
     """
     Renders the content of the meta keywords tag for the current page::
@@ -248,7 +248,7 @@ def meta_keywords(context, keywords=None):
     return conditional_escape(keywords)
 
 
-@register.simple_tag(takes_context=True)
+@parameter_tag(register, takes_context=True)
 def meta_robots(context, index=None, follow=None, archive=None):
     """
     Renders the content of the meta robots tag for the current page::
@@ -268,16 +268,6 @@ def meta_robots(context, index=None, follow=None, archive=None):
         {% meta_robots 1 1 1 %}
         
     """
-    request = context["request"]
-    # Override with page variables.
-    current_page = request.pages.current
-    if current_page:
-        if index is None:
-            index = current_page.robots_index
-        if follow is None:
-            follow = current_page.robots_follow
-        if archive is None:
-            archive = current_page.robots_archive
     # Override with context variables.
     if index is None:
         index = context.get("robots_index")
@@ -301,7 +291,7 @@ def meta_robots(context, index=None, follow=None, archive=None):
     return escape(robots)
 
 
-@register.simple_tag(takes_context=True)
+@template_tag(register, "title.html", takes_context=True)
 def title(context, browser_title=None):
     """
     Renders the title of the current page::
@@ -323,15 +313,10 @@ def title(context, browser_title=None):
     page = request.pages.current
     homepage = request.pages.homepage
     # Render the title template.
-    context.push()
-    try:
-        context.update({
-            "title": browser_title or context.get("title") or (page and page.browser_title) or (page and page.title) or "",
-            "site_title": (homepage and homepage.browser_title) or (homepage and homepage.title) or ""
-        })
-        return template.loader.render_to_string("title.html", context)
-    finally:
-        context.pop()
+    return {
+        "title": browser_title or context.get("title") or (page and page.browser_title) or (page and page.title) or "",
+        "site_title": (homepage and homepage.browser_title) or (homepage and homepage.title) or ""
+    }
 
 
 @template_tag(register, "breadcrumbs.html", takes_context=True)
@@ -365,7 +350,7 @@ def breadcrumbs(context, page=None, extended=False):
     }
 
 
-@register.simple_tag(takes_context=True)
+@template_tag(register, "header.html", takes_context=True)
 def header(context, page_header=None):
     """
     Renders the header for the current page::
@@ -386,11 +371,6 @@ def header(context, page_header=None):
     """
     request = context["request"]
     page_header = page_header or context.get("header") or context.get("title") or request.pages.current.title
-    context.push()
-    try:
-        context.update({
-            "header": page_header
-        })
-        return template.loader.render_to_string("header.html", context)
-    finally:
-        context.pop()
+    return {
+        "header": page_header,
+    }

@@ -6,7 +6,7 @@ from django.core.paginator import Paginator, InvalidPage
 from django.http import Http404
 from django.utils.html import escape
 
-from optimizations.templatetags import parameter_tag
+from optimizations.templatetags import parameter_tag, template_tag
 
 
 register = template.Library()
@@ -30,22 +30,17 @@ def paginate(context, queryset, per_page=10, key="page"):
     return page
 
 
-@register.simple_tag(takes_context=True)
-def pagination(context, page_obj):
+@template_tag(register, "pagination.html")
+def pagination(page_obj):
     """Renders the pagination for the given page of items."""
-    context.push()
-    try:
-        context.update({
-            "page_obj": page_obj,
-            "paginator": page_obj.paginator,
-            "pagination_key": getattr(page_obj, "_pagination_key", "page")
-        })
-        return template.loader.render_to_string("pagination.html", context)
-    finally:
-        context.pop()
+    return {
+        "page_obj": page_obj,
+        "paginator": page_obj.paginator,
+        "pagination_key": getattr(page_obj, "_pagination_key", "page")
+    }
 
 
-@register.simple_tag(takes_context=True)
+@parameter_tag(register, takes_context=True)
 def pagination_url(context, page_number):
     """Renders the URL for the given page number."""
     request = context["request"]
