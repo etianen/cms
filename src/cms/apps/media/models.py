@@ -3,7 +3,6 @@
 
 from django.db import models
 
-from cms.core.files import get_upload_path
 from cms.core.models import AuditBase
 
 
@@ -37,8 +36,10 @@ class File(AuditBase):
                                null=True,
                                help_text="Folders are used to help organise your media. They are not visible to users on your website.")
     
-    file = models.FileField(upload_to=get_upload_path,
-                            max_length=200)
+    file = models.FileField(
+        upload_to = "uploads/files",
+        max_length = 250,
+    )
     
     def get_absolute_url(self):
         """Generates the absolute URL of the image."""
