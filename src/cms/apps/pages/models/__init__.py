@@ -49,7 +49,7 @@ class Page(PageBase):
         null = True
     )
 
-    order = models.PositiveIntegerField(editable=False)
+    order = models.IntegerField(editable=False)
 
     @optimizations.cached_property
     @publication_manager.getter

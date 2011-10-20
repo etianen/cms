@@ -180,7 +180,7 @@ class EntityBase(PublishedBase):
         ),
     )
 
-    sitemap_changefreq = models.PositiveSmallIntegerField(
+    sitemap_changefreq = models.IntegerField(
         "change frequency",
         choices = (
             (1, "Always"),
