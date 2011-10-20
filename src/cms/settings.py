@@ -69,8 +69,6 @@ MIDDLEWARE_CLASSES = (
     "cms.core.middleware.PageMiddleware",
 )
 
-ROOT_URLCONF = "cms.urls"
-
 
 # Application settings.
 
