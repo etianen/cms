@@ -1,6 +1,5 @@
 """Abstract base models used by the page management application."""
 
-from django.contrib.auth.models import User
 from django.db import models
 from django.shortcuts import render
 
@@ -17,32 +16,12 @@ class AuditBase(models.Model):
     )
     
     date_modified = models.DateTimeField(
-        auto_now = True
+        "last modified",
+        auto_now = True,
     )
-    
-    last_modified_user = models.ForeignKey(
-        User,
-        blank = True,
-        null = True,
-        editable = False,
-        on_delete = models.SET_NULL,
-        related_name = "+",
-        help_text = "The user who last modified this item."
-    )
-    
-    def save(self, force_insert=False, force_update=False, using=None, user=None):
-        """
-        Saves the AuditBase.
-        
-        If you wish to take the save with a user model, it must be supplied as a keyword
-        argument.
-        """
-        self.last_modified_user = user
-        super(AuditBase, self).save(force_insert, force_update, using)
     
     class Meta:
         abstract = True
-        ordering = ("-date_modified",)
 
 
 class PublishedBase(AuditBase):
