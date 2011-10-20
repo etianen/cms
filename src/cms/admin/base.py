@@ -16,7 +16,7 @@ class PublishedBaseAdmin(AuditBaseAdmin):
     
     """Base admin class for published models."""
     
-    list_display = ("__unicode__", "is_online", "get_last_modified",)
+    list_display = ("__unicode__", "is_online", "date_modified",)
     
     actions = ("publish_selected", "unpublish_selected",)
     
@@ -46,7 +46,7 @@ class PageBaseAdmin(EntityBaseAdmin):
     
     """Base admin class for PageBase models."""
 
-    list_display = ("title", "is_online", "get_last_modified",)
+    list_display = ("title", "is_online", "date_modified",)
     
     prepopulated_fields = {"url_title": ("title",),}
     

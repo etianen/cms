@@ -1,5 +1,12 @@
 {% extends "admin/base_site.html" %}
 {% load url from future %}
+{% load assets %}
+
+
+{% block extrahead %}
+    {{block.super}}
+    {% stylesheet "cms/css/admin.css" %}
+{% endblock %}
 
 
 {% block breadcrumbs %}

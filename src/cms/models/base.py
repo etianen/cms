@@ -172,7 +172,7 @@ class EntityBase(PublishedBase):
             (0.0, "Very low"),
         ),
         default = None,
-        lank = True,
+        blank = True,
         null = True,
         help_text = (
             "The relative importance of this content in your site.  Search engines use this "

@@ -20,7 +20,7 @@ class FolderAdmin(AuditBaseAdmin):
     
     """Admin settings for Folder models."""
     
-    list_display = ("name", "get_last_modified",)
+    list_display = ("name", "date_modified",)
     
     search_fields = ("name",)
     
@@ -70,7 +70,7 @@ class FileAdmin(reversion.VersionAdmin, AuditBaseAdmin):
     
     search_fields = ("title",)
     
-    list_display = ("get_preview", "get_title", "get_size", "get_last_modified")
+    list_display = ("get_preview", "get_title", "get_size", "date_modified")
 
     change_list_template = "admin/media/file/change_list.html"
     

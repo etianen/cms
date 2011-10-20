@@ -38,7 +38,7 @@ DATABASES = {
 
 # Absolute path to the directory where all uploaded media files are stored.
 
-MEDIA_ROOT = "/var/uploads/%s" % SITE_DOMAIN
+MEDIA_ROOT = "/var/media/%s" % SITE_DOMAIN
 
 MEDIA_URL = "/media/"
 
@@ -47,9 +47,9 @@ FILE_UPLOAD_PERMISSIONS = 0644
 
 # Absolute path to the directory where static files will be collected.
 
-STATIC_ROOT = os.path.join(MEDIA_ROOT, "static")
+STATIC_ROOT = "/var/static/%s" % SITE_DOMAIN
 
-STATIC_URL = MEDIA_URL + "static/"
+STATIC_URL = "/static/"
 
 STATIC_ASSETS = {
     "default": {
@@ -131,8 +131,8 @@ INSTALLED_APPS += (
 
 # Additional static file locations.
 
-STATICFILES_DIRS += (
-    ("site", os.path.join(SITE_ROOT, "media")),
+STATICFILES_DIRS = (
+    os.path.join(SITE_ROOT, "static"),
 )
 
 
@@ -143,9 +143,9 @@ ADMIN_MEDIA_PREFIX = STATIC_URL + "admin/"
 
 # Absolute path to the directory where templates are stored.
 
-TEMPLATE_ROOT = os.path.join(SITE_ROOT, "templates")
-
-TEMPLATE_DIRS = (TEMPLATE_ROOT,) + TEMPLATE_DIRS
+TEMPLATE_DIRS = (
+    os.path.join(SITE_ROOT, "templates"),
+)
 
 
 # Namespace for cache keys, if using a process-shared cache.

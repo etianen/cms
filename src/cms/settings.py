@@ -19,11 +19,6 @@ For an explanation of these settings, please see the Django documentation at:
 import os
 
 
-# Absolute path to the directory containing the CMS.
-
-CMS_ROOT = os.path.dirname(__file__)
-
-
 # Template settings.
 
 TEMPLATE_LOADERS = (
@@ -32,8 +27,6 @@ TEMPLATE_LOADERS = (
         'django.template.loaders.app_directories.Loader',
     )),
 )
-
-TEMPLATE_DIRS = (os.path.join(CMS_ROOT, "templates",),)
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
