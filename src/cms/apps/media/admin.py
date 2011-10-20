@@ -9,9 +9,9 @@ from django.shortcuts import render
 from django.template.defaultfilters import filesizeformat
 from django.utils.text import truncate_words
 
-from reversion.admin import VersionAdmin
+import optimizations, reversion
 
-from cms.core import thumbnails, permalinks
+from cms.core import permalinks
 from cms.core.admin import AuditBaseAdmin, site
 from cms.apps.media.models import Folder, File
 
@@ -59,7 +59,7 @@ FILE_ICONS = {
 }
     
     
-class FileAdmin(VersionAdmin, AuditBaseAdmin):
+class FileAdmin(reversion.VersionAdmin, AuditBaseAdmin):
     
     """Admin settings for File models."""
     
@@ -132,13 +132,13 @@ class FileAdmin(VersionAdmin, AuditBaseAdmin):
     
     def get_preview(self, obj):
         """Generates a thumbnail of the image."""
-        _, extension = os.path.splitext(obj.file.name)  # @UnusedVariable
+        _, extension = os.path.splitext(obj.file.name)
         extension = extension.lower()[1:]
         icon = FILE_ICONS.get(extension, UNKNOWN_FILE_ICON)
         permalink = permalinks.create(obj)
         if icon == IMAGE_FILE_ICON:
             try:
-                thumbnail = thumbnails.create(obj.file, 100, 66)
+                thumbnail = optimizations.get_thumbnail(obj.file, 100, 66)
             except IOError:
                 pass
             else:

@@ -7,7 +7,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.html import escape
 
-from cms.core import permalinks, thumbnails
+import optimizations
+
+from cms.core import permalinks
 
 
 RE_TAG = re.compile(ur"<(img|a)(\s+.*?)(/?)>", re.IGNORECASE)
@@ -63,7 +65,7 @@ def process(text):
                     # Generate the thumbnail.
                     if fieldname:
                         try:
-                            thumbnail = thumbnails.create(getattr(obj, fieldname), width, height, thumbnails.RESIZED)
+                            thumbnail = optimizations.get_thumbnail(getattr(obj, fieldname), width, height, "resize")
                         except IOError:
                             pass
                         else:

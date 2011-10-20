@@ -2,7 +2,7 @@
 
 from __future__ import with_statement
 
-import functools, itertools, json
+import functools, itertools
 
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
@@ -10,6 +10,7 @@ from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
+from django.utils import simplejson as json
 
 from cms.core import permalinks, debug
 from cms.core.models.managers import publication_manager
