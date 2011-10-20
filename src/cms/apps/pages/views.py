@@ -14,4 +14,5 @@ class ContentIndexView(TemplateView):
         return (
             "pages/{0}.html".format(content_cls.__name__.lower()),
             "pages/base.html",
+            "base.html",
         )
