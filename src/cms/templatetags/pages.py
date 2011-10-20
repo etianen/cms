@@ -261,6 +261,15 @@ def meta_robots(context, index=None, follow=None, archive=None):
         
     """
     request = context["request"]
+    # Override with page variables.
+    current_page = request.pages.current
+    if current_page:
+        if index is None:
+            index = current_page.robots_index
+        if follow is None:
+            follow = current_page.robots_follow
+        if archive is None:
+            archive = current_page.robots_archive
     # Override with context variables.
     if index is None:
         index = context.get("robots_index")
@@ -268,12 +277,6 @@ def meta_robots(context, index=None, follow=None, archive=None):
         follow = context.get("robots_follow")
     if archive is None:
         archive = context.get("robots_archive")
-    # Override with page variables.
-    current_page = request.pages.current
-    if current_page:
-        index, follow, archive = current_page.resolve_meta_robots(index, follow, archive)
-    else:
-        index, follow, archive = None, None, None
     # Final override, set to True.
     if index is None:
         index = True

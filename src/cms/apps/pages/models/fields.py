@@ -59,7 +59,7 @@ try:
 except ImportError:
     pass
 else:
-    # Simple rules for HtmlField and NullBooleanField.
+    # Simple rules for HtmlField.
     add_introspection_rules((), (
         "^cms\.apps\.pages\.models\.fields\.PageField",
     ))

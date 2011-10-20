@@ -4,7 +4,6 @@ from django.db import models
 from django.shortcuts import render
 
 from cms.models.managers import PublishedBaseManager, publication_manager
-from cms.models.fields import NullBooleanField
 
 
 class AuditBase(models.Model):
@@ -200,67 +199,45 @@ class EntityBase(PublishedBase):
         ),
     )
     
-    robots_index = NullBooleanField(
+    robots_index = models.BooleanField(
         "allow indexing",
-        blank = True,
-        default = None,
+        default = True,
         help_text = (
             "Use this to prevent search engines from indexing this page. "
             "Disable this only if the page contains information which you do not wish "
-            "to show up in search results. Leave blank to use the setting from the parent page."
+            "to show up in search results."
         ),
     )
 
-    robots_follow = NullBooleanField(
+    robots_follow = models.BooleanField(
         "follow links",
-         blank = True,
-         default = None,
+         default = True,
          help_text = (
             "Use this to prevent search engines from following any links they find in this page. "
             "Disable this only if the page contains links to other sites that you do not wish to "
-            "publicise. Leave blank to use the setting from the parent page."
+            "publicise."
         ),
     )
 
-    robots_archive = NullBooleanField(
+    robots_archive = models.BooleanField(
         "allow archiving",
-        blank = True,
-        default = None,
+        default = True,
         help_text = (
             "Use this to prevent search engines from archiving this page. "
             "Disable this only if the page is likely to change on a very regular basis. "
-            "Leave blank to use the setting from the parent page."
         ),
     )
     
-    def resolve_meta_robots(self, index=None, follow=None, archive=None):
-        """
-        Returns the appropriate meta robots to be used for this page.
-        
-        The returned value is a tuple of (index, follow, archive).
-        """
-        page = self
-        while page and (index is None or archive is None or follow is None):
-            if index is None:
-                index = page.robots_index
-            if archive is None:
-                archive = page.robots_archive
-            if follow is None:
-                follow = page.robots_follow
-            page = page.parent
-        return index, follow, archive
-    
     def get_context_data(self):
         """Returns the SEO context data for this page."""
-        robots_index, robots_follow, robots_archive = self.resolve_meta_robots()
         title = unicode(self)
         # Return the context.
         return {
             "meta_description": self.meta_description,
             "meta_keywords": self.meta_keywords,
-            "robots_index": robots_index,
-            "robots_archive": robots_archive,
-            "robots_follow": robots_follow,
+            "robots_index": self.robots_index,
+            "robots_archive": self.robots_archive,
+            "robots_follow": self.robots_follow,
             "title": title,
             "header": title,
         }

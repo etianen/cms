@@ -46,7 +46,7 @@ class PageAdmin(PageBaseAdmin):
             "classes": ("collapse",),
         }),
         ("Search engine optimization", {
-            "fields": ("browser_title", "meta_keywords", "meta_description", "robots_index", "robots_follow", "robots_archive", "sitemap_priority", "sitemap_changefreq",),
+            "fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_changefreq", "robots_index", "robots_follow", "robots_archive",),
             "classes": ("collapse",),
         }),
     )

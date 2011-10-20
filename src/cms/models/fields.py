@@ -2,7 +2,7 @@
 
 from django.db import models
 
-from cms.forms.widgets import HtmlWidget, NullBooleanWidget
+from cms.forms.widgets import HtmlWidget
 
 
 class HtmlField(models.TextField):
@@ -14,17 +14,6 @@ class HtmlField(models.TextField):
         kwargs["widget"] = HtmlWidget
         return super(HtmlField, self).formfield(**kwargs)
         
-
-class NullBooleanField(models.NullBooleanField):
-    
-    """A null boolean field that has a blank choice instead of 'maybe',"""
-    
-    def formfield(self, **kwargs):
-        """Generates the form field."""
-        defaults = {"widget": NullBooleanWidget}
-        defaults.update(kwargs)
-        return super(NullBooleanField, self).formfield(**defaults)
-        
         
 # Register custom fields with South.
 
@@ -33,8 +22,7 @@ try:
 except ImportError:
     pass
 else:
-    # Simple rules for HtmlField and NullBooleanField.
+    # Simple rules for HtmlField.
     add_introspection_rules((), (
         "^cms\.core\.models\.fields\.HtmlField",
-        "^cms\.core\.models\.fields\.NullBooleanField",
     ))

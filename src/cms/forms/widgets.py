@@ -1,7 +1,6 @@
 """Form widgets used by the CMS."""
 
 from django import forms
-from django.forms import NullBooleanSelect
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
@@ -26,13 +25,3 @@ class HtmlWidget(forms.Textarea):
         
     media = property(get_media,
                      doc="The media used by the widget.")
-    
-    
-class NullBooleanWidget(NullBooleanSelect):
-    
-    """A null boolean widget with a blank choice instead of 'maybe'."""
-    
-    def __init__(self, attrs=None):
-        """Sets some different default choices."""
-        super(NullBooleanWidget, self).__init__(attrs,)
-        self.choices = ((u"1", "---------"), (u"2", "Yes"), (u"3", "No"))
