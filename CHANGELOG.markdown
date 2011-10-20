@@ -2,6 +2,16 @@ CMS Changelog
 =============
 
 
+2.4.1 - 20/10/2011
+------------------
+
+*   Content-specific permissions.
+*   Added in cached template loader.
+*   Static file compression.
+*   Added in multi-site page backend support.
+*   Integration with django-optimizations.
+
+
 2.4 - 15/06/2011
 ----------------
 
