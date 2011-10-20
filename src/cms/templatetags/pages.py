@@ -2,9 +2,8 @@
 
 
 from django import template
-from django.template import Node, TemplateSyntaxError
 from django.utils.safestring import mark_safe
-from django.utils.html import escape, conditional_escape
+from django.utils.html import escape
 
 from optimizations.templatetags import parameter_tag, template_tag
 
@@ -118,86 +117,24 @@ def navigation(context, pages, section=None):
 
 # Page linking.
 
-class PageUrlNode(Node):
-    
-    """Renders the page_url tag."""
-    
-    def __init__(self, page, view_func, args, kwargs, varname):
-        """Initializes the PageUrlNode."""
-        super(PageUrlNode, self).__init__()
-        self.page = page
-        self.view_func = view_func
-        self.args = args
-        self.kwargs = kwargs
-        self.varname = varname
-        
-    def render(self, context):
-        """Renders the PageUrlNode."""
-        request = context["request"]
-        page = self.page.resolve(context)
-        # Look up pages, if given an id.
-        url = None
-        if not isinstance(page, PageBase):
-            page = request.pages.get(page)
-        if page is None:
-            url = "#"
-        else:
-            # Get the page URL.
-            if self.view_func is None:
-                url = page.get_absolute_url()
-            else:
-                args = [arg.resolve(context) for arg in self.args]
-                kwargs = dict((key, value.resolve(context)) for key, value in self.kwargs.items())
-                url = request.pages.reverse(page, self.view_func, *args, **kwargs)
-        # Return the value, or set as a context variable as appropriate.
-        if self.varname:
-            context[self.varname] = url
-            return ""
-        else:
-            return escape(url)
 
-
-@register.tag
-def page_url(parser, token):
+@parameter_tag(register, takes_context=True)
+def page_url(context, page, view_func, *args, **kwargs):
     """Renders the URL of the given view func in the given page."""
-    contents = token.split_contents()
-    tag_name = contents[0]
-    contents = contents[1:]
-    # Attempt to parse the varname.
-    try:
-        if contents.index("as") == len(contents) - 2:
-            varname = contents[-1]
-            contents = contents[:-2]
+    request = context["request"]
+    url = None
+    if not isinstance(page, PageBase):
+        page = request.pages.get(page)
+    if page is None:
+        url = "#"
+    else:
+        # Get the page URL.
+        if view_func is None:
+            url = page.get_absolute_url()
         else:
-            raise TemplateSyntaxError("{tag_name} tag expects only one argument after 'as' statement".format(
-                tag_name = tag_name,
-            ))
-    except ValueError:
-        # No varname was specified.
-        varname = None
-    # Attempt to parse the page.
-    try:
-        page = parser.compile_filter(contents[0])
-    except IndexError:
-        raise template.TemplateSyntaxError, "No page specified in %s tag" % tag_name
-    # Attempt to parse the view func.
-    try:
-        view_func = contents[1]
-    except IndexError:
-        view_func = None
-    # Parse all remaining token as arguments.
-    args = []
-    kwargs = {}
-    argstring = "".join(contents[2:])
-    if argstring:
-        for argument in argstring.split(","):
-            if "=" in argument:
-                key, value = argument.split("=")
-                kwargs[key.strip()] = parser.compile_filter(value.strip())
-            else:
-                args.append(parser.compile_filter(argument.strip()))
-    # Create the node.
-    return PageUrlNode(page, view_func, args, kwargs, varname)
+            url = request.pages.reverse(page, view_func, *args, **kwargs)
+    # Return the value, or set as a context variable as appropriate.
+    return escape(url)
 
 
 # Page widgets.
@@ -222,7 +159,7 @@ def meta_description(context, description=None):
         
     """
     description = description or context.get("meta_description", "")
-    return conditional_escape(description)
+    return escape(description)
 
 
 @parameter_tag(register, takes_context=True)
@@ -245,7 +182,7 @@ def meta_keywords(context, keywords=None):
         
     """
     keywords = keywords or context.get("meta_keywords", "")
-    return conditional_escape(keywords)
+    return escape(keywords)
 
 
 @parameter_tag(register, takes_context=True)
