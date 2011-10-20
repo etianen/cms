@@ -110,9 +110,9 @@ class Page(PageBase):
         urlconf = ContentType.objects.get_for_id(self.content_type_id).model_class().urlconf
         return self.get_absolute_url() + urlresolvers.reverse(view_func, args=args, kwargs=kwargs, urlconf=urlconf, prefix="")
     
-    def save(self, force_insert=False, force_update=False, using=None, user=None):
+    def save(self, *args, **kwargs):
         """Saves the page."""
-        super(Page, self).save(force_insert, force_update, using, user)
+        super(Page, self).save(*args, **kwargs)
         self.__class__.objects.cache.put(self)
         
     def delete(self, using=None):

@@ -1,0 +1,9 @@
+header,
+hgroup,
+nav,
+section,
+article,
+aside,
+footer {
+    display: block;
+}
