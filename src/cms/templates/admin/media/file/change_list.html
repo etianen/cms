@@ -1,5 +1,5 @@
 {% extends "reversion/change_list.html" %}
-{% load adminmedia %}
+{% load adminmedia assets %}
 
 
 {% block extrahead %}
@@ -8,7 +8,7 @@
         <script type="text/javascript" src="{% admin_media_prefix %}js/jquery.min.js"></script>
         <script type="text/javascript" src="{% admin_media_prefix %}js/jquery.init.js"></script>
         <script type="text/javascript" src="{{STATIC_URL}}cms/js/tiny_mce/tiny_mce_popup.js"></script>
-        <script type="text/javascript" src="{{STATIC_URL}}cms/js/jquery.filebrowser.js"></script>
+        {% script "cms/js/jquery.filebrowser.js" %}
         <script type="text/javascript">
         // <![CDATA[
             (function($, tinyMCE, tinyMCEPopup) {

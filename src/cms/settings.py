@@ -24,13 +24,6 @@ import os
 CMS_ROOT = os.path.dirname(__file__)
 
 
-# Absolute path to the directory containing the CMS media files.
-
-STATICFILES_DIRS = (
-    ("cms", os.path.join(CMS_ROOT, "media")),
-)
-
-
 # Template settings.
 
 TEMPLATE_LOADERS = (
