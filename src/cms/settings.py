@@ -92,16 +92,6 @@ INSTALLED_APPS = (
 PAGE_BACKEND = "cms.apps.pages.backend.PageBackend"
 
 
-# Multi-site settings.
-
-SITE_ID = 1
-
-
-# Publication settings.
-
-PUBLICATION_PREVIEW_KEY = "preview"
-
-
 # SEO settings.
 
 SEO_PRIORITIES = (

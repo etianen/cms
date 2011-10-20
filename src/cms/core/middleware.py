@@ -25,7 +25,7 @@ class PreviewMiddleware(object):
         """Starts preview mode, if available."""
         # See if preview mode is requested.
         try:
-            preview_mode = int(request.GET.get(settings.PUBLICATION_PREVIEW_KEY, 0))
+            preview_mode = int(request.GET.get("preview", 0))
         except ValueError:
             preview_mode = False
         # Only allow preview mode if the user is a logged in administrator.
