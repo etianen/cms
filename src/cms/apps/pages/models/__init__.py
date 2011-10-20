@@ -11,9 +11,9 @@ from django.db.models import Q
 
 import optimizations
 
-from cms.core import sitemaps
-from cms.core.models.base import PageBase
-from cms.core.models.managers import publication_manager
+from cms import sitemaps
+from cms.models.base import PageBase
+from cms.models.managers import publication_manager
 from cms.apps import historylinks
 from cms.apps.pages.models.managers import PageManager
 from cms.apps.pages.models.fields import PageField

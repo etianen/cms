@@ -1,6 +1,6 @@
 """Custom content classes."""
 
-from cms.core.models import HtmlField
+from cms.models import HtmlField
 from cms.apps.pages.models import ContentBase
 
 

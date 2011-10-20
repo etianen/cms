@@ -4,8 +4,8 @@
 from django.db import models
 from django.db.models.fields.related import ReverseSingleRelatedObjectDescriptor
 
-from cms.core.models.base import PublishedBase
-from cms.core.models.managers import publication_manager
+from cms.models.base import PublishedBase
+from cms.models.managers import publication_manager
 
 
 class PageDescriptor(ReverseSingleRelatedObjectDescriptor):

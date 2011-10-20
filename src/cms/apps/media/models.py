@@ -3,7 +3,7 @@
 
 from django.db import models
 
-from cms.core.models import AuditBase
+from cms.models import AuditBase
 
 
 class Folder(AuditBase):

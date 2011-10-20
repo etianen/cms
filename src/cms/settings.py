@@ -50,8 +50,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.static",
     "django.contrib.messages.context_processors.messages",
     "django.core.context_processors.request",
-    "cms.core.context_processors.conf",
-    "cms.core.context_processors.pages",
+    "cms.context_processors.conf",
+    "cms.context_processors.pages",
 )
 
 
@@ -65,8 +65,8 @@ MIDDLEWARE_CLASSES = (
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "cms.apps.historylinks.middleware.HistoryLinkFallbackMiddleware",
-    "cms.core.middleware.PreviewMiddleware",
-    "cms.core.middleware.PageMiddleware",
+    "cms.middleware.PreviewMiddleware",
+    "cms.middleware.PageMiddleware",
 )
 
 
@@ -83,7 +83,7 @@ INSTALLED_APPS = (
     "optimizations",
     "reversion",
     "usertools",
-    "cms.core",
+    "cms",
     "cms.apps.historylinks",
     "cms.apps.pages",
     "cms.apps.media",

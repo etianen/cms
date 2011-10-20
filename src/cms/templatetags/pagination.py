@@ -6,7 +6,7 @@ from django.core.paginator import Paginator, InvalidPage
 from django.http import Http404
 from django.utils.html import escape
 
-from cms.core.templatetags import PatternNode
+from cms.templatetags import PatternNode
 
 
 register = template.Library()

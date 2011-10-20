@@ -4,7 +4,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.sitemaps import Sitemap
 
-from cms.core.models import PublishedBase, EntityBase, PageBase
+from cms.models import PublishedBase, EntityBase, PageBase
 
 
 # A dictionary of registered sitemap classes.

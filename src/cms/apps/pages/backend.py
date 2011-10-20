@@ -3,8 +3,8 @@
 from django.core import urlresolvers
 from django.contrib.contenttypes.models import ContentType
 
-from cms.core.db import locked
-from cms.core.pages import BackendBase
+from cms.db import locked
+from cms.pages import BackendBase
 from cms.apps.historylinks.models import HistoryLink
 from cms.apps.pages.models import Page
 

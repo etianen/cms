@@ -6,7 +6,7 @@ from django.conf import settings
 
 import optimizations
 
-from cms.core.loader import load_object
+from cms.loader import load_object
 
 
 class BackendBase(object):

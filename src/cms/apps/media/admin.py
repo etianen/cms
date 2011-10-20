@@ -11,8 +11,8 @@ from django.utils.text import truncate_words
 
 import optimizations, reversion
 
-from cms.core import permalinks
-from cms.core.admin import AuditBaseAdmin, site
+from cms import permalinks
+from cms.admin import AuditBaseAdmin, site
 from cms.apps.media.models import Folder, File
 
 

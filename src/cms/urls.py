@@ -6,9 +6,9 @@ from django.contrib import admin
 from django.views import generic
 from django.conf.urls.static import static
 
-from cms.core.admin import site as admin_site
-from cms.core.sitemaps import registered_sitemaps
-from cms.core.views import TextTemplateView
+from cms.admin import site as admin_site
+from cms.sitemaps import registered_sitemaps
+from cms.views import TextTemplateView
 
 
 admin.autodiscover()
@@ -35,7 +35,7 @@ urlpatterns = patterns("",
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
-handler500 = "cms.core.views.handler500"
+handler500 = "cms.views.handler500"
 
 
 handler404 = handler404

@@ -15,8 +15,8 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django import forms
 
-from cms.core.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
-from cms.core.db import locked
+from cms.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
+from cms.db import locked
 from cms.apps.historylinks.models import HistoryLink
 from cms.apps.pages.models import Page, get_registered_content
 

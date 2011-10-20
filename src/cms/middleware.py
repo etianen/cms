@@ -13,8 +13,8 @@ from django.http import Http404, HttpResponse
 from django.views.debug import technical_404_response
 from django.shortcuts import redirect
 
-from cms.core.models import publication_manager, PublicationManagementError
-from cms.core.pages import get_backend
+from cms.models import publication_manager, PublicationManagementError
+from cms.pages import get_backend
 
 
 class PreviewMiddleware(object):

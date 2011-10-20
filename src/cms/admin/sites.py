@@ -12,8 +12,8 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.utils import simplejson as json
 
-from cms.core import permalinks, debug
-from cms.core.models.managers import publication_manager
+from cms import permalinks, debug
+from cms.models.managers import publication_manager
 
 
 # The GET parameter used to indicate where page admin actions originated.

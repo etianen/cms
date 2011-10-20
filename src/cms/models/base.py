@@ -3,8 +3,8 @@
 from django.db import models
 from django.shortcuts import render
 
-from cms.core.models.managers import PublishedBaseManager, publication_manager
-from cms.core.models.fields import NullBooleanField
+from cms.models.managers import PublishedBaseManager, publication_manager
+from cms.models.fields import NullBooleanField
 
 
 class AuditBase(models.Model):

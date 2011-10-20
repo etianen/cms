@@ -2,7 +2,7 @@
 
 from django.db import models
 
-from cms.core.forms.widgets import HtmlWidget, NullBooleanWidget
+from cms.forms.widgets import HtmlWidget, NullBooleanWidget
 
 
 class HtmlField(models.TextField):

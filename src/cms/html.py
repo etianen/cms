@@ -9,7 +9,7 @@ from django.utils.html import escape
 
 import optimizations
 
-from cms.core import permalinks
+from cms import permalinks
 
 
 RE_TAG = re.compile(ur"<(img|a)(\s+.*?)(/?)>", re.IGNORECASE)
