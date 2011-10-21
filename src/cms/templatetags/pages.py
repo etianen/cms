@@ -158,7 +158,12 @@ def meta_description(context, description=None):
         {% meta_description "foo" %}
         
     """
-    description = description or context.get("meta_description", "")
+    if description is None:
+        description = context.get("meta_description")
+    if description is None:
+        request = context["request"]
+        page = request.pages.current
+        description = page.meta_description
     return escape(description)
 
 
@@ -181,7 +186,12 @@ def meta_keywords(context, keywords=None):
         {% meta_keywords "foo" %}
         
     """
-    keywords = keywords or context.get("meta_keywords", "")
+    if keywords is None:
+        keywords = context.get("meta_keywords")
+    if keywords is None:
+        request = context["request"]
+        page = request.pages.current
+        keywords = page.meta_keywords
     return escape(keywords)
 
 
