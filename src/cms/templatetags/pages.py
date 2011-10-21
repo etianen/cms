@@ -119,7 +119,7 @@ def navigation(context, pages, section=None):
 
 
 @parameter_tag(register, takes_context=True)
-def page_url(context, page, view_func, *args, **kwargs):
+def page_url(context, page, view_func=None, *args, **kwargs):
     """Renders the URL of the given view func in the given page."""
     request = context["request"]
     url = None
