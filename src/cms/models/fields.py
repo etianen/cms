@@ -2,7 +2,7 @@
 
 from django.db import models
 
-from cms.forms.widgets import HtmlWidget
+from cms.forms import HtmlWidget
 
 
 class HtmlField(models.TextField):
