@@ -45,10 +45,7 @@ class PageAdmin(PageBaseAdmin):
             "fields": ("short_title", "permalink", "in_navigation",),
             "classes": ("collapse",),
         }),
-        ("Search engine optimization", {
-            "fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_changefreq", "robots_index", "robots_follow", "robots_archive",),
-            "classes": ("collapse",),
-        }),
+        PageBaseAdmin.SEO_FIELDS,
     )
     
     def __init__(self, *args, **kwargs):

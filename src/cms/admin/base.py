@@ -24,6 +24,11 @@ class PublishedBaseAdmin(AuditBaseAdmin):
     
     list_filter = ("is_online",)
     
+    PUBLICATION_FIELDS = ("Publication", {
+        "fields": ("is_online",),
+        "classes": ("collapse",),
+    })
+    
     # Custom admin actions.
     
     def publish_selected(self, request, queryset):
@@ -40,6 +45,11 @@ class PublishedBaseAdmin(AuditBaseAdmin):
 class EntityBaseAdmin(reversion.VersionAdmin, PublishedBaseAdmin):
     
     """Base admin class for EntityBase models."""
+    
+    SEO_FIELDS = ("Search engine optimization", {
+        "fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_changefreq", "robots_index", "robots_follow", "robots_archive",),
+        "classes": ("collapse",),
+    })
 
 
 class PageBaseAdmin(EntityBaseAdmin):
@@ -51,3 +61,19 @@ class PageBaseAdmin(EntityBaseAdmin):
     prepopulated_fields = {"url_title": ("title",),}
     
     search_fields = ("title",)
+    
+    TITLE_FIELDS = (None, {
+        "fields": ("title", "url_title",),
+    })
+    
+    NAVIGATION_FIELDS = ("Navigation", {
+        "fields": ("short_title",),
+        "classes": ("collapse",),
+    })
+    
+    fieldsets = (
+        TITLE_FIELDS,
+        PublishedBaseAdmin.PUBLICATION_FIELDS,
+        NAVIGATION_FIELDS,
+        EntityBaseAdmin.SEO_FIELDS,
+    )
