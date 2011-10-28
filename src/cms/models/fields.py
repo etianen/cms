@@ -24,5 +24,5 @@ except ImportError:
 else:
     # Simple rules for HtmlField.
     add_introspection_rules((), (
-        "^cms\.core\.models\.fields\.HtmlField",
+        "^cms\.models\.fields\.HtmlField",
     ))
