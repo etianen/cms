@@ -21,3 +21,20 @@ class TextTemplateView(generic.TemplateView):
         """Dispatches the request."""
         kwargs.setdefault("content_type", self.content_type)
         return super(TextTemplateView, self).render_to_response(context, **kwargs)
+    
+    
+class EntityContextMixin(object):
+    
+    """Generates the context for an entity detail page."""
+    
+    def get_context_data(self, **kwargs):
+        """Adds in the additional entity context data."""
+        context = super(EntityContextMixin, self).get_context_data(**kwargs)
+        defaults = self.object.get_context_data()
+        defaults.update(context)
+        return defaults
+    
+    
+class EntityDetailView(EntityContextMixin, generic.DetailView):
+    
+    """A simple entity detail view."""
