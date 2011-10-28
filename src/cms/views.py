@@ -38,3 +38,10 @@ class EntityContextMixin(object):
 class EntityDetailView(EntityContextMixin, generic.DetailView):
     
     """A simple entity detail view."""
+    
+    
+class PageDetailView(EntityDetailView):
+    
+    """A simple page detail view."""
+    
+    slug_field = "url_title"
