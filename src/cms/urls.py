@@ -35,6 +35,13 @@ urlpatterns = patterns("",
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
+if settings.DEBUG:
+    urlpatterns += patterns("",
+        url("^404/$", generic.TemplateView.as_view(template_name="404.html")),
+        url("^500/$", generic.TemplateView.as_view(template_name="500.html")),
+    )
+
+
 handler500 = "cms.views.handler500"
 
 
