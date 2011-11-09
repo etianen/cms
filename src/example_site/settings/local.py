@@ -21,8 +21,6 @@ MEDIA_ROOT = os.path.expanduser("~/Sites/%s/media" % SITE_DOMAIN)
 
 STATIC_ROOT = os.path.expanduser("~/Sites/%s/static" % SITE_DOMAIN)
 
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-
 
 # Use local server.
 
