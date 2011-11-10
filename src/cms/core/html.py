@@ -39,7 +39,7 @@ def process(text):
                     # Add in the URL of the obj.
                     attrs[attr_name] = '"%s"' % escape(obj.get_absolute_url())
                     # Add in the title of the obj.
-                    attrs.setdefault("title", getattr(obj, "title", unicode(obj)))
+                    attrs.setdefault("title", '"%s"' % getattr(obj, "title", unicode(obj)))
                 return obj
             return None
         if tagname == "a":
