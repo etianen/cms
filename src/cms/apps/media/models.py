@@ -4,18 +4,18 @@
 from django.db import models
 
 
-class Folder(models.Model):
+class Label(models.Model):
     
     """
-    A notional folder used to organise static media.
+    A notional label used to organise static media.
     
-    This does not correspond to a physical folder on the disk.
+    This does not correspond to a physical label on the disk.
     """
     
     name = models.CharField(max_length=200)
     
     def __unicode__(self):
-        """Returns the name of the folder."""
+        """Returns the name of the label."""
         return self.name
     
     class Meta:
@@ -29,10 +29,11 @@ class File(models.Model):
     title = models.CharField(max_length=200,
                              help_text="The title will be used as the default rollover text when this media is embedded in a web page.")
     
-    folder = models.ForeignKey(Folder,
-                               blank=True,
-                               null=True,
-                               help_text="Folders are used to help organise your media. They are not visible to users on your website.")
+    labels = models.ManyToManyField(
+        Label,
+        blank = True,
+        help_text = "Labels are used to help organise your media. They are not visible to users on your website.",
+    )
     
     file = models.FileField(
         upload_to = "uploads/files",

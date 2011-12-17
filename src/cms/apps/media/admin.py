@@ -16,19 +16,19 @@ from reversion.admin import VersionMetaAdmin
 
 from cms import permalinks
 from cms.admin import site
-from cms.apps.media.models import Folder, File
+from cms.apps.media.models import Label, File
 
 
-class FolderAdmin(admin.ModelAdmin):
+class LabelAdmin(admin.ModelAdmin):
     
-    """Admin settings for Folder models."""
+    """Admin settings for Label models."""
     
     list_display = ("name",)
     
     search_fields = ("name",)
     
     
-site.register(Folder, FolderAdmin)
+site.register(Label, LabelAdmin)
     
        
 # Different types of file.
@@ -67,15 +67,17 @@ class FileAdmin(VersionMetaAdmin):
     """Admin settings for File models."""
     
     fieldsets = ((None, {"fields": ("title", "file",),},),
-                 ("Media management", {"fields": ("folder",),},),)
+                 ("Media management", {"fields": ("labels",),},),)
     
-    list_filter = ("folder",)
+    list_filter = ("labels",)
     
     search_fields = ("title",)
     
     list_display = ("get_preview", "get_title", "get_size", "get_date_modified")
 
     change_list_template = "admin/media/file/change_list.html"
+    
+    filter_horizontal = ("labels",)
     
     # Customizations.
     
@@ -87,9 +89,15 @@ class FileAdmin(VersionMetaAdmin):
     
     # Custom actions.
     
-    def update_folder_action(self, request, queryset, folder):
-        """Updates the folder on the given queryset."""
-        queryset.update(folder=folder)
+    def add_label_action(self, request, queryset, label):
+        """Adds the label on the given queryset."""
+        for file in queryset:
+            file.labels.add(label)
+            
+    def remove_label_action(self, request, queryset, label):
+        """Removes the label on the given queryset."""
+        for file in queryset:
+            file.labels.remove(label)
     
     def get_actions(self, request):
         """Generates the actions for assigning categories."""
@@ -98,32 +106,33 @@ class FileAdmin(VersionMetaAdmin):
         opts = self.model._meta
         verbose_name_plural = opts.verbose_name_plural
         actions = super(FileAdmin, self).get_actions(request)
-        # Add the dynamic folders.
-        for folder in Folder.objects.all():
-            action_function = partial(self.__class__.update_folder_action, folder=folder)
-            action_description = u'Move selected %s to folder "%s"' % (verbose_name_plural, folder.name)
+        # Add the dynamic labels.
+        for label in Label.objects.all():
+            # Add action.
+            action_function = partial(self.__class__.add_label_action, label=label)
+            action_description = u'Remove label %s from selected %s"' % (label.name, verbose_name_plural)
             action_name = action_description.lower().replace(" ", "_")
             actions[action_name] = (action_function, action_name, action_description)
-        # Add the remove folder action.
-        remove_folder_function = self.__class__.remove_folder
-        remove_folder_description = u"Remove selected %s from folder" % verbose_name_plural
-        remove_folder_name = "folder"
-        actions[remove_folder_name] = (remove_folder_function, remove_folder_name, remove_folder_description)
+            # Remove action.
+            action_function = partial(self.__class__.remove_label_action, label=label)
+            action_description = u'Remove label %s from selected %s"' % (label.name, verbose_name_plural)
+            action_name = action_description.lower().replace(" ", "_")
+            actions[action_name] = (action_function, action_name, action_description)
         return actions
     
-    def remove_folder(self, request, queryset):
-        """Removes the folder from selected files."""
-        queryset.update(folder=None)
+    def remove_label(self, request, queryset):
+        """Removes the label from selected files."""
+        queryset.update(label=None)
     
     # Custom display routines.
     
-    def get_folder(self, obj):
-        """Returns a pretty version of the folder."""
-        if obj.folder:
-            return obj.folder.name
+    def get_label(self, obj):
+        """Returns a pretty version of the label."""
+        if obj.label:
+            return obj.label.name
         return ""
-    get_folder.short_description = "folder"
-    get_folder.admin_order_field = "folder"
+    get_label.short_description = "label"
+    get_label.admin_order_field = "label"
     
     def get_size(self, obj):
         """Returns the size of the media in a human-readable format."""
