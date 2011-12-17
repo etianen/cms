@@ -1,12 +1,12 @@
 """Context processors used by the CMS."""
 
-from django.conf import settings
+from django.conf import settings as django_settings
 
 
-def conf(request):
+def settings(request):
     """Gives the settings object to the template."""
     context = {
-        "settings": settings
+        "settings": django_settings
     }
     return context
     
