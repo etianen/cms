@@ -1,5 +1,5 @@
 """
-Site-specific settings file.
+Production settings file.
 
 For an explanation of these settings, please see the Django documentation at:
 
@@ -8,11 +8,11 @@ For an explanation of these settings, please see the Django documentation at:
 While many of these settings assume sensible defaults, you must provide values
 for the site, database, media and email sections below.
 """
+#@PydevCodeAnalysisIgnore
 
+import hashlib, os
 
-import hashlib, os  # @UnusedImport
-
-from cms.settings import *  # @UnusedWildImport
+from cms.settings import *
 
 
 # The name of this site.  Used for branding in the online admin area.
@@ -157,6 +157,12 @@ CACHE_MIDDLEWARE_KEY_PREFIX = SITE_DOMAIN
 # generated from your database password and email password.  If, for some
 # reason, these are not considered secure, you can override it below.
 
-SECURE_SETTINGS = (DATABASES["default"]["PASSWORD"], EMAIL_HOST_PASSWORD)
+SECRET_KEY = hashlib.sha1("$".join((DATABASES["default"]["PASSWORD"], EMAIL_HOST_PASSWORD))).hexdigest()
 
-SECRET_KEY = hashlib.sha1("".join(SECURE_SETTINGS)).hexdigest()
+
+# Import local settings, if available.
+
+try:
+    from settings_local import *
+except ImportError:
+    pass

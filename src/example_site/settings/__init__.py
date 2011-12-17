@@ -1,8 +1,18 @@
 """
-Settings used by this site.
+The settings used by this site.
 
-This package contains settings files appropriate for a number of different
-application environments.
+This consists of the general produciton settings, with an optional import of any local
+settings.
 """
+#@PydevCodeAnalysisIgnore
 
+
+# Import production settings.
 from production import *
+
+
+# Import optional local settings.
+try:
+    from local import *
+except ImportError:
+    pass
