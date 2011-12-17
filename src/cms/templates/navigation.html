@@ -1,7 +1,7 @@
 {% if navigation %}
     <ul>
         {% for entry in navigation %}
-            <li class="{% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
+            <li>
                 <a class="{% if entry.here %}here{% endif %}" href="{{entry.url}}" title="{{entry.title}}">{{entry.short_title}}</a>
             </li>
         {% endfor %}
