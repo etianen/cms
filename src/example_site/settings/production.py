@@ -87,7 +87,7 @@ EMAIL_SUBJECT_PREFIX = "[%s] " % SITE_NAME
 
 # Whether to automatically add www to the start of the domain name.  
 
-PREPEND_WWW = True
+PREPEND_WWW = False
 
 
 # Error reporting settings.  Use these to set up automatic error notifications.
@@ -108,6 +108,10 @@ SEND_BROKEN_LINK_EMAILS = False
 TIME_ZONE = "Europe/London"
 
 LANGUAGE_CODE = "en-gb"
+
+USE_I18N = False
+
+USE_L10N = False
 
 
 # Auto-discovery of project location.

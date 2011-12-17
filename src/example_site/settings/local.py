@@ -32,11 +32,6 @@ STATIC_ROOT = os.path.expanduser("~/Sites/%s/static" % SITE_DOMAIN)
 SITE_DOMAIN = "localhost:8000"
 
 
-# Disable prepending www, as local servers run from localhost.
-
-PREPEND_WWW = False
-
-
 # Disable the template cache for development.
 
 TEMPLATE_LOADERS = (

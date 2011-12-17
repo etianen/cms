@@ -15,16 +15,12 @@ For an explanation of these settings, please see the Django documentation at:
 <http://docs.djangoproject.com/en/dev/>
 """
 
-
-import os
-
-
 # Template settings.
 
 TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
+    ("django.template.loaders.cached.Loader", (
+        "django.template.loaders.filesystem.Loader",
+        "django.template.loaders.app_directories.Loader",
     )),
 )
 
@@ -47,7 +43,7 @@ MIDDLEWARE_CLASSES = (
     "django.middleware.transaction.TransactionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    'django.middleware.csrf.CsrfViewMiddleware',
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "cms.apps.historylinks.middleware.HistoryLinkFallbackMiddleware",
@@ -76,13 +72,6 @@ INSTALLED_APPS = (
 )
 
 PAGE_BACKEND = "cms.apps.pages.backend.PageBackend"
-
-
-# Internationalization settings.
-
-USE_I18N = False
-
-USE_L10N = True
 
 
 # Logging settings.
