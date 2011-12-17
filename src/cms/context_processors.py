@@ -15,6 +15,5 @@ def pages(request):
     """Adds the current page backend to the template."""
     context = {
         "pages": request.pages,
-        "page": lambda: request.pages.current,
     }
     return context
