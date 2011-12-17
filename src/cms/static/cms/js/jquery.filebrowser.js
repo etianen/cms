@@ -31,7 +31,8 @@
                 popup_css: false
             }, {
                 window: win,
-                input: field_name
+                input: field_name,
+                tinymce_active: true
             });
             return false;
         }
@@ -61,16 +62,18 @@
     
     // Initializes the popup file browser.
     $.filebrowser.initBrowser = function() {
-        // Make the changelist links clickable and remove the original inline click listener.
-        $("div#changelist tr.row1 a, div#changelist tr.row2 a").attr("onclick", null).click(function() {
-            var img = $("img", this);
-            var title = img.attr("title");
-            var permalink = img.attr("cms:permalink");
-            $.filebrowser.complete(permalink, title)
-            return false;
-        });
-        // Made the add link flagged for TinyMCE.
-        $("a.addlink").attr("href", $("a.addlink").attr("href") + "&_tinymce=1");
+        if (tinyMCEPopup.getWindowArg("tinymce_active")) {
+            // Make the changelist links clickable and remove the original inline click listener.
+            $("div#changelist tr.row1 a, div#changelist tr.row2 a").attr("onclick", null).click(function() {
+                var img = $("img", this);
+                var title = img.attr("title");
+                var permalink = img.attr("cms:permalink");
+                $.filebrowser.complete(permalink, title)
+                return false;
+            });
+            // Made the add link flagged for TinyMCE.
+            $("a.addlink").attr("href", $("a.addlink").attr("href") + "&_tinymce=1");
+        } 
     }
 
 }(django.jQuery, tinyMCE, window.tinyMCEPopup));
