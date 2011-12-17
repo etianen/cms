@@ -20,7 +20,7 @@ urlpatterns = patterns("",
     url(r"^admin/", include(admin_site.urls)),
     
     # Permalink redirection service.
-    url(r"^r/(?P<content_type_id>\d+)/(?P<object_id>.+)/$", "django.contrib.contenttypes.views.shortcut", name="permalink_redirect"),
+    url(r"^r/(?P<content_type_id>\d+)-(?P<object_id>[^/]+)/$", "django.contrib.contenttypes.views.shortcut", name="permalink_redirect"),
     
     # Google sitemap service.
     url(r"^sitemap.xml$", "django.contrib.sitemaps.views.index", {"sitemaps": registered_sitemaps}),
