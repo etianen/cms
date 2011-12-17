@@ -162,11 +162,3 @@ CACHE_MIDDLEWARE_KEY_PREFIX = SITE_DOMAIN
 # reason, these are not considered secure, you can override it below.
 
 SECRET_KEY = hashlib.sha1("$".join((DATABASES["default"]["PASSWORD"], EMAIL_HOST_PASSWORD))).hexdigest()
-
-
-# Import local settings, if available.
-
-try:
-    from settings_local import *
-except ImportError:
-    pass

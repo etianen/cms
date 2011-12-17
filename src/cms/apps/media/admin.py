@@ -4,23 +4,26 @@ import os
 from functools import partial
 
 from django.conf import settings
+from django.contrib import admin
 from django.contrib.admin.views.main import IS_POPUP_VAR
 from django.shortcuts import render
 from django.template.defaultfilters import filesizeformat
 from django.utils.text import truncate_words
 
-import optimizations, reversion
+import optimizations
+
+from reversion.admin import VersionMetaAdmin
 
 from cms import permalinks
-from cms.admin import AuditBaseAdmin, site
+from cms.admin import site
 from cms.apps.media.models import Folder, File
 
 
-class FolderAdmin(AuditBaseAdmin):
+class FolderAdmin(admin.ModelAdmin):
     
     """Admin settings for Folder models."""
     
-    list_display = ("name", "date_modified",)
+    list_display = ("name",)
     
     search_fields = ("name",)
     
@@ -59,7 +62,7 @@ FILE_ICONS = {
 }
     
     
-class FileAdmin(reversion.VersionAdmin, AuditBaseAdmin):
+class FileAdmin(VersionMetaAdmin):
     
     """Admin settings for File models."""
     
@@ -70,7 +73,7 @@ class FileAdmin(reversion.VersionAdmin, AuditBaseAdmin):
     
     search_fields = ("title",)
     
-    list_display = ("get_preview", "get_title", "get_size", "date_modified")
+    list_display = ("get_preview", "get_title", "get_size", "get_date_modified")
 
     change_list_template = "admin/media/file/change_list.html"
     

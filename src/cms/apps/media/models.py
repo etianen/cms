@@ -3,10 +3,8 @@
 
 from django.db import models
 
-from cms.models import AuditBase
 
-
-class Folder(AuditBase):
+class Folder(models.Model):
     
     """
     A notional folder used to organise static media.
@@ -24,7 +22,7 @@ class Folder(AuditBase):
         ordering = ("name",)
     
     
-class File(AuditBase):
+class File(models.Model):
     
     """A static file."""
     

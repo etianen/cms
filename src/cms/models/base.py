@@ -6,24 +6,7 @@ from django.shortcuts import render
 from cms.models.managers import PublishedBaseManager, publication_manager
 
 
-class AuditBase(models.Model):
-    
-    """A model that allows improved admin auditing."""
-    
-    date_created = models.DateTimeField(
-        auto_now_add = True
-    )
-    
-    date_modified = models.DateTimeField(
-        "last modified",
-        auto_now = True,
-    )
-    
-    class Meta:
-        abstract = True
-
-
-class PublishedBase(AuditBase):
+class PublishedBase(models.Model):
     
     """A model with publication controls."""
     
@@ -54,7 +37,7 @@ class PublishedBase(AuditBase):
         help_text = (
             "Uncheck this box to remove the page from the public website. "
             "Logged-in admin users will still be able to view this page by clicking the 'view on site' button."
-        )
+        ),
     )
     
     class Meta:

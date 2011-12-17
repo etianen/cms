@@ -2,21 +2,14 @@
 
 from django.contrib import admin
 
-import reversion
-
-
-class AuditBaseAdmin(admin.ModelAdmin):
-    
-    """Base class for audited models."""
-    
-    list_display = ("__unicode__", "date_modified",)
+from reversion.admin import VersionMetaAdmin
             
 
-class PublishedBaseAdmin(AuditBaseAdmin):
+class PublishedBaseAdmin(admin.ModelAdmin):
     
     """Base admin class for published models."""
     
-    list_display = ("__unicode__", "is_online", "date_modified",)
+    list_display = ("__unicode__", "is_online",)
     
     actions = ("publish_selected", "unpublish_selected",)
     
@@ -42,9 +35,11 @@ class PublishedBaseAdmin(AuditBaseAdmin):
     unpublish_selected.short_description = "Take selected %(verbose_name_plural)s offline"
 
 
-class EntityBaseAdmin(reversion.VersionAdmin, PublishedBaseAdmin):
+class EntityBaseAdmin(VersionMetaAdmin, PublishedBaseAdmin):
     
     """Base admin class for EntityBase models."""
+    
+    list_display = ("__unicode__", "is_online", "get_date_modified",)
     
     SEO_FIELDS = ("Search engine optimization", {
         "fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_changefreq", "robots_index", "robots_follow", "robots_archive",),
@@ -56,7 +51,7 @@ class PageBaseAdmin(EntityBaseAdmin):
     
     """Base admin class for PageBase models."""
 
-    list_display = ("title", "is_online", "date_modified",)
+    list_display = ("title", "is_online", "get_date_modified",)
     
     prepopulated_fields = {"url_title": ("title",),}
     

@@ -163,8 +163,9 @@ def meta_description(context, description=None):
     if description is None:
         request = context["request"]
         page = request.pages.current
-        description = page.meta_description
-    return escape(description)
+        if page:
+            description = page.meta_description
+    return escape(description or "")
 
 
 @parameter_tag(register, takes_context=True)
@@ -191,8 +192,9 @@ def meta_keywords(context, keywords=None):
     if keywords is None:
         request = context["request"]
         page = request.pages.current
-        keywords = page.meta_keywords
-    return escape(keywords)
+        if page:
+            keywords = page.meta_keywords
+    return escape(keywords or "")
 
 
 @parameter_tag(register, takes_context=True)
@@ -282,13 +284,16 @@ def breadcrumbs(context, page=None, extended=False):
     request = context["request"]
     # Render the tag.
     page = page or request.pages.current
-    breadcrumb_list = [{
-        "short_title": breadcrumb.short_title or breadcrumb.title,
-        "title": breadcrumb.title,
-        "url": breadcrumb.get_absolute_url(),
-        "last": False,
-        "page": breadcrumb,
-    } for breadcrumb in page.breadcrumbs]
+    if page:
+        breadcrumb_list = [{
+            "short_title": breadcrumb.short_title or breadcrumb.title,
+            "title": breadcrumb.title,
+            "url": breadcrumb.get_absolute_url(),
+            "last": False,
+            "page": breadcrumb,
+        } for breadcrumb in page.breadcrumbs]
+    else:
+        breadcrumb_list = []
     if not extended:
         breadcrumb_list[-1]["last"] = True
     # Render the breadcrumbs.

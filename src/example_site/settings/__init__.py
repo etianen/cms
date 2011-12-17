@@ -10,7 +10,6 @@ settings.
 # Import production settings.
 from production import *
 
-
 # Import optional local settings.
 try:
     from local import *

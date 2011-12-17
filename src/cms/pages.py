@@ -18,9 +18,9 @@ class BackendBase(object):
     # The primary model of the backend.
     model = None
     
-    def get_all(self, request):
-        """Returns all the pages in the site."""
-        return self.model._default_manager.all()
+    def filter_for_site(self, request, queryset):
+        """Filters the given queryset to only show pages that belong in this site."""
+        return queryset
     
     @abc.abstractmethod
     def get_homepage(self, request):
@@ -88,7 +88,11 @@ class MountedBackend(object):
     @property
     def all(self):
         """Returns all pages in the site."""
-        return self.backend.get_all(self.request)
+        return self.backend.filter_for_site(self.request, self.backend.model)
+    
+    def filter_for_site(self, queryset):
+        """Filters the given queryset to only show pages that belong in this site."""
+        return self.backend.filter_for_site(self.request, queryset)
     
     @optimizations.cached_property
     def homepage(self):

@@ -69,7 +69,7 @@ class PageAdmin(PageBaseAdmin):
     
     def queryset(self, request):
         """Only allows editing of pages in this site."""
-        return request.pages.all
+        return request.pages.filter_for_site(super(PageAdmin, self).queryset(request))
                 
     # Reversion
 
