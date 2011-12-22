@@ -40,23 +40,9 @@ class File(models.Model):
         max_length = 250,
     )
     
-    # HACK: File fields can't be unique, for some reason.
-    file_name = models.CharField(
-        max_length = 250,
-        unique = True,
-        editable = False,
-    )
-    
     def get_absolute_url(self):
         """Generates the absolute URL of the image."""
         return self.file.url
-    
-    def save(self, *args, **kwargs):
-        """Saves the file."""
-        # HACK: Populate the filename field.
-        self.file_name = self.file.name[14:]
-        # Save the file as usual.
-        super(File, self).save(*args, **kwargs)
     
     def __unicode__(self):
         """Returns the title of the media."""
@@ -66,36 +52,24 @@ class File(models.Model):
         ordering = ("title",)
 
 
-class FileRefWidget(ForeignKeyRawIdWidget):
-    
-    """An admin file reference widget."""
-    
-    def render(self, name, value, attrs=None):
-        """Renders the widget."""
-        attrs = attrs or {}
-        attrs.setdefault("style", "width: 200px")
-        return super(FileRefWidget, self).render(name, value, attrs)
-
-
 class FileRefField(models.ForeignKey):
     
     """A foreign key to a File, constrained to only select image files."""
     
     def __init__(self, **kwargs):
         kwargs["to"] = File
-        kwargs["to_field"] = "file_name"
         kwargs.setdefault("related_name", "+")
         kwargs.setdefault("on_delete", models.PROTECT)
         super(FileRefField, self).__init__(**kwargs)
         
     def formfield(self, **kwargs):
         defaults = {
-            "widget": FileRefWidget(self.rel), 
+            "widget": ForeignKeyRawIdWidget(self.rel), 
         }
         return super(FileRefField, self).formfield(**defaults)
 
 
-IMAGE_FILTER = {"file__iregex": ur"^.+\.(png|gif|jpg|jpeg)$"} 
+IMAGE_FILTER = {"file__iregex": ur"\.(png|gif|jpg|jpeg)$"} 
         
 class ImageRefField(FileRefField):
     

@@ -66,8 +66,15 @@ class FileAdmin(VersionMetaAdmin):
     
     """Admin settings for File models."""
     
-    fieldsets = ((None, {"fields": ("title", "file",),},),
-                 ("Media management", {"fields": ("labels",),},),)
+    fieldsets = (
+        (None, {
+            "fields": ("title", "file",),
+        },),
+        ("Media management", {
+            "fields": ("labels",),
+            "classes": ("collapse",),
+        },),
+    )
     
     list_filter = ("labels",)
     
