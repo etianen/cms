@@ -35,9 +35,6 @@ class PublishedBaseSitemap(Sitemap):
             else:
                 pages.append(obj)
         return pages
-        
-    def lastmod(self, obj):
-        return obj.date_modified
 
 
 class EntityBaseSitemap(PublishedBaseSitemap):
