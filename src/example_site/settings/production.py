@@ -87,7 +87,7 @@ EMAIL_SUBJECT_PREFIX = "[%s] " % SITE_NAME
 
 # Whether to automatically add www to the start of the domain name.  
 
-PREPEND_WWW = False
+PREPEND_WWW = True
 
 
 # Error reporting settings.  Use these to set up automatic error notifications.
