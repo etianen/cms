@@ -10,7 +10,7 @@ This file should be excluded from version control to keep the settings local.
 
 import os.path
 
-from production import SITE_DOMAIN, DATABASES
+from production import SITE_PACKAGE, DATABASES
 
 
 # Run in debug mode.
@@ -22,9 +22,9 @@ TEMPLATE_DEBUG = DEBUG
 
 # Save media files to the user's Sites folder.
 
-MEDIA_ROOT = os.path.expanduser("~/Sites/%s/media" % SITE_DOMAIN)
+MEDIA_ROOT = os.path.expanduser("~/Sites/%s/media" % SITE_PACKAGE)
 
-STATIC_ROOT = os.path.expanduser("~/Sites/%s/static" % SITE_DOMAIN)
+STATIC_ROOT = os.path.expanduser("~/Sites/%s/static" % SITE_PACKAGE)
 
 
 # Use local server.
