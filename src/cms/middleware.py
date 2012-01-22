@@ -92,4 +92,4 @@ class PageMiddleware(object):
             # Let the normal 404 mechanisms render an error page.
             return response
         except:
-            return BaseHandler().handle_uncaught_exception(request, urlresolvers.get_resolver(), sys.exc_info())
+            return BaseHandler().handle_uncaught_exception(request, urlresolvers.get_resolver(None), sys.exc_info())
