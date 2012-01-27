@@ -11,7 +11,18 @@ from cms.models import PublishedBase, EntityBase, PageBase
 registered_sitemaps = {}
 
 
-class PublishedBaseSitemap(Sitemap):
+class BaseSitemap(Sitemap):
+    
+    """Base sitemap for registration."""
+    
+    model = None
+    
+    def items(self):
+        """Returns all items in this sitemap."""
+        return self.model.objects.all()
+
+
+class PublishedBaseSitemap(BaseSitemap):
     
     """
     Base sitemap for all subclasses of PublishedBase.
@@ -19,12 +30,10 @@ class PublishedBaseSitemap(Sitemap):
     Subclasses need to override the model property.
     """
     
-    model = None
-    
     def items(self):
         """Returns all items in this sitemap."""
         pages = []
-        for obj in self.model.objects.all():
+        for obj in super(PublishedBaseSitemap, self).items():
             # HACK: PublishedBase instances might be not be published, due to an
             # unpublished parent. This checks to see if they can provide a URL
             # before passing them on to the renderer.
@@ -90,7 +99,7 @@ def register(model, sitemap_cls=None):
         elif issubclass(model, PublishedBase):
             sitemap_cls_base = PublishedBaseSitemap
         else:
-            raise SitemapRegistrationError("You must specify a sitemap class.")
+            sitemap_cls_base = BaseSitemap
         sitemap_cls_name = model.__name__ + "Sitemap"
         sitemap_cls = type(sitemap_cls_name, (sitemap_cls_base,), {
             "model": model,
