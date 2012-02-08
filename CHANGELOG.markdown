@@ -2,10 +2,13 @@ CMS Changelog
 =============
 
 
-2.4.2 - 17/12/2011
+2.5 - 08/02/2012
 ------------------
 
-* Minor bug fixes.
+*   Adding in permalink to file admin.
+*   FileRefField and ImageRefField now use an admin related lookup field.
+*   File folders changed to M2M labels.
+*   Removing timestamps from many models. Likewise removing AuditBase class.
 
 
 2.4.1 - 20/10/2011
