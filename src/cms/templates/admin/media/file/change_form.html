@@ -1,0 +1,13 @@
+{% extends "admin/change_form.html" %}
+{% load permalinks %}
+
+
+{% block form_top %}
+    {% if original %}
+        <p>
+            <strong>Permalink:</strong>
+            <a href="{{original|permalink}}">{% permalink_absolute original %}</a>
+        </p>
+    {% endif %}
+    {{block.super}}
+{% endblock %}
