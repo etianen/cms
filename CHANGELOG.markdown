@@ -1,6 +1,13 @@
 CMS Changelog
 =============
 
+2.4.2 - 08/02/2012
+------------------
+
+*   Removing asset optimizer.
+*   Adding permalink to file admin.
+*   Fixing broken meta description and keywords.
+
 
 2.4.1 - 20/10/2011
 ------------------
