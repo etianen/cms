@@ -24,7 +24,7 @@ CMS Changelog
 2.4 - 15/06/2011
 ----------------
 
-*   General Iimprovements based on new Django 1.3 APIs.
+*   General improvements based on new Django 1.3 APIs.
 *   Admin performance improvements, notably asynchronous sitemap loader.
 *   Thumbnailing performance and rendering enhancements.
 *   New historylinks application for tracking old content URLs.
