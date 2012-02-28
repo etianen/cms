@@ -54,11 +54,15 @@ STATIC_URL = "/static/"
 STATIC_ASSETS = {
     "default": {
         "js": {
-            "dirname": "js",
+            "include": (
+                "js/*.js",
+            ),
         },
         "css": {
-            "dirname": "css",
-        }
+            "include": (
+                "css/*.css",
+            ),
+        },
     },
 }
 
@@ -155,6 +159,18 @@ TEMPLATE_DIRS = (
 # Namespace for cache keys, if using a process-shared cache.
 
 CACHE_MIDDLEWARE_KEY_PREFIX = SITE_DOMAIN
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    },
+    # Used for efficient caching of static assets.
+    "optimizations.assetcache": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "TIMEOUT": 60 * 60,
+        "LOCATION": "optimiizations.assetcache",
+    },
+}
 
 
 # A secret key used for cryptographic algorithms.  For convenience, this is
