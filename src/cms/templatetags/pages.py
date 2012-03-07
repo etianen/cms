@@ -5,7 +5,7 @@ from django import template
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
 
-from optimizations.templatetags import simple_tag, template_tag
+from optimizations.templatetags import simple_tag, template_tag, assignment_tag
 
 from cms.html import process as process_html
 from cms.models import PageBase
@@ -96,6 +96,7 @@ class NavigationRenderer(object):
     
 
 @simple_tag(register, takes_context=True)
+@assignment_tag(register, takes_context=True, name="get_navigation")
 def navigation(context, pages, section=None):
     """
     Renders a navigation list for the given pages.
