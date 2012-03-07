@@ -5,7 +5,7 @@ from django import template
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
 
-from optimizations.templatetags import parameter_tag, template_tag
+from optimizations.templatetags import simple_tag, template_tag
 
 from cms.html import process as process_html
 from cms.models import PageBase
@@ -95,7 +95,7 @@ class NavigationRenderer(object):
             self.context.pop()
     
 
-@parameter_tag(register, takes_context=True)
+@simple_tag(register, takes_context=True)
 def navigation(context, pages, section=None):
     """
     Renders a navigation list for the given pages.
@@ -118,7 +118,7 @@ def navigation(context, pages, section=None):
 # Page linking.
 
 
-@parameter_tag(register, takes_context=True)
+@simple_tag(register, takes_context=True)
 def page_url(context, page, view_func=None, *args, **kwargs):
     """Renders the URL of the given view func in the given page."""
     request = context["request"]
@@ -139,7 +139,7 @@ def page_url(context, page, view_func=None, *args, **kwargs):
 
 # Page widgets.
 
-@parameter_tag(register, takes_context=True)
+@simple_tag(register, takes_context=True)
 def meta_description(context, description=None):
     """
     Renders the content of the meta description tag for the current page::
@@ -168,7 +168,7 @@ def meta_description(context, description=None):
     return escape(description or "")
 
 
-@parameter_tag(register, takes_context=True)
+@simple_tag(register, takes_context=True)
 def meta_keywords(context, keywords=None):
     """
     Renders the content of the meta keywords tag for the current page::
@@ -197,7 +197,7 @@ def meta_keywords(context, keywords=None):
     return escape(keywords or "")
 
 
-@parameter_tag(register, takes_context=True)
+@simple_tag(register, takes_context=True)
 def meta_robots(context, index=None, follow=None, archive=None):
     """
     Renders the content of the meta robots tag for the current page::

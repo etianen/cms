@@ -6,13 +6,13 @@ from django.core.paginator import Paginator, InvalidPage
 from django.http import Http404
 from django.utils.html import escape
 
-from optimizations.templatetags import parameter_tag, template_tag
+from optimizations.templatetags import simple_tag, template_tag, assignment_tag
 
 
 register = template.Library()
 
 
-@parameter_tag(register, takes_context=True)
+@assignment_tag(register, takes_context=True)
 def paginate(context, queryset, per_page=10, key="page"):
     """Paginates the given queryset as sets it in the context as a variable."""
     request = context["request"]
@@ -40,7 +40,7 @@ def pagination(page_obj):
     }
 
 
-@parameter_tag(register, takes_context=True)
+@simple_tag(register, takes_context=True)
 def pagination_url(context, page_number):
     """Renders the URL for the given page number."""
     request = context["request"]
