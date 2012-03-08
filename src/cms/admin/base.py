@@ -13,7 +13,7 @@ class PublishedBaseAdmin(admin.ModelAdmin):
     
     actions = ("publish_selected", "unpublish_selected",)
     
-    change_form_template = "admin/core/publishedmodel/change_form.html"
+    change_form_template = "admin/cms/publishedmodel/change_form.html"
     
     list_filter = ("is_online",)
     
