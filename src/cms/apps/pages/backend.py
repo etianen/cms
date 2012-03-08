@@ -14,19 +14,10 @@ class PageBackend(BackendBase):
     
     def get_homepage(self, request):
         """Returns the site homepage."""
-        # Try to use the cache.
         try:
-            return Page.objects.cache.get_homepage()
-        except KeyError:
-            pass
-        # Load in the homepage.
-        try:
-            homepage = Page.objects.get(parent=None)
+            return Page.objects.get(parent=None)
         except Page.DoesNotExist:
             return None
-        else:
-            Page.objects.cache.put_homepage(homepage)
-            return homepage
         
     def get_current(self, request):
         """Returns the best-matched page, or None"""
@@ -47,8 +38,8 @@ class PageBackend(BackendBase):
         """Returns the page with the given id."""
         if isinstance(id, int):
             try:
-                return Page.objects.get_by_id(id)
-            except Page.DoesNotExist:
+                return self.model.objects.get(id=id)
+            except self.model.DoesNotExist:
                 return None
         elif isinstance(id, basestring):
             try:

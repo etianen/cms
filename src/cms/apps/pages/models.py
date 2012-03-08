@@ -14,7 +14,6 @@ import optimizations
 from cms import sitemaps
 from cms.models.base import PageBase
 from cms.apps import historylinks
-from cms.apps.pages.models.managers import PageManager
 
 
 def get_default_page_parent():
@@ -28,8 +27,6 @@ def get_default_page_parent():
 class Page(PageBase):
 
     """A page within the site."""
-
-    objects = PageManager()
     
     @classmethod
     def select_published(cls, queryset):
@@ -39,14 +36,6 @@ class Page(PageBase):
         queryset = queryset.filter(Q(publication_date=None) | Q(publication_date__lte=now))
         queryset = queryset.filter(Q(expiry_date=None) | Q(expiry_date__gt=now))
         return queryset
-    
-    # Base fields.
-    
-    def __init__(self, *args, **kwargs):
-        """"Initializes the Page."""
-        super(Page, self).__init__(*args, **kwargs)
-        if self.id:
-            self.__class__.objects.cache.put(self)
     
     # Hierarchy fields.
 
@@ -116,16 +105,6 @@ class Page(PageBase):
         """Performs a reverse URL lookup."""
         urlconf = ContentType.objects.get_for_id(self.content_type_id).model_class().urlconf
         return self.get_absolute_url() + urlresolvers.reverse(view_func, args=args, kwargs=kwargs, urlconf=urlconf, prefix="")
-    
-    def save(self, *args, **kwargs):
-        """Saves the page."""
-        super(Page, self).save(*args, **kwargs)
-        self.__class__.objects.cache.put(self)
-        
-    def delete(self, using=None):
-        """Deletes the page."""
-        super(Page, self).delete(using)
-        self.__class__.objects.cache.remove(self)
     
     class Meta:
         unique_together = (("parent", "url_title",),)
