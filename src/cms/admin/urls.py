@@ -31,7 +31,7 @@ def get_urls(admin_site):
         return do_patched_admin_view
     # Add the addional views to the listing.
     urls = patterns("",
-        url(r"^$", patched_admin_view(views.index), name="index"),
+        url(r"^$", admin_view(patched_admin_view(views.index)), name="index"),
         url(r"^tinymce-init.js$", admin_view(patched_admin_view(views.tinymce_init)), name="tinymce_init"),
         url(r"^sitemap.json$", admin_view(patched_admin_view(views.sitemap_json)), name="sitemap_json"),
         url(r"^move-page/$", admin_view(patched_admin_view(views.move_page)), name="move_page"),
