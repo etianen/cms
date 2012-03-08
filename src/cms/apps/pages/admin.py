@@ -10,11 +10,16 @@ from __future__ import with_statement
 
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
+from django.conf.urls import patterns, url
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404, HttpResponseRedirect
+from django.db import transaction
+from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
+from django.utils import simplejson as json
 
+from cms import debug
 from cms.admin import PageBaseAdmin, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.apps.pages.models import Page, get_registered_content
 
@@ -67,10 +72,6 @@ class PageAdmin(PageBaseAdmin):
                 inline_instances.append(inline(self.model, self.admin_site))
         # All done!
         return inline_instances
-    
-    def queryset(self, request):
-        """Only allows editing of pages in this site."""
-        return request.pages.filter_for_site(super(PageAdmin, self).queryset(request))
                 
     # Reversion
     
@@ -121,6 +122,25 @@ class PageAdmin(PageBaseAdmin):
             fieldsets = tuple(fieldsets[0:1]) + content_fieldsets + tuple(fieldsets[1:])
         return fieldsets
 
+    def get_all_children(self, page):
+        """Returns all the children for a page."""
+        children = []
+        def do_get_all_children(page):
+            for child in page.children.all():
+                children.append(page)
+                do_get_all_children(child)
+        do_get_all_children(page)
+        return children
+
+    def get_breadcrumbs(self, page):
+        """Returns all breadcrumbs for a page."""
+        breadcrumbs = []
+        while page:
+            breadcrumbs.append(page)
+            page = page.parent
+        breadcrumbs.reverse()
+        return breadcrumbs
+
     def get_form(self, request, obj=None, **kwargs):
         """Adds the template area fields to the form."""
         content_cls = self.get_page_content_cls(request, obj)
@@ -144,16 +164,16 @@ class PageAdmin(PageBaseAdmin):
         # HACK: Need to limit parents field based on object. This should be done in
         # formfield_for_foreignkey, but that method does not know about the object instance.
         if obj:
-            invalid_parents = set(child.id for child in obj.all_children)
+            invalid_parents = set(child.id for child in self.get_all_children(obj))
             invalid_parents.add(obj.id)
         else:
             invalid_parents = frozenset()
         homepage = request.pages.homepage
         if homepage:
             parent_choices = []
-            for page in [homepage] + homepage.all_children:
+            for page in [homepage] + self.get_all_children(homepage):
                 if not page.id in invalid_parents:
-                    parent_choices.append((page.id, u" \u203a ".join(unicode(breadcrumb) for breadcrumb in page.breadcrumbs)))
+                    parent_choices.append((page.id, u" \u203a ".join(unicode(breadcrumb) for breadcrumb in self.get_breadcrumbs(page))))
         else:
             parent_choices = []
         if not parent_choices:
@@ -320,6 +340,86 @@ class PageAdmin(PageBaseAdmin):
         """Redirects to the sitemap if appropriate."""
         response = super(PageAdmin, self).delete_view(request, *args, **kwargs)
         return self.patch_response_location(request, response)
+    
+    def get_urls(self):
+        """Adds in some custom admin URLs."""
+        admin_view = self.admin_site.admin_view
+        return patterns("",
+            url("^sitemap.json$", admin_view(self.sitemap_json_view), name="pages_page_sitemap_json"),
+            url("^move-page/$", admin_view(self.move_page_view), name="pages_page_move_page"),
+        ) + super(PageAdmin, self).get_urls()
+    
+    @debug.print_exc
+    def sitemap_json_view(self, request):
+        """Returns a JSON data structure describing the sitemap."""
+        # Get the homepage.
+        homepage = request.pages.homepage
+        # Compile the initial data.
+        data = {
+            "canAdd": self.has_add_permission(request),
+            "createHomepageUrl": reverse("admin:pages_page_add") + "?{0}={1}".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+            "moveUrl": reverse("admin:pages_page_move_page") or None,
+            "addUrl": reverse("admin:pages_page_add") + "?{0}={1}&parent=__id__".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+            "changeUrl": reverse("admin:pages_page_change", args=("__id__",)) + "?{0}={1}".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+            "deleteUrl": reverse("admin:pages_page_delete", args=("__id__",)) + "?{0}={1}".format(PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE),
+        }
+        # Add in the page data.
+        if homepage:
+            def sitemap_entry(page):
+                children = []
+                for child in page.children.all():
+                    children.append(sitemap_entry(child))
+                return {
+                    "isOnline": page.is_online,
+                    "id": page.id,
+                    "title": unicode(page),
+                    "children": children,
+                    "canChange": self.has_change_permission(request, page),
+                    "canDelete": self.has_delete_permission(request, page),
+                }
+            data["entries"] = [sitemap_entry(homepage)]
+        else:
+            data["entries"] = []
+        # Render the JSON.
+        response = HttpResponse(content_type="application/json; charset=utf-8")
+        json.dump(data, response)
+        return response
+        
+    @transaction.commit_on_success
+    @debug.print_exc
+    def move_page_view(self, request):
+        """Moves a page up or down."""
+        # Get the page.
+        page = get_object_or_404(self.model, pk=request.POST["page"])
+        # Check that the user has permission to move the page.
+        if not self.has_change_permission(request, page):
+            return HttpResponseForbidden("You do not have permission to move this page.")
+        # Get all the siblings.
+        siblings = list(page.parent.children.all().select_for_update())
+        # Find the page to swap.
+        direction = request.POST["direction"]
+        if direction == "up":
+            siblings.reverse()
+        elif direction == "down":
+            pass
+        else:
+            raise ValueError("Direction should be 'up' or 'down'.")
+        sibling_iter = iter(siblings)
+        for sibling in sibling_iter:
+            if sibling.id == page.id:
+                break
+        try:
+            other_page = next(sibling_iter)
+        except StopIteration:
+            return HttpResponse("Page could not be moved, as nothing to swap with.")
+        # Do the swap.
+        page_order = page.order
+        page.order = other_page.order
+        page.save()
+        other_page.order = page_order
+        other_page.save()
+        # Report back.
+        return HttpResponse("Page #%s was moved %s." % (page.id, direction))
 
 
 admin.site.register(Page, PageAdmin)

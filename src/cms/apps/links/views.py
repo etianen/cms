@@ -11,7 +11,7 @@ def index(request):
     # Process the link.
     if link_url.lower().startswith("page://"):
         try:
-            page = request.pages.get(link_url[7:])
+            page = Page.objects.get(pk=link_url[7:])
         except Page.DoesNotExist:
             link_url = request.pages.homepage.get_absolute_url()
         else:

@@ -44,19 +44,15 @@ class Page(PageBase):
         blank = True,
         null = True,
         default = get_default_page_parent,
+        related_name = "children",
     )
 
     order = models.IntegerField(editable=False)
-
-    @optimizations.cached_property
-    def children(self):
-        """The children of this page."""
-        return list(Page.objects.filter(parent=self).order_by("order").iterator())
     
     @property
     def navigation(self):
         """The sub-navigation of this page."""
-        return [child for child in super(Page, self).navigation if child.in_navigation]
+        return [child for child in self.children.all() if child.in_navigation]
     
     # Publication fields.
     

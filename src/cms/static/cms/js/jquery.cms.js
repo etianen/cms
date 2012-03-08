@@ -75,7 +75,7 @@
             container.append(loader);
             container.height(container.height());
             loader.hide().fadeIn(function() {
-                $.getJSON("/admin/sitemap.json", function(data) {
+                $.getJSON("/admin/pages/page/sitemap.json", function(data) {
                     loader.fadeOut(function() {
                         var dataContainer = $("<div>").css("opacity", 0);
                         // Process data.

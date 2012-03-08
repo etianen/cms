@@ -8,8 +8,9 @@ from django.utils.html import escape
 from optimizations.templatetags import simple_tag, template_tag, assignment_tag
 
 from cms.html import process as process_html
-from cms.models import PageBase
 from cms import debug
+
+from cms.apps.pages.models import Page
 
 
 register = template.Library()
@@ -119,13 +120,20 @@ def navigation(context, pages, section=None):
 # Page linking.
 
 
-@simple_tag(register, takes_context=True)
-def page_url(context, page, view_func=None, *args, **kwargs):
+@simple_tag(register)
+def page_url(page, view_func=None, *args, **kwargs):
     """Renders the URL of the given view func in the given page."""
-    request = context["request"]
     url = None
-    if not isinstance(page, PageBase):
-        page = request.pages.get(page)
+    if isinstance(page, basestring):
+        try:
+            page = Page.objects.get(permalink=page)
+        except Page.DoesNotExist:
+            url = "#"
+    elif isinstance(page, int):
+        try:
+            page = Page.objects.get(pk=page)
+        except Page.DoesNotExist:
+            url = "#"
     if page is None:
         url = "#"
     else:
@@ -133,7 +141,7 @@ def page_url(context, page, view_func=None, *args, **kwargs):
         if view_func is None:
             url = page.get_absolute_url()
         else:
-            url = request.pages.reverse(page, view_func, *args, **kwargs)
+            url = page.reverse(page, view_func, args, kwargs)
     # Return the value, or set as a context variable as appropriate.
     return escape(url)
 
@@ -292,7 +300,7 @@ def breadcrumbs(context, page=None, extended=False):
             "url": breadcrumb.get_absolute_url(),
             "last": False,
             "page": breadcrumb,
-        } for breadcrumb in page.breadcrumbs]
+        } for breadcrumb in request.pages.breadcrumbs]
     else:
         breadcrumb_list = []
     if not extended:

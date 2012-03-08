@@ -139,8 +139,6 @@ INSTALLED_APPS = (
     "{{ project_name }}.apps.site",
 )
 
-PAGE_BACKEND = "cms.apps.pages.backend.PageBackend"
-
 
 # Additional static file locations.
 

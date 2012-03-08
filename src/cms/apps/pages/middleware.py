@@ -9,21 +9,66 @@ from django.http import Http404
 from django.views.debug import technical_404_response
 from django.shortcuts import redirect
 
-from cms.apps.pages.backend import get_backend
+import optimizations
+
+from cms.apps.pages.models import Page
+
+
+class RequestPageManager(object):
+    
+    """Handles loading page objects."""
+    
+    def __init__(self, path, path_info):
+        """Initializes the RequestPageManager."""
+        self._path = path
+        self._path_info = path_info
+        
+    @optimizations.cached_property
+    def homepage(self):
+        """Returns the site homepage."""
+        try:
+            return Page.objects.prefetch_related("children__children").get(parent=None)
+        except Page.DoesNotExist:
+            return None
+        
+    @property
+    def is_homepage(self):
+        """Whether the current request is for the site homepage."""
+        return self._path == self.homepage.get_absolute_url()
+    
+    @optimizations.cached_property
+    def breadcrumbs(self):
+        """The breadcrumbs for the current request."""
+        breadcrumbs = []
+        slugs = self._path_info.strip("/").split("/")
+        slugs.reverse()
+        def do_breadcrumbs(page):
+            breadcrumbs.append(page)
+            if slugs:
+                slug = slugs.pop()
+                for child in page.children.all():
+                    if child.url_title == slug:
+                        do_breadcrumbs(child)
+                        break
+        do_breadcrumbs(self.homepage)
+        return breadcrumbs
+    
+    @optimizations.cached_property
+    def current(self):
+        """The current best-matched page."""
+        try:
+            return self.breadcrumbs[-1]
+        except IndexError:
+            return None
 
 
 class PageMiddleware(object):
     
     """Serves up pages when no other view is matched."""
     
-    def __init__(self):
-        """Initializes the PageMiddleware."""
-        self.backend = get_backend()
-    
     def process_request(self, request):
-        """Annotates the request with a page backend."""
-        # Mount the page backend.
-        self.backend.mount(request)
+        """Annotates the request with a page manager."""
+        request.pages = RequestPageManager(request.path, request.path_info)
             
     def process_response(self, request, response):
         """If the response was a 404, attempt to serve up a page."""
@@ -38,13 +83,13 @@ class PageMiddleware(object):
         # Dispatch to the content.
         try:
             try:
-                callback, callback_args, callback_kwargs = self.backend.resolve(request, page, path_info)
+                callback, callback_args, callback_kwargs = urlresolvers.resolve(path_info, page.content.urlconf)
             except urlresolvers.Resolver404:
                 # First of all see if adding a slash will help matters.
                 if settings.APPEND_SLASH:
                     new_path_info = path_info + "/"
                     try:
-                        self.backend.resolve(request, page, new_path_info)
+                        urlresolvers.resolve(new_path_info, page.content.urlconf)
                     except urlresolvers.Resolver404:
                         pass
                     else:
