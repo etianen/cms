@@ -10,6 +10,7 @@ from django.db import models
 from django.db.models import Q
 
 import optimizations
+from optimizations.assetcache import default_asset_cache
 
 from cms import sitemaps
 from cms.models.base import PageBase, PublishedBaseManager
@@ -139,7 +140,7 @@ class ContentBase(models.Model):
     """Base class for page content."""
     
     # This must be a 64 x 64 pixel image.
-    icon = settings.STATIC_URL + "cms/img/content-types/content.png"
+    icon = "pages/img/content.png"
 
     # The heading that the admin places this content under.
     classifier = "content"

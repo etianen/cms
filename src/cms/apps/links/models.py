@@ -1,6 +1,5 @@
 """"Content used by the links application."""
 
-from django.conf import settings
 from django.db import models
 
 from cms.apps.pages.models import ContentBase
@@ -12,7 +11,7 @@ class Link(ContentBase):
     
     classifier = "utilities"
     
-    icon = settings.STATIC_URL + "cms/img/content-types/redirect.png"
+    icon = "links/img/link.png"
     
     urlconf = "cms.apps.links.urls"
     

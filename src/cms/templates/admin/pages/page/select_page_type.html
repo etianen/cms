@@ -5,7 +5,7 @@
 
 {% block extrahead %}
     {{block.super}}
-    {% stylesheet "cms/css/admin.css" %}
+    {% stylesheet "pages/css/admin.css" %}
 {% endblock %}
 
 
@@ -35,7 +35,7 @@
                 {% for content_type in classifier.list %}
                     <li>
                         <a href="{{content_type.url}}">
-                            <img class="content-type-icon" src="{{content_type.icon}}" width="64" height="64" alt=""/>
+                            {% img content_type.icon width=64 height=64 method="crop" class="content-type-icon" %}
                             <span class="content-type-name">{{content_type.name|capfirst}}</span>
                         </a>
                     </li>

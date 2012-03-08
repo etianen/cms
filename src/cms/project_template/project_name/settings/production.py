@@ -197,7 +197,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 # Namespace for cache keys, if using a process-shared cache.
 
-CACHE_MIDDLEWARE_KEY_PREFIX = SITE_DOMAIN
+CACHE_MIDDLEWARE_KEY_PREFIX = "{{ project_name }}"
 
 CACHES = {
     "default": {
