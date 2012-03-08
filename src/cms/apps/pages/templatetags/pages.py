@@ -2,35 +2,15 @@
 
 
 from django import template
-from django.utils.safestring import mark_safe
 from django.utils.html import escape
 
 from optimizations.templatetags import simple_tag, template_tag, assignment_tag
 
-from cms.html import process as process_html
 from cms import debug
-
 from cms.apps.pages.models import Page
 
 
 register = template.Library()
-
-
-# HTML processing.
-
-@register.filter
-def html(text):
-    """
-    Processes HTML text.
-    
-    The text is checked for permalinks embedded in <a> tags, expanding the
-    permalinks to their referenced URL. Images containing a permalink source
-    are checked for size and thumbnailed as appropriate.
-    """
-    if not text:
-        return ""
-    text = process_html(text)
-    return mark_safe(text)
 
 
 # Navigation.
@@ -91,7 +71,7 @@ class NavigationRenderer(object):
             self.context.update({
                 "navigation": self.entries,
             })
-            return template.loader.render_to_string("navigation.html", self.context)
+            return template.loader.render_to_string("pages/navigation.html", self.context)
         finally:
             self.context.pop()
     
@@ -249,7 +229,7 @@ def meta_robots(context, index=None, follow=None, archive=None):
     return escape(robots)
 
 
-@template_tag(register, "title.html", takes_context=True)
+@template_tag(register, "pages/title.html", takes_context=True)
 def title(context, browser_title=None):
     """
     Renders the title of the current page::
@@ -277,7 +257,7 @@ def title(context, browser_title=None):
     }
 
 
-@template_tag(register, "breadcrumbs.html", takes_context=True)
+@template_tag(register, "pages/breadcrumbs.html", takes_context=True)
 def breadcrumbs(context, page=None, extended=False):
     """
     Renders the breadcrumbs trail for the current page::
@@ -311,7 +291,7 @@ def breadcrumbs(context, page=None, extended=False):
     }
 
 
-@template_tag(register, "header.html", takes_context=True)
+@template_tag(register, "pages/header.html", takes_context=True)
 def header(context, page_header=None):
     """
     Renders the header for the current page::
