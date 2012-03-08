@@ -1,16 +1,23 @@
 """The backend implementation for the app."""
 
 from django.core import urlresolvers
+from django.conf import settings
 
-from cms.pages import BackendBase
+import optimizations
+
 from cms.apps.pages.models import Page
+from cms.loader import load_object
 
 
-class PageBackend(BackendBase):
+class PageBackend(object):
     
     """A page backend that uses Page models."""
     
     model = Page
+    
+    def filter_for_site(self, request, queryset):
+        """Filters the given queryset to only show pages that belong in this site."""
+        return queryset
     
     def get_homepage(self, request):
         """Returns the site homepage."""
@@ -33,6 +40,16 @@ class PageBackend(BackendBase):
                 if not matched:
                     break
         return page
+    
+    def get_navigation(self, request, level):
+        """Returns the navigation list for the given level (zero-indexed)."""
+        page = self.get_current(request)
+        try:
+            section = page.breadcrumbs[level]
+        except IndexError:
+            return []
+        else:
+            return section.navigation
     
     def get(self, request, id):
         """Returns the page with the given id."""
@@ -92,3 +109,93 @@ class PageBackend(BackendBase):
                 pass
             else:
                 self._swap(page, other)
+                
+    def mount(self, request):
+        """Mounts this backend on the given request."""
+        request.pages = MountedBackend(self, request)
+                
+                
+class MountedBackend(object):
+    
+    """A page backend mounted on a request."""
+    
+    def __init__(self, backend, request):
+        """Initializes the MountedBackend."""
+        self.backend = backend
+        self.request = request
+    
+    @property
+    def all(self):
+        """Returns all pages in the site."""
+        return self.backend.filter_for_site(self.request, self.backend.model)
+    
+    def filter_for_site(self, queryset):
+        """Filters the given queryset to only show pages that belong in this site."""
+        return self.backend.filter_for_site(self.request, queryset)
+    
+    @optimizations.cached_property
+    def homepage(self):
+        """The current homepage."""
+        return self.backend.get_homepage(self.request)
+    
+    @optimizations.cached_property
+    def is_homepage(self):
+        """Whether the current request is for the site homepage."""
+        return self.request.path == self.homepage.get_absolute_url()
+    
+    def get(self, id):
+        """Returns the page with the given id, or None."""
+        return self.backend.get(self.request, id)
+        
+    @optimizations.cached_property
+    def current(self):
+        """Returns the current best-matched page."""
+        return self.backend.get_current(self.request)
+        
+    def reverse(self, page, view_name="index", *args, **kwargs):
+        """
+        Reverses the given url in the context of the given page.
+        
+        The page can be a page instance, or a page id.
+        """
+        return self.backend.reverse(self.request, page, view_name, args, kwargs)
+    
+    # Navigation.
+    
+    def get_navigation(self, level=0):
+        """Returns the navigation list for the given level (zero-indexed)."""
+        return self.backend.get_navigation(self.request, level)
+    
+    @optimizations.cached_property
+    def nav_primary(self):
+        """Returs the primary navigation for the site."""
+        return self.get_navigation(0)
+    
+    @optimizations.cached_property
+    def nav_secondary(self):
+        """Returns the secondary navigation for the site."""
+        return self.get_navigation(1)
+        
+    @optimizations.cached_property
+    def nav_tertiary(self):
+        """Returns the tertiary navigation for the site."""
+        return self.get_navigation(2)
+
+
+_backend_cache = None
+        
+def get_backend():
+    """Returns the page backend, as specified in the settings."""
+    global _backend_cache
+    backend_name = getattr(settings, "PAGE_BACKEND", None)
+    # Simple case - no backend.
+    if backend_name is None:
+        return None
+    # Try to use the cached backend.
+    if _backend_cache is not None:
+        return _backend_cache
+    # Use load up the backend.
+    backend_cls = load_object(backend_name)
+    backend = backend_cls()
+    _backend_cache = backend
+    return backend

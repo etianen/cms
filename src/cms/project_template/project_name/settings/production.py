@@ -161,7 +161,7 @@ MIDDLEWARE_CLASSES = (
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "cms.apps.historylinks.middleware.HistoryLinkFallbackMiddleware",
     "cms.middleware.PreviewMiddleware",
-    "cms.middleware.PageMiddleware",
+    "cms.apps.pages.middleware.PageMiddleware",
 )
 
 ROOT_URLCONF = "{{ project_name }}.urls"
