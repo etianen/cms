@@ -31,7 +31,6 @@ def get_urls(admin_site):
         return do_patched_admin_view
     # Add the addional views to the listing.
     urls = patterns("",
-        url(r"^$", admin_view(patched_admin_view(views.index)), name="index"),
         url(r"^tinymce-init.js$", admin_view(patched_admin_view(views.tinymce_init)), name="tinymce_init"),
     ) + admin_site.get_urls()
     # Patch all the views to disable publication management.

@@ -191,7 +191,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.messages.context_processors.messages",
     "django.core.context_processors.request",
     "cms.context_processors.settings",
-    "cms.context_processors.pages",
+    "cms.apps.pages.context_processors.pages",
 )
 
 

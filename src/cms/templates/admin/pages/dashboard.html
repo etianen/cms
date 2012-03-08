@@ -1,0 +1,32 @@
+{% extends "admin/index.html" %}
+{% load url from future %}
+{% load assets %}
+
+
+{% block extrahead %}
+    {% stylesheet "cms/css/admin.css" %}
+    {{block.super}}
+    {% script 'admin/js/jquery.min.js' %}
+    {% script 'admin/js/jquery.init.js' %}
+    {% script "cms/js/jquery.cms.js" %}
+{% endblock %}
+
+
+
+{% block sidebar %}
+    <div id="content-related">
+        <div id="sitemap-panel">
+            <div id="sitemap-module" class="module">
+                <h2>Sitemap</h2>
+                <noscript>
+                    <p>Please turn on javascript to activate the sitemap.</p>
+                </noscript>
+            </div>
+            <script>
+                (function($) {
+                    $("#sitemap-module").cms("sitemap");
+                }(django.jQuery));
+            </script>
+        </div>
+    </div>
+{% endblock %}

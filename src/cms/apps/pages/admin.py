@@ -50,6 +50,9 @@ class PageAdmin(PageBaseAdmin):
     def __init__(self, *args, **kwargs):
         """Initialzies the PageAdmin."""
         super(PageAdmin, self).__init__(*args, **kwargs)
+        # Patch the admin class's index template.
+        self.admin_site.index_template = "admin/pages/dashboard.html"
+        # Prepare to register some content inlines.
         self.content_inlines = []
         # Register all content classes with reversion.
         for content_cls in get_registered_content():

@@ -23,14 +23,6 @@ def admin_view(view, *args, **kwargs):
     return do_admin_view
 
 
-def index(admin_site, request):
-    """Renders the dashboard view."""
-    response = admin_site.index(request)
-    response.context_data["admin_site_template_name"] = response.template_name[0]
-    response.template_name = "admin/dashboard.html"
-    return response
-
-
 def tinymce_init(admin_site, request):
     """Renders the tinymce init script."""
     return render(request, "admin/tinymce_init.js", {}, content_type="text/javascript; charset=utf-8")
