@@ -14,7 +14,7 @@ import os
 
 # The name of this site.  Used for branding in the online admin area.
 
-SITE_NAME = "Example Site"
+SITE_NAME = "Example"
 
 SITE_DOMAIN = "example.com"
 
@@ -26,8 +26,8 @@ PREPEND_WWW = True
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "example",
-        "USER": "example",
+        "NAME": "{{ project_name }}",
+        "USER": "{{ project_name }}",
         "PASSWORD": "",
         "HOST": "",
         "PORT": ""
