@@ -1,7 +1,6 @@
 """Views used by the CMS admin extensions."""
 
 from functools import wraps
-from itertools import chain
 
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -10,7 +9,7 @@ from django.utils import simplejson as json
 
 from django.shortcuts import render, redirect
 
-from cms import permalinks, debug
+from cms import debug
 from cms.models.managers import publication_manager
 
 
@@ -41,16 +40,6 @@ def index(admin_site, request):
 def tinymce_init(admin_site, request):
     """Renders the tinymce init script."""
     return render(request, "admin/tinymce_init.js", {}, content_type="text/javascript; charset=utf-8")
-
-
-def tinymce_link_list(admin_site, request):
-    """Generates the tinymce link list."""
-    generators = []
-    for model in admin_site._link_list_models:
-        generators.append((unicode(obj), permalinks.create(obj)) for obj in model._default_manager.all().iterator())
-    links = sorted(chain(*generators))
-    context = {"links": links}
-    return render(request, "admin/tinymce_link_list.js", context, content_type="text/javascript; charset=utf-8")
 
 
 @debug.print_exc
