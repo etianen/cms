@@ -6,11 +6,10 @@ using the django-admin.py utility.
 
 This file should be excluded from version control to keep the settings local.
 """
-#@PydevCodeAnalysisIgnore
 
 import os.path
 
-from production import SITE_PACKAGE, DATABASES
+from production import DATABASES
 
 
 # Run in debug mode.
@@ -22,9 +21,9 @@ TEMPLATE_DEBUG = DEBUG
 
 # Save media files to the user's Sites folder.
 
-MEDIA_ROOT = os.path.expanduser("~/Sites/%s/media" % SITE_PACKAGE)
+MEDIA_ROOT = os.path.expanduser("~/Sites/{{ project_name }}/media")
 
-STATIC_ROOT = os.path.expanduser("~/Sites/%s/static" % SITE_PACKAGE)
+STATIC_ROOT = os.path.expanduser("~/Sites/{{ project_name }}/static")
 
 
 # Use local server.

@@ -1,5 +1,5 @@
 """
-Production settings file.
+Production settings for {{ project_name }} project.
 
 For an explanation of these settings, please see the Django documentation at:
 
@@ -8,11 +8,8 @@ For an explanation of these settings, please see the Django documentation at:
 While many of these settings assume sensible defaults, you must provide values
 for the site, database, media and email sections below.
 """
-#@PydevCodeAnalysisIgnore
 
-import hashlib, os
-
-from cms.settings import *
+import os
 
 
 # The name of this site.  Used for branding in the online admin area.
@@ -20,6 +17,8 @@ from cms.settings import *
 SITE_NAME = "Example Site"
 
 SITE_DOMAIN = "example.com"
+
+PREPEND_WWW = True
 
 
 # Database settings.
@@ -89,11 +88,6 @@ DEFAULT_FROM_EMAIL = SERVER_EMAIL
 EMAIL_SUBJECT_PREFIX = "[%s] " % SITE_NAME
 
 
-# Whether to automatically add www to the start of the domain name.  
-
-PREPEND_WWW = True
-
-
 # Error reporting settings.  Use these to set up automatic error notifications.
 
 ADMINS = (
@@ -115,26 +109,37 @@ LANGUAGE_CODE = "en-gb"
 
 USE_I18N = False
 
-USE_L10N = False
+USE_L10N = True
+
+USE_TZ = True
 
 
 # Auto-discovery of project location.
 
 SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
-SITE_PACKAGE = os.path.split(SITE_ROOT)[-1]
-
-
-# The root URL configuration.
-
-ROOT_URLCONF = "{site_package}.urls".format(site_package=SITE_PACKAGE)
-
 
 # A list of additional installed applications.
 
-INSTALLED_APPS += (
-    "%s.apps.site" % SITE_PACKAGE,
+INSTALLED_APPS = (
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.admin",
+    "django.contrib.sitemaps",
+    "optimizations",
+    "reversion",
+    "usertools",
+    "cms",
+    "cms.apps.historylinks",
+    "cms.apps.pages",
+    "cms.apps.media",
+    "{{ project_name }}.apps.site",
 )
+
+PAGE_BACKEND = "cms.apps.pages.backend.PageBackend"
 
 
 # Additional static file locations.
@@ -149,10 +154,51 @@ STATICFILES_DIRS = (
 ADMIN_MEDIA_PREFIX = STATIC_URL + "admin/"
 
 
+# Dispatch settings.
+
+MIDDLEWARE_CLASSES = (
+    "django.middleware.transaction.TransactionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "cms.apps.historylinks.middleware.HistoryLinkFallbackMiddleware",
+    "cms.middleware.PreviewMiddleware",
+    "cms.middleware.PageMiddleware",
+)
+
+ROOT_URLCONF = "{{ project_name }}.urls"
+
+WSGI_APPLICATION = "{{ project_name }}.wsgi.application"
+
+SITE_ID = 1
+
+
 # Absolute path to the directory where templates are stored.
 
 TEMPLATE_DIRS = (
     os.path.join(SITE_ROOT, "templates"),
+)
+
+TEMPLATE_LOADERS = (
+    ("django.template.loaders.cached.Loader", (
+        "django.template.loaders.filesystem.Loader",
+        "django.template.loaders.app_directories.Loader",
+    )),
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.contrib.messages.context_processors.messages",
+    "django.core.context_processors.request",
+    "cms.context_processors.settings",
+    "cms.context_processors.pages",
 )
 
 
@@ -173,8 +219,33 @@ CACHES = {
 }
 
 
-# A secret key used for cryptographic algorithms.  For convenience, this is
-# generated from your database password and email password.  If, for some
-# reason, these are not considered secure, you can override it below.
+# A secret key used for cryptographic algorithms.
 
-SECRET_KEY = hashlib.sha1("$".join((DATABASES["default"]["PASSWORD"], EMAIL_HOST_PASSWORD))).hexdigest()
+SECRET_KEY = "{{ secret_key }}"
+
+
+# Logging configuration.
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse"
+        }
+    },
+    "handlers": {
+        "mail_admins": {
+            "level": "ERROR",
+            "filters": ["require_debug_false"],
+            "class": "django.utils.log.AdminEmailHandler"
+        }
+    },
+    "loggers": {
+        "django.request": {
+            "handlers": ["mail_admins"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+    }
+}

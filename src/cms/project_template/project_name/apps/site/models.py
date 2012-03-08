@@ -1,3 +1,5 @@
+"""Models used by {{ project_name }} project."""
+
 from cms.models import HtmlField
 from cms.apps.pages.models import ContentBase
 

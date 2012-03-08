@@ -1,4 +1,4 @@
-"""Base URLs for the CMS."""
+"""URL config for {{ project_name }} project."""
 
 from django.conf import settings
 from django.conf.urls.defaults import patterns, url, include, handler404
