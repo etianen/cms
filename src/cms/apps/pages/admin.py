@@ -16,8 +16,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 
 from cms.admin import PageBaseAdmin, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
-from cms.db import locked
-from cms.apps.historylinks.models import HistoryLink
 from cms.apps.pages.models import Page, get_registered_content
 
 
@@ -167,36 +165,36 @@ class PageAdmin(PageBaseAdmin):
     def save_model(self, request, obj, form, change):
         """Saves the model and adds its content fields."""
         content_cls = self.get_page_content_cls(request, obj)
-        with locked(Page, content_cls, ContentType, HistoryLink):
-            content_cls_type = ContentType.objects.get_for_model(content_cls)
-            # Delete the old page content, if it's expired.
-            if change and ContentType.objects.get_for_id(obj.content_type_id) != content_cls_type:
-                obj.content.delete()
-            # Create the page content.
-            obj.content_type = content_cls_type
-            if change:
-                try:
-                    content_obj = content_cls_type.model_class().objects.get(page=obj)
-                except content_cls.DoesNotExist:
-                    content_obj = content_cls()  # We're either in a reversion recovery, or something has gone very wrong with the database...
+        content_cls_type = ContentType.objects.get_for_model(content_cls)
+        # Delete the old page content, if it's expired.
+        if change and ContentType.objects.get_for_id(obj.content_type_id) != content_cls_type:
+            obj.content.delete()
+        # Create the page content.
+        obj.content_type = content_cls_type
+        if change:
+            try:
+                content_obj = content_cls_type.model_class().objects.get(page=obj)
+            except content_cls.DoesNotExist:
+                content_obj = content_cls()  # We're either in a reversion recovery, or something has gone very wrong with the database...
+        else:
+            content_obj = content_cls()
+        # Modify the page content.
+        for field in content_obj._meta.fields:
+            if field.name == "page":
+                continue
+            setattr(content_obj, field.name, form.cleaned_data[field.name])
+        # Get the page order.
+        if not obj.order:
+            existing_page_order = self.model.objects.all().select_for_update().values_list("order", flat=True)
+            if existing_page_order:
+                obj.order = max(existing_page_order) + 1
             else:
-                content_obj = content_cls()
-            # Modify the page content.
-            for field in content_obj._meta.fields:
-                if field.name == "page":
-                    continue
-                setattr(content_obj, field.name, form.cleaned_data[field.name])
-            # Get the page order.
-            if not obj.order:
-                try:
-                    obj.order = self.model.objects.order_by("-order").values_list("order", flat=True)[0] + 1
-                except IndexError:
-                    obj.order = 1
-            # Save the model.
-            super(PageAdmin, self).save_model(request, obj, form, change)
-            # Save the page content.
-            content_obj.page = obj
-            content_obj.save()
+                obj.order = 1
+        # Save the model.
+        super(PageAdmin, self).save_model(request, obj, form, change)
+        # Save the page content.
+        content_obj.page = obj
+        content_obj.save()
     
     # Permissions.
     

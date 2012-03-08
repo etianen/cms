@@ -1,11 +1,8 @@
 """The backend implementation for the app."""
 
 from django.core import urlresolvers
-from django.contrib.contenttypes.models import ContentType
 
-from cms.db import locked
 from cms.pages import BackendBase
-from cms.apps.historylinks.models import HistoryLink
 from cms.apps.pages.models import Page
 
 
@@ -71,13 +68,15 @@ class PageBackend(BackendBase):
     
     def _swap(self, page, other):
         """Swaps over two pages."""
-        with locked(Page, ContentType, HistoryLink):
-            page_order = page.order
-            other_order = other.order
-            page.order = other_order
-            other.order = page_order
-            page.save()
-            other.save()
+        # Get a lock on the pages.
+        page, other = self.model.objects.filter(pk__in=(page.pk, other.pk)).select_for_update()
+        # Swap them!
+        page_order = page.order
+        other_order = other.order
+        page.order = other_order
+        other.order = page_order
+        page.save()
+        other.save()
     
     can_move = True
         
