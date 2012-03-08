@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.views import generic
 from django.conf.urls.static import static
 
-from cms.admin import site as admin_site
+import cms.admin
 from cms.sitemaps import registered_sitemaps
 from cms.views import TextTemplateView
 
@@ -16,8 +16,8 @@ admin.autodiscover()
 
 urlpatterns = patterns("",
 
-    # Admin views.
-    url(r"^admin/", include(admin_site.urls)),
+    # Admin extension views.
+    url(r"^admin/", include(cms.admin.get_urls(admin.site), namespace=admin.site.name)),
     
     # Permalink redirection service.
     url(r"^r/(?P<content_type_id>\d+)-(?P<object_id>[^/]+)/$", "django.contrib.contenttypes.views.shortcut", name="permalink_redirect"),

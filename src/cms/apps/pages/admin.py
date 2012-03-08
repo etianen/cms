@@ -9,13 +9,14 @@ standard implementation.
 from __future__ import with_statement
 import threading
 
+from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django import forms
 
-from cms.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
+from cms.admin import PageBaseAdmin, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
 from cms.db import locked
 from cms.apps.historylinks.models import HistoryLink
 from cms.apps.pages.models import Page, get_registered_content
@@ -329,7 +330,6 @@ class PageAdmin(PageBaseAdmin):
         return self.patch_response_location(request, response)
 
 
-site.register(Page, PageAdmin)
-site.register_link_list(Page)
+admin.site.register(Page, PageAdmin)
 
-page_admin = site._registry[Page]
+page_admin = admin.site._registry[Page]

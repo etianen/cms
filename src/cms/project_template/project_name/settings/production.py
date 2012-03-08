@@ -149,11 +149,6 @@ STATICFILES_DIRS = (
 )
 
 
-# Absolute URL of the location where admin media files are served.
-
-ADMIN_MEDIA_PREFIX = STATIC_URL + "admin/"
-
-
 # Dispatch settings.
 
 MIDDLEWARE_CLASSES = (

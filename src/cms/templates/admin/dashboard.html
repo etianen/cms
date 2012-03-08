@@ -1,13 +1,13 @@
-{% extends "admin/index.html" %}
+{% extends admin_site_template_name %}
 {% load url from future %}
-{% load adminmedia assets %}
+{% load assets %}
 
 
 {% block extrahead %}
     {% stylesheet "cms/css/admin.css" %}
     {{block.super}}
-    <script type="text/javascript" src="{% admin_media_prefix %}js/jquery.min.js"></script>
-    <script type="text/javascript" src="{% admin_media_prefix %}js/jquery.init.js"></script>
+    {% script 'admin/js/jquery.min.js' %}
+    {% script 'admin/js/jquery.init.js' %}
     {% script "cms/js/jquery.cms.js" %}
 {% endblock %}
 
@@ -23,7 +23,7 @@
                         <p>Please turn on javascript to activate the sitemap.</p>
                     </noscript>
                 </div>
-                <script type="text/javascript">
+                <script>
                     (function($) {
                         $("#sitemap-module").cms("sitemap");
                     }(django.jQuery));

@@ -15,7 +15,6 @@ import optimizations
 from reversion.admin import VersionMetaAdmin
 
 from cms import permalinks
-from cms.admin import site
 from cms.apps.media.models import Label, File
 
 
@@ -28,7 +27,7 @@ class LabelAdmin(admin.ModelAdmin):
     search_fields = ("name",)
     
     
-site.register(Label, LabelAdmin)
+admin.site.register(Label, LabelAdmin)
     
        
 # Different types of file.
@@ -182,4 +181,4 @@ class FileAdmin(VersionMetaAdmin):
         return super(FileAdmin, self).response_add(request, obj, *args, **kwargs)
     
     
-site.register(File, FileAdmin)
+admin.site.register(File, FileAdmin)
