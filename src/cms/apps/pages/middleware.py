@@ -27,7 +27,7 @@ class RequestPageManager(object):
     def homepage(self):
         """Returns the site homepage."""
         try:
-            return Page.objects.prefetch_related("children__children").get(parent=None)
+            return Page.objects.get_homepage()
         except Page.DoesNotExist:
             return None
         

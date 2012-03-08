@@ -28,7 +28,7 @@ class PageEfficiencyTest(TestCase):
         
     def testChildPrefetching(self):
         with self.assertNumQueries(3):
-            homepage = Page.objects.prefetch_related("children__children").get(parent=None)
+            homepage = Page.objects.get_homepage()
         with self.assertNumQueries(0):
             subsection = homepage.children.all()[0].children.all()[0]
         self.assertEqual(subsection.title, "Subsection")

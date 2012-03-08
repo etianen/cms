@@ -12,7 +12,7 @@ from django.db.models import Q
 import optimizations
 
 from cms import sitemaps
-from cms.models.base import PageBase
+from cms.models.base import PageBase, PublishedBaseManager
 from cms.apps import historylinks
 
 
@@ -24,9 +24,20 @@ def get_default_page_parent():
         return None
 
 
+class PageManager(PublishedBaseManager):
+    
+    """Manager for Page objects."""
+    
+    def get_homepage(self):
+        """Returns the site homepage."""
+        return self.prefetch_related("children__children").get(parent=None)
+
+
 class Page(PageBase):
 
     """A page within the site."""
+    
+    objects = PageManager()
     
     @classmethod
     def select_published(cls, queryset):
