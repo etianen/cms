@@ -37,7 +37,7 @@ DATABASES = {
 
 # Absolute path to the directory where all uploaded media files are stored.
 
-MEDIA_ROOT = "/var/media/%s" % SITE_DOMAIN
+MEDIA_ROOT = "/var/media/{{ project_name }}"
 
 MEDIA_URL = "/media/"
 
@@ -46,7 +46,7 @@ FILE_UPLOAD_PERMISSIONS = 0644
 
 # Absolute path to the directory where static files will be collected.
 
-STATIC_ROOT = "/var/static/%s" % SITE_DOMAIN
+STATIC_ROOT = "/var/static/{{ project_name }}"
 
 STATIC_URL = "/static/"
 
