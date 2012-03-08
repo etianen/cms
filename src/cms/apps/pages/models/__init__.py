@@ -13,10 +13,16 @@ import optimizations
 
 from cms import sitemaps
 from cms.models.base import PageBase
-from cms.models.managers import publication_manager
 from cms.apps import historylinks
 from cms.apps.pages.models.managers import PageManager
-from cms.apps.pages.models.fields import PageField
+
+
+def get_default_page_parent():
+    """Returns the default page parent."""
+    try:
+        return Page.objects.all()[0]
+    except IndexError:
+        return None
 
 
 class Page(PageBase):
@@ -44,15 +50,16 @@ class Page(PageBase):
     
     # Hierarchy fields.
 
-    parent = PageField(
+    parent = models.ForeignKey(
+        "self",
         blank = True,
-        null = True
+        null = True,
+        default = get_default_page_parent,
     )
 
     order = models.IntegerField(editable=False)
 
     @optimizations.cached_property
-    @publication_manager.getter
     def children(self):
         """The children of this page."""
         return list(Page.objects.filter(parent=self).order_by("order").iterator())

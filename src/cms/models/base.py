@@ -3,7 +3,7 @@
 from django.db import models
 from django.shortcuts import render
 
-from cms.models.managers import PublishedBaseManager, publication_manager
+from cms.models.managers import PublishedBaseManager
 
 
 class PublishedBase(models.Model):
@@ -24,12 +24,6 @@ class PublishedBase(models.Model):
         rules.
         """
         return queryset.filter(is_online=True)
-    
-    def __init__(self, *args, **kwargs):
-        """Initializes the PublishedBase."""
-        super(PublishedBase, self).__init__(*args, **kwargs)
-        # Add a flag to determine whether the publication manager was active.
-        self._select_published_active = publication_manager.select_published_active()
     
     is_online = models.BooleanField(
         "online",

@@ -7,7 +7,7 @@ import threading
 
 from django.core.signals import request_finished
 
-from cms.models.managers import PublishedBaseManager, publication_manager
+from cms.models.managers import PublishedBaseManager
     
     
 class PageCache(threading.local):
@@ -42,10 +42,6 @@ class PageCache(threading.local):
         self._cache.pop(page.id, None)
         if page.permalink:
             self._cache.pop(page.permalink, None)
-    
-    def _needs_reload(self, page):
-        """Checks whether the page was created in an insufficient publication context."""
-        return not page._select_published_active and publication_manager.select_published_active()
     
     def get(self, id):
         """
