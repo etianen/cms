@@ -15,8 +15,8 @@ admin.autodiscover()
 
 urlpatterns = patterns("",
 
-    # Admin extension views.
-    url(r"^admin/", include(admin.site.get_urls(), namespace=admin.site.name)),
+    # Admin URLs.
+    url(r"^admin/", include(admin.site.urls)),
     
     # Permalink redirection service.
     url(r"^r/(?P<content_type_id>\d+)-(?P<object_id>[^/]+)/$", "django.contrib.contenttypes.views.shortcut", name="permalink_redirect"),
