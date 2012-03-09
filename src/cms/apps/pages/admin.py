@@ -135,7 +135,7 @@ class PageAdmin(PageBaseAdmin):
         children = []
         def do_get_all_children(page):
             for child in page.children:
-                children.append(page)
+                children.append(child)
                 do_get_all_children(child)
         do_get_all_children(page)
         return children
@@ -210,14 +210,7 @@ class PageAdmin(PageBaseAdmin):
         for field in content_obj._meta.fields:
             if field.name == "page":
                 continue
-            setattr(content_obj, field.name, form.cleaned_data[field.name])
-        # Get the page order.
-        if not obj.order:
-            existing_page_order = self.model.objects.all().select_for_update().values_list("order", flat=True)
-            if existing_page_order:
-                obj.order = max(existing_page_order) + 1
-            else:
-                obj.order = 1
+            setattr(content_obj, field.name, form.cleaned_data[field.name])    
         # Save the model.
         super(PageAdmin, self).save_model(request, obj, form, change)
         # Save the page content.

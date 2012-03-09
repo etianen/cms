@@ -3,7 +3,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, F
 from django.utils.functional import cached_property
 from django.utils import timezone
 
@@ -53,15 +53,24 @@ class Page(PageBase):
         related_name = "child_set",
     )
 
-    order = models.IntegerField(editable=False)
+    left = models.IntegerField(
+        editable = False,
+        db_index = True,
+    )
+    
+    right = models.IntegerField(
+        editable = False,
+        db_index = True,
+    )
     
     @cached_property
     def children(self):
         """The child pages for this page."""
         children = []
-        for child in self.child_set.all():
-            child.parent = self
-            children.append(child)
+        if self.right - self.left > 1:  # Optimization - don't fetch children we know aren't there!
+            for child in self.child_set.all():
+                child.parent = self
+                children.append(child)
         return children
     
     @property
@@ -101,6 +110,11 @@ class Page(PageBase):
         content.page = self
         return content
 
+    def reverse(self, view_func, args, kwargs):
+        """Performs a reverse URL lookup."""
+        urlconf = ContentType.objects.get_for_id(self.content_type_id).model_class().urlconf
+        return self.get_absolute_url() + urlresolvers.reverse(view_func, args=args, kwargs=kwargs, urlconf=urlconf, prefix="")
+
     # Standard model methods.
     
     def get_absolute_url(self):
@@ -109,14 +123,96 @@ class Page(PageBase):
             return self.parent.get_absolute_url() + self.url_title + "/"
         return urlresolvers.get_script_prefix()
     
-    def reverse(self, view_func, args, kwargs):
-        """Performs a reverse URL lookup."""
-        urlconf = ContentType.objects.get_for_id(self.content_type_id).model_class().urlconf
-        return self.get_absolute_url() + urlresolvers.reverse(view_func, args=args, kwargs=kwargs, urlconf=urlconf, prefix="")
+    # Tree management.
     
+    @property
+    def _branch_width(self):
+        return self.right - self.left + 1
+    
+    def _excise_branch(self):
+        """Excises this whole branch from the tree."""
+        branch_width = self._branch_width
+        Page.objects.filter(left__gte=self.left).update(
+            left = F("left") - branch_width,
+        )
+        Page.objects.filter(right__gte=self.left).update(
+            right = F("right") - branch_width,
+        )
+        
+    def _insert_branch(self):
+        """Inserts this whole branch into the tree."""
+        branch_width = self._branch_width
+        Page.objects.filter(left__gte=self.left).update(
+            left = F("left") + branch_width,
+        )
+        Page.objects.filter(right__gte=self.left).update(
+            right = F("right") + branch_width,
+        )
+        
+    def save(self, *args, **kwargs):
+        """Saves the page."""
+        # Lock entire table.
+        existing_pages = dict(
+            (page["id"], page)
+            for page
+            in Page.objects.all().select_for_update().values("id", "parent_id", "left", "right")
+        )
+        if self.left is None or self.right is None:
+            # This page is being inserted.
+            if existing_pages:
+                parent_right = existing_pages[self.parent_id]["right"]
+                # Set the model left and right.
+                self.left = parent_right
+                self.right = self.left + 1
+                # Update the whole tree structure.
+                self._insert_branch()
+            else:
+                # This is the first page to be created, ever!
+                self.left = 1
+                self.right = 2
+        else:
+            # This is an update.
+            old_parent_id = existing_pages[self.id]["parent_id"]
+            if old_parent_id != self.parent_id:
+                # The page has moved.
+                branch_width = self.right - self.left + 1
+                # Disconnect child branch.
+                if branch_width > 2:
+                    Page.objects.filter(left__gt=self.left, right__lt=self.right).update(
+                        left = F("left") * -1,
+                        right = F("right") * -1,
+                    )
+                self._excise_branch()
+                # Store old left and right values.
+                old_left = self.left
+                old_right = self.right
+                # Put self into the tree.
+                parent_right = existing_pages[self.parent_id]["right"]
+                if parent_right > self.right:
+                    parent_right -= self._branch_width
+                self.left = parent_right
+                self.right = self.left + branch_width - 1
+                self._insert_branch()
+                # Put all children back into the tree.
+                if branch_width > 2:
+                    child_offset = self.left - old_left
+                    Page.objects.filter(left__lt=-old_left, right__gt=-old_right).update(
+                        left = (F("left") - child_offset) * -1,
+                        right = (F("right") - child_offset) * -1,
+                    )
+        # Now actually save it!
+        super(Page, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """Deletes the page."""
+        list(Page.objects.all().select_for_update().values_list("left", "right"))  # Lock entire table.
+        super(Page, self).delete(*args, **kwargs)
+        # Update the entire tree.
+        self._excise_branch()
+
     class Meta:
         unique_together = (("parent", "url_title",),)
-        ordering = ("order",)
+        ordering = ("left",)
 
 
 historylinks.register(Page)
