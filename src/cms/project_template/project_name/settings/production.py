@@ -50,21 +50,6 @@ STATIC_ROOT = "/var/static/{{ project_name }}"
 
 STATIC_URL = "/static/"
 
-STATIC_ASSETS = {
-    "default": {
-        "js": {
-            "include": (
-                "js/*.js",
-            ),
-        },
-        "css": {
-            "include": (
-                "css/*.css",
-            ),
-        },
-    },
-}
-
 
 # Email settings.
 
@@ -145,6 +130,43 @@ INSTALLED_APPS = (
 STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, "static"),
 )
+
+STATIC_ASSETS = {
+    "default": {
+        "js": {
+            "include": (
+                "js/*.js",
+            ),
+        },
+        "css": {
+            "include": (
+                "css/*.css",
+            ),
+        },
+    },
+    "django.jquery": {
+        "js": {
+            "include": (
+                "admin/js/jquery.js",
+                "admin/js/jquery.init.js",
+            ),
+        },
+    },
+    "cms": {
+        "js": {
+            "include": (
+                "cms/js/jquery.cms.js",
+                "pages/js/jquery.cms.pages.js",
+                "media/js/jquery.cms.media.js",
+            ),
+        },
+        "css": {
+            "include": (
+                "pages/css/cms.pages.css",
+            ),
+        }
+    }
+}
 
 
 # Dispatch settings.

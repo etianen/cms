@@ -1,0 +1,17 @@
+{% extends "reversion/change_list.html" %}
+{% load assets static %}
+
+
+{% block extrahead %}
+    {{block.super}}
+    {% if is_popup %}
+        {% script "django.jquery" %}
+        <script src="{% static 'cms/js/tiny_mce/tiny_mce_popup.js' %}"></script>
+        {% script "cms" %}
+        <script>
+            tinyMCEPopup.onInit.add(function() {
+                django.jQuery.cms.media.initBrowser();
+            });
+        </script>
+    {% endif %}
+{% endblock %}

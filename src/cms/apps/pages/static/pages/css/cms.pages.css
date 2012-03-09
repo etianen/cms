@@ -145,27 +145,36 @@ body.dashboard div.sitemap-entry .move-down:hover {
     background-position: -2px -34px;
 }
 
+body.dashboard #sitemap-module .loading {
+    margin: 0 0 0 10px;
+    padding: 0 0 10px 40px;
+    background: url(../img/ajax-loader.gif) 0 0 no-repeat;
+    height: 30px;
+    line-height: 30px;
+    color: #5B80B8;
+}
+
 
 /* Page content type selection page. */
 
-h3.classifier {
+body.page-content-types h3.classifier {
     clear: left;
     padding: 5px 0px 5px 0px;
     border-bottom: 1px #eeeeee solid;
 }
 
-ul.content-types {
+body.page-content-types ul.content-types {
     padding: 0px 0px 0px 0px;
 }
 
-ul.content-types li {
+body.page-content-types ul.content-types li {
     float: left;
     list-style: none;
     margin: 0px 10px 10px 0px;
     
 }
 
-ul.content-types a {
+body.page-content-types ul.content-types a {
     display: block;
     position: relative;
     width: 100px;
@@ -173,33 +182,21 @@ ul.content-types a {
     border: 1px white solid;
 }
 
-ul.content-types a:hover {
+body.page-content-types ul.content-types a:hover {
     border: 1px #b0b0b0 solid;
 }
 
-img.content-type-icon {
+body.page-content-types img.content-type-icon {
     position: absolute;
     top: 15px;
     left: 18px;
 }
 
-span.content-type-name {
+body.page-content-types span.content-type-name {
     font-size: 120%;
     position: absolute;
     top: 85px;
     left: 0px;
     width: 100px;
     text-align: center;
-}
-
-
-/* Ajax loader. */
-
-#sitemap-module .loading {
-    margin: 0 0 0 10px;
-    padding: 0 0 10px 40px;
-    background: url(../img/ajax-loader.gif) 0 0 no-repeat;
-    height: 30px;
-    line-height: 30px;
-    color: #5B80B8;
 }

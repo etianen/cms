@@ -3,9 +3,13 @@
 from django import forms
 from django.conf import settings
 from django.utils import simplejson as json
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.utils.safestring import mark_safe
 
 from optimizations import default_stylesheet_cache, default_javascript_cache
+from optimizations.assetcache import StaticAsset
+
+from cms import debug
 
 
 class HtmlWidget(forms.Textarea):
@@ -17,12 +21,12 @@ class HtmlWidget(forms.Textarea):
         self.richtext_settings = getattr(settings, "RICHTEXT_SETTINGS", {}).get(kwargs.pop("richtext_settings", "default"), {})
         super(HtmlWidget, self).__init__(*args, **kwargs)
 
+    @debug.print_exc
     def get_media(self):
         """Returns the media used by the widget."""
-        return forms.Media(js=(
-            default_javascript_cache.get_urls(("cms/js/tiny_mce/tiny_mce.js",))[0],
-            default_javascript_cache.get_urls(("cms/js/jquery.cms.js",))[0],
-        ))
+        assets = [staticfiles_storage.url("cms/js/tiny_mce/tiny_mce.js")]
+        assets.extend(default_javascript_cache.get_urls(StaticAsset.load("js", "cms")))
+        return forms.Media(js=assets)
     
     media = property(
         get_media,

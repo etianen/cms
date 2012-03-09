@@ -3,7 +3,6 @@
 import os
 from functools import partial
 
-from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin.views.main import IS_POPUP_VAR
 from django.shortcuts import render
@@ -11,6 +10,7 @@ from django.template.defaultfilters import filesizeformat
 from django.utils.text import truncate_words
 
 import optimizations
+from optimizations.assetcache import default_asset_cache
 
 from reversion.admin import VersionMetaAdmin
 
@@ -31,13 +31,13 @@ admin.site.register(Label, LabelAdmin)
     
        
 # Different types of file.
-AUDIO_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/audio-x-generic.png"
-DOCUMENT_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/x-office-document.png"
-SPREADSHEET_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/x-office-spreadsheet.png"
-TEXT_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/text-x-generic.png"
-IMAGE_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/image-x-generic.png"
-MOVIE_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/video-x-generic.png"
-UNKNOWN_FILE_ICON = settings.STATIC_URL + "cms/img/file-types/text-x-generic-template.png"
+AUDIO_FILE_ICON = "media/img/audio-x-generic.png"
+DOCUMENT_FILE_ICON = "media/img/x-office-document.png"
+SPREADSHEET_FILE_ICON = "media/img/x-office-spreadsheet.png"
+TEXT_FILE_ICON = "media/img/text-x-generic.png"
+IMAGE_FILE_ICON = "media/img/image-x-generic.png"
+MOVIE_FILE_ICON = "media/img/video-x-generic.png"
+UNKNOWN_FILE_ICON = "media/img/text-x-generic-template.png"
 
 # Different types of recognised file extensions.
 FILE_ICONS = {
@@ -161,6 +161,8 @@ class FileAdmin(VersionMetaAdmin):
                 pass
             else:
                 return '<img cms:permalink="%s" src="%s" width="%s" height="%s" alt="" title="%s"/>' % (permalink, thumbnail.url, thumbnail.width, thumbnail.height, obj.title)
+        else:
+            icon = default_asset_cache.get_url(icon)
         return '<img cms:permalink="%s" src="%s" width="66" height="66" alt="" title="%s"/>' % (permalink, icon, obj.title)
     get_preview.short_description = "preview"
     get_preview.allow_tags = True
