@@ -57,4 +57,29 @@
         });
     }
     
+    /**
+     * Activates a rich text area.
+     */
+    cms.htmlWidget = function(config) {
+        // Configure the plugin.
+        var settings = $.extend({
+            mode: "exact",
+            setup: function(editor) {
+                editor.onPostProcess.add(function(editor, o) {
+                    o.content = o.content.replace(/&nbsp;/g, " ").replace(/ +/g, " ");
+                });
+            }
+        }, cms.htmlWidget.extensions, config)
+        // Run the plugin.
+        return this.each(function() {
+            var container = $(this);
+            tinyMCE.init($.extend({
+                elements: container.attr("id"),
+            }, settings));
+        });
+    }
+    
+    // Extensions for the html widget.
+    cms.htmlWidget.extensions = {};
+    
 }(django.jQuery));

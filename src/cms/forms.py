@@ -2,26 +2,54 @@
 
 from django import forms
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.utils import simplejson as json
+from django.utils.safestring import mark_safe
+
+from optimizations import default_stylesheet_cache, default_javascript_cache
 
 
 class HtmlWidget(forms.Textarea):
     
     """A textarea that is converted into a TinyMCE editor."""
     
-    def __init__(self, init_js=None, attrs=None, **kwargs):
+    def __init__(self, *args, **kwargs):
         """Initializes the HtmlWidget."""
-        widget_attrs = {"class": "html"}
-        widget_attrs.update(attrs or {})
-        super(HtmlWidget, self).__init__(attrs=widget_attrs, **kwargs)
-        self.init_js = init_js
+        self.richtext_settings = getattr(settings, "RICHTEXT_SETTINGS", {}).get(kwargs.pop("richtext_settings", "default"), {})
+        super(HtmlWidget, self).__init__(*args, **kwargs)
 
     def get_media(self):
         """Returns the media used by the widget."""
-        filebrowser_js = settings.STATIC_URL + "cms/js/jquery.filebrowser.js"
-        tiny_mce_js = settings.STATIC_URL + "cms/js/tiny_mce/tiny_mce.js"
-        init_js =  self.init_js or reverse("admin:tinymce_init")
-        return forms.Media(js=(tiny_mce_js, filebrowser_js, init_js))
-        
-    media = property(get_media,
-                     doc="The media used by the widget.")
+        return forms.Media(js=(
+            default_javascript_cache.get_urls(("cms/js/tiny_mce/tiny_mce.js",))[0],
+            default_javascript_cache.get_urls(("cms/js/jquery.cms.js",))[0],
+        ))
+    
+    media = property(
+        get_media,
+        doc = "The media used by the widget.",
+    )
+    
+    def render(self, name, value, attrs=None):
+        """Renders the widget."""
+        # Get the standard widget.
+        html = super(HtmlWidget, self).render(name, value, attrs)
+        # Add on the JS initializer.
+        attrs = attrs or {}
+        try:
+            element_id = attrs["id"]
+        except KeyError:
+            pass
+        else:
+            # Customize the config.
+            richtext_settings = self.richtext_settings.copy()
+            # Cache the asset URL.
+            if "content_css" in richtext_settings:
+                richtext_settings["content_css"] = default_stylesheet_cache.get_urls((richtext_settings["content_css"],))[0]
+            # Add in the initializer.
+            settings_js = json.dumps(richtext_settings)
+            html += u'<script>django.jQuery("#{element_id}").cms("htmlWidget",{settings_js})</script>'.format(
+                element_id = element_id,
+                settings_js = settings_js,
+            )
+        # All done!
+        return mark_safe(html)
