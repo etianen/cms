@@ -4,7 +4,7 @@
 from django import template
 from django.utils.html import escape
 
-from optimizations.templatetags import parameter_tag
+from optimizations.templatetags import simple_tag
 
 from cms.core import permalinks
 
@@ -19,7 +19,7 @@ def permalink(model):
 
 
 
-@parameter_tag(register, takes_context=True)
+@simple_tag(register, takes_context=True)
 def permalink_absolute(context, model):
     request = context["request"]
     return escape(request.build_absolute_uri(permalinks.create(model)))
