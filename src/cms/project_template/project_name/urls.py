@@ -1,7 +1,7 @@
 """URL config for {{ project_name }} project."""
 
 from django.conf import settings
-from django.conf.urls import patterns, url, include, handler404
+from django.conf.urls import patterns, url, include
 from django.contrib import admin
 from django.views import generic
 from django.conf.urls.static import static
@@ -42,6 +42,3 @@ if settings.DEBUG:
 
 
 handler500 = "cms.views.handler500"
-
-
-handler404 = handler404
