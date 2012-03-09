@@ -4,8 +4,6 @@
 from django import template
 from django.utils.html import escape
 
-from optimizations.templatetags import simple_tag, template_tag, assignment_tag
-
 from cms import debug
 from cms.apps.pages.models import Page
 
@@ -76,8 +74,8 @@ class NavigationRenderer(object):
             self.context.pop()
     
 
-@simple_tag(register, takes_context=True)
-@assignment_tag(register, takes_context=True, name="get_navigation")
+@register.simple_tag(takes_context=True)
+@register.assignment_tag(takes_context=True, name="get_navigation")
 def navigation(context, pages, section=None):
     """
     Renders a navigation list for the given pages.
@@ -99,8 +97,7 @@ def navigation(context, pages, section=None):
 
 # Page linking.
 
-
-@simple_tag(register)
+@register.simple_tag
 def page_url(page, view_func=None, *args, **kwargs):
     """Renders the URL of the given view func in the given page."""
     url = None
@@ -128,7 +125,7 @@ def page_url(page, view_func=None, *args, **kwargs):
 
 # Page widgets.
 
-@simple_tag(register, takes_context=True)
+@register.simple_tag(takes_context=True)
 def meta_description(context, description=None):
     """
     Renders the content of the meta description tag for the current page::
@@ -157,7 +154,7 @@ def meta_description(context, description=None):
     return escape(description or "")
 
 
-@simple_tag(register, takes_context=True)
+@register.simple_tag(takes_context=True)
 def meta_keywords(context, keywords=None):
     """
     Renders the content of the meta keywords tag for the current page::
@@ -186,7 +183,7 @@ def meta_keywords(context, keywords=None):
     return escape(keywords or "")
 
 
-@simple_tag(register, takes_context=True)
+@register.simple_tag(takes_context=True)
 def meta_robots(context, index=None, follow=None, archive=None):
     """
     Renders the content of the meta robots tag for the current page::
@@ -229,7 +226,7 @@ def meta_robots(context, index=None, follow=None, archive=None):
     return escape(robots)
 
 
-@template_tag(register, "pages/title.html", takes_context=True)
+@register.inclusion_tag("pages/title.html", takes_context=True)
 def title(context, browser_title=None):
     """
     Renders the title of the current page::
@@ -257,7 +254,7 @@ def title(context, browser_title=None):
     }
 
 
-@template_tag(register, "pages/breadcrumbs.html", takes_context=True)
+@register.inclusion_tag("pages/breadcrumbs.html", takes_context=True)
 def breadcrumbs(context, page=None, extended=False):
     """
     Renders the breadcrumbs trail for the current page::
@@ -291,7 +288,7 @@ def breadcrumbs(context, page=None, extended=False):
     }
 
 
-@template_tag(register, "pages/header.html", takes_context=True)
+@register.inclusion_tag("pages/header.html", takes_context=True)
 def header(context, page_header=None):
     """
     Renders the header for the current page::
