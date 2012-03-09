@@ -158,13 +158,17 @@ MIDDLEWARE_CLASSES = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "cms.apps.historylinks.middleware.HistoryLinkFallbackMiddleware",
-    "cms.middleware.PreviewMiddleware",
+    "cms.middleware.PublicationMiddleware",
     "cms.apps.pages.middleware.PageMiddleware",
 )
 
 ROOT_URLCONF = "{{ project_name }}.urls"
 
 WSGI_APPLICATION = "{{ project_name }}.wsgi.application"
+
+PUBLICATION_MIDDLEWARE_EXCLUDE_URLS = (
+    "^admin/.*",
+)
 
 SITE_ID = 1
 

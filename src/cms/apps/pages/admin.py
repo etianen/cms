@@ -20,8 +20,13 @@ from django import forms
 from django.utils import simplejson as json
 
 from cms import debug
-from cms.admin import PageBaseAdmin, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
+from cms.admin import PageBaseAdmin
 from cms.apps.pages.models import Page, get_registered_content
+
+
+# Used to track references to and from the JS sitemap.
+PAGE_FROM_KEY = "from",
+PAGE_FROM_SITEMAP_VALUE = "sitemap"
 
 
 # The GET parameter used to indicate content type.
@@ -129,7 +134,7 @@ class PageAdmin(PageBaseAdmin):
         """Returns all the children for a page."""
         children = []
         def do_get_all_children(page):
-            for child in page.children():
+            for child in page.children:
                 children.append(page)
                 do_get_all_children(child)
         do_get_all_children(page)
@@ -370,7 +375,7 @@ class PageAdmin(PageBaseAdmin):
         if homepage:
             def sitemap_entry(page):
                 children = []
-                for child in page.children():
+                for child in page.children:
                     children.append(sitemap_entry(child))
                 return {
                     "isOnline": page.is_online,
@@ -398,7 +403,7 @@ class PageAdmin(PageBaseAdmin):
         if not self.has_change_permission(request, page):
             return HttpResponseForbidden("You do not have permission to move this page.")
         # Get all the siblings.
-        siblings = list(page.parent.children().select_for_update())
+        siblings = list(page.parent.children.select_for_update())
         # Find the page to swap.
         direction = request.POST["direction"]
         if direction == "up":
