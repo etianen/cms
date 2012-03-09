@@ -9,11 +9,16 @@ class PublishedBaseAdmin(admin.ModelAdmin):
     
     """Base admin class for published models."""
     
-    list_display = ("__unicode__", "is_online",)
+    change_form_template = "admin/cms/publishedmodel/change_form.html"
+
+
+class OnlineBaseAdmin(PublishedBaseAdmin):
+    
+    """Base admin class for OnlineModelBase instances."""
     
     actions = ("publish_selected", "unpublish_selected",)
     
-    change_form_template = "admin/cms/publishedmodel/change_form.html"
+    list_display = ("__unicode__", "is_online",)
     
     list_filter = ("is_online",)
     
@@ -33,9 +38,10 @@ class PublishedBaseAdmin(admin.ModelAdmin):
         """Unpublishes the selected models."""
         queryset.update(is_online=False)
     unpublish_selected.short_description = "Take selected %(verbose_name_plural)s offline"
+    
 
 
-class EntityBaseAdmin(VersionMetaAdmin, PublishedBaseAdmin):
+class SearchMetaBaseAdmin(VersionMetaAdmin, OnlineBaseAdmin):
     
     """Base admin class for EntityBase models."""
     
@@ -47,7 +53,7 @@ class EntityBaseAdmin(VersionMetaAdmin, PublishedBaseAdmin):
     })
 
 
-class PageBaseAdmin(EntityBaseAdmin):
+class PageBaseAdmin(SearchMetaBaseAdmin):
     
     """Base admin class for PageBase models."""
 
@@ -68,7 +74,7 @@ class PageBaseAdmin(EntityBaseAdmin):
     
     fieldsets = (
         TITLE_FIELDS,
-        PublishedBaseAdmin.PUBLICATION_FIELDS,
+        OnlineBaseAdmin.PUBLICATION_FIELDS,
         NAVIGATION_FIELDS,
-        EntityBaseAdmin.SEO_FIELDS,
+        SearchMetaBaseAdmin.SEO_FIELDS,
     )

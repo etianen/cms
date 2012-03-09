@@ -72,9 +72,29 @@ class PublishedBaseManager(models.Manager):
     
     use_for_related_fields = True
     
+    def select_published(self, queryset):
+        """
+        Filters the given queryset to only include published items.
+        
+        Override this in subclasses for more specific publication filtering.
+        """
+        return queryset
+    
     def get_query_set(self):
         """"Returns the queryset, filtered if appropriate."""
         queryset = super(PublishedBaseManager, self).get_query_set()
         if publication_manager.select_published_active():
-            queryset = self.model.select_published(queryset)
+            queryset = self.select_published(queryset)
         return queryset
+    
+    
+class OnlineBaseManager(PublishedBaseManager):
+    
+    """Publication manager that uses a simple online/offline flag."""
+    
+    def select_published(self, queryset):
+        """
+        Filters the given queryset to only include items marked as online.
+        """
+        queryset = super(OnlineBaseManager, self).select_published(queryset)
+        return queryset.filter(is_online=True)

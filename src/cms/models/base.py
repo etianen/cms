@@ -3,7 +3,7 @@
 from django.db import models
 from django.shortcuts import render
 
-from cms.models.managers import PublishedBaseManager
+from cms.models.managers import OnlineBaseManager, PublishedBaseManager
 
 
 class PublishedBase(models.Model):
@@ -12,18 +12,13 @@ class PublishedBase(models.Model):
     
     objects = PublishedBaseManager()
     
-    @classmethod
-    def select_published(cls, queryset):
-        """
-        Filters out unpublished objects from the given queryset.
-        
-        This method will automatically be applied to all querysets of this model
-        when in an active publication context.
-        
-        Subclasses can override this method to define additinal publication
-        rules.
-        """
-        return queryset.filter(is_online=True)
+    class Meta:
+        abstract = True
+
+
+class OnlineBase(PublishedBase):
+    
+    objects = OnlineBaseManager()
     
     is_online = models.BooleanField(
         "online",
@@ -38,7 +33,7 @@ class PublishedBase(models.Model):
         abstract = True
 
 
-class EntityBase(PublishedBase):
+class SearchMetaBase(OnlineBase):
     
     """Base model for models used to generate a standalone HTML page."""
     
@@ -161,10 +156,10 @@ class EntityBase(PublishedBase):
         abstract = True
     
 
-class PageBase(EntityBase):
+class PageBase(SearchMetaBase):
     
     """
-    An enhanced EntityBase with a sensible set of common features suitable for
+    An enhanced SearchMetaBase with a sensible set of common features suitable for
     most pages.
     """
     

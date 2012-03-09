@@ -8,7 +8,7 @@ from django.utils.functional import cached_property
 from django.utils import timezone
 
 from cms import sitemaps
-from cms.models.base import PageBase, PublishedBaseManager
+from cms.models.base import PageBase, OnlineBaseManager
 from cms.apps import historylinks
 
 
@@ -20,9 +20,17 @@ def get_default_page_parent():
         return None
 
 
-class PageManager(PublishedBaseManager):
+class PageManager(OnlineBaseManager):
     
     """Manager for Page objects."""
+    
+    def select_published(self, queryset):
+        """Selects only published pages."""
+        queryset = super(PageManager, self).select_published(queryset)
+        now = timezone.now()
+        queryset = queryset.filter(Q(publication_date=None) | Q(publication_date__lte=now))
+        queryset = queryset.filter(Q(expiry_date=None) | Q(expiry_date__gt=now))
+        return queryset
     
     def get_homepage(self):
         """Returns the site homepage."""
@@ -34,15 +42,6 @@ class Page(PageBase):
     """A page within the site."""
     
     objects = PageManager()
-    
-    @classmethod
-    def select_published(cls, queryset):
-        """Selects only published pages."""
-        queryset = super(Page, cls).select_published(queryset)
-        now = timezone.now()
-        queryset = queryset.filter(Q(publication_date=None) | Q(publication_date__lte=now))
-        queryset = queryset.filter(Q(expiry_date=None) | Q(expiry_date__gt=now))
-        return queryset
     
     # Hierarchy fields.
 

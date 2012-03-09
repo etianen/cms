@@ -4,7 +4,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.sitemaps import Sitemap
 
-from cms.models import PublishedBase, EntityBase, PageBase
+from cms.models import PublishedBase, SearchMetaBase, PageBase
 
 
 # A dictionary of registered sitemap classes.
@@ -46,7 +46,7 @@ class PublishedBaseSitemap(BaseSitemap):
         return pages
 
 
-class EntityBaseSitemap(PublishedBaseSitemap):
+class SearchMetaBaseSitemap(PublishedBaseSitemap):
     
     """
     Base sitemap for all subclasses of EntityBase.
@@ -65,7 +65,7 @@ class EntityBaseSitemap(PublishedBaseSitemap):
         return obj.sitemap_priority
         
 
-class PageBaseSitemap(EntityBaseSitemap):
+class PageBaseSitemap(SearchMetaBaseSitemap):
     
     """
     Base sitemap for all subclasses of PageBase.
@@ -94,8 +94,8 @@ def register(model, sitemap_cls=None):
     if not sitemap_cls:
         if issubclass(model, PageBase):
             sitemap_cls_base = PageBaseSitemap
-        elif issubclass(model, EntityBase):
-            sitemap_cls_base = EntityBaseSitemap
+        elif issubclass(model, SearchMetaBase):
+            sitemap_cls_base = SearchMetaBaseSitemap
         elif issubclass(model, PublishedBase):
             sitemap_cls_base = PublishedBaseSitemap
         else:
