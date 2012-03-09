@@ -41,7 +41,7 @@ class PageAdmin(PageBaseAdmin):
             "classes": ("collapse",),
         }),
         ("Navigation", {
-            "fields": ("short_title", "permalink", "in_navigation",),
+            "fields": ("short_title", "in_navigation",),
             "classes": ("collapse",),
         }),
         PageBaseAdmin.SEO_FIELDS,

@@ -86,9 +86,6 @@ class Page(PageBase):
                                         default=True,
                                         help_text="Uncheck this box to remove this content from the site navigation.")
 
-    permalink = models.SlugField(blank=True,
-                                 help_text="A unique identifier for this page.  This will be set by your design team in order to link to this page from any custom templates they write.")
-
     # Content fields.
     
     content_type = models.ForeignKey(

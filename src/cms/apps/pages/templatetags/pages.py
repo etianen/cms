@@ -101,12 +101,7 @@ def navigation(context, pages, section=None):
 def page_url(page, view_func=None, *args, **kwargs):
     """Renders the URL of the given view func in the given page."""
     url = None
-    if isinstance(page, basestring):
-        try:
-            page = Page.objects.get(permalink=page)
-        except Page.DoesNotExist:
-            url = "#"
-    elif isinstance(page, int):
+    if isinstance(page, int):
         try:
             page = Page.objects.get(pk=page)
         except Page.DoesNotExist:
