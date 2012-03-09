@@ -49,7 +49,8 @@ class RequestPageManager(object):
                     if child.url_title == slug:
                         do_breadcrumbs(child)
                         break
-        do_breadcrumbs(self.homepage)
+        if self.homepage:
+            do_breadcrumbs(self.homepage)
         return breadcrumbs
     
     @property
