@@ -8,8 +8,7 @@ from django.core.handlers.base import BaseHandler
 from django.http import Http404
 from django.views.debug import technical_404_response
 from django.shortcuts import redirect
-
-import optimizations
+from django.utils.functional import cached_property
 
 from cms.apps.pages.models import Page
 
@@ -23,7 +22,7 @@ class RequestPageManager(object):
         self._path = path
         self._path_info = path_info
         
-    @optimizations.cached_property
+    @cached_property
     def homepage(self):
         """Returns the site homepage."""
         try:
@@ -36,7 +35,7 @@ class RequestPageManager(object):
         """Whether the current request is for the site homepage."""
         return self._path == self.homepage.get_absolute_url()
     
-    @optimizations.cached_property
+    @cached_property
     def breadcrumbs(self):
         """The breadcrumbs for the current request."""
         breadcrumbs = []
@@ -53,7 +52,7 @@ class RequestPageManager(object):
         do_breadcrumbs(self.homepage)
         return breadcrumbs
     
-    @optimizations.cached_property
+    @property
     def current(self):
         """The current best-matched page."""
         try:

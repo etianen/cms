@@ -7,8 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
 from django.db import models
 from django.db.models import Q
-
-import optimizations
+from django.utils.functional import cached_property
 
 from cms import sitemaps
 from cms.models.base import PageBase, PublishedBaseManager
@@ -59,7 +58,7 @@ class Page(PageBase):
 
     order = models.IntegerField(editable=False)
     
-    @optimizations.cached_property
+    @cached_property
     def children(self):
         """The child pages for this page."""
         return list(self.child_set.all())
@@ -96,7 +95,7 @@ class Page(PageBase):
         help_text="The type of page content.",
     )
     
-    @optimizations.cached_property
+    @cached_property
     def content(self):
         """The associated content model for this page."""
         content_cls = ContentType.objects.get_for_id(self.content_type_id).model_class()
