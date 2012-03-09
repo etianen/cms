@@ -1,10 +1,8 @@
 """Google sitemaps used by the page managment application."""
 
-
-from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.sitemaps import Sitemap
 
-from cms.models import PublishedBase, SearchMetaBase, PageBase
+from cms.models import SearchMetaBase, PageBase
 
 
 # A dictionary of registered sitemap classes.
@@ -22,31 +20,7 @@ class BaseSitemap(Sitemap):
         return self.model.objects.all()
 
 
-class PublishedBaseSitemap(BaseSitemap):
-    
-    """
-    Base sitemap for all subclasses of PublishedBase.
-    
-    Subclasses need to override the model property.
-    """
-    
-    def items(self):
-        """Returns all items in this sitemap."""
-        pages = []
-        for obj in super(PublishedBaseSitemap, self).items():
-            # HACK: PublishedBase instances might be not be published, due to an
-            # unpublished parent. This checks to see if they can provide a URL
-            # before passing them on to the renderer.
-            try:
-                obj.get_absolute_url()
-            except ObjectDoesNotExist:
-                pass
-            else:
-                pages.append(obj)
-        return pages
-
-
-class SearchMetaBaseSitemap(PublishedBaseSitemap):
+class SearchMetaBaseSitemap(BaseSitemap):
     
     """
     Base sitemap for all subclasses of EntityBase.
@@ -96,8 +70,6 @@ def register(model, sitemap_cls=None):
             sitemap_cls_base = PageBaseSitemap
         elif issubclass(model, SearchMetaBase):
             sitemap_cls_base = SearchMetaBaseSitemap
-        elif issubclass(model, PublishedBase):
-            sitemap_cls_base = PublishedBaseSitemap
         else:
             sitemap_cls_base = BaseSitemap
         sitemap_cls_name = model.__name__ + "Sitemap"

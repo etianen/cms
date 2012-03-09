@@ -35,8 +35,8 @@ class PageManager(OnlineBaseManager):
         quote_name = connection.ops.quote_name
         queryset = queryset.extra(
             where = ("""
-                EXISTS (
-                    SELECT count(*)
+                NOT EXISTS (
+                    SELECT *
                     FROM {pages_page} AS {ancestors}
                     WHERE
                         {ancestors}.{left} < {pages_page}.{left} AND
