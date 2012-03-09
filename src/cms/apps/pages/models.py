@@ -2,7 +2,7 @@
 
 from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
-from django.db import models
+from django.db import models, connection
 from django.db.models import Q, F
 from django.utils.functional import cached_property
 from django.utils import timezone
@@ -28,8 +28,40 @@ class PageManager(OnlineBaseManager):
         """Selects only published pages."""
         queryset = super(PageManager, self).select_published(queryset)
         now = timezone.now()
+        # Perform local filtering.
         queryset = queryset.filter(Q(publication_date=None) | Q(publication_date__lte=now))
         queryset = queryset.filter(Q(expiry_date=None) | Q(expiry_date__gt=now))
+        # Perform parent ordering.
+        quote_name = connection.ops.quote_name
+        queryset = queryset.extra(
+            where = ("""
+                EXISTS (
+                    SELECT count(*)
+                    FROM {pages_page} AS {ancestors}
+                    WHERE
+                        {ancestors}.{left} < {pages_page}.{left} AND
+                        {ancestors}.{right} > {pages_page}.{right} AND (
+                            {ancestors}.{is_online} = FALSE OR
+                            {ancestors}.{publication_date} > %s OR
+                            {ancestors}.{expiry_date} <= %s
+                        )
+                )
+            """.format(
+                **dict(
+                    (name, quote_name(name))
+                    for name in (
+                        "pages_page",
+                        "ancestors",
+                        "left",
+                        "right",
+                        "is_online",
+                        "publication_date",
+                        "expiry_date",
+                    )
+                )
+            ),),
+            params = (now, now),
+        )
         return queryset
     
     def get_homepage(self):
