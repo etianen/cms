@@ -112,19 +112,27 @@ class Page(PageBase):
     
     # Publication fields.
     
-    publication_date = models.DateTimeField(blank=True,
-                                            null=True,
-                                            help_text="The date that this page will appear on the website.  Leave this blank to immediately publish this page.")
+    publication_date = models.DateTimeField(
+        blank = True,
+        null = True,
+        db_index = True,
+        help_text = "The date that this page will appear on the website.  Leave this blank to immediately publish this page.",
+    )
 
-    expiry_date = models.DateTimeField(blank=True,
-                                       null=True,
-                                       help_text="The date that this page will be removed from the website.  Leave this blank to never expire this page.")
+    expiry_date = models.DateTimeField(
+        blank = True,
+        null = True,
+        db_index = True,
+        help_text = "The date that this page will be removed from the website.  Leave this blank to never expire this page.",
+    )
 
     # Navigation fields.
 
-    in_navigation = models.BooleanField("add to navigation",
-                                        default=True,
-                                        help_text="Uncheck this box to remove this content from the site navigation.")
+    in_navigation = models.BooleanField(
+        "add to navigation",
+        default = True,
+        help_text = "Uncheck this box to remove this content from the site navigation.",
+    )
 
     # Content fields.
     
