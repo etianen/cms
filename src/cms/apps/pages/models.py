@@ -61,7 +61,11 @@ class Page(PageBase):
     @cached_property
     def children(self):
         """The child pages for this page."""
-        return list(self.child_set.all())
+        children = []
+        for child in self.child_set.all():
+            child.parent = self
+            children.append(child)
+        return children
     
     @property
     def navigation(self):
