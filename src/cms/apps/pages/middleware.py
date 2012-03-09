@@ -46,7 +46,7 @@ class RequestPageManager(object):
             breadcrumbs.append(page)
             if slugs:
                 slug = slugs.pop()
-                for child in page.children.all():
+                for child in page.children():
                     if child.url_title == slug:
                         do_breadcrumbs(child)
                         break

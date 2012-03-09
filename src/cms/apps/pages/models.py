@@ -3,14 +3,12 @@
 
 import datetime
 
-from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
 from django.db import models
 from django.db.models import Q
 
 import optimizations
-from optimizations.assetcache import default_asset_cache
 
 from cms import sitemaps
 from cms.models.base import PageBase, PublishedBaseManager
@@ -31,7 +29,7 @@ class PageManager(PublishedBaseManager):
     
     def get_homepage(self):
         """Returns the site homepage."""
-        return self.prefetch_related("children__children").get(parent=None)
+        return self.prefetch_related("child_set__child_set").get(parent=None)
 
 
 class Page(PageBase):
@@ -56,15 +54,20 @@ class Page(PageBase):
         blank = True,
         null = True,
         default = get_default_page_parent,
-        related_name = "children",
+        related_name = "child_set",
     )
 
     order = models.IntegerField(editable=False)
     
+    @optimizations.cached_property
+    def children(self):
+        """The child pages for this page."""
+        return list(self.child_set.all())
+    
     @property
     def navigation(self):
         """The sub-navigation of this page."""
-        return [child for child in self.children.all() if child.in_navigation]
+        return [child for child in self.children if child.in_navigation]
     
     # Publication fields.
     
