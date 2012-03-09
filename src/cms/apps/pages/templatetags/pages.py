@@ -4,7 +4,6 @@
 from django import template
 from django.utils.html import escape
 
-from cms import debug
 from cms.apps.pages.models import Page
 
 
@@ -13,69 +12,7 @@ register = template.Library()
 
 # Navigation.
 
-class NavigationItem(object):
-    
-    """An item in a navigation list."""
-    
-    def __init__(self, request, page):
-        """Initializes the NavigationItem."""
-        self._request = request
-        self.url = page.get_absolute_url()
-        self.page = page
-        self.title = page.title
-        self.short_title = unicode(page)
-        self.here = request.path.startswith(self.url)
-        
-    @property
-    @debug.print_exc
-    def navigation(self):
-        """Returns the sub-navigation."""
-        return self.page.navigation
-        
-    def __unicode__(self):
-        """Returns a unicode representation."""
-        return self.short_title
-
-
-class SectionNavigationItem(NavigationItem):
-    
-    """An item in a navigation list with no navigation."""
-    
-    def __init__(self, request, page):
-        """Initialzies the SectionNavigationItem."""
-        super(SectionNavigationItem, self).__init__(request, page)
-        self.here = request.path == self.url
-    
-    navigation = ()
-    
-    
-class NavigationRenderer(object):
-    
-    """Renders navigation."""
-    
-    def __init__(self, entries, context):
-        """Initializes the navigation renderer."""
-        self.entries = entries
-        self.context = context
-    
-    def __iter__(self):
-        """Iterates over the entries."""
-        return iter(self.entries)
-        
-    def __unicode__(self):
-        """Renders the navigation."""
-        self.context.push()
-        try:
-            self.context.update({
-                "navigation": self.entries,
-            })
-            return template.loader.render_to_string("pages/navigation.html", self.context)
-        finally:
-            self.context.pop()
-    
-
-@register.simple_tag(takes_context=True)
-@register.assignment_tag(takes_context=True, name="get_navigation")
+@register.inclusion_tag("pages/navigation.html", takes_context=True)
 def navigation(context, pages, section=None):
     """
     Renders a navigation list for the given pages.
@@ -87,12 +24,31 @@ def navigation(context, pages, section=None):
     """
     request = context["request"]
     # Compile the entries.
-    entries = [NavigationItem(request, page) for page in pages]
+    def page_entry(page):
+        url = page.get_absolute_url()
+        return {
+            "url": url,
+            "page": page,
+            "title": unicode(page),
+            "here": request.path.startswith(url),
+        }
+    entries = map(page_entry, pages)
     # Add the section.
     if section:
-        entries = [SectionNavigationItem(request, section)] + entries
+        section_entry = page_entry(section)
+        section_entry["here"] = request.path == section_entry["url"]
+        entries = [section_entry] + entries
     # Render the template.
-    return NavigationRenderer(entries, context)
+    return {
+        "request": request,
+        "navigation": entries, 
+    }
+    
+    
+@register.assignment_tag(takes_context=True)
+def get_navigation(context, pages, section=None):
+    """Returns a navigation list for the given pages."""
+    return navigation(context, pages, section)["navigation"]
 
 
 # Page linking.

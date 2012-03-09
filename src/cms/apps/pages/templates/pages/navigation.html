@@ -2,7 +2,7 @@
     <ul>
         {% for entry in navigation %}
             <li>
-                <a class="{% if entry.here %}here{% endif %}" href="{{entry.url}}" title="{{entry.title}}">{{entry.short_title}}</a>
+                <a{% if entry.here %} class="here"{% endif %} href="{{entry.url}}">{{entry.title}}</a>
             </li>
         {% endfor %}
     </ul>

@@ -25,7 +25,7 @@ from cms.apps.pages.models import Page, get_registered_content
 
 
 # Used to track references to and from the JS sitemap.
-PAGE_FROM_KEY = "from",
+PAGE_FROM_KEY = "from"
 PAGE_FROM_SITEMAP_VALUE = "sitemap"
 
 
@@ -403,7 +403,7 @@ class PageAdmin(PageBaseAdmin):
         if not self.has_change_permission(request, page):
             return HttpResponseForbidden("You do not have permission to move this page.")
         # Get all the siblings.
-        siblings = list(page.parent.children.select_for_update())
+        siblings = list(page.parent.child_set.select_for_update())
         # Find the page to swap.
         direction = request.POST["direction"]
         if direction == "up":
