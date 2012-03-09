@@ -28,7 +28,7 @@ def paginate(context, queryset, per_page=10, key="page"):
     return page
 
 
-@register.inclusion_tag("pagination.html", takes_context=True)
+@register.inclusion_tag("pagination/pagination.html", takes_context=True)
 def pagination(context, page_obj):
     """Renders the pagination for the given page of items."""
     return {
