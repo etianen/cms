@@ -1,13 +1,11 @@
 """Core models used by the CMS."""
 
-
-import datetime
-
 from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
 from django.db import models
 from django.db.models import Q
 from django.utils.functional import cached_property
+from django.utils import timezone
 
 from cms import sitemaps
 from cms.models.base import PageBase, PublishedBaseManager
@@ -41,7 +39,7 @@ class Page(PageBase):
     def select_published(cls, queryset):
         """Selects only published pages."""
         queryset = super(Page, cls).select_published(queryset)
-        now = datetime.datetime.now()
+        now = timezone.now()
         queryset = queryset.filter(Q(publication_date=None) | Q(publication_date__lte=now))
         queryset = queryset.filter(Q(expiry_date=None) | Q(expiry_date__gt=now))
         return queryset
