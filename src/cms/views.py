@@ -23,24 +23,24 @@ class TextTemplateView(generic.TemplateView):
         return super(TextTemplateView, self).render_to_response(context, **kwargs)
     
     
-class EntityContextMixin(object):
+class SearchMetaDetailMixin(object):
     
-    """Generates the context for an entity detail page."""
+    """Generates the context for an search meta detail page."""
     
     def get_context_data(self, **kwargs):
-        """Adds in the additional entity context data."""
-        context = super(EntityContextMixin, self).get_context_data(**kwargs)
+        """Adds in the additional search meta context data."""
+        context = super(SearchMetaDetailMixin, self).get_context_data(**kwargs)
         defaults = self.object.get_context_data()
         defaults.update(context)
         return defaults
     
     
-class EntityDetailView(EntityContextMixin, generic.DetailView):
+class SearchMetaDetailView(SearchMetaDetailMixin, generic.DetailView):
     
     """A simple entity detail view."""
     
     
-class PageDetailView(EntityDetailView):
+class PageDetailView(SearchMetaDetailView):
     
     """A simple page detail view."""
     

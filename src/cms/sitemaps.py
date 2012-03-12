@@ -23,7 +23,7 @@ class BaseSitemap(Sitemap):
 class SearchMetaBaseSitemap(BaseSitemap):
     
     """
-    Base sitemap for all subclasses of EntityBase.
+    Base sitemap for all subclasses of SearchMetaBase.
     
     Subclasses need to override the model property.
     """

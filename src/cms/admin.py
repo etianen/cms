@@ -43,7 +43,7 @@ class OnlineBaseAdmin(PublishedBaseAdmin):
 
 class SearchMetaBaseAdmin(VersionMetaAdmin, OnlineBaseAdmin):
     
-    """Base admin class for EntityBase models."""
+    """Base admin class for SearchMetaBase models."""
     
     list_display = ("__unicode__", "is_online", "get_date_modified",)
     
