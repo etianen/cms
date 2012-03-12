@@ -109,7 +109,6 @@ SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 INSTALLED_APPS = (
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.admin",
@@ -191,6 +190,8 @@ WSGI_APPLICATION = "{{ project_name }}.wsgi.application"
 PUBLICATION_MIDDLEWARE_EXCLUDE_URLS = (
     "^admin/.*",
 )
+
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 SITE_ID = 1
 
