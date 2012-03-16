@@ -233,10 +233,10 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     },
     # Used for efficient caching of static assets.
-    "optimizations.assetcache": {
+    "optimizations": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "TIMEOUT": 60 * 60,
-        "LOCATION": "optimiizations.assetcache",
+        "LOCATION": "optimizations",
     },
 }
 
