@@ -5,8 +5,11 @@
 
 {% block extrahead %}
     {{block.super}}
-    {% stylesheet "cms" %}
+    {% stylesheet "pages/css/cms.pages.css" %}
 {% endblock %}
+
+
+{% block bodyclass %}page-content-types{% endblock %}
 
 
 {% block breadcrumbs %}
