@@ -9,6 +9,7 @@ from django.http import Http404
 from django.views.debug import technical_404_response
 from django.shortcuts import redirect
 from django.utils.functional import cached_property
+from django.template.response import SimpleTemplateResponse
 
 from cms.apps.pages.models import Page
 
@@ -99,7 +100,9 @@ class PageMiddleware(object):
             # Validate the response.
             if not response:
                 raise ValueError, "The view {0!r} didn't return an HttpResponse object.".format(callback.__name__)
-            return response.render()
+            if isinstance(response, SimpleTemplateResponse):
+                return response.render()
+            return response
         except Http404, ex:
             if settings.DEBUG:
                 return technical_404_response(request, ex)
