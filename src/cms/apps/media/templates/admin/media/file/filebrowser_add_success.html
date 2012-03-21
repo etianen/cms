@@ -5,9 +5,8 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>File added</title>
-        {% script "django.jquery" %}
         <script src="{% static 'cms/js/tiny_mce/tiny_mce_popup.js' %}"></script>
-        {% script "cms" %}
+        {% include "admin/cms/scripts.html" %}
         <script>
             tinyMCEPopup.onInit.add(function() {
                 django.jQuery.cms.media.complete("{{permalink|escapejs}}", "{{title|escapejs}}");

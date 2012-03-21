@@ -4,10 +4,9 @@
 
 
 {% block extrahead %}
-    {% stylesheet "cms" %}
+    {% stylesheet "pages/css/cms.pages.css" %}
     {{block.super}}
-    {% script "django.jquery" %}
-    {% script "cms" %}
+    {% include "admin/cms/scripts.html" %}
 {% endblock %}
 
 

@@ -7,7 +7,6 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.utils.safestring import mark_safe
 
 from optimizations import default_stylesheet_cache, default_javascript_cache
-from optimizations.assetcache import StaticAsset
 
 from cms import debug
 
@@ -25,7 +24,7 @@ class HtmlWidget(forms.Textarea):
     def get_media(self):
         """Returns the media used by the widget."""
         assets = [staticfiles_storage.url("cms/js/tiny_mce/tiny_mce.js")]
-        assets.extend(default_javascript_cache.get_urls(StaticAsset.load("js", "cms")))
+        assets.extend(default_javascript_cache.get_urls(("cms/js/jquery.cms.js", "pages/js/jquery.cms.pages.js", "media/js/jquery.cms.media.js",)))
         return forms.Media(js=assets)
     
     media = property(

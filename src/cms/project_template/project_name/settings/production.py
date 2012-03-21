@@ -143,28 +143,6 @@ STATIC_ASSETS = {
             ),
         },
     },
-    "django.jquery": {
-        "js": {
-            "include": (
-                "admin/js/jquery.js",
-                "admin/js/jquery.init.js",
-            ),
-        },
-    },
-    "cms": {
-        "js": {
-            "include": (
-                "cms/js/jquery.cms.js",
-                "pages/js/jquery.cms.pages.js",
-                "media/js/jquery.cms.media.js",
-            ),
-        },
-        "css": {
-            "include": (
-                "pages/css/cms.pages.css",
-            ),
-        }
-    }
 }
 
 
