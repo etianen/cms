@@ -3,7 +3,7 @@
 */
 
 
-(function($, tinyMCE, tinyMCEPopup) {
+(function($) {
     
     // Define the filebrowser plugin.
     $.cms.media = {}
@@ -72,4 +72,4 @@
         return false;
     }
 
-}(django.jQuery, tinyMCE, window.tinyMCEPopup));
+}(django.jQuery));
