@@ -7,7 +7,6 @@ standard implementation.
 """
 
 from __future__ import with_statement
-import threading
 
 from django.core.exceptions import PermissionDenied
 from django.contrib.contenttypes.models import ContentType
@@ -23,10 +22,6 @@ from cms.apps.pages.models import Page, get_registered_content
 
 # The GET parameter used to indicate content type.
 PAGE_TYPE_PARAMETER = "type"
-
-
-# HACK: Used to provide thread safety for the patch inlines hack (below).
-page_inlines_lock = threading.RLock()
     
     
 class PageAdmin(PageBaseAdmin):
@@ -54,21 +49,29 @@ class PageAdmin(PageBaseAdmin):
     def __init__(self, *args, **kwargs):
         """Initialzies the PageAdmin."""
         super(PageAdmin, self).__init__(*args, **kwargs)
+        # Prepare to register some content inlines.
+        self.content_inlines = []
         # Register all content classes with reversion.
-        self.content_inline_instances = []
         for content_cls in get_registered_content():
             self._autoregister(content_cls, follow=["page"])
     
-    def register_content_inline(self, content_cls, inline, inline_admin):
+    def register_content_inline(self, content_cls, inline_admin):
         """Registers an inline model with the page admin."""
-        # Register the admin class.
-        self.inlines = list(self.inlines)
-        self.inlines.append(inline_admin)
-        inline_instance = inline_admin(self.model, self.admin_site)
-        self.content_inline_instances.append((content_cls, inline_instance))
-        self.inline_instances.append(inline_instance)
+        self.content_inlines.append((content_cls, inline_admin))
         # Register with reversion.
-        self._autoregister(inline, follow=["page"])
+        self._autoregister(inline_admin.model, follow=["page"])
+    
+    def get_inline_instances(self, request):
+        """Returns all the inline instances for this PageAdmin."""
+        inline_instances = super(PageAdmin, self).get_inline_instances(request)
+        # Add on the relevant content inlines.
+        obj = getattr(request, "_admin_change_obj", None)  # HACK: Retrieve the page from the change view.
+        content_cls = self.get_page_content_cls(request, obj)
+        for cls, inline in self.content_inlines:
+            if cls == content_cls:
+                inline_instances.append(inline(self.model, self.admin_site))
+        # All done!
+        return inline_instances
     
     def queryset(self, request):
         """Only allows editing of pages in this site."""
@@ -238,35 +241,6 @@ class PageAdmin(PageBaseAdmin):
             if PAGE_FROM_KEY in request.GET:
                 response["Location"] += "?%s=%s" % (PAGE_FROM_KEY, request.GET[PAGE_FROM_KEY])
         return response
-    
-    def patch_inlines(self, request, obj, func):
-        """Updates the admin inlines to only display those relevant to the content class."""
-        # HACK: Not thread-safe, only suitable for process-based hosting.
-        def do_patch_inlines(*args, **kwargs):
-            with page_inlines_lock:
-                inlines = self.inlines
-                inline_instances = self.inline_instances
-                try:
-                    content_cls = self.get_page_content_cls(request, obj)
-                    content_inline_instances = [
-                        content_inline_instance
-                        for content_inline_cls, content_inline_instance
-                        in self.content_inline_instances
-                        if content_inline_cls == content_cls
-                    ]
-                    # Trim current inline instances.
-                    self.inlines = inlines[:-len(self.content_inline_instances)]
-                    self.inline_instances = inline_instances[:-len(self.content_inline_instances)]
-                    # Add in new ones.
-                    for content_inline_instance in content_inline_instances:
-                        self.inlines.append(content_inline_instance.__class__)
-                        self.inline_instances.append(content_inline_instance)
-                    # Run the func.
-                    return func(*args, **kwargs)
-                finally:
-                    self.inlines = inlines
-                    self.inline_instances = inline_instances
-        return do_patch_inlines
             
     def changelist_view(self, request, *args, **kwargs):
         """Redirects to the sitemap, if appropriate."""
@@ -309,12 +283,7 @@ class PageAdmin(PageBaseAdmin):
         else:
             if not self.has_add_content_permission(request, ContentType.objects.get_for_id(request.GET[PAGE_TYPE_PARAMETER]).model_class()):
                 raise PermissionDenied, "You are not allowed to add pages of that content type."
-        return self.patch_inlines(request, None, super(PageAdmin, self).add_view)(request, *args, **kwargs)
-    
-    def change_view(self, request, object_id, *args, **kwargs):
-        """Uses only the correct inlines for the page."""
-        page = Page.objects.get(id=object_id)
-        return self.patch_inlines(request, page, super(PageAdmin, self).change_view)(request, object_id, *args, **kwargs)
+        return super(PageAdmin, self).add_view(request, *args, **kwargs)
     
     def response_add(self, request, *args, **kwargs):
         """Redirects to the sitemap if appropriate."""
