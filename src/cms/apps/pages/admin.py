@@ -11,7 +11,7 @@ from __future__ import with_statement
 from django.core.exceptions import PermissionDenied
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 
 from cms.core.admin import PageBaseAdmin, site, PAGE_FROM_KEY, PAGE_FROM_SITEMAP_VALUE
@@ -249,6 +249,22 @@ class PageAdmin(PageBaseAdmin):
             if redirect_slug == PAGE_FROM_SITEMAP_VALUE:
                 return redirect("admin:index")
         return super(PageAdmin, self).changelist_view(request, *args, **kwargs)
+    
+    def change_view(self, request, object_id, *args, **kwargs):
+        """Uses only the correct inlines for the page."""
+        # HACK: Add the current page to the request to pass to the get_inline_instances() method.
+        page = get_object_or_404(self.model, id=object_id)
+        request._admin_change_obj = page
+        # Call the change view.
+        return super(PageAdmin, self).change_view(request, object_id, *args, **kwargs)
+    
+    def revision_view(self, request, object_id, *args, **kwargs):
+        """Load up the correct content inlines."""
+        # HACK: Add the current page to the request to pass to the get_inline_instances() method.
+        page = get_object_or_404(self.model, id=object_id)
+        request._admin_change_obj = page
+        # Call the change view.
+        return super(PageAdmin, self).revision_view(request, object_id, *args, **kwargs)
     
     def add_view(self, request, *args, **kwargs):
         """Ensures that a valid content type is chosen."""
