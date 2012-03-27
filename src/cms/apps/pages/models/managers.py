@@ -1,8 +1,6 @@
 """Model managers used by the pages application."""
 
 
-from __future__ import with_statement
-
 import threading
 
 from django.core.signals import request_finished

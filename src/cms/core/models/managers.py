@@ -1,8 +1,5 @@
 """Model managers used by the pages application."""
 
-
-from __future__ import with_statement
-
 import threading, contextlib
 from functools import wraps
 

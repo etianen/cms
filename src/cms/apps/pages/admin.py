@@ -6,8 +6,6 @@ user-friendly appearance and providing additional functionality over the
 standard implementation.
 """
 
-from __future__ import with_statement
-
 from django.core.exceptions import PermissionDenied
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponseRedirect

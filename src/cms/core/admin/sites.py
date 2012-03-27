@@ -1,7 +1,5 @@
 """Extensions to the Django admin site."""
 
-from __future__ import with_statement
-
 import functools, itertools, json
 
 from django.conf.urls.defaults import patterns, url

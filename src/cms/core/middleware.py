@@ -1,8 +1,5 @@
 """Custom middleware used by the pages application."""
 
-
-from __future__ import with_statement
-
 import sys
 
 from django.conf import settings
