@@ -14,6 +14,7 @@ from django.core.urlresolvers import reverse
 from django.conf.urls import patterns, url
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from django.db.models import F
 from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
@@ -390,13 +391,21 @@ class PageAdmin(PageBaseAdmin):
     @debug.print_exc
     def move_page_view(self, request):
         """Moves a page up or down."""
-        # Get the page.
-        page = get_object_or_404(self.model, pk=request.POST["page"])
-        # Check that the user has permission to move the page.
-        if not self.has_change_permission(request, page):
+        # Check that the user has permission to move pages.
+        if not self.has_change_permission(request):
             return HttpResponseForbidden("You do not have permission to move this page.")
+        # Lock entire table.
+        existing_pages_list = Page.objects.all().select_for_update().values("id", "parent_id", "left", "right", "title").order_by("left")
+        existing_pages = dict(
+            (page["id"], page)
+            for page
+            in existing_pages_list
+        )
+        # Get the page.
+        page = existing_pages[int(request.POST["page"])]
+        parent_id = page["parent_id"]
         # Get all the siblings.
-        siblings = list(page.parent.child_set.select_for_update())
+        siblings = [s for s in existing_pages_list if s["parent_id"] == parent_id]
         # Find the page to swap.
         direction = request.POST["direction"]
         if direction == "up":
@@ -407,20 +416,33 @@ class PageAdmin(PageBaseAdmin):
             raise ValueError("Direction should be 'up' or 'down'.")
         sibling_iter = iter(siblings)
         for sibling in sibling_iter:
-            if sibling.id == page.id:
+            if sibling["id"] == page["id"]:
                 break
         try:
             other_page = next(sibling_iter)
         except StopIteration:
             return HttpResponse("Page could not be moved, as nothing to swap with.")
-        # Do the swap.
-        page_order = page.order
-        page.order = other_page.order
-        page.save()
-        other_page.order = page_order
-        other_page.save()
+        # Put the pages in order.
+        first_page, second_page = sorted((page, other_page), key=lambda p: p["left"])
+        # Excise the first page.
+        Page.objects.filter(left__gte=first_page["left"], right__lte=first_page["right"]).update(
+            left = F("left") * -1,
+            right = F("right") * -1,
+        )
+        # Move the other page.
+        branch_width = first_page["right"] - first_page["left"] + 1
+        Page.objects.filter(left__gte=second_page["left"], right__lte=second_page["right"]).update(
+            left = F("left") - branch_width,
+            right = F("right") - branch_width,
+        )
+        # Put the page back in.
+        second_branch_width = second_page["right"] - second_page["left"] + 1
+        Page.objects.filter(left__lte=-first_page["left"], right__gte=-first_page["right"]).update(
+            left = (F("left") - second_branch_width) * -1,
+            right = (F("right") - second_branch_width) * -1,
+        )
         # Report back.
-        return HttpResponse("Page #%s was moved %s." % (page.id, direction))
+        return HttpResponse("Page #%s was moved %s." % (page["id"], direction))
 
 
 admin.site.register(Page, PageAdmin)
