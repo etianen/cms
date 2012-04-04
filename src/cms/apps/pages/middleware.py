@@ -55,6 +55,22 @@ class RequestPageManager(object):
         return breadcrumbs
     
     @property
+    def section(self):
+        """The current primary level section, or None."""
+        try:
+            return self.breadcrumbs[1]
+        except IndexError:
+            return None
+        
+    @property
+    def subsection(self):
+        """The current secondary level section, or None."""
+        try:
+            return self.breadcrumbs[2]
+        except IndexError:
+            return None
+    
+    @property
     def current(self):
         """The current best-matched page."""
         try:
