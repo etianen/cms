@@ -52,4 +52,4 @@ TEMPLATE_LOADERS = (
 
 # Optional console-based email backend.
 
-#EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
+#EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
