@@ -11,8 +11,12 @@ class ContentIndexView(TemplateView):
     def get_template_names(self):
         """Returns the list of template names."""
         content_cls = ContentType.objects.get_for_id(self.request.pages.current.content_type_id).model_class()
+        params = {
+            "model_name": content_cls.__name__.lower(),
+            "app_label": content_cls._meta.app_label,
+        }
         return (
-            "pages/{0}.html".format(content_cls.__name__.lower()),
-            "pages/base.html",
+            "{app_label}/{model_name}.html".format(**params),
+            "{app_label}/base.html".format(**params),
             "base.html",
         )
