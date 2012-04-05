@@ -10,25 +10,21 @@ class PageEfficiencyTest(TestCase):
     def setUp(self):
         self.homepage = Page.objects.create(
             title = "Homepage",
-            order = 1,
             content_type_id = 1,
         )
         self.section = Page.objects.create(
             parent = self.homepage,
             title = "Section",
-            order = 2,
             content_type_id = 1,
         )
         self.subsection = Page.objects.create(
             parent = self.section,
             title = "Subsection",
-            order = 3,
             content_type_id = 1,
         )
         self.subsubsection = Page.objects.create(
             parent = self.subsection,
             title = "Subsubsection",
-            order = 4,
             content_type_id = 1,
         )
         

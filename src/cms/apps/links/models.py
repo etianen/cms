@@ -2,6 +2,7 @@
 
 from django.db import models
 
+from cms.models import LinkField
 from cms.apps.pages.models import ContentBase
 
 
@@ -15,9 +16,7 @@ class Link(ContentBase):
     
     urlconf = "cms.apps.links.urls"
     
-    link_url = models.CharField(
+    link_url = LinkField(
         "link URL",
-        max_length = 1000,
         help_text = "The URL where the user will be redirected.",
     )
-    
