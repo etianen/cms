@@ -217,6 +217,7 @@ class PageAdmin(PageBaseAdmin):
         # Save the page content.
         content_obj.page = obj
         content_obj.save()
+        obj.content = content_obj
     
     # Permissions.
     
