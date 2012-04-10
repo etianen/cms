@@ -116,8 +116,8 @@ INSTALLED_APPS = (
     "optimizations",
     "reversion",
     "usertools",
+    "historylinks",
     "cms",
-    "cms.apps.historylinks",
     "cms.apps.pages",
     "cms.apps.media",
     "{{ project_name }}.apps.site",
@@ -156,7 +156,7 @@ MIDDLEWARE_CLASSES = (
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "cms.apps.historylinks.middleware.HistoryLinkFallbackMiddleware",
+    "historylinks.middleware.HistoryLinkFallbackMiddleware",
     "cms.middleware.PublicationMiddleware",
     "cms.apps.pages.middleware.PageMiddleware",
 )

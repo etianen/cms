@@ -7,9 +7,10 @@ from django.db.models import Q, F
 from django.utils.functional import cached_property
 from django.utils import timezone
 
+import historylinks 
+
 from cms import sitemaps
 from cms.models.base import PageBase, OnlineBaseManager
-from cms.apps import historylinks
 
 
 def get_default_page_parent():
