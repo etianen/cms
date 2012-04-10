@@ -1,0 +1,21 @@
+{% extends "news/base.html" %}
+{% load html %}
+
+
+{% block header_group %}
+    <hgroup>
+        {{block.super}}
+        <h2>{{article.date}}</h2>
+    </hgroup>
+{% endblock %}
+
+
+{% block content_primary %}
+    
+    {% if article.content %}
+        {{article.content|html}}
+    {% else %}
+        {{article.summary|html}}
+    {% endif %}
+
+{% endblock %}

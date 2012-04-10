@@ -38,7 +38,9 @@
                 {% if not pages.is_homepage %}
                     <nav id="nav-breadcrumbs">{% block breadcrumbs %}{% breadcrumbs %}{% endblock %}</nav>
                 {% endif %}
-                <h1>{% block header %}{% header %}{% endblock %}</h1>
+                {% block header_group %}
+                    <h1>{% block header %}{% header %}{% endblock %}</h1>
+                {% endblock %}
                 {% block content_primary %}{{pages.current.content.content_primary|html}}{% endblock %}
             </article>
             <aside>

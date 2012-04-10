@@ -22,3 +22,18 @@ def html(text):
         return ""
     text = process_html(text)
     return mark_safe(text)
+
+
+@register.filter
+def truncate_paragraphs(text, number):
+    """Truncates to the end of the given number of paragraphs in the given text."""
+    position = 0
+    count = 0
+    while count < number and position < len(text):
+        position = text.find(u"</p>", position)
+        if position == -1:
+            position = len(text)
+        else:
+            position += 4
+        count += 1
+    return text[:position]

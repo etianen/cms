@@ -151,8 +151,12 @@ class Page(PageBase):
         content.page = self
         return content
 
-    def reverse(self, view_func, args, kwargs):
+    def reverse(self, view_func, args=None, kwargs=None):
         """Performs a reverse URL lookup."""
+        if args is None:
+            args = ()
+        if kwargs is None:
+            kwargs = {}
         urlconf = ContentType.objects.get_for_id(self.content_type_id).model_class().urlconf
         return self.get_absolute_url() + urlresolvers.reverse(view_func, args=args, kwargs=kwargs, urlconf=urlconf, prefix="")
 
@@ -297,7 +301,7 @@ class ContentBase(models.Model):
     
     def __unicode__(self):
         """Returns a unicode representation."""
-        return u"Content for {0}.".format(self.page)
+        return unicode(self.page)
     
     class Meta:
         abstract = True

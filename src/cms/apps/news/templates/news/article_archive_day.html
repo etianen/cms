@@ -1,0 +1,14 @@
+{% extends "news/base.html" %}
+{% load news %}
+
+
+{% block header %}{{block.super}} for {{day}}{% endblock %}
+
+
+{% block content_primary %}
+
+    {{block.super}}
+    
+    {% article_list article_list %}
+
+{% endblock %}

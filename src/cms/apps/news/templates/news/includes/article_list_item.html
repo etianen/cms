@@ -1,0 +1,19 @@
+{% load html assets %}
+<article{% if article.image %} class="news-article-list-item-with-image"{% endif %}>
+    <hgroup>
+        <h1><a href="{{url}}">{{article}}</a></h1>
+        <h2>{{article.date}}</h2>
+    </hgroup>
+    {% if article.image %}
+        <aside>
+            <a href="{{url}}">
+                {% img article.image.file width=140 alt=article.image %}
+            </a>
+        </aside>
+    {% endif %}
+    {% if article.summary %}
+        {{article.summary|html}}
+    {% else %}
+        {{article.content|truncate_paragraphs:1|html}}
+    {% endif %}
+</article>
