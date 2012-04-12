@@ -123,9 +123,23 @@ def article_meta(context, article):
 def article_date_list(context, date_list):
     """Renders a list of dates."""
     pages = context["pages"]
+    # Resolve the current year.
     current_year = context.get("year", None)
     if current_year is not None:
         current_year = int(current_year)
+    else:
+        current_month = context.get("month", None)
+        if current_month is not None:
+            current_year = current_month.year
+        else:
+            current_day = context.get("day", None)
+            if current_day is not None:
+                current_year = current_day.year
+            else:
+                current_article = context.get("article", None)
+                if current_article is not None:
+                    current_year = current_article.date.year
+    # Render the template.
     return {
         "pages": pages,
         "date_list": date_list,
