@@ -1,9 +1,5 @@
-{% load html assets %}
+{% load html assets news %}
 <article{% if article.image %} class="news-article-list-item-with-image"{% endif %}>
-    <hgroup>
-        <h1><a href="{{url}}">{{article}}</a></h1>
-        <h2>{{article.date}}</h2>
-    </hgroup>
     {% if article.image %}
         <aside>
             <a href="{{url}}">
@@ -11,6 +7,12 @@
             </a>
         </aside>
     {% endif %}
+    <hgroup>
+        <h1><a href="{{url}}">{{article}}</a></h1>
+        <h2>
+            {% article_meta article %}
+        </h2>
+    </hgroup>
     {% if article.summary %}
         {{article.summary|html}}
     {% else %}

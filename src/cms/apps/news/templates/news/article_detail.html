@@ -1,11 +1,11 @@
 {% extends "news/base.html" %}
-{% load html %}
+{% load html news %}
 
 
 {% block header_group %}
     <hgroup>
         {{block.super}}
-        <h2>{{article.date}}</h2>
+        <h2>{% article_meta article %}</h2>
     </hgroup>
 {% endblock %}
 

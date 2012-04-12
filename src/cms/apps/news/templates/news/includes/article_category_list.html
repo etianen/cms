@@ -1,0 +1,9 @@
+{% load news %}
+{% if categories %}
+    in
+    {% for category in categories %}
+        <a href="{% category_url category %}">
+            {{category}}{% if not forloop.last %},{% endif %}
+        </a>
+    {% endfor %}
+{% endif %}

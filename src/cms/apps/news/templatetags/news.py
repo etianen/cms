@@ -77,6 +77,48 @@ def article_year_archive_url(context, year):
     }))
     
     
+@register.simple_tag(takes_context=True)
+def article_day_archive_url(context, date):
+    """Renders the month archive URL for the given date."""
+    pages = context["pages"]
+    page = pages.current
+    return escape(page.reverse("article_day_archive", kwargs={
+        "year": date.year,
+        "month": date.strftime("%b").lower(),
+        "day": date.day,
+    }))
+    
+    
+@register.inclusion_tag("news/includes/article_date.html", takes_context=True)
+def article_date(context, article):
+    """Renders a rich date for the given article."""
+    pages = context["pages"]
+    return {
+        "article": article,
+        "pages": pages,
+    }
+    
+    
+@register.inclusion_tag("news/includes/article_category_list.html", takes_context=True)
+def article_category_list(context, article):
+    """Renders the list of article categories."""
+    pages = context["pages"]
+    return {
+        "article": article,
+        "pages": pages,
+        "categories": article.categories.all(),
+    }
+    
+    
+@register.inclusion_tag("news/includes/article_meta.html", takes_context=True)
+def article_meta(context, article):
+    pages = context["pages"]
+    return {
+        "article": article,
+        "pages": pages,
+    }
+    
+    
 @register.inclusion_tag("news/includes/article_date_list.html", takes_context=True)
 def article_date_list(context, date_list):
     """Renders a list of dates."""
