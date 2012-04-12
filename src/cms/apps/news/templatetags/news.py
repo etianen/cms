@@ -31,6 +31,7 @@ def article_list_item(context, article):
         "url_title": article.url_title,
     })
     return {
+        "pages": context["pages"],
         "article": article,
         "url": url,
     }
