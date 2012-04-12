@@ -17,5 +17,20 @@
     {% else %}
         {{article.summary|html}}
     {% endif %}
+    
+    {% if next_article or prev_article %}
+        <nav class="news-article-detail-navigation">
+            {% if prev_article %}
+                <a rel="prev" href="{% article_url prev_article %}">
+                    Previous
+                </a>
+            {% endif %}
+            {% if next_article %}
+                <a rel="next" href="{% article_url next_article %}">
+                    Next
+                </a>
+            {% endif %}
+        </nav>
+    {% endif %}
 
 {% endblock %}

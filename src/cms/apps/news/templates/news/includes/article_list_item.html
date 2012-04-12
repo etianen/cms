@@ -2,13 +2,13 @@
 <article{% if article.image %} class="news-article-list-item-with-image"{% endif %}>
     {% if article.image %}
         <aside>
-            <a href="{{url}}">
+            <a href="{% article_url article %}">
                 {% img article.image.file width=140 alt=article.image %}
             </a>
         </aside>
     {% endif %}
     <hgroup>
-        <h1><a href="{{url}}">{{article}}</a></h1>
+        <h1><a href="{% article_url article %}">{{article}}</a></h1>
         <h2>
             {% article_meta article %}
         </h2>

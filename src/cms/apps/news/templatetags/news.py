@@ -19,22 +19,26 @@ def article_list(context, article_list):
     }
     
     
-@register.inclusion_tag("news/includes/article_list_item.html", takes_context=True)
-def article_list_item(context, article):
-    """Renders an item in an article list."""
+@register.simple_tag(takes_context=True)
+def article_url(context, article):
+    """Renders the URL for an article."""
     pages = context["pages"]
     page = pages.current
-    # Calculate the URL rather than have to look up the article page AGAIN.
-    url = page.reverse("article_detail", kwargs={
+    return escape(page.reverse("article_detail", kwargs={
         "year": article.date.year,
         "month": article.date.strftime("%b").lower(),
         "day": article.date.day,
         "url_title": article.url_title,
-    })
+    }))
+    
+    
+@register.inclusion_tag("news/includes/article_list_item.html", takes_context=True)
+def article_list_item(context, article):
+    """Renders an item in an article list."""
+    pages = context["pages"]
     return {
-        "pages": context["pages"],
+        "pages": pages,
         "article": article,
-        "url": url,
     }
 
 

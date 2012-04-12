@@ -37,7 +37,7 @@ class ArticleListMixin(object):
             "authors",
         ).select_related("image").filter(
             news_feed__page = self.request.pages.current,
-        )
+        ).order_by("-date")
 
 
 class ArticleArchiveView(ArticleListMixin, generic.ArchiveIndexView):
@@ -81,16 +81,16 @@ class ArticleDetailView(ArticleDateListMixin, ArticleListMixin, PageDetailMixin,
         # Get the next article.
         try:
             next_article = self.get_queryset().filter(
-                date__gt = self.object.date,
-            )
+                date__lt = self.object.date,
+            )[0]
         except IndexError:
             next_article = None
         context["next_article"] = next_article
         # Get the previous article.
         try:
             prev_article = self.get_queryset().reverse().filter(
-                date__lt = self.object.date,
-            )
+                date__gt = self.object.date,
+            )[0]
         except IndexError:
             prev_article = None
         context["prev_article"] = prev_article
