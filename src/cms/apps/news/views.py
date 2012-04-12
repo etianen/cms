@@ -74,6 +74,28 @@ class ArticleDayArchiveView(ArticleDateListMixin, ArticleListMixin, generic.DayA
 class ArticleDetailView(ArticleDateListMixin, ArticleListMixin, PageDetailMixin, generic.DateDetailView):
     
     context_object_name = "article"
+    
+    def get_context_data(self, **kwargs):
+        """Adds the next and previous articles to the context."""
+        context = super(ArticleDetailView, self).get_context_data(**kwargs)
+        # Get the next article.
+        try:
+            next_article = self.get_queryset().filter(
+                date__gt = self.object.date,
+            )
+        except IndexError:
+            next_article = None
+        context["next_article"] = next_article
+        # Get the previous article.
+        try:
+            prev_article = self.get_queryset().reverse().filter(
+                date__lt = self.object.date,
+            )
+        except IndexError:
+            prev_article = None
+        context["prev_article"] = prev_article
+        # All done!
+        return context
 
 
 class ArticleCategoryArchiveView(PageDetailMixin, ArticleArchiveView):
