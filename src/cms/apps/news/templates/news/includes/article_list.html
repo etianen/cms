@@ -1,5 +1,5 @@
 {% load pagination news %}
-{% paginate articles per_page=5 as article_page %}
+{% paginate article_list per_page=5 as article_page %}
 {% if article_page.object_list %}
     
     <ul class="news-article-list">

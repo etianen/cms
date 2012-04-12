@@ -47,6 +47,12 @@ class Category(PageBase):
         blank = True
     )
     
+    def get_permalink_for_page(self, page):
+        """Returns the URL for this category for the given page."""
+        return page.reverse("article_category_archive", kwargs={
+            "url_title": self.url_title,
+        })
+    
     def get_permalinks(self):
         """Returns a dictionary of all permalinks for the given category."""
         pages = Page.objects.filter(
@@ -55,9 +61,7 @@ class Category(PageBase):
             ).values_list("news_feed_id", flat=True)
         )
         return dict(
-            (u"page_{id}".format(id=page.id), page.reverse("article_category_archive", kwargs={
-                "url_title": self.url_title,
-            }))
+            (u"page_{id}".format(id=page.id), self.get_permalink_for_page(page))
             for page in pages
         )
     

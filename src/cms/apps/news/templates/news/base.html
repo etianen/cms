@@ -1,4 +1,12 @@
 {% extends "base.html" %}
+{% load news %}
 
 
 {% block body_class %}news{% endblock %}
+
+
+{% block content_secondary %}
+
+    {% category_list category_list %}
+
+{% endblock %}

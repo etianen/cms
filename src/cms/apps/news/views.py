@@ -21,6 +21,15 @@ class ArticleListMixin(object):
     
     context_object_name = "article_list"
     
+    def get_context_data(self, **kwargs):
+        """Returns the context data for the view."""
+        context = super(ArticleListMixin, self).get_context_data(**kwargs)
+        category_list = Category.objects.filter(
+            article__news_feed__page = self.request.pages.current,
+        ).distinct()
+        context["category_list"] = category_list
+        return context
+    
     def get_queryset(self):
         """Returns the article queryset."""
         return super(ArticleListMixin, self).get_queryset().prefetch_related(
