@@ -4,7 +4,7 @@
         <h1>Categories</h1>
         <ul>
             <li>
-                <a{% if not current_category %} class="here"{% endif %} href="{{article_archive_url}}">All categories</a>
+                <a{% if not current_category %} class="here"{% endif %} href="{% article_archive_url %}">All categories</a>
             </li>
             {% for category in category_list %}
                 <li>

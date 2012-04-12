@@ -39,6 +39,14 @@ def article_list_item(context, article):
 
 
 @register.simple_tag(takes_context=True)
+def article_archive_url(context):
+    """Renders the URL for the current article archive."""
+    pages = context["pages"]
+    page = pages.current
+    return escape(page.reverse("article_archive"))
+
+
+@register.simple_tag(takes_context=True)
 def category_url(context, category):
     """Renders the URL for the given category."""
     pages = context["pages"]
@@ -50,13 +58,34 @@ def category_url(context, category):
 def category_list(context, category_list):
     """Renders a list of categories."""
     pages = context["pages"]
-    page = pages.current
     category = context.get("category", None)
-    article_archive_url = page.reverse("article_archive")
     return {
         "category_list": category_list,
         "category": category,
         "pages": pages,
-        "article_archive_url": article_archive_url,
         "current_category": category,
+    }
+    
+    
+@register.simple_tag(takes_context=True)
+def article_year_archive_url(context, year):
+    """Renders the year archive URL for the given year."""
+    pages = context["pages"]
+    page = pages.current
+    return escape(page.reverse("article_year_archive", kwargs={
+        "year": year,
+    }))
+    
+    
+@register.inclusion_tag("news/includes/article_date_list.html", takes_context=True)
+def article_date_list(context, date_list):
+    """Renders a list of dates."""
+    pages = context["pages"]
+    current_year = context.get("year", None)
+    if current_year is not None:
+        current_year = int(current_year)
+    return {
+        "pages": pages,
+        "date_list": date_list,
+        "current_year": current_year,
     }

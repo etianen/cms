@@ -63,6 +63,13 @@ class ArticleDayArchiveView(ArticleListMixin, generic.DayArchiveView):
 class ArticleDetailView(ArticleListMixin, PageDetailMixin, generic.DateDetailView):
     
     context_object_name = "article"
+    
+    def get_context_data(self, **kwargs):
+        """Adds in the context data for the article."""
+        context = super(ArticleDetailView, self).get_context_data(**kwargs)
+        context["date_list"] = self.get_queryset().dates("date", "month")
+        context["year"] = unicode(self.object.date.year)
+        return context
 
 
 class ArticleCategoryArchiveView(PageDetailMixin, ArticleArchiveView):
