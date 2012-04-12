@@ -69,7 +69,7 @@ def page_url(page, view_func=None, *args, **kwargs):
         if view_func is None:
             url = page.get_absolute_url()
         else:
-            url = page.reverse(page, view_func, args, kwargs)
+            url = page.reverse(view_func, args, kwargs)
     # Return the value, or set as a context variable as appropriate.
     return escape(url)
 
