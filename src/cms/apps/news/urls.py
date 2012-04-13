@@ -5,7 +5,7 @@ from django.conf.urls import patterns, url
 from cms.apps.news import views
 
 
-urlpatterns = patterns("cms.apps.news.view",
+urlpatterns = patterns("cms.apps.news.views",
     
     url(r"^$", views.ArticleArchiveView.as_view(), name="article_archive"),
     
