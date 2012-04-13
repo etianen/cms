@@ -12,10 +12,12 @@ def article_list(context, article_list):
     """Renders a list of news articles."""
     request = context["request"]
     pages = context["pages"]
+    page_obj = context.get("page_obj")
     return {
         "article_list": article_list,
         "request": request,
         "pages": pages,
+        "page_obj": page_obj,
     }
     
     

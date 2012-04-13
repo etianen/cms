@@ -29,6 +29,13 @@ class NewsFeed(ContentBase):
         blank = True
     )
     
+    per_page = models.IntegerField(
+        "articles per page",
+        default = 5,
+        blank = True,
+        null = True,
+    )
+    
     
 def get_default_news_feed():
     """Returns the default news feed for the site."""

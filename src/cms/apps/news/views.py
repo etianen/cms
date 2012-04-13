@@ -21,6 +21,10 @@ class ArticleListMixin(object):
     
     context_object_name = "article_list"
     
+    def get_paginate_by(self, queryset):
+        """Returns the number of articles to show per page."""
+        return self.request.pages.current.content.per_page
+    
     def get_context_data(self, **kwargs):
         """Returns the context data for the view."""
         context = super(ArticleListMixin, self).get_context_data(**kwargs)

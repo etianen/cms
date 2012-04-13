@@ -1,16 +1,17 @@
 {% load pagination news %}
-{% paginate article_list per_page=5 as article_page %}
-{% if article_page.object_list %}
+{% if article_list %}
     
     <ul class="news-article-list">
-        {% for article in article_page.object_list %}
+        {% for article in article_list %}
             <li>
                 {% article_list_item article %}
             </li>
         {% endfor %}
     </ul>
     
-    {% pagination article_page %}
+    {% if page_obj %}
+        {% pagination page_obj %}
+    {% endif %}
     
 {% else %}
     <p><em>There are not articles to display.</em>
