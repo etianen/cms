@@ -134,14 +134,18 @@ class Article(PageBase):
         blank = True,
     )
     
-    def get_absolute_url(self):
-        """Returns the URL of the article."""
-        return self.news_feed.page.reverse("article_detail", kwargs={
+    def get_permalink_for_page(self, page):
+        """Returns the URL of this article for the given news feed page."""
+        return page.reverse("article_detail", kwargs={
             "year": self.date.year,
             "month": self.date.strftime("%b").lower(),
             "day": self.date.day,
             "url_title": self.url_title,
         })
+    
+    def get_absolute_url(self):
+        """Returns the URL of the article."""
+        return self.get_permalink_for_page(self.news_feed.page)
     
     class Meta:
         unique_together = (("news_feed", "date", "url_title",),)

@@ -24,12 +24,7 @@ def article_url(context, article):
     """Renders the URL for an article."""
     pages = context["pages"]
     page = pages.current
-    return escape(page.reverse("article_detail", kwargs={
-        "year": article.date.year,
-        "month": article.date.strftime("%b").lower(),
-        "day": article.date.day,
-        "url_title": article.url_title,
-    }))
+    return escape(article.get_permalink_for_page(page))
     
     
 @register.inclusion_tag("news/includes/article_list_item.html", takes_context=True)
