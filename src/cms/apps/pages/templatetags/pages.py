@@ -36,7 +36,7 @@ def navigation(context, pages, section=None):
     # Add the section.
     if section:
         section_entry = page_entry(section)
-        section_entry["here"] = request.path == section_entry["url"]
+        section_entry["here"] = context["pages"].current == section_entry["page"]
         entries = [section_entry] + entries
     # Render the template.
     return {
