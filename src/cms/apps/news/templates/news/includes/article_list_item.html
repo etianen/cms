@@ -16,6 +16,6 @@
     {% if article.summary %}
         {{article.summary|html}}
     {% else %}
-        {{article.content|truncate_paragraphs:1|html}}
+        <p>{{article.content|truncate_paragraphs:1|striptags}}</p>
     {% endif %}
 </article>
