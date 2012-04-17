@@ -1,10 +1,14 @@
 """Views used by the CMS news app."""
 
 from django.views import generic
+from django.views.generic.list import BaseListView
 from django.shortcuts import get_object_or_404
+from django.utils.feedgenerator import DefaultFeed
+from django.http import HttpResponse
 
 from cms.views import PageDetailMixin
 from cms.apps.news.models import Article, Category
+from cms.html import process as process_html
 
 
 class ArticleListMixin(object):
@@ -47,6 +51,35 @@ class ArticleListMixin(object):
 class ArticleArchiveView(ArticleListMixin, generic.ArchiveIndexView):
     
     pass
+
+
+class ArticleFeedView(ArticleListMixin, BaseListView):
+    
+    """Generates an RSS feed of articles."""
+    
+    def get(self, request):
+        """Generates the RSS feed."""
+        page = request.pages.current
+        # Write the feed headers.
+        feed = DefaultFeed(
+            title = page.title,
+            link = page.get_absolute_url(),
+            description = page.meta_description,
+        )
+        # Write the feed items.
+        for article in self.get_queryset()[:30]:
+            feed.add_item(
+                title = article.title,
+                link = article.get_absolute_url(),
+                description = process_html(article.summary or article.content),
+                pubdate = article.date,
+            )
+        # Write the response.
+        content = feed.writeString("utf-8")
+        response = HttpResponse(content)
+        response["Content-Type"] = feed.mime_type
+        response["Content-Length"] = len(content)
+        return response
 
 
 class ArticleYearArchiveView(ArticleListMixin, generic.YearArchiveView):

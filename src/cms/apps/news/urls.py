@@ -9,6 +9,8 @@ urlpatterns = patterns("cms.apps.news.views",
     
     url(r"^$", views.ArticleArchiveView.as_view(), name="article_archive"),
     
+    url(r"^feed/$", views.ArticleFeedView.as_view(), name="article_feed"),
+    
     url("^(?P<year>\d+)/$", views.ArticleYearArchiveView.as_view(), name="article_year_archive"),
     
     url("^(?P<year>\d+)/(?P<month>\w+)/$", views.ArticleMonthArchiveView.as_view(), name="article_month_archive"),
