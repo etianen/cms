@@ -1,0 +1,16 @@
+{% load news %}
+{% if article_list %}
+    <section class="news-article-latest-list">
+        <h1><a href="{{page.get_absolute_url}}">{{page.title}}</a></h1>
+        <ul>
+            {% for article in article_list %}
+                <li>
+                    <a href="{% article_url article %}">
+                        <span class="news-article-latest-list-item-title">{{article}}</span>
+                        <span class="news-article-latest-list-item-date">{{article.date}}</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+{% endif %}

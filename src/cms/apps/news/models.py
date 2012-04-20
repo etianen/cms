@@ -143,6 +143,8 @@ class Article(PageBase):
     
     def get_permalink_for_page(self, page):
         """Returns the URL of this article for the given news feed page."""
+        if page.id != self.news_feed_id:
+            page = self.news_feed.page
         return page.reverse("article_detail", kwargs={
             "year": self.date.year,
             "month": self.date.strftime("%b").lower(),

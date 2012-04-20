@@ -3,6 +3,9 @@
 from django import template
 from django.utils.html import escape
 
+from cms.apps.pages.models import Page
+from cms.apps.news.models import Article, get_default_news_feed, NewsFeed
+
 
 register = template.Library()
 
@@ -145,4 +148,36 @@ def article_date_list(context, date_list):
         "pages": pages,
         "date_list": date_list,
         "current_year": current_year,
+    }
+    
+    
+@register.inclusion_tag("news/includes/article_latest_list.html", takes_context=True)
+def article_latest_list(context, page=None, limit=5):
+    """Renders a widget-style list of latest articles."""
+    pages = context["pages"]
+    # Resolve the page and news feed.
+    if page is None:
+        news_feed = get_default_news_feed()
+        page = news_feed.page
+    elif isinstance(page, Page):
+        news_feed = page.content
+    elif isinstance(page, NewsFeed):
+        news_feed = page
+        page = news_feed.page
+    elif isinstance(page, int):
+        news_feed = NewsFeed.objects.get(id=page)
+        page = news_feed.page
+    else:
+        raise ValueError("{!r} is not a valid news feed identifier".format(page))
+    # Load the articles.
+    article_list = Article.objects.filter(
+        news_feed = news_feed,
+    )[:limit]
+    # Given them the page (for efficiency).
+    for article in article_list:
+        article.page = page
+    return {
+        "article_list": article_list,
+        "pages": pages,
+        "page": page,
     }
