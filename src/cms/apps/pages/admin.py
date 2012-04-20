@@ -44,6 +44,11 @@ class PageAdmin(PageBaseAdmin):
         }),
     )
     
+    def _patch_page_version_adapter(self, cls):
+        """Adds the given class as a follow relation for the page version adapter."""
+        adapter = self.revision_manager.get_adapter(Page)
+        adapter.follow = tuple(adapter.follow) + (cls._meta.get_field("page").related.get_accessor_name(),)
+    
     def __init__(self, *args, **kwargs):
         """Initialzies the PageAdmin."""
         super(PageAdmin, self).__init__(*args, **kwargs)
@@ -52,12 +57,14 @@ class PageAdmin(PageBaseAdmin):
         # Register all content classes with reversion.
         for content_cls in get_registered_content():
             self._autoregister(content_cls, follow=["page"])
+            self._patch_page_version_adapter(content_cls)
     
     def register_content_inline(self, content_cls, inline_admin):
         """Registers an inline model with the page admin."""
         self.content_inlines.append((content_cls, inline_admin))
         # Register with reversion.
         self._autoregister(inline_admin.model, follow=["page"])
+        self._patch_page_version_adapter(content_cls)
     
     def get_inline_instances(self, request):
         """Returns all the inline instances for this PageAdmin."""
@@ -76,7 +83,17 @@ class PageAdmin(PageBaseAdmin):
         return request.pages.all
                 
     # Reversion
-
+    
+    def get_revision_instances(self, request, object):
+        """Returns all the instances to be used in this object's revision."""
+        instances = super(PageAdmin, self).get_revision_instances(request, object)
+        # Add the content object.
+        instances.append(object.content)
+        # Add all the content inlines.
+        for _, inline in self.content_inlines:
+            instances.extend(inline.model._default_manager.filter(page=object))
+        return instances
+    
     def get_revision_form_data(self, request, obj, version):
         """
         Returns a dictionary of data to set in the admin form in order to revert
