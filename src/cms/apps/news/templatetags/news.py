@@ -124,9 +124,13 @@ def article_meta(context, article):
     
     
 @register.inclusion_tag("news/includes/article_date_list.html", takes_context=True)
-def article_date_list(context, date_list):
+def article_date_list(context):
     """Renders a list of dates."""
     pages = context["pages"]
+    page = pages.current
+    date_list = Article.objects.filter(
+        news_feed_id = page.id,
+    ).dates("date", "month").order_by("-date")
     # Resolve the current year.
     current_year = context.get("year", None)
     if current_year is not None:
