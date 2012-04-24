@@ -208,10 +208,10 @@ def article_latest_list(context, page, limit=5):
     # Load the articles.
     article_list = Article.objects.filter(
         news_feed__id = page.id,
+    ).select_related("image").prefetch_related(
+        "categories",
+        "authors",
     )[:limit]
-    # Given them the page (for efficiency).
-    for article in article_list:
-        article.page = page
     return {
         "article_list": article_list,
         "page": page,
