@@ -207,7 +207,7 @@ def article_latest_list(context, page, limit=5):
     """Renders a widget-style list of latest articles."""
     # Load the articles.
     article_list = Article.objects.filter(
-        news_feed__id = page.id,
+        news_feed__page__id = page.id,
     ).select_related("image").prefetch_related(
         "categories",
         "authors",
