@@ -7,10 +7,10 @@ from django.db.models import Q, F
 from django.utils.functional import cached_property
 from django.utils import timezone
 
-import historylinks 
+import historylinks
 
 from cms import sitemaps
-from cms.models.base import PageBase, OnlineBaseManager
+from cms.models.base import PageBase, OnlineBaseManager, PageBaseSearchAdapter
 
 
 def get_default_page_parent():
@@ -264,6 +264,26 @@ historylinks.register(Page)
 
 
 sitemaps.register(Page)
+
+
+class PageSearchAdapter(PageBaseSearchAdapter):
+    
+    """Search adapter for Page models."""
+    
+    def get_content(self, obj):
+        """Returns the search text for the page."""
+        content_obj = obj.content
+        return u" ".join((
+            super(PageSearchAdapter, self).get_content(obj),
+            self.prepare_content(u" ".join(
+                unicode(self._resolve_field(content_obj, field_name))
+                for field_name in (
+                    field.name for field
+                    in content_obj._meta.fields
+                    if isinstance(field, (models.CharField, models.TextField))
+                )
+            ))
+        ))
 
 
 # Base content class.

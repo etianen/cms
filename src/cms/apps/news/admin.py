@@ -30,6 +30,8 @@ class ArticleAdmin(PageBaseAdmin):
     
     date_hierarchy = "date"
     
+    search_fields = PageBaseAdmin.search_fields + ("content", "summary",)
+    
     list_display = ("title", "date", "is_online", "get_date_modified",)
     
     list_filter = ("is_online", "categories",)

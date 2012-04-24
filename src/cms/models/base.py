@@ -3,6 +3,8 @@
 from django.db import models
 from django.shortcuts import render
 
+import watson
+
 from cms.models.managers import OnlineBaseManager, PublishedBaseManager
 
 
@@ -154,6 +156,15 @@ class SearchMetaBase(OnlineBase):
         
     class Meta:
         abstract = True
+
+
+class SearchMetaBaseSearchAdapter(watson.SearchAdapter):
+    
+    """Search adapter for SearchMetaBase derivatives."""
+    
+    def get_description(self, obj):
+        """Returns the meta description."""
+        return obj.meta_description
     
 
 class PageBase(SearchMetaBase):
@@ -206,3 +217,12 @@ class PageBase(SearchMetaBase):
     
     class Meta:
         abstract = True
+        
+        
+class PageBaseSearchAdapter(SearchMetaBaseSearchAdapter):
+    
+    """Search adapter for PageBase derivatives."""
+    
+    def get_title(self, obj):
+        """Returns the title of the page."""
+        return obj.title

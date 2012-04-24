@@ -2,7 +2,11 @@
 
 from django.contrib import admin
 
+from watson.admin import SearchAdmin
+
 from reversion.admin import VersionMetaAdmin
+
+from cms.models.base import SearchMetaBaseSearchAdapter, PageBaseSearchAdapter
             
 
 class PublishedBaseAdmin(admin.ModelAdmin):
@@ -41,9 +45,11 @@ class OnlineBaseAdmin(PublishedBaseAdmin):
     
 
 
-class SearchMetaBaseAdmin(VersionMetaAdmin, OnlineBaseAdmin):
+class SearchMetaBaseAdmin(VersionMetaAdmin, SearchAdmin, OnlineBaseAdmin):
     
     """Base admin class for SearchMetaBase models."""
+    
+    adapter_cls = SearchMetaBaseSearchAdapter
     
     list_display = ("__unicode__", "is_online", "get_date_modified",)
     
@@ -61,7 +67,9 @@ class PageBaseAdmin(SearchMetaBaseAdmin):
     
     prepopulated_fields = {"url_title": ("title",),}
     
-    search_fields = ("title",)
+    search_fields = ("title", "short_title", "meta_keywords", "meta_description",)
+    
+    adapter_cls = PageBaseSearchAdapter
     
     TITLE_FIELDS = (None, {
         "fields": ("title", "url_title",),

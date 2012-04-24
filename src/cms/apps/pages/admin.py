@@ -22,7 +22,7 @@ from django.utils import simplejson as json
 
 from cms import debug
 from cms.admin import PageBaseAdmin
-from cms.apps.pages.models import Page, get_registered_content
+from cms.apps.pages.models import Page, get_registered_content, PageSearchAdapter
 
 
 # Used to track references to and from the JS sitemap.
@@ -52,6 +52,8 @@ class PageAdmin(PageBaseAdmin):
         }),
         PageBaseAdmin.SEO_FIELDS,
     )
+    
+    search_adapter_cls = PageSearchAdapter
     
     def _patch_page_version_adapter(self, cls):
         """Adds the given class as a follow relation for the page version adapter."""
