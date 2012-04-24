@@ -1,6 +1,7 @@
 """Models used by the CMS news app."""
 
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.db import models
 
@@ -35,14 +36,24 @@ class NewsFeed(ContentBase):
         blank = True,
         null = True,
     )
+
+
+def get_default_news_page():
+    """Returns the default news page."""
+    try:
+        return Page.objects.filter(
+            content_type = ContentType.objects.get_for_model(NewsFeed),
+        ).order_by("left")[0]
+    except IndexError:
+        return None
     
     
 def get_default_news_feed():
     """Returns the default news feed for the site."""
-    try:
-        return NewsFeed.objects.order_by("page__left")[0]
-    except IndexError:
-        return None
+    page = get_default_news_page()
+    if page:
+        return page.content
+    return None
 
 
 class Category(PageBase):
@@ -54,13 +65,13 @@ class Category(PageBase):
         blank = True
     )
     
-    def get_permalink_for_page(self, page):
+    def _get_permalink_for_page(self, page):
         """Returns the URL for this category for the given page."""
         return page.reverse("article_category_archive", kwargs={
             "url_title": self.url_title,
         })
     
-    def get_permalinks(self):
+    def _get_permalinks(self):
         """Returns a dictionary of all permalinks for the given category."""
         pages = Page.objects.filter(
             id__in = Article.objects.filter(
@@ -68,7 +79,7 @@ class Category(PageBase):
             ).values_list("news_feed_id", flat=True)
         )
         return dict(
-            (u"page_{id}".format(id=page.id), self.get_permalink_for_page(page))
+            (u"page_{id}".format(id=page.id), self._get_permalink_for_page(page))
             for page in pages
         )
     
@@ -84,7 +95,7 @@ class CategoryHistoryLinkAdapter(historylinks.HistoryLinkAdapter):
     
     def get_permalinks(self, obj):
         """Returns all permalinks for the given category."""
-        return obj.get_permalinks()
+        return obj._get_permalinks()
 
         
 historylinks.register(Category, CategoryHistoryLinkAdapter)
@@ -141,10 +152,8 @@ class Article(PageBase):
         blank = True,
     )
     
-    def get_permalink_for_page(self, page):
+    def _get_permalink_for_page(self, page):
         """Returns the URL of this article for the given news feed page."""
-        if page.id != self.news_feed_id:
-            page = self.news_feed.page
         return page.reverse("article_detail", kwargs={
             "year": self.date.year,
             "month": self.date.strftime("%b").lower(),
@@ -154,7 +163,7 @@ class Article(PageBase):
     
     def get_absolute_url(self):
         """Returns the URL of the article."""
-        return self.get_permalink_for_page(self.news_feed.page)
+        return self._get_permalink_for_page(self.news_feed.page)
     
     class Meta:
         unique_together = (("news_feed", "date", "url_title",),)
