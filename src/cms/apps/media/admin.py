@@ -12,9 +12,7 @@ from django.utils.text import truncate_words
 import optimizations
 from optimizations.assetcache import default_asset_cache
 
-from reversion.admin import VersionMetaAdmin
-
-from cms import permalinks
+from cms import permalinks, externals
 from cms.apps.media.models import Label, File
 
 
@@ -61,7 +59,7 @@ FILE_ICONS = {
 }
     
     
-class FileAdmin(VersionMetaAdmin):
+class FileAdmin(externals.VersionMetaAdminMixin, admin.ModelAdmin):
     
     """Admin settings for File models."""
     
@@ -181,6 +179,15 @@ class FileAdmin(VersionMetaAdmin):
                        "title": obj.title}
             return render(request, "admin/media/file/filebrowser_add_success.html", context)
         return super(FileAdmin, self).response_add(request, obj, *args, **kwargs)
+    
+    def changelist_view(self, request, extra_context=None):
+        """Renders the change list."""
+        context = {
+            "changelist_template_parent": hasattr(self, "revision_manager") and "reversion/change_list.html" or "admin/change_list.html",
+        }
+        if extra_context:
+            context.update(extra_context)
+        return super(FileAdmin, self).changelist_view(request, context)
     
     
 admin.site.register(File, FileAdmin)

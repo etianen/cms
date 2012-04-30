@@ -55,10 +55,12 @@ class PageAdmin(PageBaseAdmin):
     
     search_adapter_cls = PageSearchAdapter
     
-    def _patch_page_version_adapter(self, cls):
-        """Adds the given class as a follow relation for the page version adapter."""
-        adapter = self.revision_manager.get_adapter(Page)
-        adapter.follow = tuple(adapter.follow) + (cls._meta.get_field("page").related.get_accessor_name(),)
+    def _register_page_inline(self, model):
+        """Registeres the given page inline with reversion."""
+        if hasattr(self, "revision_manager"):
+            self._autoregister(model, follow=["page"])
+            adapter = self.revision_manager.get_adapter(Page)
+            adapter.follow = tuple(adapter.follow) + (model._meta.get_field("page").related.get_accessor_name(),)
     
     def __init__(self, *args, **kwargs):
         """Initialzies the PageAdmin."""
@@ -67,17 +69,14 @@ class PageAdmin(PageBaseAdmin):
         self.admin_site.index_template = "admin/pages/dashboard.html"
         # Prepare to register some content inlines.
         self.content_inlines = []
-        # Register all content classes with reversion.
+        # Register all page inlines.
         for content_cls in get_registered_content():
-            self._autoregister(content_cls, follow=["page"])
-            self._patch_page_version_adapter(content_cls)
+            self._register_page_inline(content_cls)
     
     def register_content_inline(self, content_cls, inline_admin):
         """Registers an inline model with the page admin."""
         self.content_inlines.append((content_cls, inline_admin))
-        # Register with reversion.
-        self._autoregister(inline_admin.model, follow=["page"])
-        self._patch_page_version_adapter(content_cls)
+        self._register_page_inline(inline_admin.model)
     
     def get_inline_instances(self, request):
         """Returns all the inline instances for this PageAdmin."""
@@ -213,7 +212,7 @@ class PageAdmin(PageBaseAdmin):
             try:
                 content_obj = content_cls_type.model_class().objects.get(page=obj)
             except content_cls.DoesNotExist:
-                content_obj = content_cls()  # We're either in a reversion recovery, or something has gone very wrong with the database...
+                content_obj = content_cls()  # This means that we're in a reversion recovery, or something weird has happened to the databae.
         else:
             content_obj = content_cls()
         # Modify the page content.

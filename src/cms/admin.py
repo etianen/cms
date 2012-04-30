@@ -4,8 +4,7 @@ from django.contrib import admin
 
 from watson.admin import SearchAdmin
 
-from reversion.admin import VersionMetaAdmin
-
+from cms import externals
 from cms.models.base import SearchMetaBaseSearchAdapter, PageBaseSearchAdapter
             
 
@@ -45,7 +44,7 @@ class OnlineBaseAdmin(PublishedBaseAdmin):
     
 
 
-class SearchMetaBaseAdmin(VersionMetaAdmin, SearchAdmin, OnlineBaseAdmin):
+class SearchMetaBaseAdmin(externals.VersionMetaAdminMixin, SearchAdmin, OnlineBaseAdmin):
     
     """Base admin class for SearchMetaBase models."""
     
