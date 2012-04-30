@@ -20,7 +20,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 from django.utils import simplejson as json
 
-from cms import debug
+from cms import debug, externals
 from cms.admin import PageBaseAdmin
 from cms.apps.pages.models import Page, get_registered_content, PageSearchAdapter
 
@@ -57,7 +57,7 @@ class PageAdmin(PageBaseAdmin):
     
     def _register_page_inline(self, model):
         """Registeres the given page inline with reversion."""
-        if hasattr(self, "revision_manager"):
+        if externals.has_reversion:
             self._autoregister(model, follow=["page"])
             adapter = self.revision_manager.get_adapter(Page)
             adapter.follow = tuple(adapter.follow) + (model._meta.get_field("page").related.get_accessor_name(),)
