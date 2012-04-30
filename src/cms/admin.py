@@ -42,7 +42,7 @@ class OnlineBaseAdmin(PublishedBaseAdmin):
     
 
 
-class SearchMetaBaseAdmin(externals.reversion["admin.VersionMetaAdminMixin"], externals.watson["admin.SearchAdminMixin"], OnlineBaseAdmin):
+class SearchMetaBaseAdmin(externals.reversion["admin.VersionMetaAdmin"], externals.watson["admin.SearchAdmin"], OnlineBaseAdmin):
     
     """Base admin class for SearchMetaBase models."""
     

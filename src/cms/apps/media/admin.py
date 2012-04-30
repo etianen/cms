@@ -59,7 +59,7 @@ FILE_ICONS = {
 }
     
     
-class FileAdmin(externals.reversion["admin.VersionMetaAdminMixin"], externals.watson["admin.SearchAdminMixin"], admin.ModelAdmin):
+class FileAdmin(externals.reversion["admin.VersionMetaAdmin"], externals.watson["admin.SearchAdmin"], admin.ModelAdmin):
     
     """Admin settings for File models."""
     
