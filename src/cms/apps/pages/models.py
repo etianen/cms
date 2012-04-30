@@ -7,9 +7,7 @@ from django.db.models import Q, F
 from django.utils.functional import cached_property
 from django.utils import timezone
 
-import historylinks
-
-from cms import sitemaps
+from cms import sitemaps, externals
 from cms.models.base import PageBase, OnlineBaseManager, PageBaseSearchAdapter
 
 
@@ -260,7 +258,7 @@ class Page(PageBase):
         ordering = ("left",)
 
 
-historylinks.register(Page)
+externals.historylinks("register", Page)
 
 
 sitemaps.register(Page)

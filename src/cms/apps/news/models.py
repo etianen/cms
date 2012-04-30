@@ -5,9 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.db import models
 
-import historylinks
-
-from cms import sitemaps
+from cms import sitemaps, externals
 from cms.apps.media.models import ImageRefField
 from cms.apps.pages.models import ContentBase, Page
 from cms.models import PageBase, OnlineBaseManager, HtmlField
@@ -89,7 +87,7 @@ class Category(PageBase):
         ordering = ("title",)
         
 
-class CategoryHistoryLinkAdapter(historylinks.HistoryLinkAdapter):
+class CategoryHistoryLinkAdapter(externals.historylinks.HistoryLinkAdapter):
     
     """History link adapter for category models."""
     
@@ -98,7 +96,7 @@ class CategoryHistoryLinkAdapter(historylinks.HistoryLinkAdapter):
         return obj._get_permalinks()
 
         
-historylinks.register(Category, CategoryHistoryLinkAdapter)
+externals.historylinks("register", Category, CategoryHistoryLinkAdapter)
 
 
 class ArticleManager(OnlineBaseManager):
@@ -170,7 +168,7 @@ class Article(PageBase):
         ordering = ("-date",)
         
         
-historylinks.register(Article)
+externals.historylinks("register", Article)
 
 
 sitemaps.register(Article)
