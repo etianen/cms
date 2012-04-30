@@ -3,8 +3,7 @@
 from django.db import models
 from django.shortcuts import render
 
-import watson
-
+from cms import externals
 from cms.models.managers import OnlineBaseManager, PublishedBaseManager
 
 
@@ -158,8 +157,8 @@ class SearchMetaBase(OnlineBase):
         abstract = True
 
 
-class SearchMetaBaseSearchAdapter(watson.SearchAdapter):
-    
+class SearchMetaBaseSearchAdapter(externals.watson.SearchAdapter):
+
     """Search adapter for SearchMetaBase derivatives."""
     
     def get_description(self, obj):

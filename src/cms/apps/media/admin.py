@@ -59,7 +59,7 @@ FILE_ICONS = {
 }
     
     
-class FileAdmin(externals.VersionMetaAdminMixin, admin.ModelAdmin):
+class FileAdmin(externals.reversion["admin.VersionMetaAdminMixin"], externals.watson["admin.SearchAdminMixin"], admin.ModelAdmin):
     
     """Admin settings for File models."""
     
@@ -183,7 +183,7 @@ class FileAdmin(externals.VersionMetaAdminMixin, admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         """Renders the change list."""
         context = {
-            "changelist_template_parent": externals.has_reversion and "reversion/change_list.html" or "admin/change_list.html",
+            "changelist_template_parent": externals.reversion and "reversion/change_list.html" or "admin/change_list.html",
         }
         if extra_context:
             context.update(extra_context)

@@ -57,7 +57,7 @@ class PageAdmin(PageBaseAdmin):
     
     def _register_page_inline(self, model):
         """Registeres the given page inline with reversion."""
-        if externals.has_reversion:
+        if externals.reversion:
             self._autoregister(model, follow=["page"])
             adapter = self.revision_manager.get_adapter(Page)
             adapter.follow = tuple(adapter.follow) + (model._meta.get_field("page").related.get_accessor_name(),)
