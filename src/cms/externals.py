@@ -28,17 +28,19 @@ class External(object):
         """
         return loader.load_object(".".join((self._app_name, name)))
     
-    def load_class(self, name):
+    def load_class(self, name, fallback=None):
         """
         Loads the named class from the external library.
         
-        If the object is not present, the object class will
+        If the object is not present, the fallback class will
         be returned
         """
         try:
             return self._load(name)
         except (ImportError, AttributeError):
-            return object
+            if fallback is None:
+                return object
+            return fallback
     
     def __getattr__(self, name):
         """Loads the named class from the external library."""
@@ -48,7 +50,7 @@ class External(object):
         """Loads the named class from the external library."""
         return self.load_class(name)
     
-    def load_method(self, name):
+    def load_method(self, name, fallback=None):
         """
         Loads the named method from the external library.
         
@@ -58,7 +60,9 @@ class External(object):
         try:
             return self._load(name)
         except (ImportError, AttributeError):
-            return lambda *args, **kwargs: None
+            if fallback is None:
+                return lambda *args, **kwargs: None
+            return fallback
         
     def __call__(self, _name, *args, **kwargs):
         """
@@ -68,7 +72,7 @@ class External(object):
         """
         self.load_method(_name)(*args, **kwargs)
        
-    def context_manager(self, name):
+    def context_manager(self, name, fallback=None):
         """
         Returns the named context manager from the external library.
         
@@ -76,12 +80,14 @@ class External(object):
         manager will be returned.
         """
         try:
-            context_manager = self._load(name)
+            return self._load(name)
         except (ImportError, AttributeError):
-            @contextmanager
-            def context_manager(*args, **kwargs):
-                yield
-        return context_manager
+            if fallback is None:
+                @contextmanager
+                def context_manager(*args, **kwargs):
+                    yield
+                return context_manager
+            return fallback
 
 
 reversion = External("reversion")
