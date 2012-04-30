@@ -1,5 +1,7 @@
 """Optional external libraries that enhance the CMS."""
 
+from contextlib import contextmanager
+
 from django.conf import settings
 
 from cms import loader
@@ -65,6 +67,21 @@ class External(object):
         If the method is not present, this is a no-op.
         """
         self.load_method(_name)(*args, **kwargs)
+       
+    def context_manager(self, name):
+        """
+        Returns the named context manager from the external library.
+        
+        If the context manager is not present, a no-op dummy context
+        manager will be returned.
+        """
+        try:
+            context_manager = self._load(name)
+        except (ImportError, AttributeError):
+            @contextmanager
+            def context_manager(*args, **kwargs):
+                yield
+        return context_manager
 
 
 reversion = External("reversion")
