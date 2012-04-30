@@ -107,6 +107,7 @@ SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # A list of additional installed applications.
 
 INSTALLED_APPS = (
+    "django.contrib.sessions",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.messages",
