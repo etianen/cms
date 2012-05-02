@@ -29,13 +29,13 @@ def paginate(context, queryset, per_page=10, key="page"):
 
 
 @register.inclusion_tag("pagination/pagination.html", takes_context=True)
-def pagination(context, page_obj):
+def pagination(context, page_obj, pagination_key=None):
     """Renders the pagination for the given page of items."""
     return {
         "request": context["request"],
         "page_obj": page_obj,
         "paginator": page_obj.paginator,
-        "pagination_key": getattr(page_obj, "_pagination_key", "page")
+        "pagination_key": pagination_key or getattr(page_obj, "_pagination_key", "page")
     }
 
 
