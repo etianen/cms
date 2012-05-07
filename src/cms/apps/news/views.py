@@ -23,6 +23,8 @@ class ArticleListMixin(object):
     
     allow_future = True  # The publication manager will take care of this.
     
+    allow_empty = True
+    
     context_object_name = "article_list"
     
     def get_paginate_by(self, queryset):
