@@ -8,7 +8,7 @@ from django.db import models
 from cms import sitemaps, externals
 from cms.apps.media.models import ImageRefField
 from cms.apps.pages.models import ContentBase, Page
-from cms.models import PageBase, OnlineBaseManager, HtmlField
+from cms.models import PageBase, OnlineBaseManager, HtmlField, PageBaseSearchAdapter
 
 
 class NewsFeed(ContentBase):
@@ -172,3 +172,6 @@ externals.historylinks("register", Article)
 
 
 sitemaps.register(Article)
+
+
+externals.watson("register", Article, adapter_cls=PageBaseSearchAdapter)

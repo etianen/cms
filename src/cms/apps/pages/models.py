@@ -8,7 +8,7 @@ from django.utils.functional import cached_property
 from django.utils import timezone
 
 from cms import sitemaps, externals
-from cms.models.base import PageBase, OnlineBaseManager, PageBaseSearchAdapter
+from cms.models import PageBase, OnlineBaseManager, PageBaseSearchAdapter
 
 
 def get_default_page_parent():
@@ -282,6 +282,9 @@ class PageSearchAdapter(PageBaseSearchAdapter):
                 )
             ))
         ))
+        
+        
+externals.watson("register", Page, adapter_cls=PageSearchAdapter)
 
 
 # Base content class.
