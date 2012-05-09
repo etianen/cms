@@ -245,7 +245,7 @@ RICHTEXT_SETTINGS = {
         "width": "700px",
         "height": "350px",
         "dialog_type": "modal",
-        "theme_advanced_blockformats": "h1,h2,p",
+        "theme_advanced_blockformats": "h2,p",
         "content_css": "css/screen.content.css",
         "extended_valid_elements": "iframe[scrolling|frameborder|class|id|src|width|height|name|align],article[id|class],section[id|class]",
         "convert_urls": False,
