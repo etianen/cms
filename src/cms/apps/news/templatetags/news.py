@@ -212,7 +212,16 @@ def article_latest_list(context, page, limit=5):
         "categories",
         "authors",
     )[:limit]
+    # Set the page for efficiency.
+    for article in article_list:
+        article.page = page
     return {
         "article_list": article_list,
         "page": page,
     }
+    
+
+@register.assignment_tag(takes_context=True)
+@takes_current_page    
+def get_article_latest_list(context, page, limit=5):
+    return article_latest_list(context, page=page, limit=limit)["article_list"]
