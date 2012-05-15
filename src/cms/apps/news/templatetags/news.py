@@ -6,6 +6,7 @@ from django import template
 from django.utils.html import escape
 from django.contrib.contenttypes.models import ContentType
 
+from cms.apps.pages.models import Page
 from cms.apps.news.models import Article, NewsFeed, get_default_news_page
 
 
@@ -29,6 +30,7 @@ def page_context(func):
 def get_page_from_context(context, kwargs):
     """Returns the current page based on the given template context."""
     page = None
+    # Resolve the page.
     if "page" in kwargs:
         page = kwargs["page"]
     elif "page" in context:
@@ -36,8 +38,12 @@ def get_page_from_context(context, kwargs):
     elif "pages" in context:
         pages = context["pages"]
         page = pages.current
+    # Adapt the page.
+    if isinstance(page, int):
+        page = Page.objects.get(id=page)
     if page and page.content_type_id != ContentType.objects.get_for_model(NewsFeed).id:
         page = get_default_news_page()
+    # All done.
     return page
     
 
