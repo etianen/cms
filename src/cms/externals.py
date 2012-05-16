@@ -15,7 +15,7 @@ class External(object):
         """Initializes the external."""
         self._app_name = app_name
         
-    def __bool__(self):
+    def __nonzero__(self):
         """Returns if the app is installed."""
         return self._app_name in settings.INSTALLED_APPS
     
@@ -26,7 +26,9 @@ class External(object):
         If the object is not present, and ImportError or an
         Attribute error will be raised.
         """
-        return loader.load_object(".".join((self._app_name, name)))
+        if self:
+            return loader.load_object(".".join((self._app_name, name)))
+        raise ImportError
     
     def load_class(self, name, fallback=None):
         """

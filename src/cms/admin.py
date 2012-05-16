@@ -41,10 +41,7 @@ class OnlineBaseAdmin(PublishedBaseAdmin):
     unpublish_selected.short_description = "Take selected %(verbose_name_plural)s offline"
     
 
-
-class SearchMetaBaseAdmin(externals.reversion.load_class("admin.VersionMetaAdmin", admin.ModelAdmin),
-                          externals.watson.load_class("admin.SearchAdmin", admin.ModelAdmin),
-                          OnlineBaseAdmin):
+class SearchMetaBaseAdmin(OnlineBaseAdmin):
     
     """Base admin class for SearchMetaBase models."""
     
@@ -56,6 +53,16 @@ class SearchMetaBaseAdmin(externals.reversion.load_class("admin.VersionMetaAdmin
         "fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_changefreq", "robots_index", "robots_follow", "robots_archive",),
         "classes": ("collapse",),
     })
+    
+    
+if externals.reversion:
+    class SearchMetaBaseAdmin(SearchMetaBaseAdmin, externals.reversion["admin.VersionMetaAdmin"]):
+        pass
+    
+    
+if externals.watson:
+    class SearchMetaBaseAdmin(SearchMetaBaseAdmin, externals.watson["admin.SearchAdmin"]):
+        pass
 
 
 class PageBaseAdmin(SearchMetaBaseAdmin):
