@@ -59,7 +59,7 @@ FILE_ICONS = {
 }
     
     
-class FileAdmin(admin.ModelAdmin):
+class FileAdminBase(admin.ModelAdmin):
     
     """Admin settings for File models."""
     
@@ -178,7 +178,7 @@ class FileAdmin(admin.ModelAdmin):
             context = {"permalink": permalinks.create(obj),
                        "title": obj.title}
             return render(request, "admin/media/file/filebrowser_add_success.html", context)
-        return super(FileAdmin, self).response_add(request, obj, *args, **kwargs)
+        return super(FileAdminBase, self).response_add(request, obj, *args, **kwargs)
     
     def changelist_view(self, request, extra_context=None):
         """Renders the change list."""
@@ -187,7 +187,11 @@ class FileAdmin(admin.ModelAdmin):
         }
         if extra_context:
             context.update(extra_context)
-        return super(FileAdmin, self).changelist_view(request, context)
+        return super(FileAdminBase, self).changelist_view(request, context)
+
+
+# Renaming needed to allow inheritance to take place in this class without infinite recursion.
+FileAdmin = FileAdminBase
 
 
 if externals.reversion:
