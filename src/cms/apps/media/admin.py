@@ -89,7 +89,7 @@ class FileAdminBase(admin.ModelAdmin):
         """Allows the file iregex lookup needed by TinyMCE integration."""
         if lookup == "file__iregex":
             return True
-        return super(FileAdmin, self).lookup_allowed(lookup, *args, **kwargs)
+        return super(FileAdminBase, self).lookup_allowed(lookup, *args, **kwargs)
     
     # Custom actions.
     
@@ -109,7 +109,7 @@ class FileAdminBase(admin.ModelAdmin):
             return []
         opts = self.model._meta
         verbose_name_plural = opts.verbose_name_plural
-        actions = super(FileAdmin, self).get_actions(request)
+        actions = super(FileAdminBase, self).get_actions(request)
         # Add the dynamic labels.
         for label in Label.objects.all():
             # Add action.
