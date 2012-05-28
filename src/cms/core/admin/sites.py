@@ -47,7 +47,10 @@ class AdminSite(admin.AdminSite):
         @functools.wraps(view)
         def wrapper(*args, **kwargs):
             with publication_manager.select_published(False):
-                return view(*args, **kwargs)
+                response = view(*args, **kwargs)
+                if hasattr(response, "render"):
+                    response.render()
+                return response
         return wrapper
     
     def get_urls(self):
