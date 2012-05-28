@@ -3,6 +3,7 @@
 import re
 
 from django.conf import settings
+from django.template.response import SimpleTemplateResponse
 
 from cms.models import publication_manager, PublicationManagementError
 
@@ -33,6 +34,10 @@ class PublicationMiddleware(object):
         
     def process_response(self, request, response):
         """Cleans up after preview mode."""
+        # Render the response if we're in a block of publication management.
+        if publication_manager.select_published_active():
+            if isinstance(response, SimpleTemplateResponse):
+                response = response.render()
         # Clean up all blocks.
         while True:
             try:
