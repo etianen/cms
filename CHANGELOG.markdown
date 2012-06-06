@@ -2,8 +2,21 @@ CMS Changelog
 =============
 
 
+2.6 - 06/06/2012
+----------------
+
+*   Built-in news feed app.
+*   Optional integration of django-watson via externals loader.
+*   Historylinks delegated to separate app, accessible via externals loader.
+*   Simplification of page loading logic.
+*   Integration with new Django 1.4 features.
+*   Using MPTT implementation to finally fix page publication settings.
+*   New management command - start_cms_project.
+*   Using standard Django admin site for better integration with 3rd party apps.  
+
+
 2.5 - 08/02/2012
-------------------
+----------------
 
 *   Adding in permalink to file admin.
 *   FileRefField and ImageRefField now use an admin related lookup field.
