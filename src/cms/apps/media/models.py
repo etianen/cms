@@ -1,6 +1,8 @@
 """Models used by the static media management application."""
 
 from django.db import models
+from django.contrib import admin
+from django.contrib.admin.widgets import ForeignKeyRawIdWidget
 
 
 class Label(models.Model):
@@ -60,6 +62,12 @@ class FileRefField(models.ForeignKey):
         kwargs.setdefault("related_name", "+")
         kwargs.setdefault("on_delete", models.PROTECT)
         super(FileRefField, self).__init__(**kwargs)
+        
+    def formfield(self, **kwargs):
+        defaults = {
+            "widget": ForeignKeyRawIdWidget(self.rel, admin.site), 
+        }
+        return super(FileRefField, self).formfield(**defaults)
 
 
 IMAGE_FILTER = {"file__iregex": ur"\.(png|gif|jpg|jpeg)$"} 
