@@ -46,9 +46,9 @@ def pagination_url(context, page_number):
     url = request.path
     params = request.GET.copy()
     if unicode(page_number) != u"1":
-        params[context["pagination_key"]] = page_number
+        params[context.get("pagination_key", "page")] = page_number
     else:
-        params.pop(context["pagination_key"], None)
+        params.pop(context.get("pagination_key", "page"), None)
     if params:
         url += "?%s" % params.urlencode()
     return escape(url)
