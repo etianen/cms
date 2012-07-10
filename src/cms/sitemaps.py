@@ -27,7 +27,13 @@ class SearchMetaBaseSitemap(BaseSitemap):
     
     Subclasses need to override the model property.
     """
-        
+    
+    def items(self):
+        """Only lists items that are marked as indexable."""
+        return super(SearchMetaBaseSitemap, self).items().filter(
+            robots_index = True,
+        )
+     
     def changefreq(self, obj):
         """Returns the change frequency of the given page."""
         if obj.sitemap_changefreq:
