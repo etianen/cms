@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from cms import sitemaps, externals
 from cms.models import PageBase, OnlineBaseManager, PageBaseSearchAdapter
+from cms.models.managers import publication_manager
 
 
 def get_default_page_parent():
@@ -23,7 +24,7 @@ class PageManager(OnlineBaseManager):
     
     """Manager for Page objects."""
     
-    def select_published(self, queryset):
+    def select_published(self, queryset, page_alias=None):
         """Selects only published pages."""
         queryset = super(PageManager, self).select_published(queryset)
         now = timezone.now()
@@ -32,20 +33,22 @@ class PageManager(OnlineBaseManager):
         queryset = queryset.filter(Q(expiry_date=None) | Q(expiry_date__gt=now))
         # Perform parent ordering.
         quote_name = connection.ops.quote_name
+        page_alias = page_alias  or quote_name("pages_page")
         queryset = queryset.extra(
             where = ("""
                 NOT EXISTS (
                     SELECT *
                     FROM {pages_page} AS {ancestors}
                     WHERE
-                        {ancestors}.{left} < {pages_page}.{left} AND
-                        {ancestors}.{right} > {pages_page}.{right} AND (
+                        {ancestors}.{left} < {page_alias}.{left} AND
+                        {ancestors}.{right} > {page_alias}.{right} AND (
                             {ancestors}.{is_online} = FALSE OR
                             {ancestors}.{publication_date} > %s OR
                             {ancestors}.{expiry_date} <= %s
                         )
                 )
             """.format(
+                page_alias = page_alias,
                 **dict(
                     (name, quote_name(name))
                     for name in (
@@ -282,6 +285,14 @@ class PageSearchAdapter(PageBaseSearchAdapter):
                 )
             ))
         ))
+        
+    def get_live_queryset(self):
+        """Selects the live page queryset."""
+        with publication_manager.select_published(False):
+            qs = Page._base_manager.all()
+        if publication_manager.select_published_active():
+            qs = Page.objects.select_published(qs, page_alias="U0")
+        return qs
         
         
 externals.watson("register", Page, adapter_cls=PageSearchAdapter)
