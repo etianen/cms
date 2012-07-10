@@ -284,7 +284,7 @@ class PageSearchAdapter(PageBaseSearchAdapter):
         ))
         
         
-externals.watson("register", Page.objects.all(), adapter_cls=PageSearchAdapter)
+externals.watson("register", Page, adapter_cls=PageSearchAdapter)
 
 
 # Base content class.

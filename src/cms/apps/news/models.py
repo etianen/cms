@@ -174,4 +174,4 @@ externals.historylinks("register", Article)
 sitemaps.register(Article)
 
 
-externals.watson("register", Article.objects.all(), adapter_cls=PageBaseSearchAdapter)
+externals.watson("register", Article, adapter_cls=PageBaseSearchAdapter)

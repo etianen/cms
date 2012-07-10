@@ -15,6 +15,15 @@ class PublishedBase(models.Model):
     
     class Meta:
         abstract = True
+        
+        
+class PublishedBaseSearchAdapter(externals.watson.SearchAdapter):
+    
+    """Base search adapter for PublishedBase derivatives."""
+    
+    def get_live_queryset(self):
+        """Selects only live models."""
+        return self.model.objects.all()
 
 
 class OnlineBase(PublishedBase):
@@ -32,6 +41,11 @@ class OnlineBase(PublishedBase):
     
     class Meta:
         abstract = True
+        
+        
+class OnlineBaseSearchAdapter(PublishedBaseSearchAdapter):
+    
+    """Base search adapter for OnlineBase derivatives."""
 
 
 class SearchMetaBase(OnlineBase):
@@ -157,13 +171,19 @@ class SearchMetaBase(OnlineBase):
         abstract = True
 
 
-class SearchMetaBaseSearchAdapter(externals.watson.SearchAdapter):
+class SearchMetaBaseSearchAdapter(OnlineBaseSearchAdapter):
 
     """Search adapter for SearchMetaBase derivatives."""
     
     def get_description(self, obj):
         """Returns the meta description."""
         return obj.meta_description
+    
+    def get_live_queryset(self):
+        """Selects only live models."""
+        return super(OnlineBaseSearchAdapter, self).get_live_queryset().filter(
+            robots_index = True,
+        )
     
 
 class PageBase(SearchMetaBase):
