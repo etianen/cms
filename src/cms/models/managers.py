@@ -98,3 +98,13 @@ class OnlineBaseManager(PublishedBaseManager):
         """
         queryset = super(OnlineBaseManager, self).select_published(queryset)
         return queryset.filter(is_online=True)
+    
+    
+class SearchMetaBaseManager(OnlineBaseManager):
+    
+    """Publication manager for SearchMetaBase models."""
+    
+    
+class PageBaseManager(SearchMetaBaseManager):
+    
+    """Publication manager for SearchMetaBase models."""

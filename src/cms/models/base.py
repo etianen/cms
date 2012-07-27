@@ -4,7 +4,7 @@ from django.db import models
 from django.shortcuts import render
 
 from cms import externals
-from cms.models.managers import OnlineBaseManager, PublishedBaseManager
+from cms.models.managers import OnlineBaseManager, PublishedBaseManager, SearchMetaBaseManager, PageBaseManager
 
 
 class PublishedBase(models.Model):
@@ -51,6 +51,8 @@ class OnlineBaseSearchAdapter(PublishedBaseSearchAdapter):
 class SearchMetaBase(OnlineBase):
     
     """Base model for models used to generate a standalone HTML page."""
+    
+    objects = SearchMetaBaseManager()
     
     # SEO fields.
     
@@ -192,6 +194,8 @@ class PageBase(SearchMetaBase):
     An enhanced SearchMetaBase with a sensible set of common features suitable for
     most pages.
     """
+    
+    objects = PageBaseManager()
     
     # Base fields.
     
