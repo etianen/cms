@@ -47,7 +47,7 @@ class SearchMetaBaseAdmin(OnlineBaseAdmin):
     
     adapter_cls = SearchMetaBaseSearchAdapter
     
-    list_display = ("__unicode__", "is_online", "get_date_modified",)
+    list_display = ("__unicode__", "is_online",)
     
     SEO_FIELDS = ("Search engine optimization", {
         "fields": ("browser_title", "meta_keywords", "meta_description", "sitemap_priority", "sitemap_changefreq", "robots_index", "robots_follow", "robots_archive",),
@@ -57,7 +57,7 @@ class SearchMetaBaseAdmin(OnlineBaseAdmin):
     
 if externals.reversion:
     class SearchMetaBaseAdmin(SearchMetaBaseAdmin, externals.reversion["admin.VersionMetaAdmin"]):
-        pass
+        list_display = SearchMetaBaseAdmin.list_display + ("get_date_modified",)
     
     
 if externals.watson:
@@ -68,8 +68,6 @@ if externals.watson:
 class PageBaseAdmin(SearchMetaBaseAdmin):
     
     """Base admin class for PageBase models."""
-
-    list_display = ("title", "is_online", "get_date_modified",)
     
     prepopulated_fields = {"url_title": ("title",),}
     

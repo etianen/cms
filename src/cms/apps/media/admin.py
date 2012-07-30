@@ -76,7 +76,7 @@ class FileAdminBase(admin.ModelAdmin):
     
     search_fields = ("title",)
     
-    list_display = ("get_preview", "get_title", "get_size", "get_date_modified")
+    list_display = ("get_preview", "get_title", "get_size",)
 
     change_list_template = "admin/media/file/change_list.html"
     
@@ -195,7 +195,7 @@ FileAdmin = FileAdminBase
 
 if externals.reversion:
     class FileAdmin(FileAdmin, externals.reversion["admin.VersionMetaAdmin"]):
-        pass
+        list_display = FileAdmin.list_display + ("get_date_modified",)
     
     
 if externals.watson:
