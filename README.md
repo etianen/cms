@@ -8,7 +8,7 @@ Overview
 --------
 
 The term *Content Management System* is ill-defined and means different things to different people.
-Rather than attempting to create a single monolithic solution to fit all needs, this package uses
+Rather than attempting to create a single monolithic solution to fit all needs, this project uses
 a modular approach, allowing you to pick the parts you need, and extend it where necessary.
 
 **Core features:**
