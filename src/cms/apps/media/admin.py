@@ -10,7 +10,6 @@ from django.template.defaultfilters import filesizeformat
 from django.utils.text import truncate_words
 
 import optimizations
-from optimizations.assetcache import default_asset_cache
 
 from cms import permalinks, externals
 from cms.apps.media.models import Label, File
@@ -160,7 +159,7 @@ class FileAdminBase(admin.ModelAdmin):
             else:
                 return '<img cms:permalink="%s" src="%s" width="%s" height="%s" alt="" title="%s"/>' % (permalink, thumbnail.url, thumbnail.width, thumbnail.height, obj.title)
         else:
-            icon = default_asset_cache.get_url(icon)
+            icon = optimizations.get_url(icon)
         return '<img cms:permalink="%s" src="%s" width="66" height="66" alt="" title="%s"/>' % (permalink, icon, obj.title)
     get_preview.short_description = "preview"
     get_preview.allow_tags = True
