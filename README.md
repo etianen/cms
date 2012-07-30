@@ -7,7 +7,7 @@ A collection of Django extensions that add content-management facilities to Djan
 Overview
 --------
 
-The term 'Content Management System' is ill-defined and means different things to different people.
+The term *Content Management System* is ill-defined and means different things to different people.
 Rather than attempting to create a single monolithic solution to fit all needs, this package uses
 a modular approach, allowing you to pick the parts you need, and extend it where necessary.
 
