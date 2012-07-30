@@ -22,7 +22,7 @@ Optional additional features:
 
 *   Version control and rollback (via [django-reversion](https://github.com/etianen/django-reversion)).
 *   Automatic SEO-friendly redirect management (via [django-historylinks](https://github.com/etianen/django-historylinks)).
-*   Full-text search with relevance ranking (via [django-watson](https://github.com/etianen/django-watsion)).
+*   Full-text search with relevance ranking (via [django-watson](https://github.com/etianen/django-watson)).
 *   Internal / external links in menus (via bundled `cms.apps.links` application).
 
 
