@@ -43,7 +43,7 @@ found at the [main project website][].
 You can keep up to date with the latest announcements by joining the
 [etianen-cms discussion group][].
 
-[django-reversion discussion group]: http://groups.google.com/group/etianen-cms
+[etianen-cms discussion group]: http://groups.google.com/group/etianen-cms
     "etianen-cms Google Group"
 
 
@@ -54,6 +54,5 @@ Dave Hall is a freelance web developer, based in Cambridge, UK. You can usually
 find him on the Internet in a number of different places:
 
 *   [Website](http://www.etianen.com/ "Dave Hall's homepage")
-*   [Blog](http://www.etianen.com/blog/developers/ "Dave Hall's blog")
 *   [Twitter](http://twitter.com/etianen "Dave Hall on Twitter")
 *   [Google Profile](http://www.google.com/profiles/david.etianen "Dave Hall's Google profile")
