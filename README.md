@@ -11,14 +11,14 @@ The term *Content Management System* is ill-defined and means different things t
 Rather than attempting to create a single monolithic solution to fit all needs, this package uses
 a modular approach, allowing you to pick the parts you need, and extend it where necessary.
 
-Core features:
+**Core features:**
 
 *   Publication controls with online preview.
 *   Pre-configured WYSIWYG editor widgets.
 *   Hierarchal page management with no depth limit.
 *   Image and file management, with easy embedding via WYSIWYG editors or pure model fields.
 
-Optional additional features:
+**Optional additional features:**
 
 *   Version control and rollback (via [django-reversion](https://github.com/etianen/django-reversion)).
 *   Automatic SEO-friendly redirect management (via [django-historylinks](https://github.com/etianen/django-historylinks)).
