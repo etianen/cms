@@ -119,6 +119,7 @@ INSTALLED_APPS = (
     "usertools",
     "historylinks",
     "watson",
+    "south",
     "cms",
     "cms.apps.pages",
     "cms.apps.media",
