@@ -264,7 +264,18 @@ class Page(PageBase):
 externals.historylinks("register", Page)
 
 
-sitemaps.register(Page)
+class PageSitemap(sitemaps.PageBaseSitemap):
+    
+    """Sitemap for page models."""
+    
+    model = Page
+    
+    def items(self):
+        """Only lists items that are marked as indexable."""
+        return filter_indexable_pages(super(PageSitemap, self).items())
+
+
+sitemaps.register(Page, sitemap_cls=PageSitemap)
 
 
 class PageSearchAdapter(PageBaseSearchAdapter):
@@ -288,10 +299,14 @@ class PageSearchAdapter(PageBaseSearchAdapter):
         
     def get_live_queryset(self):
         """Selects the live page queryset."""
+        # HACK: Prevents a table name collision in the Django queryset manager.
         with publication_manager.select_published(False):
             qs = Page._base_manager.all()
         if publication_manager.select_published_active():
             qs = Page.objects.select_published(qs, page_alias="U0")
+        # Filter out unindexable pages.
+        qs = filter_indexable_pages(qs)
+        # All done!
         return qs
         
         
@@ -306,6 +321,22 @@ def get_registered_content():
         model for model in models.get_models()
         if issubclass(model, ContentBase) and not model._meta.abstract
     ]
+    
+    
+def filter_indexable_pages(queryset):
+    """
+    Filters the given queryset of pages to only contain ones that should be
+    indexed by search engines.
+    """
+    return queryset.filter(
+        robots_index = True,
+        content_type__in = [
+            ContentType.objects.get_for_model(content_model)
+            for content_model
+            in get_registered_content()
+            if content_model.robots_index
+        ]
+    )
     
 
 class ContentBase(models.Model):
@@ -323,6 +354,9 @@ class ContentBase(models.Model):
     
     # A fieldset definition. If blank, one will be generated.
     fieldsets = None
+    
+    # Whether pages of this type should be included in search indexes. (Can still be disabled on a per-page basis).
+    robots_index = True
     
     page = models.OneToOneField(
         Page,

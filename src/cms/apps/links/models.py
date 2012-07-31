@@ -16,6 +16,8 @@ class Link(ContentBase):
     
     urlconf = "cms.apps.links.urls"
     
+    robots_index = False
+    
     link_url = LinkField(
         "link URL",
         help_text = "The URL where the user will be redirected.",
