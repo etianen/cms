@@ -1,7 +1,5 @@
 """"Content used by the links application."""
 
-from django.db import models
-
 from cms.models import LinkField
 from cms.apps.pages.models import ContentBase
 
