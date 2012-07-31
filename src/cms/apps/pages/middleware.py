@@ -77,6 +77,11 @@ class RequestPageManager(object):
             return self.breadcrumbs[-1]
         except IndexError:
             return None
+        
+    @property
+    def is_exact(self):
+        """Whether the current page exactly matches the request URL."""
+        return self.current.get_absolute_url() == self._path
 
 
 class PageMiddleware(object):
