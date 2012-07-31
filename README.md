@@ -23,7 +23,8 @@ a modular approach, allowing you to pick the parts you need, and extend it where
 *   Version control and rollback (via [django-reversion](https://github.com/etianen/django-reversion)).
 *   Automatic SEO-friendly redirect management (via [django-historylinks](https://github.com/etianen/django-historylinks)).
 *   Full-text search with relevance ranking (via [django-watson](https://github.com/etianen/django-watson)).
-*   Internal / external links in menus (via bundled `cms.apps.links` application).
+*   Internal / external links in menus (via bundled [[Links app]]).
+*   Simple blog managment (via bundled [[News app]]).
 
 
 Documentation
