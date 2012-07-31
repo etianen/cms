@@ -159,7 +159,7 @@ class SearchMetaBase(OnlineBase):
             "robots_index": self.robots_index,
             "robots_archive": self.robots_archive,
             "robots_follow": self.robots_follow,
-            "title": title,
+            "title": self.browser_title or title,
             "header": title,
         }
         
