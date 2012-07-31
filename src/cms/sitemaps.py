@@ -2,7 +2,7 @@
 
 from django.contrib.sitemaps import Sitemap
 
-from cms.models import SearchMetaBase, PageBase
+from cms.models import PublishedBase, OnlineBase, SearchMetaBase, PageBase
 
 
 # A dictionary of registered sitemap classes.
@@ -11,22 +11,32 @@ registered_sitemaps = {}
 
 class BaseSitemap(Sitemap):
     
-    """Base sitemap for registration."""
+    """
+    Base sitemap for registration.
+    
+    Subclasses need to override the model property.
+    """
     
     model = None
     
     def items(self):
         """Returns all items in this sitemap."""
         return self.model.objects.all()
+    
+    
+class PublishedBaseSitemap(BaseSitemap):
+    
+    """Base sitemap for all subclasses of PublishedBase."""
+    
+    
+class OnlineBaseSitemap(PublishedBaseSitemap):
+    
+    """Base sitemap for all subclasses of OnlineBase."""
 
 
-class SearchMetaBaseSitemap(BaseSitemap):
+class SearchMetaBaseSitemap(OnlineBaseSitemap):
     
-    """
-    Base sitemap for all subclasses of SearchMetaBase.
-    
-    Subclasses need to override the model property.
-    """
+    """Base sitemap for all subclasses of SearchMetaBase."""
     
     def items(self):
         """Only lists items that are marked as indexable."""
@@ -76,6 +86,10 @@ def register(model, sitemap_cls=None):
             sitemap_cls_base = PageBaseSitemap
         elif issubclass(model, SearchMetaBase):
             sitemap_cls_base = SearchMetaBaseSitemap
+        elif issubclass(model, OnlineBase):
+            sitemap_cls_base = OnlineBaseSitemap
+        elif issubclass(model, PublishedBase):
+            sitemap_cls_base = PublishedBaseSitemap
         else:
             sitemap_cls_base = BaseSitemap
         sitemap_cls_name = model.__name__ + "Sitemap"
