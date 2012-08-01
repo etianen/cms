@@ -1,7 +1,9 @@
 """
-The Etianen.com Content Management System.
+A collection of Django extensions that add content-management facilities to Django projects.
 
-Enlightened Website Development.
+Developed by Dave Hall.
 
-<http://www.etianen.com/>
+<http://etianen.com/>
 """
+
+VERSION = (2, 6, 2)
