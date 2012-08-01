@@ -75,13 +75,9 @@ EMAIL_SUBJECT_PREFIX = "[%s] " % SITE_NAME
 
 # Error reporting settings.  Use these to set up automatic error notifications.
 
-ADMINS = (
-    ("Dave Hall", "errors@etianen.com"),
-)
+ADMINS = ()
 
-MANAGERS = (
-    ("Dave Hall", "notifications@etianen.com"),
-)
+MANAGERS = ()
 
 SEND_BROKEN_LINK_EMAILS = False
 
