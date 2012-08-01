@@ -2,6 +2,13 @@ CMS Changelog
 =============
 
 
+2.6.1 - 01/07/2012
+------------------
+
+*   Migrations for all built-in apps.
+*   Offline and unindexable models no longer show up in search results.
+
+
 2.6 - 06/06/2012
 ----------------
 
