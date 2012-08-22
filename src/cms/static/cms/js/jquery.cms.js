@@ -73,9 +73,30 @@
         // Run the plugin.
         return this.each(function() {
             var container = $(this);
-            tinyMCE.init($.extend({
-                elements: container.attr("id"),
-            }, settings));
+            var state = container.data("cms.htmlWidget");
+            if (!state) {
+            	state = {};
+            	container.data("cms.htmlWidget", state);
+            }
+            if (!state.initialized) {
+            	if (container.not(".inline-group .empty-form textarea").length) {
+            		tinyMCE.init($.extend({
+                        elements: container.attr("id"),
+                    }, settings));
+                	state.initialized = true;
+            	} else {
+            		// Set up deferred initialization.
+            		if (!state.initializedDeferred) {
+                		setTimeout(function() {
+                			var parentContainer = container.parents(".inline-group");
+                    		parentContainer.find(".add-row a").click(function() {
+                    			parentContainer.find("textarea").cms("htmlWidget", config);
+                    		});
+                		});
+                		state.initializedDeferred = true;
+            		}
+            	}
+            }
         });
     }
     
