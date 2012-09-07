@@ -14,7 +14,7 @@ from cms import permalinks
 
 RE_TAG = re.compile(ur"<(img|a)(\s+.*?)(/?)>", re.IGNORECASE)
 
-RE_ATTR = re.compile(ur"\s(\w+)=(\".*?\"|'.*?')", re.IGNORECASE)
+RE_ATTR = re.compile(ur"\s([\w-]+)=(\".*?\"|'.*?')", re.IGNORECASE)
 
 
 def process(text):
