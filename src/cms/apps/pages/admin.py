@@ -128,7 +128,7 @@ class PageAdmin(PageBaseAdmin):
     def get_fieldsets(self, request, obj=None):
         """Generates the custom content fieldsets."""
         content_cls = self.get_page_content_cls(request, obj)
-        content_fields = [field.name for field in content_cls._meta.fields if field.name != "page"]
+        content_fields = [field.name for field in content_cls._meta.fields + content_cls._meta.many_to_many if field.name != "page"]
         fieldsets = super(PageAdmin, self).get_fieldsets(request, obj)
         if content_fields:
             content_fieldsets = content_cls.fieldsets or (
@@ -137,6 +137,8 @@ class PageAdmin(PageBaseAdmin):
                 }),
             )
             fieldsets = tuple(fieldsets[0:1]) + content_fieldsets + tuple(fieldsets[1:])
+        if getattr(content_cls, "filter_horizontal", ""):
+            self.filter_horizontal = content_cls.filter_horizontal
         return fieldsets
 
     def get_all_children(self, page):
@@ -162,7 +164,7 @@ class PageAdmin(PageBaseAdmin):
         """Adds the template area fields to the form."""
         content_cls = self.get_page_content_cls(request, obj)
         form_attrs = {}
-        for field in content_cls._meta.fields:
+        for field in content_cls._meta.fields + content_cls._meta.many_to_many:
             if field.name == "page":
                 continue
             form_field = self.formfield_for_dbfield(field, request=request)
