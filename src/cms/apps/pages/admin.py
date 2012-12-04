@@ -12,6 +12,7 @@ from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.conf.urls import patterns, url
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import F
@@ -137,9 +138,17 @@ class PageAdmin(PageBaseAdmin):
                 }),
             )
             fieldsets = tuple(fieldsets[0:1]) + content_fieldsets + tuple(fieldsets[1:])
-        if getattr(content_cls, "filter_horizontal", ""):
-            self.filter_horizontal = content_cls.filter_horizontal
         return fieldsets
+
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        content_cls = self.get_page_content_cls(request)
+        formfield = super(PageAdmin, self).formfield_for_manytomany(db_field, request=None, **kwargs)
+        if getattr(content_cls, "filter_horizontal", "") and db_field.name in content_cls.filter_horizontal:
+            formfield.widget = FilteredSelectMultiple(
+                verbose_name = db_field.verbose_name,
+                is_stacked = False,
+            )
+        return formfield
 
     def get_all_children(self, page):
         """Returns all the children for a page."""
