@@ -143,7 +143,7 @@ class PageAdmin(PageBaseAdmin):
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         content_cls = self.get_page_content_cls(request)
         formfield = super(PageAdmin, self).formfield_for_manytomany(db_field, request=None, **kwargs)
-        if getattr(content_cls, "filter_horizontal", "") and db_field.name in content_cls.filter_horizontal:
+        if db_field.name in getattr(content_cls, "filter_horizontal", ()):
             formfield.widget = FilteredSelectMultiple(
                 verbose_name = db_field.verbose_name,
                 is_stacked = False,
