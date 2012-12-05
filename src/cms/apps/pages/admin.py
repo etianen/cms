@@ -12,6 +12,7 @@ from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.conf.urls import patterns, url
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import F
@@ -128,7 +129,7 @@ class PageAdmin(PageBaseAdmin):
     def get_fieldsets(self, request, obj=None):
         """Generates the custom content fieldsets."""
         content_cls = self.get_page_content_cls(request, obj)
-        content_fields = [field.name for field in content_cls._meta.fields if field.name != "page"]
+        content_fields = [field.name for field in content_cls._meta.fields + content_cls._meta.many_to_many if field.name != "page"]
         fieldsets = super(PageAdmin, self).get_fieldsets(request, obj)
         if content_fields:
             content_fieldsets = content_cls.fieldsets or (
@@ -138,6 +139,16 @@ class PageAdmin(PageBaseAdmin):
             )
             fieldsets = tuple(fieldsets[0:1]) + content_fieldsets + tuple(fieldsets[1:])
         return fieldsets
+
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        content_cls = self.get_page_content_cls(request)
+        formfield = super(PageAdmin, self).formfield_for_manytomany(db_field, request=None, **kwargs)
+        if db_field.name in getattr(content_cls, "filter_horizontal", ()):
+            formfield.widget = FilteredSelectMultiple(
+                verbose_name = db_field.verbose_name,
+                is_stacked = False,
+            )
+        return formfield
 
     def get_all_children(self, page):
         """Returns all the children for a page."""
@@ -162,7 +173,7 @@ class PageAdmin(PageBaseAdmin):
         """Adds the template area fields to the form."""
         content_cls = self.get_page_content_cls(request, obj)
         form_attrs = {}
-        for field in content_cls._meta.fields:
+        for field in content_cls._meta.fields + content_cls._meta.many_to_many:
             if field.name == "page":
                 continue
             form_field = self.formfield_for_dbfield(field, request=request)
