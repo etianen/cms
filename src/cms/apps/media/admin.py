@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.admin.views.main import IS_POPUP_VAR
 from django.shortcuts import render
 from django.template.defaultfilters import filesizeformat
-from django.utils.text import truncate_words
+from django.utils.text import Truncator
 
 from reversion.admin import VersionAdmin
 
@@ -149,7 +149,7 @@ class FileAdmin(VersionAdmin, AuditBaseAdmin):
     
     def get_title(self, obj):
         """Returns a truncated title of the object."""
-        return truncate_words(obj.title, 8)
+        return Truncator(obj.title).words(8)
     get_title.short_description = "title"
     
     # Custom view logic.
