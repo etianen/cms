@@ -14,7 +14,7 @@ from django.core.urlresolvers import reverse
 from django.conf.urls import patterns, url
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
+from django.db import transaction, models
 from django.db.models import F
 from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
@@ -140,16 +140,6 @@ class PageAdmin(PageBaseAdmin):
             fieldsets = tuple(fieldsets[0:1]) + content_fieldsets + tuple(fieldsets[1:])
         return fieldsets
 
-    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        content_cls = self.get_page_content_cls(request)
-        formfield = super(PageAdmin, self).formfield_for_manytomany(db_field, request=None, **kwargs)
-        if db_field.name in getattr(content_cls, "filter_horizontal", ()):
-            formfield.widget = FilteredSelectMultiple(
-                verbose_name = db_field.verbose_name,
-                is_stacked = False,
-            )
-        return formfield
-
     def get_all_children(self, page):
         """Returns all the children for a page."""
         children = []
@@ -181,8 +171,16 @@ class PageAdmin(PageBaseAdmin):
             if obj:
                 try:
                     form_field.initial = getattr(obj.content, field.name, "")
+                    if isinstance(field, models.ManyToManyField):
+                        form_field.initial = form_field.initial.all()
                 except content_cls.DoesNotExist:
-                    pass  # This means that we're in a reversion recovery, or something weird has happened to the databae.
+                    pass  # This means that we're in a reversion recovery, or something weird has happened to the database.
+
+                if field.name in getattr(content_cls, "filter_horizontal", ()):
+                    form_field.widget = FilteredSelectMultiple(
+                        field.verbose_name,
+                        is_stacked=False,
+                    )
             # Store the field.
             form_attrs[field.name] = form_field
         ContentForm = type("%sForm" % self.__class__.__name__, (forms.ModelForm,), form_attrs)
@@ -223,11 +221,11 @@ class PageAdmin(PageBaseAdmin):
             try:
                 content_obj = content_cls_type.model_class().objects.get(page=obj)
             except content_cls.DoesNotExist:
-                content_obj = content_cls()  # This means that we're in a reversion recovery, or something weird has happened to the databae.
+                content_obj = content_cls()  # This means that we're in a reversion recovery, or something weird has happened to the database.
         else:
             content_obj = content_cls()
         # Modify the page content.
-        for field in content_obj._meta.fields:
+        for field in content_obj._meta.fields + content_obj._meta.many_to_many:
             if field.name == "page":
                 continue
             setattr(content_obj, field.name, form.cleaned_data[field.name])    
