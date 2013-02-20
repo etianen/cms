@@ -140,16 +140,6 @@ class PageAdmin(PageBaseAdmin):
             fieldsets = tuple(fieldsets[0:1]) + content_fieldsets + tuple(fieldsets[1:])
         return fieldsets
 
-    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        content_cls = self.get_page_content_cls(request)
-        formfield = super(PageAdmin, self).formfield_for_manytomany(db_field, request=None, **kwargs)
-        if db_field.name in getattr(content_cls, "filter_horizontal", ()):
-            formfield.widget = FilteredSelectMultiple(
-                verbose_name = db_field.verbose_name,
-                is_stacked = False,
-            )
-        return formfield
-
     def get_all_children(self, page):
         """Returns all the children for a page."""
         children = []
@@ -173,7 +163,7 @@ class PageAdmin(PageBaseAdmin):
         """Adds the template area fields to the form."""
         content_cls = self.get_page_content_cls(request, obj)
         form_attrs = {}
-        for field in content_cls._meta.fields + content_cls._meta.many_to_many:
+        for field in content_cls._meta.fields:
             if field.name == "page":
                 continue
             form_field = self.formfield_for_dbfield(field, request=request)
@@ -182,7 +172,17 @@ class PageAdmin(PageBaseAdmin):
                 try:
                     form_field.initial = getattr(obj.content, field.name, "")
                 except content_cls.DoesNotExist:
-                    pass  # This means that we're in a reversion recovery, or something weird has happened to the databae.
+                    pass  # This means that we're in a reversion recovery, or something weird has happened to the database.
+            # Store the field.
+            form_attrs[field.name] = form_field
+
+        for field in content_cls._meta.many_to_many:
+            form_field = self.formfield_for_dbfield(field, request=request)
+            if field.name in getattr(content_cls, "filter_horizontal", ()):
+                form_field.widget = FilteredSelectMultiple(
+                    verbose_name=field.verbose_name,
+                    is_stacked=False,
+                )
             # Store the field.
             form_attrs[field.name] = form_field
         ContentForm = type("%sForm" % self.__class__.__name__, (forms.ModelForm,), form_attrs)
