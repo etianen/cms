@@ -176,11 +176,11 @@ class PageAdmin(PageBaseAdmin):
                 except content_cls.DoesNotExist:
                     pass  # This means that we're in a reversion recovery, or something weird has happened to the database.
 
-                if field.name in getattr(content_cls, "filter_horizontal", ()):
-                    form_field.widget = FilteredSelectMultiple(
-                        field.verbose_name,
-                        is_stacked=False,
-                    )
+            if field.name in getattr(content_cls, "filter_horizontal", ()):
+                form_field.widget = FilteredSelectMultiple(
+                    field.verbose_name,
+                    is_stacked=False,
+                )
             # Store the field.
             form_attrs[field.name] = form_field
         ContentForm = type("%sForm" % self.__class__.__name__, (forms.ModelForm,), form_attrs)
@@ -225,7 +225,7 @@ class PageAdmin(PageBaseAdmin):
         else:
             content_obj = content_cls()
         # Modify the page content.
-        for field in content_obj._meta.fields + content_obj._meta.many_to_many:
+        for field in content_obj._meta.fields:
             if field.name == "page":
                 continue
             setattr(content_obj, field.name, form.cleaned_data[field.name])    
@@ -234,6 +234,12 @@ class PageAdmin(PageBaseAdmin):
         # Save the page content.
         content_obj.page = obj
         content_obj.save()
+        
+        # Now save m2m fields.
+        for field in content_obj._meta.many_to_many:
+            setattr(content_obj, field.name, form.cleaned_data[field.name])
+        content_obj.save()
+
         obj.content = content_obj
     
     # Permissions.
