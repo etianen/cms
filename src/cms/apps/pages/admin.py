@@ -201,7 +201,7 @@ class PageAdmin(PageBaseAdmin):
             else:
                 content_obj = content_cls()
             # Modify the page content.
-            for field in content_obj._meta.fields + content_obj._meta.many_to_many:
+            for field in content_obj._meta.fields:
                 if field.name == "page":
                     continue
                 setattr(content_obj, field.name, form.cleaned_data[field.name])
@@ -216,6 +216,9 @@ class PageAdmin(PageBaseAdmin):
             # Save the page content.
             content_obj.page = obj
             content_obj.save()
+            # Save the content m2m fields.
+            for field in content_obj._meta.many_to_many:
+                setattr(content_obj, field.name, form.cleaned_data[field.name])
     
     # Permissions.
     
