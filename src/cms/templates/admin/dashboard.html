@@ -1,13 +1,13 @@
 {% extends "admin/index.html" %}
-{% load adminmedia %}
+{% load staticfiles %}
 {% load url from future %}
 
 
 {% block extrahead %}
     {{block.super}}
-    <script type="text/javascript" src="{% admin_media_prefix %}js/jquery.min.js"></script>
-    <script type="text/javascript" src="{% admin_media_prefix %}js/jquery.init.js"></script>
-    <script type="text/javascript" src="{{STATIC_URL}}cms/js/jquery.cms.js"></script>
+    <script type="text/javascript" src="{% static 'admin/js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'cms/js/jquery.cms.js' %}"></script>
 {% endblock %}
 
 
