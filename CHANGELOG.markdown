@@ -2,6 +2,14 @@ CMS Changelog
 =============
 
 
+2.6.2 - 20/11/2013
+------------------
+
+*   Added ManyToMany fields for page content models.
+*   Enabling WYSIWYG editors in inline related models.
+*   Fixing hardcoded template path.
+
+
 2.6.1 - 01/07/2012
 ------------------
 
