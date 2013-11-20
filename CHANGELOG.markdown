@@ -2,7 +2,7 @@ CMS Changelog
 =============
 
 
-2.6.2 - 20/11/2013
+2.6.3 - 20/11/2013
 ------------------
 
 *   Added ManyToMany fields for page content models.
