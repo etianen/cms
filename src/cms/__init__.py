@@ -5,3 +5,5 @@ Enlightened Website Development.
 
 <http://www.etianen.com/>
 """
+
+VERSION = (2, 4, 0, 1)
