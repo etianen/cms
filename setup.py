@@ -29,12 +29,12 @@ packages, package_data = [], {}
 root_dir = os.path.dirname(__file__)
 if root_dir != '':
     os.chdir(root_dir)
-django_dir = 'django'
+cms_dir = 'src/cms'
 
-for dirpath, dirnames, filenames in os.walk(django_dir):
+for dirpath, dirnames, filenames in os.walk(cms_dir):
     # Ignore PEP 3147 cache dirs and those whose names start with '.'
     dirnames[:] = [d for d in dirnames if not d.startswith('.') and d != '__pycache__']
-    parts = fullsplit(dirpath)
+    parts = fullsplit(dirpath)[1:]
     package_name = '.'.join(parts)
     if '__init__.py' in filenames:
         packages.append(package_name)
@@ -49,6 +49,7 @@ for dirpath, dirnames, filenames in os.walk(django_dir):
 
 
 # Create the setup config.
+
 setup(
     name = "etianen-cms",
     version = ".".join(str(n) for n in VERSION),
