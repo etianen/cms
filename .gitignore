@@ -7,3 +7,5 @@
 .bzr
 .bzrignore
 Thumbs.db
+*.egg-info
+dist
