@@ -24,21 +24,29 @@ def fullsplit(path, result=None):
 
 # Compile the list of packages available, because distutils doesn't have
 # an easy way to do this.
-packages, data_files = [], []
+packages, package_data = [], {}
+
 root_dir = os.path.dirname(__file__)
 if root_dir != '':
     os.chdir(root_dir)
-cms_dir = 'src/cms'
+django_dir = 'django'
 
-for dirpath, dirnames, filenames in os.walk(cms_dir):
-    # Ignore dirnames that start with '.'
-    for i, dirname in enumerate(dirnames):
-        if dirname.startswith('.'): del dirnames[i]
+for dirpath, dirnames, filenames in os.walk(django_dir):
+    # Ignore PEP 3147 cache dirs and those whose names start with '.'
+    dirnames[:] = [d for d in dirnames if not d.startswith('.') and d != '__pycache__']
+    parts = fullsplit(dirpath)
+    package_name = '.'.join(parts)
     if '__init__.py' in filenames:
-        packages.append('.'.join(fullsplit(dirpath)[1:]))
+        packages.append(package_name)
     elif filenames:
-        data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
-        
+        relative_path = []
+        while '.'.join(parts) not in packages:
+            relative_path.append(parts.pop())
+        relative_path.reverse()
+        path = os.path.join(*relative_path)
+        package_files = package_data.setdefault('.'.join(parts), [])
+        package_files.extend([os.path.join(path, f) for f in filenames])
+
 
 # Create the setup config.
 setup(
@@ -54,7 +62,7 @@ setup(
         "": "src",
     },
     packages = packages,
-    data_files = data_files,
+    package_data = package_data,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",

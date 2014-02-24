@@ -11,6 +11,7 @@ Thumbs.db
 =======
 *.egg-info
 dist
+build
 MANIFEST
 
 >>>>>>> b742637... Updating for 2.4.0.1 release
