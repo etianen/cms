@@ -19,6 +19,12 @@ CMS Changelog
 *   Integration with django-optimizations.
 
 
+2.4.0.1 - 24/02/2014
+--------------------
+
+* Integration with PyPi.
+
+
 2.4 - 15/06/2011
 ----------------
 
