@@ -7,3 +7,10 @@
 .bzr
 .bzrignore
 Thumbs.db
+<<<<<<< HEAD
+=======
+*.egg-info
+dist
+MANIFEST
+
+>>>>>>> b742637... Updating for 2.4.0.1 release
