@@ -79,9 +79,9 @@ class PageAdmin(PageBaseAdmin):
         self.content_inlines.append((content_cls, inline_admin))
         self._register_page_inline(inline_admin.model)
 
-    def get_inline_instances(self, request):
+    def get_inline_instances(self, request, obj=None):
         """Returns all the inline instances for this PageAdmin."""
-        inline_instances = super(PageAdmin, self).get_inline_instances(request)
+        inline_instances = super(PageAdmin, self).get_inline_instances(request, obj)
         # Add on the relevant content inlines.
         obj = getattr(request, "_admin_change_obj", None)  # HACK: Retrieve the page from the change view.
         content_cls = self.get_page_content_cls(request, obj)
