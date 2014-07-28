@@ -9,7 +9,7 @@ This file should be excluded from version control to keep the settings local.
 
 import os.path
 
-from production import DATABASES
+from production import SITE_DOMAIN
 
 
 # Run in debug mode.
@@ -21,9 +21,9 @@ TEMPLATE_DEBUG = DEBUG
 
 # Save media files to the user's Sites folder.
 
-MEDIA_ROOT = os.path.expanduser("~/Sites/{{ project_name }}/media")
+MEDIA_ROOT = os.path.expanduser(os.path.join("~/Sites" + SITE_DOMAIN + "media"))
 
-STATIC_ROOT = os.path.expanduser("~/Sites/{{ project_name }}/static")
+STATIC_ROOT = os.path.expanduser(os.path.join("~/Sites" + SITE_DOMAIN + "static"))
 
 
 # Use local server.
@@ -41,13 +41,17 @@ TEMPLATE_LOADERS = (
 )
 
 
-# Optional separate database settings
+# Local database settings
 
-#DATABASES["default"]["NAME"] = ""
-
-#DATABASES["default"]["USER"] = ""
-
-#DATABASES["default"]["PASSWORD"] = ""
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "HOST": "localhost",
+        "NAME": "{{ project_name }}",
+        "USER": "{{ user }}",
+        "PASSWORD": "",
+    },
+}
 
 
 # Optional console-based email backend.

@@ -32,6 +32,7 @@ setup(
     install_requires = [
         "django",
         "django-optimizations",
+        "Pillow",
     ],
     extras_require = {
         "full":  [
@@ -40,6 +41,7 @@ setup(
             "django-historylinks",
             "django-watson",
             "south",
+            "psycopg2",
         ],
     },
     classifiers=[

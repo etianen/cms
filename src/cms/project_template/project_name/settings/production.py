@@ -12,6 +12,13 @@ for the site, database, media and email sections below.
 import os
 
 
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
+SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+BASE_DIR = os.path.abspath(os.path.join(SITE_ROOT, ".."))
+
+
 # The name of this site.  Used for branding in the online admin area.
 
 SITE_NAME = "Example"
@@ -19,6 +26,15 @@ SITE_NAME = "Example"
 SITE_DOMAIN = "example.com"
 
 PREPEND_WWW = True
+
+
+# Security settings.
+
+ALLOWED_HOSTS = (
+    SITE_DOMAIN,
+)
+
+X_FRAME_OPTIONS = "DENY"
 
 
 # Database settings.
@@ -40,8 +56,6 @@ DATABASES = {
 MEDIA_ROOT = "/var/media/{{ project_name }}"
 
 MEDIA_URL = "/media/"
-
-FILE_UPLOAD_PERMISSIONS = 0644
 
 
 # Absolute path to the directory where static files will be collected.
@@ -93,11 +107,6 @@ USE_I18N = False
 USE_L10N = True
 
 USE_TZ = True
-
-
-# Auto-discovery of project location.
-
-SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 
 # A list of additional installed applications.
@@ -247,32 +256,5 @@ RICHTEXT_SETTINGS = {
         "extended_valid_elements": "iframe[scrolling|frameborder|class|id|src|width|height|name|align],article[id|class],section[id|class]",
         "convert_urls": False,
         "accessibility_warnings": False,
-    }
-}
-
-
-# Logging configuration.
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "filters": {
-        "require_debug_false": {
-            "()": "django.utils.log.RequireDebugFalse"
-        }
-    },
-    "handlers": {
-        "mail_admins": {
-            "level": "ERROR",
-            "filters": ["require_debug_false"],
-            "class": "django.utils.log.AdminEmailHandler"
-        }
-    },
-    "loggers": {
-        "django.request": {
-            "handlers": ["mail_admins"],
-            "level": "ERROR",
-            "propagate": True,
-        },
     }
 }
