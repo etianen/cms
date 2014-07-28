@@ -49,7 +49,6 @@ setup(
     author = "Dave Hall",
     author_email = "dave@etianen.com",
     url = "http://github.com/etianen/cms",
-    download_url = "http://github.com/downloads/etianen/cms/etianen-cms-{version_str}.tar.gz".format(version_str=VERSION_STR),
     zip_safe = False,
     package_dir = {
         "": "src",
