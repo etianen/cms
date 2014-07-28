@@ -2,6 +2,14 @@ CMS Changelog
 =============
 
 
+2.6.4 - 28/07/2014
+------------------
+
+* Django 1.6.x compatibility.
+* Improved start_cms_project.py script with configuration installation root.
+* Improved setup.py to work better with pip, and updated installation instructions to use pip as the default installation method.
+
+
 2.6.3 - 20/11/2013
 ------------------
 
