@@ -5,6 +5,8 @@
 
 (function($) {
     
+    "use strict";
+
     /**
      * Activates the main CMS dashboard sitemap.
      */
@@ -14,19 +16,26 @@
             var sitemap_enabled = true;
             // Get some containers.
             var sitemap = $(this);
-            var container = $('<div/>')
-            sitemap.append(container)
+            var container = $('<div/>');
+            sitemap.append(container);
             var loader = $('<p class="loading">Loading sitemap...</p>');
             container.append(loader);
             container.height(container.height());
             loader.hide().fadeIn(function() {
                 $.getJSON("/admin/pages/page/sitemap.json", function(data) {
                     loader.fadeOut(function() {
-                        var dataContainer = $("<div>").css("opacity", 0);
+                        var dataContainer = $("<div>").css({
+                            "opacity": 0,
+                            "-webkit-user-select": "none",
+                            "-moz-user-select": "none",
+                            "-ms-user-select": "none",
+                            "-o-user-select": "none",
+                            "user-select": "none"
+                        });
                         // Process data.
                         if (data.entries.length > 0) {
                             var homepageList = $('<ul/>');
-                            function addEntry(depth, list, index, page, siblings) {
+                            var addEntry = function(depth, list, index, page) {
                                 var li = $('<li/>');
                                 // Add the collapse control.
                                 if (depth > 0 && page.children.length > 0) {
@@ -66,16 +75,17 @@
                                 }
                                 // Add the move functionality.
                                 if (page.canChange && data.moveUrl) {
-                                    function makeMoveHandler(direction) {
+                                    var makeMoveHandler = function(direction) {
                                         return function() {
                                             // Prevent simultanious page moves.
                                             if (!sitemap_enabled) {
                                                 return;
                                             }
+                                            var other_li;
                                             if (direction == "up") {
-                                                var other_li = li.prev();
+                                                other_li = li.prev();
                                             } else if (direction == "down") {
-                                                var other_li = li.next();
+                                                other_li = li.next();
                                             }
                                             // Disable the sitemap.
                                             sitemap_enabled = false;
@@ -88,7 +98,7 @@
                                                         page: page.id,
                                                         direction: direction
                                                     },
-                                                    beforeSend: function(xhr, settings) {
+                                                    beforeSend: function(xhr) {
                                                         xhr.setRequestHeader("X-CSRFToken", $.cms.cookie("csrftoken"));
                                                     },
                                                     error: function() {
@@ -96,7 +106,7 @@
                                                             container.append('<p>The sitemap service is currently unavailable.</p>');
                                                         });
                                                     },
-                                                    success: function(data) {
+                                                    success: function() {
                                                         // Animate the page move.
                                                         if (direction == "up") {
                                                             other_li.before(li);
@@ -108,15 +118,15 @@
                                                         li.trigger("render.cms");
                                                         other_li.trigger("render.cms");
                                                         // Re-enable the sitemap.
-                                                        sitemap_enabled = true
+                                                        sitemap_enabled = true;
                                                     },
                                                     cache: false
                                                 });
                                             });
-                                        }
-                                    }
+                                        };
+                                    };
                                     // Add the move controls.
-                                    var moveUp = $('<span class="move-up" title="Move this page up"/>')
+                                    var moveUp = $('<span class="move-up" title="Move this page up"/>');
                                     pageContainer.append(moveUp);
                                     moveUp.click(makeMoveHandler("up"));
                                     var moveDown = $('<span class="move-down" title="Move this page down"/>');
@@ -142,14 +152,14 @@
                                 if (page.children.length > 0) {
                                     var childList = $('<ul/>');
                                     $.each(page.children, function(index, child) {
-                                        addEntry(depth + 1, childList, index, child, page.children);
+                                        addEntry(depth + 1, childList, index, child);
                                     });
                                     li.append(childList);
                                 }
                                 // Add in the list.
                                 list.append(li);
-                            }
-                            addEntry(0, homepageList, 0, data.entries[0], data.entries);
+                            };
+                            addEntry(0, homepageList, 0, data.entries[0]);
                             homepageList.find("li").trigger("render.cms");
                             dataContainer.append(homepageList);
                         } else {
@@ -158,8 +168,6 @@
                                 dataContainer.append('<p>It\'s time to go ahead and <a href="' + data.createHomepageUrl + '">create one</a>!</p>');
                             }
                         }
-                        // Disable text selection.
-                        dataContainer.cms("disableTextSelect");
                         // Fade in data.
                         container.append(dataContainer);
                         container.animate({
@@ -176,6 +184,6 @@
                 });
             });
         });
-    }
+    };
     
-}(django.jQuery));
+}(window.django.jQuery));

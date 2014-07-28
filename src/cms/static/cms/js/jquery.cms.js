@@ -4,6 +4,8 @@
 
 
 (function($) {
+
+    "use strict";
     
     /**
      * The main cms plugin. Use by passing in the name of the required method.
@@ -14,7 +16,7 @@
         } else {
             $.error("Method " +  method + " does not exist on jQuery.cms");
         }
-    }
+    };
     
     // Namespace for static cms plugins.
     $.cms = {};
@@ -24,7 +26,7 @@
      */
     $.cms.cookie = function(name) {
         var cookieValue = null;
-        if (document.cookie && document.cookie != "") {
+        if (document.cookie && document.cookie !== "") {
             var cookies = document.cookie.split(";");
             for (var i = 0; i < cookies.length; i++) {
                 var cookie = $.trim(cookies[i]);
@@ -36,26 +38,7 @@
             }
         }
         return cookieValue;
-    }
-    
-    /**
-     * Disables text selection on the given element.
-     */
-    cms.disableTextSelect = function() {
-        return this.each(function() {
-        	if ($.browser.mozilla) {
-        		$(this).css('MozUserSelect', 'none');
-        	 } else if ($.browser.msie) {
-        		$(this).bind('selectstart', function () {
-        		    return false;
-        		});
-        	} else {
-        		$(this).mousedown(function() {
-        		    return false;
-        		});
-        	}
-        });
-    }
+    };
     
     /**
      * Activates a rich text area.
@@ -69,7 +52,7 @@
                     o.content = o.content.replace(/&nbsp;/g, " ").replace(/ +/g, " ");
                 });
             }
-        }, cms.htmlWidget.extensions, config)
+        }, cms.htmlWidget.extensions, config);
         // Run the plugin.
         return this.each(function() {
             var container = $(this);
@@ -80,7 +63,7 @@
             }
             if (!state.initialized) {
             	if (container.not(".inline-group .empty-form textarea").length) {
-            		tinyMCE.init($.extend({
+            		window.tinyMCE.init($.extend({
                         elements: container.attr("id"),
                     }, settings));
                 	state.initialized = true;
@@ -98,9 +81,9 @@
             	}
             }
         });
-    }
+    };
     
     // Extensions for the html widget.
     cms.htmlWidget.extensions = {};
     
-}(django.jQuery));
+}(window.django.jQuery));
