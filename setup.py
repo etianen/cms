@@ -24,7 +24,11 @@ setup(
     },
     packages = find_packages("src"),
     include_package_data = True,
-    scripts = ['src/cms/bin/start_cms_project.py'],
+    entry_points = {
+        "console_scripts": [
+            "start_cms_project.py = cms.bin.start_cms_project:main",
+        ],
+    },
     install_requires = [
         "django",
         "django-optimizations",
