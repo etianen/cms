@@ -56,6 +56,19 @@ setup(
     packages = packages,
     data_files = data_files,
     scripts = ['src/cms/bin/start_cms_project.py'],
+    install_requires = [
+        "django",
+        "django-optimizations",
+    ],
+    extras_require = {
+        "full":  [
+            "django-reversion",
+            "django-usertools",
+            "django-historylinks",
+            "django-watson",
+            "south",
+        ],
+    },
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
