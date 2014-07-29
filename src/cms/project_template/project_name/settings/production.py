@@ -34,7 +34,7 @@ ALLOWED_HOSTS = (
     SITE_DOMAIN,
 )
 
-X_FRAME_OPTIONS = "DENY"
+X_FRAME_OPTIONS = "SAMEORIGIN"  # Same origin embedding required for TinyMCE popups.
 
 
 # Database settings.

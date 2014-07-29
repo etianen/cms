@@ -48,7 +48,7 @@
     
     // Add in the filebrowser plugin to the rich text editor.
     $.fn.cms.htmlWidget.extensions.file_browser_callback = function(field_name, url, type, win) {
-        var browserURL = "/admin/media/file/?pop=1";
+        var browserURL = "/admin/media/file/?_popup=1";
         if (type == "image") {
             browserURL = browserURL + '&file__iregex=\x5C.(png|gif|jpg|jpeg)$';
         }
