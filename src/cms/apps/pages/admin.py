@@ -8,6 +8,8 @@ standard implementation.
 
 from __future__ import with_statement
 
+import json
+
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
@@ -19,7 +21,6 @@ from django.db.models import F
 from django.http import Http404, HttpResponseRedirect, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
-from django.utils import simplejson as json
 
 from cms import debug, externals
 from cms.admin import PageBaseAdmin

@@ -1,8 +1,9 @@
 """Form widgets used by the CMS."""
 
+import json
+
 from django import forms
 from django.conf import settings
-from django.utils import simplejson as json
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.utils.safestring import mark_safe
 
