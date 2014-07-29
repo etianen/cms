@@ -21,9 +21,9 @@ TEMPLATE_DEBUG = DEBUG
 
 # Save media files to the user's Sites folder.
 
-MEDIA_ROOT = os.path.expanduser(os.path.join("~/Sites" + SITE_DOMAIN + "media"))
+MEDIA_ROOT = os.path.expanduser(os.path.join("~/Sites", SITE_DOMAIN, "media"))
 
-STATIC_ROOT = os.path.expanduser(os.path.join("~/Sites" + SITE_DOMAIN + "static"))
+STATIC_ROOT = os.path.expanduser(os.path.join("~/Sites", SITE_DOMAIN, "static"))
 
 
 # Use local server.
