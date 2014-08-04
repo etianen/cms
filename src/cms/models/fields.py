@@ -81,7 +81,7 @@ class LinkField(models.CharField):
                 except LinkResolutionError:
                     pass
             return link
-        setattr(cls, "get_{}_resolved".format(name), get_XXX_resolved)
+        setattr(cls, "get_{name}_resolved".format(name=name), get_XXX_resolved)
         
 # Register custom fields with South.
 
