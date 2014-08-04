@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-    {% load pages html %}
+    {% load static pages html %}
     <head>
         
         <meta charset="utf-8">
@@ -13,13 +13,12 @@
         
         {% block feeds %}{% endblock %}
         
-        {% stylesheet %}
+        <link rel="stylesheet" href="{% 'css/screen.css' %}">
+        <link rel="stylesheet" href="{% 'css/screen.content.css' %}">
         
         <!--[if lt IE 9]>
             <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
-        
-        {% script %}
         
     </head>
     

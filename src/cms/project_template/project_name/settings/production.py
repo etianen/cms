@@ -137,21 +137,6 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, "static"),
 )
 
-STATIC_ASSETS = {
-    "default": {
-        "js": {
-            "include": (
-                "js/*.js",
-            ),
-        },
-        "css": {
-            "include": (
-                "css/*.css",
-            ),
-        },
-    },
-}
-
 
 # Dispatch settings.
 
