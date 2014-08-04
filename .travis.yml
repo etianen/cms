@@ -1,0 +1,18 @@
+language: python
+python:
+  - 2.6
+  - 2.7
+env:
+  - DJANGO=django==1.6.5
+matrix:
+  fast_finish: true
+install:
+  - travis_retry pip install $DJANGO
+  - travis_retry pip install -e .[full]
+  - start_cms_project.py test_project src/test_project
+  - echo "from production import INSTALLED_APPS" >> src/test_project/test_project/settings/local.py
+  - echo "INSTALLED_APPS+=('cms.apps.links',)" >> src/test_project/test_project/settings/local.py
+  - python src/test_project/manage.py collectstatic --noinput
+script: python src/test_project/manage.py test cms
+notifications:
+  email: false
