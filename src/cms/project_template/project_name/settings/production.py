@@ -131,6 +131,8 @@ INSTALLED_APPS = (
     "{{ project_name }}.apps.site",
 )
 
+SOUTH_TESTS_MIGRATE = False
+
 
 # Additional static file locations.
 
