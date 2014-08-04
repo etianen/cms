@@ -3,19 +3,21 @@ from django.contrib.contenttypes.models import ContentType
 
 from cms.apps.pages.models import Page
 from cms.apps.links.models import Link
+from cms.externals import watson
 
 
 class TestLinks(TestCase):
     
     def setUp(self):
-        page = Page.objects.create(
-            title = "Homepage",
-            content_type = ContentType.objects.get_for_model(Link),
-        )
-        Link.objects.create(
-            page = page,
-            link_url = "http://www.example.com/",
-        )
+        with watson.context_manager("update_index")():
+            page = Page.objects.create(
+                title = "Homepage",
+                content_type = ContentType.objects.get_for_model(Link),
+            )
+            Link.objects.create(
+                page = page,
+                link_url = "http://www.example.com/",
+            )
     
     def testLinkRedirect(self):
         response = self.client.get("/")
