@@ -7,8 +7,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.html import escape
 
-import optimizations
-
 from cms import permalinks
 
 
@@ -49,29 +47,7 @@ def process(text):
             get_obj("href")
         elif tagname == "img":
             # Process images.            
-            obj = get_obj("src")
-            if obj:
-                try:
-                    width = int(attrs["width"][1:-1])
-                    height = int(attrs["height"][1:-1])
-                except (ValueError, KeyError, TypeError):
-                    pass
-                else:
-                    # Automagically detect a FileField.
-                    fieldname = None
-                    for field in obj._meta.fields:
-                        if isinstance(field, models.FileField):
-                            fieldname = field.name
-                    # Generate the thumbnail.
-                    if fieldname:
-                        try:
-                            thumbnail = optimizations.get_thumbnail(getattr(obj, fieldname), width, height, "resize")
-                        except IOError:
-                            pass
-                        else:
-                            attrs["src"] = '"%s"' % escape(thumbnail.url)
-                            attrs["width"] = '"%s"' % thumbnail.width
-                            attrs["height"] = '"%s"' % thumbnail.height
+            get_obj("src")
         else:
             assert False
         # Regenerate the html tag.

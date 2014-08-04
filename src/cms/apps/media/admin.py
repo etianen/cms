@@ -9,8 +9,6 @@ from django.shortcuts import render
 from django.template.defaultfilters import filesizeformat
 from django.utils.text import Truncator
 
-import optimizations
-
 from cms import permalinks, externals
 from cms.apps.media.models import Label, File
 
@@ -152,14 +150,7 @@ class FileAdminBase(admin.ModelAdmin):
         icon = FILE_ICONS.get(extension, UNKNOWN_FILE_ICON)
         permalink = permalinks.create(obj)
         if icon == IMAGE_FILE_ICON:
-            try:
-                thumbnail = optimizations.get_thumbnail(obj.file, 100, 66)
-            except IOError:
-                pass
-            else:
-                return '<img cms:permalink="%s" src="%s" width="%s" height="%s" alt="" title="%s"/>' % (permalink, thumbnail.url, thumbnail.width, thumbnail.height, obj.title)
-        else:
-            icon = optimizations.get_url(icon)
+            return '<img cms:permalink="%s" src="%s" lt="" title="%s" style="max-height: 66px;"/>' % (permalink, obj.file.url, obj.title)
         return '<img cms:permalink="%s" src="%s" width="66" height="66" alt="" title="%s"/>' % (permalink, icon, obj.title)
     get_preview.short_description = "preview"
     get_preview.allow_tags = True

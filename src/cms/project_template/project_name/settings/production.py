@@ -219,14 +219,7 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     },
-    # Used for efficient caching of static assets.
-    "optimizations": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "TIMEOUT": 60 * 60 * 24,
-        "LOCATION": "optimizations",
-    },
 }
-
 
 # A secret key used for cryptographic algorithms.
 
