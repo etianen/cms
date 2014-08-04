@@ -31,8 +31,6 @@ setup(
     },
     install_requires = [
         "django",
-        "django-optimizations",
-        "Pillow",
     ],
     extras_require = {
         "full":  [
