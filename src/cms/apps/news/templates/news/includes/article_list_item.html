@@ -1,9 +1,9 @@
-{% load html assets news %}
+{% load html news %}
 <article{% if article.image %} class="news-article-list-item-with-image"{% endif %}>
     {% if article.image %}
         <aside>
             <a href="{% article_url article %}">
-                {% img article.image.file width=140 alt=article.image %}
+                <img src="{{article.image.file.url}}" title="{{article.image}}" alt="{{article.image}}" style="max-width: 140px">
             </a>
         </aside>
     {% endif %}

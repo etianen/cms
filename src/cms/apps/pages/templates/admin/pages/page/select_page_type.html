@@ -1,11 +1,10 @@
 {% extends "admin/base_site.html" %}
-{% load url from future %}
-{% load assets %}
+{% load static %}
 
 
 {% block extrahead %}
     {{block.super}}
-    {% stylesheet "pages/css/cms.pages.css" %}
+    <link rel="stylesheet" href="{% static 'pages/css/cms.pages.css' %}">
 {% endblock %}
 
 
