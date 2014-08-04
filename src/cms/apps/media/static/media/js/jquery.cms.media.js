@@ -43,6 +43,8 @@
             });
             // Made the add link flagged for TinyMCE.
             $("a.addlink").attr("href", $("a.addlink").attr("href") + "&_tinymce=1");
+            // Make the changeform form have the _tinymce GET param.
+            $("form#file_form").attr("action", "?_tinymce=1");
         } 
     }
     

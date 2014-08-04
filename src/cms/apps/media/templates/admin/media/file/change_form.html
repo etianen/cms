@@ -2,6 +2,12 @@
 {% load permalinks %}
 
 
+{% block extrahead %}
+    {{block.super}}
+    {% include "admin/media/file/tinymce_popup_injection.html" %}
+{% endblock %}
+
+
 {% block form_top %}
     {% if original %}
         <p>
