@@ -2,6 +2,12 @@ CMS Changelog
 =============
 
 
+MASTER
+------
+
+* Fixing issues with TinyMCE popups in Django 1.6.
+
+
 2.6.4 - 28/07/2014
 ------------------
 

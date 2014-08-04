@@ -10,3 +10,4 @@ Thumbs.db
 /MANIFEST
 /dist
 *.egg-info
+/src/test_project
