@@ -6,6 +6,8 @@ env:
   - DJANGO=django==1.6.5
 matrix:
   fast_finish: true
+  services:
+  - postgresql
 install:
   - travis_retry pip install $DJANGO
   - travis_retry pip install -e .[full]
@@ -13,6 +15,8 @@ install:
   - echo "from production import INSTALLED_APPS" >> src/test_project/test_project/settings/local.py
   - echo "INSTALLED_APPS+=('cms.apps.links',)" >> src/test_project/test_project/settings/local.py
   - python src/test_project/manage.py collectstatic --noinput
+before_script:
+  - psql -c 'create database test_project;' -U postgres
 script: python src/test_project/manage.py test cms
 notifications:
   email: false
