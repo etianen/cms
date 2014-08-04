@@ -5,6 +5,7 @@ import json
 from django import forms
 from django.conf import settings
 from django.utils.safestring import mark_safe
+from django.contrib.staticfiles.storage import staticfiles_storage
 
 
 class HtmlWidget(forms.Textarea):
@@ -27,8 +28,11 @@ class HtmlWidget(forms.Textarea):
         except KeyError:
             pass
         else:
+            richtext_settings = self.richtext_settings.copy()
+            if "content_css" in richtext_settings:
+                richtext_settings["content_css"] = staticfiles_storage.url(richtext_settings["content_css"])
             # Add in the initializer.
-            settings_js = json.dumps(self.richtext_settings)
+            settings_js = json.dumps(richtext_settings)
             html += u'<script>django.jQuery("#{element_id}").cms("htmlWidget",{settings_js})</script>'.format(
                 element_id = element_id,
                 settings_js = settings_js,
