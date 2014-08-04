@@ -3,10 +3,12 @@
 */
 
 
-(function($) {
+(function($, tinyMCE, tinyMCEPopup) {
     
+    "use strict";
+
     // Define the filebrowser plugin.
-    $.cms.media = {}
+    $.cms.media = {};
     
     // Closes the filebrowser and sends the information back to the TinyMCE editor.
     $.cms.media.complete = function(permalink, title) {
@@ -28,7 +30,7 @@
         }
         // Close the dialogue.
         tinyMCEPopup.close();
-    }
+    };
     
     // Initializes the popup file browser.
     $.cms.media.initBrowser = function() {
@@ -38,7 +40,7 @@
                 var img = $("img", this);
                 var title = img.attr("title");
                 var permalink = img.attr("cms:permalink");
-                $.cms.media.complete(permalink, title)
+                $.cms.media.complete(permalink, title);
                 return false;
             });
             // Made the add link flagged for TinyMCE.
@@ -46,7 +48,7 @@
             // Make the changeform form have the _tinymce GET param.
             $("form#file_form").attr("action", "?_tinymce=1");
         } 
-    }
+    };
     
     // Add in the filebrowser plugin to the rich text editor.
     $.fn.cms.htmlWidget.extensions.file_browser_callback = function(field_name, url, type, win) {
@@ -72,6 +74,6 @@
             tinymce_active: true
         });
         return false;
-    }
+    };
 
-}(django.jQuery));
+}(window.django.jQuery, window.tinyMCE, window.tinyMCEPopup));
