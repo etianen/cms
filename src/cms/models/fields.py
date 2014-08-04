@@ -49,7 +49,7 @@ def resolve_link(value):
         if netloc and scheme:
             return value
     # Raise a validation error.
-    raise LinkResolutionError("The link {!r} could not be resolved.".format(value))
+    raise LinkResolutionError("The link {value!r} could not be resolved.".format(value=value))
 
 
 def link_validator(value):
