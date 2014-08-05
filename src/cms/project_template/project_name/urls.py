@@ -15,6 +15,9 @@ admin.autodiscover()
 
 urlpatterns = patterns("",
 
+    # Admin password reset.
+    url(r"admin/", include("usertools.urls")),
+
     # Admin URLs.
     url(r"^admin/", include(admin.site.urls)),
     
